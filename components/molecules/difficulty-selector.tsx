@@ -21,24 +21,24 @@ export default function DifficultySelector({
     label: string;
     color: string;
   }> = [
-    { value: "easy", label: "簡單", color: "bg-green-500 hover:bg-green-600" },
+    { value: "easy", label: "簡單", color: "bg-green-600 hover:bg-green-700" },
     {
       value: "medium",
       label: "中等",
-      color: "bg-yellow-500 hover:bg-yellow-600",
+      color: "bg-yellow-600 hover:bg-yellow-700",
     },
-    { value: "hard", label: "困難", color: "bg-red-500 hover:bg-red-600" },
+    { value: "hard", label: "困難", color: "bg-red-600 hover:bg-red-700" },
   ];
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-4">
+    <div className="bg-gray-900/80 rounded-xl shadow-lg p-4 border border-gray-700">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-medium">難度選擇</h3>
+        <h3 className="text-lg font-medium text-white">難度選擇</h3>
         <Button
           variant="ghost"
           size="icon"
           onClick={onReset}
-          className="hover:bg-gray-100"
+          className="hover:bg-gray-800 text-gray-300"
           title="重新開始"
         >
           <RotateCcw className="h-5 w-5" />
@@ -52,7 +52,7 @@ export default function DifficultySelector({
             className={`${
               difficulty === option.value
                 ? `${option.color} text-white`
-                : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+                : "bg-gray-800 hover:bg-gray-700 text-gray-300"
             } flex-1`}
           >
             {option.label}
