@@ -1,26 +1,36 @@
 "use client";
 
 import { AVAILABLE_COINS } from "@/lib/constants/game";
+import { useEffect, useState } from "react";
+import { GAME_SETTINGS } from "../organisms/coin-game";
 
 interface GameControlPanelProps {
   answerMethod: string;
   enabledCoins: number[];
   isOrdered: boolean;
+  maxCoins: number;
   setAnswerMethod: (method: string) => void;
   setEnabledCoins: (enabledCoins: number[]) => void;
   setIsOrdered: (isOrdered: boolean) => void;
-  resetGame: () => void;
+  setMaxCoins: (maxCoins: number) => void;
 }
 
 export default function GameControlPanel({
   answerMethod,
   enabledCoins,
   isOrdered,
+  maxCoins,
   setAnswerMethod,
   setEnabledCoins,
   setIsOrdered,
-  resetGame,
+  setMaxCoins,
 }: GameControlPanelProps) {
+  const [sliderValue, setSliderValue] = useState(maxCoins);
+
+  useEffect(() => {
+    setSliderValue(maxCoins);
+  }, [maxCoins]);
+
   // 處理硬幣切換的函數
   const toggleCoin = (coinValue: number) => {
     if (enabledCoins.includes(coinValue)) {
@@ -31,6 +41,17 @@ export default function GameControlPanel({
     } else {
       setEnabledCoins([...enabledCoins, coinValue]);
     }
+  };
+
+  // 處理滑桿變更的函數
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseInt(e.target.value);
+    setSliderValue(newValue);
+  };
+
+  // 當滑桿釋放時更新 maxCoins
+  const handleSliderChangeComplete = () => {
+    setMaxCoins(sliderValue);
   };
 
   return (
@@ -58,6 +79,34 @@ export default function GameControlPanel({
           ))}
         </div>
       </div>
+
+      {/* 最大硬幣數量滑桿 */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-700">最大硬幣數量</h3>
+          <span className="text-sm font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+            {sliderValue}
+          </span>
+        </div>
+        <div className="relative pt-1">
+          <input
+            type="range"
+            min="1"
+            max={GAME_SETTINGS.maxCoins}
+            step="1"
+            value={sliderValue}
+            onChange={handleSliderChange}
+            onMouseUp={handleSliderChangeComplete}
+            onTouchEnd={handleSliderChangeComplete}
+            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+          />
+          <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <span>1</span>
+            <span>{GAME_SETTINGS.maxCoins}</span>
+          </div>
+        </div>
+      </div>
+
       {/* 答案方式選擇 */}
       <div className="space-y-2">
         <h3 className="text-sm font-medium text-gray-700 mb-2">回答方式</h3>

@@ -25,10 +25,10 @@ interface GameSettings {
   choiceRange: number;
 }
 
-// 遊戲設定 - 固定使用中等難度
-const GAME_SETTINGS: GameSettings = {
+// 遊戲設定
+export const GAME_SETTINGS: GameSettings = {
   minCoins: 3,
-  maxCoins: 6,
+  maxCoins: 15,
   coinTypes: [0, 1, 2, 3], // 所有硬幣類型
   choiceRange: 20,
 };
@@ -36,13 +36,13 @@ const GAME_SETTINGS: GameSettings = {
 // 生成隨機硬幣
 const generateRandomCoins = (
   enabledCoinValues: number[],
-  isOrdered: boolean
+  isOrdered: boolean,
+  maxCoins: number
 ): Coin[] => {
   const coins: Coin[] = [];
   const numCoins =
-    Math.floor(
-      Math.random() * (GAME_SETTINGS.maxCoins - GAME_SETTINGS.minCoins + 1)
-    ) + GAME_SETTINGS.minCoins;
+    Math.floor(Math.random() * (maxCoins - GAME_SETTINGS.minCoins + 1)) +
+    GAME_SETTINGS.minCoins;
 
   // 根據啟用的硬幣值過濾可用硬幣
   const availableCoins = AVAILABLE_COINS.filter((coin) =>
@@ -104,11 +104,13 @@ export default function CoinGame() {
   const [enabledCoins, setEnabledCoins] = useState<number[]>([1, 5, 10, 50]);
   // 硬幣排列順序，預設為隨機
   const [isOrdered, setIsOrdered] = useState<boolean>(true);
+  // 最大硬幣數量
+  const [maxCoins, setMaxCoins] = useState<number>(GAME_SETTINGS.maxCoins);
   const { playCorrectSound, playWrongSound } = useSound();
 
   // 重置遊戲的核心邏輯
   const setupNewQuestion = () => {
-    const newCoins = generateRandomCoins(enabledCoins, isOrdered);
+    const newCoins = generateRandomCoins(enabledCoins, isOrdered, maxCoins);
     const newTotal = calculateTotal(newCoins);
     setCoins(newCoins);
     setTotalValue(newTotal);
@@ -128,10 +130,10 @@ export default function CoinGame() {
     resetGame();
   }, [enabledCoins]);
 
-  // 當硬幣排序設定變更時重置遊戲
+  // 當硬幣排序設定或最大硬幣數量變更時重置遊戲
   useEffect(() => {
     resetGame();
-  }, [isOrdered]);
+  }, [isOrdered, maxCoins]);
 
   // 初始化遊戲
   useEffect(() => {
@@ -184,10 +186,11 @@ export default function CoinGame() {
               answerMethod={answerMethod}
               enabledCoins={enabledCoins}
               isOrdered={isOrdered}
+              maxCoins={maxCoins}
               setAnswerMethod={setAnswerMethod}
               setEnabledCoins={setEnabledCoins}
               setIsOrdered={setIsOrdered}
-              resetGame={resetGame}
+              setMaxCoins={setMaxCoins}
             />
           </SheetHeader>
         </SheetContent>
