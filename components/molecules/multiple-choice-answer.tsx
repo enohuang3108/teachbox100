@@ -26,7 +26,7 @@ export default function MultipleChoiceAnswer({
       {choices.map((choice, index) => (
         <div
           key={index}
-          className="flex items-center space-x-2 border border-gray-200 rounded-lg p-3 hover:bg-gray-100 transition-colors cursor-pointer"
+          className="flex items-center space-x-2 border border-gray-200 bg-white rounded-lg p-3 hover:bg-gray-100 transition-colors cursor-pointer"
           onClick={() => onSelect(choice.toString())}
         >
           <RadioGroupItem value={choice.toString()} id={`choice-${index}`} />

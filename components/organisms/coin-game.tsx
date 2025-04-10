@@ -222,7 +222,7 @@ export default function CoinGame() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <div className="text-center md:text-left mb-4 md:mb-0">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2">
-            計算錢幣或鈔票
+            認識錢幣與鈔票
           </h1>
         </div>
       </div>
