@@ -1,58 +1,57 @@
 "use client";
 
 import { Button } from "@/components/atoms/shadcn/button";
-import DigitInput from "./digit-input";
-import KeypadAnswer from "../organisms/keypad-answer";
-import MultipleChoiceAnswer from "../organisms/multiple-choice-answer";
+import { getRandomConfettiEffect } from "@/lib/helpers/confetti-effects";
+import { useSound } from "@/lib/hooks/useSound";
+import { useEffect } from "react";
 
 interface GameAnswerSectionProps {
-  answerMethod: string;
-  userAnswer: string;
-  choices: number[];
-  totalValue: number;
+  question: string;
+  hasAnswer: boolean;
   isCorrect: boolean | null;
+  correctFeedback: string;
+  incorrectFeedback: string;
   showFeedback: boolean;
-  setUserAnswer: (answer: string) => void;
+  children: React.ReactNode;
   checkAnswer: () => void;
   handleNextQuestion: () => void;
 }
 
 export default function GameAnswerSection({
-  answerMethod,
-  userAnswer,
-  choices,
-  totalValue,
+  question,
+  hasAnswer,
   isCorrect,
+  correctFeedback,
+  incorrectFeedback,
   showFeedback,
-  setUserAnswer,
+  children,
   checkAnswer,
   handleNextQuestion,
 }: GameAnswerSectionProps) {
+  const { playCorrectSound, playWrongSound } = useSound();
+
+  useEffect(() => {
+    if (isCorrect === null) return;
+    if (isCorrect) {
+      playCorrectSound();
+      // 使用隨機撒花特效
+      const randomEffect = getRandomConfettiEffect();
+      randomEffect();
+    } else {
+      playWrongSound();
+    }
+  }, [isCorrect]);
+
   return (
     <div className="mt-16 relative">
-      <h2 className="text-3xl md:text-4xl font-bold mb-6">硬幣總共有多少元?</h2>
-
-      {/* 根據選擇的答案方式顯示不同的輸入方式 */}
-      <div className="mt-4">
-        {answerMethod === "multiple" ? (
-          <MultipleChoiceAnswer
-            choices={choices}
-            selectedValue={userAnswer}
-            onSelect={setUserAnswer}
-          />
-        ) : answerMethod === "keypad" ? (
-          <KeypadAnswer value={userAnswer} onChange={setUserAnswer} />
-        ) : (
-          <DigitInput value={userAnswer} onChange={setUserAnswer} />
-        )}
-      </div>
-
+      <h2 className="text-3xl md:text-4xl font-bold mb-6">{question}</h2>
+      {children}
       {/* 提交按鈕 */}
       <div className="mt-6 md:mt-8">
         <Button
           onClick={checkAnswer}
           className="w-full bg-black hover:bg-gray-800 text-white text-xl md:text-2xl py-5 md:py-6 rounded-full"
-          disabled={!userAnswer || showFeedback}
+          disabled={!hasAnswer || showFeedback}
         >
           確定
         </Button>
@@ -77,8 +76,8 @@ export default function GameAnswerSection({
             {isCorrect === null
               ? "" // 不顯示文字直到狀態確定
               : isCorrect
-              ? `正確！總共是 ${totalValue} 元。`
-              : `不正確，再試一次！正確答案是 ${totalValue} 元。`}
+              ? correctFeedback
+              : incorrectFeedback}
           </p>
           <Button
             onClick={handleNextQuestion}

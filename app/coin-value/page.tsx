@@ -5,7 +5,7 @@ import { SettingsGearIcon } from "@/components/atoms/ani-icons/settings-gear";
 import { Background } from "@/components/atoms/Background";
 import { SimpleCard } from "@/components/atoms/SimpleCard";
 import CoinDisplay from "@/components/molecules/coin-display";
-import GameAnswerSection from "@/components/molecules/game-answer-section";
+import GameAnswerSection from "@/components/molecules/CoinGameAnswerSection";
 import {
   Sheet,
   SheetContent,
@@ -15,8 +15,7 @@ import {
 } from "@/components/molecules/sheet";
 import GameControlPanel from "@/components/organisms/game-control-panel";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
-import { getRandomConfettiEffect } from "@/lib/helpers/confetti-effects";
-import { useSound } from "@/lib/hooks/useSound";
+
 import { Coin } from "@/lib/types/types";
 import { useEffect, useState } from "react";
 
@@ -160,7 +159,7 @@ export default function CoinGamePage() {
   const [isOrdered, setIsOrdered] = useState<boolean>(true);
   // 最大金錢上限
   const [maxAmount, setMaxAmount] = useState<number>(100);
-  const { playCorrectSound, playWrongSound } = useSound();
+
 
   // 重置遊戲的核心邏輯
   const setupNewQuestion = () => {
@@ -200,15 +199,6 @@ export default function CoinGamePage() {
     const correct = userValueInt === totalValue;
     setIsCorrect(correct);
     setShowFeedback(true);
-
-    if (correct) {
-      playCorrectSound();
-      // 使用隨機撒花特效
-      const randomEffect = getRandomConfettiEffect();
-      randomEffect();
-    } else {
-      playWrongSound();
-    }
   };
 
   // 處理點擊 "下一題"
@@ -224,14 +214,6 @@ export default function CoinGamePage() {
       <Background />
       <div className="w-full max-w-4xl mx-auto">
         <div className="w-full">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-            <div className="text-center md:text-left mb-4 md:mb-0">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2">
-                認識錢幣與鈔票
-              </h1>
-            </div>
-          </div>
-
           <Sheet>
             <SheetTrigger>
               <SettingsGearIcon className="fixed top-16 right-4 w-10 h-10 hover:bg-transparent" />
@@ -258,6 +240,9 @@ export default function CoinGamePage() {
             className="fixed top-4 right-4 w-10 h-10 hover:bg-transparent"
             onClick={resetGame}
           />
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8">
+            認識錢幣與鈔票
+          </h1>
 
           {/* 硬幣顯示區域 */}
           <SimpleCard>

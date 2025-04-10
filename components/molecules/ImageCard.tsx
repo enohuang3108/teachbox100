@@ -6,6 +6,7 @@ type CardProps = {
   blurDataURL: string;
   cardTitle: string;
   cardDescription: string;
+  cardWidth?: number;
   link: string;
   button?: React.ReactNode;
 };
@@ -15,13 +16,14 @@ export const ImageCard = ({
   blurDataURL,
   cardTitle,
   cardDescription,
+  cardWidth = 300,
   link,
   button,
 }: CardProps) => {
   return (
     <Link
       href={link}
-      className="rounded-xl dark:bg-zinc-950 bg-zinc-50 overflow-hidden pb-3 border border-zinc-200 dark:border-zinc-800"
+      className={`rounded-xl w-[${cardWidth}px] dark:bg-zinc-950 bg-zinc-50 overflow-hidden pb-3 border border-zinc-200 dark:border-zinc-800`}
     >
       <div className="overflow-hidden relative aspect-video ">
         <Image
