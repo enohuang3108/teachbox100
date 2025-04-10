@@ -19,6 +19,16 @@ export default function CoinDisplay({ coins }: CoinProps) {
               return 90;
             case 50:
               return 100;
+            case 100:
+              return 110;
+            case 200:
+              return 120;
+            case 500:
+              return 130;
+            case 1000:
+              return 140;
+            case 2000:
+              return 150;
             default:
               return 70;
           }
@@ -33,7 +43,7 @@ export default function CoinDisplay({ coins }: CoinProps) {
               alt={`${coin.value}元硬幣`}
               width={size}
               height={size}
-              className={`object-contain w-[${size}px] h-[${size}px] md:w-[${size}px] md:h-[${size.desktop}px]`}
+              className={`object-contain w-[${size}px] h-[${size}px] md:w-[${size}px] md:h-[${size}px]`}
             />
           </div>
         );
