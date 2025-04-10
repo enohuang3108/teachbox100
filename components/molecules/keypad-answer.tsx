@@ -1,23 +1,23 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/atoms/shadcn/button";
+import { Input } from "@/components/atoms/shadcn/input";
 
 interface KeypadAnswerProps {
-  value: string
-  onChange: (value: string) => void
+  value: string;
+  onChange: (value: string) => void;
 }
 
 export default function KeypadAnswer({ value, onChange }: KeypadAnswerProps) {
   const handleButtonClick = (digit: string) => {
     if (digit === "clear") {
-      onChange("")
+      onChange("");
     } else if (digit === "backspace") {
-      onChange(value.slice(0, -1))
+      onChange(value.slice(0, -1));
     } else {
-      onChange(value + digit)
+      onChange(value + digit);
     }
-  }
+  };
 
   return (
     <div>
@@ -62,6 +62,5 @@ export default function KeypadAnswer({ value, onChange }: KeypadAnswerProps) {
         </Button>
       </div>
     </div>
-  )
+  );
 }
-

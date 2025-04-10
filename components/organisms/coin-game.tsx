@@ -1,19 +1,23 @@
 "use client";
 
+import { RefreshCWIcon } from "@/components/atoms/ani-icons/refresh-cw";
+import { SettingsGearIcon } from "@/components/atoms/ani-icons/settings-gear";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/atoms/shadcn/sheet";
 import { SimpleCard } from "@/components/atoms/SimpleCard";
 import CoinDisplay from "@/components/molecules/coin-display";
-import DifficultySelector from "@/components/molecules/difficulty-selector";
-import DigitInput from "@/components/molecules/digit-input";
-import KeypadAnswer from "@/components/molecules/keypad-answer";
-import MultipleChoiceAnswer from "@/components/molecules/multiple-choice-answer";
-import { Button } from "@/components/ui/button";
+import GameAnswerSection from "@/components/molecules/game-answer-section";
+import GameControlPanel from "@/components/molecules/game-control-panel";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
 import { getRandomConfettiEffect } from "@/lib/helpers/confetti-effects";
 import { useSound } from "@/lib/hooks/useSound";
-import { Coin, DifficultyLevel } from "@/lib/types/types";
+import { Coin } from "@/lib/types/types";
 import { useEffect, useState } from "react";
-import AnimatedDrawer from "../molecules/AnimatedDrawer";
-
 interface GameSettings {
   minCoins: number;
   maxCoins: number;
@@ -21,41 +25,42 @@ interface GameSettings {
   choiceRange: number;
 }
 
-// 遊戲難度設定
-const GAME_SETTINGS: Record<DifficultyLevel, GameSettings> = {
-  easy: {
-    minCoins: 2,
-    maxCoins: 4,
-    coinTypes: [0, 1, 2], // 索引對應AVAILABLE_COINS (1元, 5元, 10元)
-    choiceRange: 10, // 選項誤差範圍
-  },
-  medium: {
-    minCoins: 3,
-    maxCoins: 6,
-    coinTypes: [0, 1, 2, 3], // 所有硬幣類型
-    choiceRange: 20,
-  },
-  hard: {
-    minCoins: 4,
-    maxCoins: 8,
-    coinTypes: [0, 1, 2, 3], // 所有硬幣類型
-    choiceRange: 30,
-  },
+// 遊戲設定 - 固定使用中等難度
+const GAME_SETTINGS: GameSettings = {
+  minCoins: 3,
+  maxCoins: 6,
+  coinTypes: [0, 1, 2, 3], // 所有硬幣類型
+  choiceRange: 20,
 };
 
 // 生成隨機硬幣
-const generateRandomCoins = (difficulty: DifficultyLevel): Coin[] => {
-  const settings = GAME_SETTINGS[difficulty];
+const generateRandomCoins = (
+  enabledCoinValues: number[],
+  isOrdered: boolean
+): Coin[] => {
   const coins: Coin[] = [];
   const numCoins =
-    Math.floor(Math.random() * (settings.maxCoins - settings.minCoins + 1)) +
-    settings.minCoins;
+    Math.floor(
+      Math.random() * (GAME_SETTINGS.maxCoins - GAME_SETTINGS.minCoins + 1)
+    ) + GAME_SETTINGS.minCoins;
+
+  // 根據啟用的硬幣值過濾可用硬幣
+  const availableCoins = AVAILABLE_COINS.filter((coin) =>
+    enabledCoinValues.includes(coin.value)
+  );
+
+  // 確保至少有一種硬幣
+  if (availableCoins.length === 0) return [];
 
   for (let i = 0; i < numCoins; i++) {
-    // 從當前難度允許的硬幣類型中隨機選擇
-    const typeIndex =
-      settings.coinTypes[Math.floor(Math.random() * settings.coinTypes.length)];
-    coins.push(AVAILABLE_COINS[typeIndex]);
+    // 從啟用的硬幣中隨機選擇
+    const randomIndex = Math.floor(Math.random() * availableCoins.length);
+    coins.push(availableCoins[randomIndex]);
+  }
+
+  // 如果需要排序，則按硬幣面值從小到大排序
+  if (isOrdered) {
+    coins.sort((a, b) => a.value - b.value);
   }
 
   return coins;
@@ -67,12 +72,9 @@ const calculateTotal = (coins: Coin[]): number => {
 };
 
 // 生成多選項答案選項
-const generateChoices = (
-  correctAnswer: number,
-  difficulty: DifficultyLevel
-): number[] => {
+const generateChoices = (correctAnswer: number): number[] => {
   const choices = [correctAnswer];
-  const range = GAME_SETTINGS[difficulty].choiceRange;
+  const range = GAME_SETTINGS.choiceRange;
 
   // 生成3個不同的錯誤選項
   while (choices.length < 4) {
@@ -98,31 +100,38 @@ export default function CoinGame() {
   const [choices, setChoices] = useState<number[]>([]);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
+  // 默認所有硬幣都啟用
+  const [enabledCoins, setEnabledCoins] = useState<number[]>([1, 5, 10, 50]);
+  // 硬幣排列順序，預設為隨機
+  const [isOrdered, setIsOrdered] = useState<boolean>(true);
   const { playCorrectSound, playWrongSound } = useSound();
 
   // 重置遊戲的核心邏輯
   const setupNewQuestion = () => {
-    const newCoins = generateRandomCoins(difficulty);
+    const newCoins = generateRandomCoins(enabledCoins, isOrdered);
     const newTotal = calculateTotal(newCoins);
     setCoins(newCoins);
     setTotalValue(newTotal);
     setUserAnswer("");
-    setChoices(generateChoices(newTotal, difficulty));
+    setChoices(generateChoices(newTotal));
     setIsCorrect(null);
-    // setShowFeedback(false); // 這行移到 handleNextQuestion 或 resetGame
   };
 
-  // 初始化和重置遊戲 (用於難度變更或初始加載)
+  // 初始化和重置遊戲
   const resetGame = () => {
     setupNewQuestion();
-    setShowFeedback(false); // 確保初始狀態下回饋是隱藏的
+    setShowFeedback(false);
   };
 
-  // 當難度變更時重置遊戲
+  // 當硬幣啟用狀態變更時重置遊戲
   useEffect(() => {
     resetGame();
-  }, [difficulty]);
+  }, [enabledCoins]);
+
+  // 當硬幣排序設定變更時重置遊戲
+  useEffect(() => {
+    resetGame();
+  }, [isOrdered]);
 
   // 初始化遊戲
   useEffect(() => {
@@ -163,144 +172,50 @@ export default function CoinGame() {
           </h1>
         </div>
       </div>
-      <AnimatedDrawer>
-        {/* 控制面板 - 懸浮在右上角 */}
-        <div className="">
-          <div className="space-y-4">
-            {/* 難度選擇器 */}
-            <div>
-              <DifficultySelector
-                difficulty={difficulty}
-                onChange={setDifficulty}
-                onReset={resetGame}
-              />
-            </div>
 
-            {/* 答案方式選擇 */}
-            <div className="space-y-2">
-              <div
-                className={`flex items-center space-x-2 border rounded-full p-2 cursor-pointer transition-colors ${
-                  answerMethod === "multiple"
-                    ? "border-purple-500 bg-purple-900/40 text-white"
-                    : "border-gray-600 hover:bg-gray-800/50 text-gray-300"
-                }`}
-                onClick={() => setAnswerMethod("multiple")}
-              >
-                <div
-                  className={`w-4 h-4 rounded-full border-2 ${
-                    answerMethod === "multiple"
-                      ? "border-purple-500 bg-purple-500"
-                      : "border-gray-400"
-                  }`}
-                />
-                <span className="text-sm font-medium">選擇題</span>
-              </div>
-              <div
-                className={`flex items-center space-x-2 border rounded-full p-2 cursor-pointer transition-colors ${
-                  answerMethod === "keypad"
-                    ? "border-gray-400 bg-gray-700/50 text-white"
-                    : "border-gray-600 hover:bg-gray-800/50 text-gray-300"
-                }`}
-                onClick={() => setAnswerMethod("keypad")}
-              >
-                <div
-                  className={`w-4 h-4 rounded-full border-2 ${
-                    answerMethod === "keypad"
-                      ? "border-gray-400 bg-gray-400"
-                      : "border-gray-400"
-                  }`}
-                />
-                <span className="text-sm font-medium">手動輸入</span>
-              </div>
-              <div
-                className={`flex items-center space-x-2 border rounded-full p-2 cursor-pointer transition-colors ${
-                  answerMethod === "digit"
-                    ? "border-blue-500 bg-blue-900/40 text-white"
-                    : "border-gray-600 hover:bg-gray-800/50 text-gray-300"
-                }`}
-                onClick={() => setAnswerMethod("digit")}
-              >
-                <div
-                  className={`w-4 h-4 rounded-full border-2 ${
-                    answerMethod === "digit"
-                      ? "border-blue-500 bg-blue-500"
-                      : "border-gray-400"
-                  }`}
-                />
-                <span className="text-sm font-medium">數字調整</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </AnimatedDrawer>
+      <Sheet>
+        <SheetTrigger>
+          <SettingsGearIcon className="fixed top-16 right-4 w-10 h-10 hover:bg-transparent" />
+        </SheetTrigger>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>設定</SheetTitle>
+            <GameControlPanel
+              answerMethod={answerMethod}
+              enabledCoins={enabledCoins}
+              isOrdered={isOrdered}
+              setAnswerMethod={setAnswerMethod}
+              setEnabledCoins={setEnabledCoins}
+              setIsOrdered={setIsOrdered}
+              resetGame={resetGame}
+            />
+          </SheetHeader>
+        </SheetContent>
+      </Sheet>
+
+      {/* 重置按鈕 */}
+      <RefreshCWIcon
+        className="fixed top-4 right-4 w-10 h-10 hover:bg-transparent"
+        onClick={resetGame}
+      />
+
       {/* 硬幣顯示區域 */}
       <SimpleCard>
         <CoinDisplay coins={coins} />
       </SimpleCard>
 
-      {/* 答案區域 */}
-      <div className="mt-16 relative">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6">
-          硬幣總共有多少元?
-        </h2>
-
-        {/* 根據選擇的答案方式顯示不同的輸入方式 */}
-        <div className="mt-4">
-          {answerMethod === "multiple" ? (
-            <MultipleChoiceAnswer
-              choices={choices}
-              selectedValue={userAnswer}
-              onSelect={setUserAnswer}
-            />
-          ) : answerMethod === "keypad" ? (
-            <KeypadAnswer value={userAnswer} onChange={setUserAnswer} />
-          ) : (
-            <DigitInput value={userAnswer} onChange={setUserAnswer} />
-          )}
-        </div>
-
-        {/* 提交按鈕 */}
-        <div className="mt-6 md:mt-8">
-          <Button
-            onClick={checkAnswer}
-            className="w-full bg-black hover:bg-gray-800 text-white text-xl md:text-2xl py-5 md:py-6 rounded-full"
-            disabled={!userAnswer || showFeedback}
-          >
-            確定
-          </Button>
-        </div>
-
-        {/* 回饋訊息 */}
-        <div
-          className={`absolute inset-0 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center transition-opacity duration-300 ${
-            showFeedback ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-        >
-          <div
-            className={`text-center ${
-              isCorrect === null
-                ? ""
-                : isCorrect
-                ? "text-green-700"
-                : "text-red-700"
-            }`}
-          >
-            <p className="text-2xl md:text-3xl font-bold mb-4">
-              {isCorrect === null
-                ? "" // 不顯示文字直到狀態確定
-                : isCorrect
-                ? `正確！總共是 ${totalValue} 元。`
-                : `不正確，再試一次！正確答案是 ${totalValue} 元。`}
-            </p>
-            <Button
-              onClick={handleNextQuestion} // 更新 onClick
-              className="mt-4 bg-black hover:bg-gray-800 text-white text-lg py-4 px-8 rounded-full"
-            >
-              下一題
-            </Button>
-          </div>
-        </div>
-      </div>
+      {/* 使用答案區域組件 */}
+      <GameAnswerSection
+        answerMethod={answerMethod}
+        userAnswer={userAnswer}
+        choices={choices}
+        totalValue={totalValue}
+        isCorrect={isCorrect}
+        showFeedback={showFeedback}
+        setUserAnswer={setUserAnswer}
+        checkAnswer={checkAnswer}
+        handleNextQuestion={handleNextQuestion}
+      />
     </div>
   );
 }

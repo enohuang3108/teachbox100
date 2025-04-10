@@ -68,7 +68,7 @@ const AnimatedDrawer = ({ children }: { children: React.ReactNode }) => {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              className="h-[300px] bg-primary text-primary-foreground absolute rounded-3xl overflow-hidden -z-10 w-[300px] p-5 mx-auto "
+              className="h-[300px] overflow-y-auto bg-primary text-primary-foreground absolute rounded-3xl overflow-hidden -z-10 w-[300px] p-5 mx-auto "
               variants={setting}
               initial="initial"
               animate="animate"

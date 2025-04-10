@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/atoms/shadcn/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface DigitInputProps {

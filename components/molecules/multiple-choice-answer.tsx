@@ -1,7 +1,10 @@
 "use client";
 
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/atoms/shadcn/label";
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/components/atoms/shadcn/radio-group";
 
 interface MultipleChoiceAnswerProps {
   choices: number[];
