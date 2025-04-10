@@ -24,12 +24,9 @@ export default function MultipleChoiceAnswer({
         <div
           key={index}
           className="flex items-center space-x-2 border border-gray-200 rounded-lg p-3 hover:bg-gray-100 transition-colors cursor-pointer"
+          onClick={() => onSelect(choice.toString())}
         >
-          <RadioGroupItem
-            value={choice.toString()}
-            id={`choice-${index}`}
-            className="peer"
-          />
+          <RadioGroupItem value={choice.toString()} id={`choice-${index}`} />
           <Label
             htmlFor={`choice-${index}`}
             className="text-lg md:text-xl cursor-pointer flex-1 peer-checked:text-blue-600"
