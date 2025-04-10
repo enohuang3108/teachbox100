@@ -10,11 +10,14 @@ const AnimatedDrawer = ({ children }: { children: React.ReactNode }) => {
   const setting = {
     initial: {
       opacity: 0,
-      x: -200,
+      x: -50,
+      scaleX: 0.4,
+      transformOrigin: "left",
     },
     animate: {
       opacity: 1,
       x: -320,
+      scaleX: 1,
       transition: {
         type: "spring",
         stiffness: 260,
@@ -25,7 +28,8 @@ const AnimatedDrawer = ({ children }: { children: React.ReactNode }) => {
     },
     exit: {
       opacity: 0,
-      x: -200,
+      x: -50,
+      scaleX: 0.4,
       transition: {
         duration: 0.2,
       },
@@ -33,7 +37,7 @@ const AnimatedDrawer = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <div className="absolute flex items-end justify-center top-10 right-10 z-10">
+    <div className="absolute flex items-end justify-center top-10 right-5 z-10">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         version="1.1"

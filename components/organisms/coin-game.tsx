@@ -239,7 +239,7 @@ export default function CoinGame() {
       </SimpleCard>
 
       {/* 答案區域 */}
-      <div className="mt-16">
+      <div className="mt-16 relative">
         <h2 className="text-3xl md:text-4xl font-bold mb-6">
           硬幣總共有多少元?
         </h2>
@@ -272,7 +272,7 @@ export default function CoinGame() {
 
         {/* 回饋訊息 */}
         <div
-          className={`absolute inset-0 bg-white/95 backdrop-blur-sm rounded-3xl flex flex-col items-center justify-center transition-opacity duration-300 ${
+          className={`absolute inset-0 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center transition-opacity duration-300 ${
             showFeedback ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
