@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/atoms/shadcn/button";
 import DigitInput from "./digit-input";
-import KeypadAnswer from "./keypad-answer";
-import MultipleChoiceAnswer from "./multiple-choice-answer";
+import KeypadAnswer from "../organisms/keypad-answer";
+import MultipleChoiceAnswer from "../organisms/multiple-choice-answer";
 
 interface GameAnswerSectionProps {
   answerMethod: string;

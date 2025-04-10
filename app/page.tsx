@@ -8,7 +8,7 @@ export default function Home() {
       <ImageCard
         link="/coin-value"
         imageSrc="/images/cover_coin.webp"
-        blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEBAMAAABb34NNAAAAMFBMVEXv6dp2f1N5iniOfHSeaEnOnIPr5NK8qKTc1cPW37q21KXn3s3E0K27pK+y46Pj2MbeORoeAAAAFElEQVQI12Pgm8bQ5MsQLM7wZzUAEUsDhZWABcsAAAAASUVORK5CYII="
+        blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACBAMAAACNhmBQAAAAGFBMVEXkWzHhWy/bfVPfeU3jd03djGHhmm/ppnJS83WVAAAADklEQVQI12NgMmMoCQQAAiEA/oMLiwwAAAAASUVORK5CYII="
         cardTitle="認識錢幣與鈔票"
         cardDescription="學習怎麼計算錢幣與鈔票的價值"
       />

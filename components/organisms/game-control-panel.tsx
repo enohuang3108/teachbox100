@@ -1,9 +1,9 @@
 "use client";
 
+import { GAME_SETTINGS } from "@/app/coin-value/page";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { GAME_SETTINGS } from "../organisms/coin-game";
 
 interface GameControlPanelProps {
   answerMethod: string;
