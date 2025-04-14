@@ -14,6 +14,7 @@ teachbox100/
 ├── public/ # Static assets (images, fonts)
 │ ├── fonts/
 │ ├── images/
+│ ├── icons/
 │ ├── sounds/
 │
 ├── components/ # UI Components (Atomic Design)

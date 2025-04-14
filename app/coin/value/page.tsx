@@ -1,21 +1,12 @@
 "use client";
 
-import { RefreshCWIcon } from "@/components/atoms/ani-icons/refresh-cw";
-import { SettingsGearIcon } from "@/components/atoms/ani-icons/settings-gear";
-import { Background } from "@/components/atoms/Background";
+import { pages } from "@/app/pages.config";
 import { SimpleCard } from "@/components/atoms/SimpleCard";
 import CoinDisplay from "@/components/molecules/coin-display";
 import GameAnswerSection from "@/components/molecules/CoinGameAnswerSection";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/molecules/sheet";
-import GameControlPanel from "@/components/organisms/game-control-panel";
+import GameControlPanel from "@/components/organisms/coin-value-panel";
+import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
-
 import { Coin } from "@/lib/types/types";
 import { useEffect, useState } from "react";
 
@@ -151,15 +142,11 @@ export default function CoinGamePage() {
   const [choices, setChoices] = useState<number[]>([]);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
-  // 默認所有硬幣都啟用
   const [enabledCoins, setEnabledCoins] = useState<number[]>([
-    1, 5, 10, 50, 100, 200, 500, 1000, 2000,
+    1, 5, 10, 50, 100, 500, 1000,
   ]);
-  // 硬幣排列順序，預設為隨機
   const [isOrdered, setIsOrdered] = useState<boolean>(true);
-  // 最大金錢上限
   const [maxAmount, setMaxAmount] = useState<number>(100);
-
 
   // 重置遊戲的核心邏輯
   const setupNewQuestion = () => {
@@ -209,60 +196,42 @@ export default function CoinGamePage() {
     }, 300); // 等待淡出動畫完成 (需與 CSS transition duration 匹配)
   };
 
+  const settingSection = (
+    <GameControlPanel
+      answerMethod={answerMethod}
+      enabledCoins={enabledCoins}
+      isOrdered={isOrdered}
+      maxAmount={maxAmount}
+      setAnswerMethod={setAnswerMethod}
+      setEnabledCoins={setEnabledCoins}
+      setIsOrdered={setIsOrdered}
+      setMaxAmount={setMaxAmount}
+    />
+  );
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8">
-      <Background />
-      <div className="w-full max-w-4xl mx-auto">
-        <div className="w-full">
-          <Sheet>
-            <SheetTrigger>
-              <SettingsGearIcon className="fixed top-16 right-4 w-10 h-10 hover:bg-transparent" />
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader className="text-left">
-                <SheetTitle>設定</SheetTitle>
-                <GameControlPanel
-                  answerMethod={answerMethod}
-                  enabledCoins={enabledCoins}
-                  isOrdered={isOrdered}
-                  maxAmount={maxAmount}
-                  setAnswerMethod={setAnswerMethod}
-                  setEnabledCoins={setEnabledCoins}
-                  setIsOrdered={setIsOrdered}
-                  setMaxAmount={setMaxAmount}
-                />
-              </SheetHeader>
-            </SheetContent>
-          </Sheet>
+    <GamePageTemplate
+      title={pages["coin-value"].title}
+      resetGame={resetGame}
+      settings={settingSection}
+    >
+      {/* 硬幣顯示區域 */}
+      <SimpleCard>
+        <CoinDisplay coins={coins} />
+      </SimpleCard>
 
-          {/* 重置按鈕 */}
-          <RefreshCWIcon
-            className="fixed top-4 right-4 w-10 h-10 hover:bg-transparent"
-            onClick={resetGame}
-          />
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8">
-            認識錢幣與鈔票
-          </h1>
-
-          {/* 硬幣顯示區域 */}
-          <SimpleCard>
-            <CoinDisplay coins={coins} />
-          </SimpleCard>
-
-          {/* 使用答案區域組件 */}
-          <GameAnswerSection
-            answerMethod={answerMethod}
-            userAnswer={userAnswer}
-            choices={choices}
-            totalValue={totalValue}
-            isCorrect={isCorrect}
-            showFeedback={showFeedback}
-            setUserAnswer={setUserAnswer}
-            checkAnswer={checkAnswer}
-            handleNextQuestion={handleNextQuestion}
-          />
-        </div>
-      </div>
-    </main>
+      {/* 使用答案區域組件 */}
+      <GameAnswerSection
+        answerMethod={answerMethod}
+        userAnswer={userAnswer}
+        choices={choices}
+        totalValue={totalValue}
+        isCorrect={isCorrect}
+        showFeedback={showFeedback}
+        setUserAnswer={setUserAnswer}
+        checkAnswer={checkAnswer}
+        handleNextQuestion={handleNextQuestion}
+      />
+    </GamePageTemplate>
   );
 }

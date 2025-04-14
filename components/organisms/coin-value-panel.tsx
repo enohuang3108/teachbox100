@@ -1,6 +1,6 @@
 "use client";
 
-import { GAME_SETTINGS } from "@/app/coin-value/page";
+import { GAME_SETTINGS } from "@/app/coin/value/page";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -64,18 +64,12 @@ export default function GameControlPanel({
         <h3 className="text-sm font-medium text-gray-700 mb-©2">可用硬幣</h3>
         <div className="flex flex-wrap gap-2">
           {AVAILABLE_COINS.map((coin) => (
-            <div
+            <button
               key={coin.value}
               onClick={() => toggleCoin(coin.value)}
-              // className={`relative flex items-center justify-center p-1 rounded-full cursor-pointer transition-all ${
-              //   enabledCoins.includes(coin.value)
-              //     ? "border-2 border-amber-400 bg-amber-100"
-              //     : "border border-gray-300 bg-gray-100"
-              // }`}©
-              className={`flex items-center justify-center flex-col transition-all ${
+              className={`flex items-center justify-center flex-col transition-all w-[70px] h-[70px] p-0 ${
                 !enabledCoins.includes(coin.value) && "grayscale opacity-50"
               }`}
-              style={{ width: "70px", height: "70px" }}
             >
               <Image
                 src={`/coins/${coin.value}.webp`}
@@ -85,7 +79,7 @@ export default function GameControlPanel({
                 className={`object-contain  `}
               />
               {coin.value}
-            </div>
+            </button>
           ))}
         </div>
       </div>

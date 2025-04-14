@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+大方向: /coin/change 這個頁面中，會出現一個價錢以及已經付的硬幣或鈔票，使用者需要點選正確的選項來符合正確應找的錢
+
+細節：

@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+大方向: /coin/pay 這個頁面中，會出現一個價錢，使用者需要點選正確的硬幣或鈔票來符合題目的價錢
+
+細節：

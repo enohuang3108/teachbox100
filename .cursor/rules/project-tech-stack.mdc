@@ -1,0 +1,36 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+**library:**
+- react(version:^19.1)
+- next(version:^15.3)
+- tailwindcss(version:^4.1)
+- typescript(version:^5.8)
+
+**Form 處理與驗證:**
+- react-hook-form
+- zod
+
+**UI 工具與動畫:**
+- clsx
+- class-variance-authority
+- lucide-react
+- tailwind-merge
+- tailwindcss-animate
+- motion
+- canvas-confetti
+- sonner
+
+**輸入與日期:**
+- input-otp
+- react-day-picker
+- date-fns
+
+**音訊:**
+- howler
+- @types/howler
+
+**Theme/暗色模式支援:**
+- next-themes
