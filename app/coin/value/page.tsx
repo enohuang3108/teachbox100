@@ -1,13 +1,13 @@
 "use client";
 
 import { pages } from "@/app/pages.config";
+import Coin from "@/components/atoms/Coin";
 import { SimpleCard } from "@/components/atoms/SimpleCard";
-import CoinDisplay from "@/components/molecules/coin-display";
 import GameAnswerSection from "@/components/molecules/CoinGameAnswerSection";
 import GameControlPanel from "@/components/organisms/coin-value-panel";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
-import { Coin } from "@/lib/types/types";
+import type { Coin as CoinType } from "@/lib/types/types";
 import { useEffect, useState } from "react";
 
 interface GameSettings {
@@ -31,7 +31,7 @@ const generateRandomCoins = (
   enabledCoinValues: number[],
   isOrdered: boolean,
   maxAmount: number
-): Coin[] => {
+): CoinType[] => {
   // 1. 準備可用的硬幣集合
   const availableCoins = AVAILABLE_COINS.filter((coin) =>
     enabledCoinValues.includes(coin.value)
@@ -41,7 +41,7 @@ const generateRandomCoins = (
   if (availableCoins.length === 0) return [];
 
   // 2. 初始化結果和追蹤變數
-  const result: Coin[] = [];
+  const result: CoinType[] = [];
   let totalAmount = 0;
   let coinCount = 0;
 
@@ -93,7 +93,7 @@ const generateRandomCoins = (
   }
 
   // 輔助函數: 獲取符合條件的隨機硬幣
-  function getEligibleCoin(): Coin | null {
+  function getEligibleCoin(): CoinType | null {
     // 篩選出不會導致總額超過上限的硬幣
     const eligibleCoins = availableCoins.filter(
       (coin) => totalAmount + coin.value <= maxAmount
@@ -109,7 +109,7 @@ const generateRandomCoins = (
 };
 
 // 計算硬幣總值
-const calculateTotal = (coins: Coin[]): number => {
+const calculateTotal = (coins: CoinType[]): number => {
   return coins.reduce((sum, coin) => sum + coin.value, 0);
 };
 
@@ -135,7 +135,7 @@ const generateChoices = (correctAnswer: number): number[] => {
 };
 
 export default function CoinGamePage() {
-  const [coins, setCoins] = useState<Coin[]>([]);
+  const [coins, setCoins] = useState<CoinType[]>([]);
   const [totalValue, setTotalValue] = useState(0);
   const [answerMethod, setAnswerMethod] = useState("multiple");
   const [userAnswer, setUserAnswer] = useState("");
@@ -217,7 +217,11 @@ export default function CoinGamePage() {
     >
       {/* 硬幣顯示區域 */}
       <SimpleCard>
-        <CoinDisplay coins={coins} />
+        <div className="flex flex-wrap gap-2 md:gap-4 justify-center items-center mx-auto min-h-[120px] md:min-h-[160px] p-4">
+          {coins.map((coin, index) => (
+            <Coin key={index} coinValue={coin.value} />
+          ))}
+        </div>
       </SimpleCard>
 
       {/* 使用答案區域組件 */}

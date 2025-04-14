@@ -1,15 +1,18 @@
 "use client";
 
 import { pages } from "@/app/pages.config";
-import { SimpleCard } from "@/components/atoms/SimpleCard";
-import GameAnswerSection from "@/components/molecules/GameAnswerSection"; // 導入 GameAnswerSection
+import Coin from "@/components/atoms/Coin";
+import GameAnswerSection from "@/components/molecules/GameAnswerSection";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
-import { AVAILABLE_COINS } from "@/lib/constants/game"; // 引入共用硬幣定義
-import { Coin } from "@/lib/types/types"; // 導入 Coin 型別
-import Image from "next/image"; // 引入 Image
+import { AVAILABLE_COINS } from "@/lib/constants/game";
+import type { Coin as CoinType } from "@/lib/types/types";
+import { dseg7 } from "@/public/fonts/fonts";
 import { useCallback, useEffect, useState } from "react";
 
-// 從 AVAILABLE_COINS 取得此遊戲使用的面額 (可以之後調整)
+interface SelectedCoin extends CoinType {
+  id: number;
+}
+
 const GAME_COINS = AVAILABLE_COINS.filter((coin) =>
   [1, 5, 10, 50].includes(coin.value)
 );
@@ -18,7 +21,7 @@ const GAME_COINS = AVAILABLE_COINS.filter((coin) =>
 export default function SelectCoinsPage() {
   const [targetAmount, setTargetAmount] = useState<number | null>(null);
   const [currentAmount, setCurrentAmount] = useState(0);
-  const [selectedCoins, setSelectedCoins] = useState<Coin[]>([]);
+  const [selectedCoins, setSelectedCoins] = useState<SelectedCoin[]>([]);
   const [hasAnswer, setHasAnswer] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -50,15 +53,25 @@ export default function SelectCoinsPage() {
   }, []);
 
   const handleCoinClick = useCallback(
-    (coin: Coin) => {
+    (coin: CoinType) => {
       const newAmount = currentAmount + coin.value;
+      // 為添加的硬幣創建唯一 ID
+      const newSelectedCoin: SelectedCoin = { ...coin, id: Date.now() };
 
-      setSelectedCoins((prev) => [...prev, coin]); // 儲存 Coin 物件
+      setSelectedCoins((prev) => [...prev, newSelectedCoin]); // 儲存 SelectedCoin 物件
       setCurrentAmount(newAmount);
-      setHasAnswer(true); // 已選取硬幣，可以提交答案
+      // setHasAnswer(true); // 由 useEffect 處理
     },
-    [currentAmount, showFeedback] // 依賴 showFeedback
+    [currentAmount] // 移除 showFeedback 依賴
   );
+
+  // 新增移除硬幣的處理函數
+  const handleRemoveCoin = useCallback((coinToRemove: SelectedCoin) => {
+    setCurrentAmount((prev) => prev - coinToRemove.value);
+    setSelectedCoins((prev) =>
+      prev.filter((coin) => coin.id !== coinToRemove.id)
+    );
+  }, []);
 
   // 偵測 currentAmount 變化來更新 hasAnswer
   useEffect(() => {
@@ -81,22 +94,19 @@ export default function SelectCoinsPage() {
       resetGame={resetGame}
       settings={settingSection}
     >
-      <SimpleCard className="mb-8">
-        <div className="mb-4 text-xl text-center">
-          目標金額：
-          <span className="font-bold text-blue-600">{targetAmount}</span> 元
+      <div className="flex flex-col bg-black justify-center items-center w-full h-32 rounded-md">
+        <div className="text-4xl flex items-end space-x-2 text-green-400 drop-shadow-[0_0_5px_#00ff00]">
+          <span className="text-3xl font-medium">$</span>
+          <span className={`${dseg7.className} text-5xl`}>
+            {targetAmount !== null ? targetAmount : "--"}
+          </span>
         </div>
-        <div className="text-xl text-center">
-          目前金額：
-          <span className="font-bold text-green-600">{currentAmount}</span>元
-        </div>
-      </SimpleCard>
-
+      </div>
       <GameAnswerSection
-        question="請挑選符合目標金額的硬幣"
+        question="請挑選正確的金額來付款"
         hasAnswer={hasAnswer}
         isCorrect={isCorrect}
-        correctFeedback="成功！"
+        correctFeedback="付款成功！"
         incorrectFeedback={`差一點！目標是 ${targetAmount} 元`}
         showFeedback={showFeedback}
         checkAnswer={checkAnswer}
@@ -107,15 +117,15 @@ export default function SelectCoinsPage() {
             <h2 className="text-lg font-semibold mb-2 self-start">已選硬幣:</h2>
             <div className="flex flex-wrap gap-2 justify-center min-h-[40px]">
               {selectedCoins.length > 0 ? (
-                selectedCoins.map((coin, index) => (
-                  <Image
-                    key={`${coin.value}-${index}`} // 加上 index 避免 key 重複
-                    src={`/coins/${coin.value}.webp`}
-                    alt={`${coin.name} 硬幣`}
-                    width={30} // 較小尺寸
-                    height={30}
-                    className="object-contain"
-                  />
+                selectedCoins.map((coin) => (
+                  <button
+                    key={coin.id}
+                    onClick={() => handleRemoveCoin(coin)}
+                    className="transition-transform hover:scale-110 active:scale-95"
+                    aria-label={`移除 ${coin.name}`}
+                  >
+                    <Coin coinValue={coin.value} />
+                  </button>
                 ))
               ) : (
                 <p className="text-gray-500 self-center">尚未選擇任何硬幣</p>
@@ -138,13 +148,7 @@ export default function SelectCoinsPage() {
                     className={`relative transition-transform hover:scale-105 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
                     aria-label={`選擇 ${coin.name}`}
                   >
-                    <Image
-                      src={`/coins/${coin.value}.webp`}
-                      alt={`${coin.name} 硬幣`}
-                      width={size}
-                      height={size}
-                      className={"object-contain transition-opacity"}
-                    />
+                    <Coin coinValue={coin.value} />
                   </button>
                 );
               })}

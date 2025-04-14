@@ -20,7 +20,7 @@ export const pages: { [key: string]: Page } = {
     imageSrc: "/images/cover_coin2.webp",
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACBAMAAACNhmBQAAAAGFBMVEWKUj2vfVnLo3vVr33MoXXRrIHOr43PqoDH/NHxAAAADklEQVQI12MocmMIEAYABAsBHHBsQLkAAAAASUVORK5CYII=",
-    title: "付錢",
-    description: "學習選擇正確的錢幣或鈔票來付錢",
+    title: "付款",
+    description: "學習選擇正確的錢幣或鈔票來付款",
   },
 };
