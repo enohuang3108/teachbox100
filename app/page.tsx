@@ -1,11 +1,9 @@
 import { pages } from "@/app/pages.config";
-import { Background } from "@/components/atoms/Background";
 import { ImageCard } from "@/components/molecules/ImageCard";
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-row items-center justify-center space-x-4 p-4 md:p-8">
-      <Background />
       {Object.values(pages).map((page) => (
         <ImageCard
           key={page.path}

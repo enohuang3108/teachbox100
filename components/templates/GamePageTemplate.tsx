@@ -1,6 +1,5 @@
 import { RefreshCWIcon } from "../atoms/ani-icons/refresh-cw";
 import { SettingsGearIcon } from "../atoms/ani-icons/settings-gear";
-import { Background } from "../atoms/Background";
 import {
   Sheet,
   SheetContent,
@@ -21,8 +20,7 @@ export const GamePageTemplate = ({
   resetGame: () => void;
 }) => {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-8">
-      <Background />
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 pt-14 md:p-8 md:pt-4">
       <Sheet>
         <SheetTrigger>
           <SettingsGearIcon className="fixed top-16 right-4 h-10 w-10 hover:bg-transparent" />

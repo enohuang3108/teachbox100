@@ -1,3 +1,4 @@
+import { Background } from "@/components/atoms/Background";
 import { FaviconButton } from "@/components/atoms/FaviconButton";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
@@ -24,6 +25,7 @@ export default function RootLayout({
     <html lang="zh-TW">
       <body className={inter.className + "m-0 overflow-scroll p-0"}>
         <FaviconButton />
+        <Background />
         {children}
       </body>
     </html>

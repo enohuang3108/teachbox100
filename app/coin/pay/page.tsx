@@ -94,10 +94,10 @@ export default function SelectCoinsPage() {
       resetGame={resetGame}
       settings={settingSection}
     >
-      <div className="flex h-32 w-full flex-col items-center justify-center rounded-md bg-black">
-        <div className="flex items-end space-x-2 text-4xl text-green-400 drop-shadow-[0_0_5px_#00ff00]">
+      <div className="flex h-32 w-full flex-col items-center justify-center rounded-md bg-zinc-950">
+        <div className="flex items-end space-x-2 text-5xl font-bold text-green-400 [text-shadow:0_0_20px_#05df72aa]">
           <span className="text-3xl font-medium">$</span>
-          <span className={`${dseg7.className} text-5xl`}>
+          <span className={`${dseg7.className}`}>
             {targetAmount !== null ? targetAmount : "--"}
           </span>
         </div>
