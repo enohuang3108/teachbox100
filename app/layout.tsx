@@ -1,5 +1,6 @@
 import { Background } from "@/components/atoms/Background";
 import { FaviconButton } from "@/components/atoms/FaviconButton";
+import { PostHogProvider } from "@/components/PostHogProvider";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -18,15 +19,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="zh-TW">
-      <body className={inter.className + "m-0 overflow-scroll p-0"}>
-        <FaviconButton />
-        <Background />
-        {children}
+      <body className={inter.className + " m-0 overflow-scroll p-0"}>
+        <PostHogProvider>
+          <FaviconButton />
+          <Background />
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );
