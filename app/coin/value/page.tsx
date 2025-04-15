@@ -3,7 +3,7 @@
 import { pages } from "@/app/pages.config";
 import Coin from "@/components/atoms/Coin";
 import { SimpleCard } from "@/components/atoms/SimpleCard";
-import GameAnswerSection from "@/components/molecules/CoinGameAnswerSection";
+import GameAnswerSection from "@/components/organisms/CoinGameAnswerSection";
 import GameControlPanel from "@/components/organisms/coin-value-panel";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";

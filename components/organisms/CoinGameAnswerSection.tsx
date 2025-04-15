@@ -1,9 +1,10 @@
 "use client";
 
-import KeypadAnswer from "../organisms/keypad-answer";
-import MultipleChoiceAnswer from "../organisms/multiple-choice-answer";
-import DigitInput from "./digit-input";
-import GameAnswerSection from "./GameAnswerSection";
+import DigitInput from "@/components/molecules/digit-input";
+import GameAnswerSection from "@/components/molecules/GameAnswerSection";
+import KeypadAnswer from "@/components/organisms/keypad-answer";
+import MultipleChoiceAnswer from "@/components/organisms/multiple-choice-answer";
+import { getRandomFeedback } from "@/lib/utils/gameFeedback";
 
 interface GameAnswerSectionProps {
   answerMethod: string;
@@ -34,8 +35,8 @@ export default function CoinGameAnswerSection({
       question={"硬幣總共有多少元?"}
       hasAnswer={userAnswer !== ""}
       isCorrect={isCorrect}
-      correctFeedback={`正確！總共是 ${totalValue} 元。`}
-      incorrectFeedback={`不正確，再試一次！正確答案是 ${totalValue} 元。`}
+      correctFeedback={getRandomFeedback("coingameCorrect", totalValue)}
+      incorrectFeedback={getRandomFeedback("coingameIncorrect", totalValue)}
       showFeedback={showFeedback}
       checkAnswer={checkAnswer}
       handleNextQuestion={handleNextQuestion}

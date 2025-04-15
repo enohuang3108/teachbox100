@@ -6,6 +6,7 @@ import GameAnswerSection from "@/components/molecules/GameAnswerSection";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
 import type { Coin as CoinType } from "@/lib/types/types";
+import { getRandomFeedback } from "@/lib/utils/gameFeedback";
 import { dseg7 } from "@/public/fonts/fonts";
 import { useCallback, useEffect, useState } from "react";
 
@@ -106,8 +107,14 @@ export default function SelectCoinsPage() {
         question="請挑選正確的金額來付款"
         hasAnswer={hasAnswer}
         isCorrect={isCorrect}
-        correctFeedback="付款成功！"
-        incorrectFeedback={`差一點！目標是 ${targetAmount} 元`}
+        correctFeedback={getRandomFeedback("correctpay")}
+        incorrectFeedback={
+          targetAmount
+            ? currentAmount > targetAmount
+              ? getRandomFeedback("overpay", currentAmount - targetAmount)
+              : getRandomFeedback("underpay", targetAmount - currentAmount)
+            : ""
+        }
         showFeedback={showFeedback}
         checkAnswer={checkAnswer}
         handleNextQuestion={resetGame}
