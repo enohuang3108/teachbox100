@@ -30,11 +30,11 @@ export const GAME_SETTINGS: GameSettings = {
 const generateRandomCoins = (
   enabledCoinValues: number[],
   isOrdered: boolean,
-  maxAmount: number
+  maxAmount: number,
 ): CoinType[] => {
   // 1. 準備可用的硬幣集合
   const availableCoins = AVAILABLE_COINS.filter((coin) =>
-    enabledCoinValues.includes(coin.value)
+    enabledCoinValues.includes(coin.value),
   );
 
   // 如果沒有啟用的硬幣，直接返回空陣列
@@ -96,7 +96,7 @@ const generateRandomCoins = (
   function getEligibleCoin(): CoinType | null {
     // 篩選出不會導致總額超過上限的硬幣
     const eligibleCoins = availableCoins.filter(
-      (coin) => totalAmount + coin.value <= maxAmount
+      (coin) => totalAmount + coin.value <= maxAmount,
     );
 
     // 如果沒有符合條件的硬幣，返回 null
@@ -217,7 +217,7 @@ export default function CoinGamePage() {
     >
       {/* 硬幣顯示區域 */}
       <SimpleCard>
-        <div className="flex flex-wrap gap-2 md:gap-4 justify-center items-center mx-auto min-h-[120px] md:min-h-[160px] p-4">
+        <div className="mx-auto flex min-h-[120px] flex-wrap items-center justify-center gap-2 p-4 md:min-h-[160px] md:gap-4">
           {coins.map((coin, index) => (
             <Coin key={index} coinValue={coin.value} />
           ))}

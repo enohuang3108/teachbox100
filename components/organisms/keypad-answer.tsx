@@ -26,7 +26,7 @@ export default function KeypadAnswer({ value, onChange }: KeypadAnswerProps) {
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="text-xl md:text-2xl py-4 md:py-6 text-center"
+          className="py-4 text-center text-xl md:py-6 md:text-2xl"
           placeholder="輸入金額"
           readOnly
         />
@@ -37,26 +37,26 @@ export default function KeypadAnswer({ value, onChange }: KeypadAnswerProps) {
           <Button
             key={num}
             onClick={() => handleButtonClick(num.toString())}
-            className="text-lg md:text-xl py-3 md:py-4 bg-gray-100 hover:bg-gray-200 text-black"
+            className="bg-gray-100 py-3 text-lg text-black hover:bg-gray-200 md:py-4 md:text-xl"
           >
             {num}
           </Button>
         ))}
         <Button
           onClick={() => handleButtonClick("clear")}
-          className="text-lg md:text-xl py-3 md:py-4 bg-red-100 hover:bg-red-200 text-red-700"
+          className="bg-red-100 py-3 text-lg text-red-700 hover:bg-red-200 md:py-4 md:text-xl"
         >
           清除
         </Button>
         <Button
           onClick={() => handleButtonClick("0")}
-          className="text-lg md:text-xl py-3 md:py-4 bg-gray-100 hover:bg-gray-200 text-black"
+          className="bg-gray-100 py-3 text-lg text-black hover:bg-gray-200 md:py-4 md:text-xl"
         >
           0
         </Button>
         <Button
           onClick={() => handleButtonClick("backspace")}
-          className="text-lg md:text-xl py-3 md:py-4 bg-yellow-100 hover:bg-yellow-200 text-yellow-700"
+          className="bg-yellow-100 py-3 text-lg text-yellow-700 hover:bg-yellow-200 md:py-4 md:text-xl"
         >
           ←
         </Button>

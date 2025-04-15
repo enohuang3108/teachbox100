@@ -26,13 +26,13 @@ export default function MultipleChoiceAnswer({
       {choices.map((choice, index) => (
         <div
           key={index}
-          className="flex items-center space-x-2 border border-gray-200 bg-white rounded-lg p-3 hover:bg-gray-100 transition-colors cursor-pointer"
+          className="flex cursor-pointer items-center space-x-2 rounded-lg border border-gray-200 bg-white p-3 transition-colors hover:bg-gray-100"
           onClick={() => onSelect(choice.toString())}
         >
           <RadioGroupItem value={choice.toString()} id={`choice-${index}`} />
           <Label
             htmlFor={`choice-${index}`}
-            className="text-lg md:text-xl cursor-pointer flex-1 peer-checked:text-blue-600"
+            className="flex-1 cursor-pointer text-lg peer-checked:text-blue-600 md:text-xl"
           >
             {choice} 元
           </Label>

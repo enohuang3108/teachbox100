@@ -37,7 +37,7 @@ const AnimatedDrawer = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <div className="absolute flex items-end justify-center top-10 right-5 z-10">
+    <div className="absolute top-10 right-5 z-10 flex items-end justify-center">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         version="1.1"
@@ -68,7 +68,7 @@ const AnimatedDrawer = ({ children }: { children: React.ReactNode }) => {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              className="h-[300px] overflow-y-auto bg-primary text-primary-foreground absolute rounded-3xl overflow-hidden -z-10 w-[300px] p-5 mx-auto "
+              className="bg-primary text-primary-foreground absolute -z-10 mx-auto h-[300px] w-[300px] overflow-hidden overflow-y-auto rounded-3xl p-5"
               variants={setting}
               initial="initial"
               animate="animate"
@@ -80,15 +80,15 @@ const AnimatedDrawer = ({ children }: { children: React.ReactNode }) => {
         </AnimatePresence>
 
         <div className="flex items-center justify-center">
-          <div className="flex items-center justify-between bg-primary rounded-2xl mx-auto z-10 h-[300px] p-1 px-2.5">
+          <div className="bg-primary z-10 mx-auto flex h-[300px] items-center justify-between rounded-2xl p-1 px-2.5">
             <motion.button
               animate={{
                 height: 50,
               }}
-              className="bg-primary bg-black rounded-lg max-w-[50px] min-w-[50px] flex items-center justify-center"
+              className="bg-primary flex max-w-[50px] min-w-[50px] items-center justify-center rounded-lg bg-black"
               onClick={() => setIsOpen((prev) => !prev)}
             >
-              <div className="h-4 rounded w-4 bg-white rotate-45" />
+              <div className="h-4 w-4 rotate-45 rounded bg-white" />
             </motion.button>
           </div>
         </div>

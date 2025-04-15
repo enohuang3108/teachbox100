@@ -4,7 +4,7 @@ import { ImageCard } from "@/components/molecules/ImageCard";
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-row space-x-4 items-center justify-center p-4 md:p-8">
+    <main className="flex min-h-screen flex-row items-center justify-center space-x-4 p-4 md:p-8">
       <Background />
       {Object.values(pages).map((page) => (
         <ImageCard

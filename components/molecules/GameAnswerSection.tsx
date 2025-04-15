@@ -43,14 +43,14 @@ export default function GameAnswerSection({
   }, [isCorrect]);
 
   return (
-    <div className="mt-16 relative">
-      <h2 className="text-3xl md:text-4xl font-bold mb-6">{question}</h2>
+    <div className="relative mt-16">
+      <h2 className="mb-6 text-3xl font-bold md:text-4xl">{question}</h2>
       {children}
       {/* 提交按鈕 */}
       <div className="mt-6 md:mt-8">
         <Button
           onClick={checkAnswer}
-          className="w-full bg-black hover:bg-gray-800 text-white text-xl md:text-2xl py-5 md:py-6 rounded-full"
+          className="w-full rounded-full bg-black py-5 text-xl text-white hover:bg-gray-800 md:py-6 md:text-2xl"
           disabled={!hasAnswer || showFeedback}
         >
           確定
@@ -59,8 +59,8 @@ export default function GameAnswerSection({
 
       {/* 回饋訊息 */}
       <div
-        className={`absolute inset-0 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center transition-opacity duration-300 ${
-          showFeedback ? "opacity-100" : "opacity-0 pointer-events-none"
+        className={`absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm transition-opacity duration-300 ${
+          showFeedback ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
         <div
@@ -68,20 +68,20 @@ export default function GameAnswerSection({
             isCorrect === null
               ? ""
               : isCorrect
-              ? "text-green-700"
-              : "text-red-700"
+                ? "text-green-700"
+                : "text-red-700"
           }`}
         >
-          <p className="text-2xl md:text-3xl font-bold mb-4">
+          <p className="mb-4 text-2xl font-bold md:text-3xl">
             {isCorrect === null
               ? "" // 不顯示文字直到狀態確定
               : isCorrect
-              ? correctFeedback
-              : incorrectFeedback}
+                ? correctFeedback
+                : incorrectFeedback}
           </p>
           <Button
             onClick={handleNextQuestion}
-            className="mt-4 bg-black hover:bg-gray-800 text-white text-lg py-4 px-8 rounded-full"
+            className="mt-4 rounded-full bg-black px-8 py-4 text-lg text-white hover:bg-gray-800"
           >
             下一題
           </Button>

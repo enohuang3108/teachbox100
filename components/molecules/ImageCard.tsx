@@ -23,9 +23,9 @@ export const ImageCard = ({
   return (
     <Link
       href={link}
-      className={`rounded-xl w-[${cardWidth}px] bg-zinc-50 overflow-hidden pb-3 border border-zinc-200`}
+      className={`rounded-xl w-[${cardWidth}px] overflow-hidden border border-zinc-200 bg-zinc-50 pb-3`}
     >
-      <div className="overflow-hidden relative aspect-video ">
+      <div className="relative aspect-video overflow-hidden">
         <Image
           fill
           src={imageSrc}
@@ -37,8 +37,8 @@ export const ImageCard = ({
           alt="image"
         />
       </div>
-      <div className="px-2 text-zinc-900 sm:px-4 py-0 sm:pb-3 text-start">
-        <h3 className="text-lg font-bold mt-3 mb-1">{cardTitle}</h3>
+      <div className="px-2 py-0 text-start text-zinc-900 sm:px-4 sm:pb-3">
+        <h3 className="mt-3 mb-1 text-lg font-bold">{cardTitle}</h3>
         <p className="text-sm leading-5">{cardDescription}</p>
       </div>
       {button && <div className="px-2">{button}</div>}

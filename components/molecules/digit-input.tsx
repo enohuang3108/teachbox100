@@ -21,7 +21,7 @@ export default function DigitInput({ value, onChange }: DigitInputProps) {
     <div className="flex items-center justify-center space-x-4">
       {["百位", "十位", "個位"].map((label, index) => (
         <div key={index} className="flex flex-col items-center">
-          <div className="text-sm text-gray-500 mb-2">{label}</div>
+          <div className="mb-2 text-sm text-gray-500">{label}</div>
           <div className="flex flex-col items-center space-y-1">
             <Button
               variant="outline"
@@ -31,7 +31,7 @@ export default function DigitInput({ value, onChange }: DigitInputProps) {
             >
               <ChevronUp className="h-4 w-4" />
             </Button>
-            <div className="w-12 h-12 flex items-center justify-center border rounded-lg text-xl font-bold bg-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg border bg-white text-xl font-bold">
               {value.padStart(3, "0")[index]}
             </div>
             <Button

@@ -21,11 +21,11 @@ export const GamePageTemplate = ({
   resetGame: () => void;
 }) => {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-8">
       <Background />
       <Sheet>
         <SheetTrigger>
-          <SettingsGearIcon className="fixed top-16 right-4 w-10 h-10 hover:bg-transparent" />
+          <SettingsGearIcon className="fixed top-16 right-4 h-10 w-10 hover:bg-transparent" />
         </SheetTrigger>
         <SheetContent>
           <SheetHeader className="text-left">
@@ -35,17 +35,17 @@ export const GamePageTemplate = ({
         </SheetContent>
       </Sheet>
       <RefreshCWIcon
-        className="fixed top-4 right-4 w-10 h-10 hover:bg-transparent"
+        className="fixed top-4 right-4 h-10 w-10 hover:bg-transparent"
         onClick={resetGame}
       />
-      <div className="w-full max-w-4xl mx-auto">
+      <div className="mx-auto w-full max-w-4xl">
         <div className="w-full">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8">
+          <h1 className="mb-8 text-4xl font-bold md:text-5xl lg:text-6xl">
             {title}
           </h1>
         </div>
       </div>
-      <div className="w-full max-w-4xl mx-auto">
+      <div className="mx-auto w-full max-w-4xl">
         <div className="w-full">{children}</div>
       </div>
     </main>

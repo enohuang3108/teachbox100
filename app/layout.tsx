@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-TW">
-      <body className={inter.className + "m-0 p-0 overflow-scroll"}>
+      <body className={inter.className + "m-0 overflow-scroll p-0"}>
         <FaviconButton />
         {children}
       </body>

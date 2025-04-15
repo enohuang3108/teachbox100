@@ -14,7 +14,7 @@ interface SelectedCoin extends CoinType {
 }
 
 const GAME_COINS = AVAILABLE_COINS.filter((coin) =>
-  [1, 5, 10, 50].includes(coin.value)
+  [1, 5, 10, 50].includes(coin.value),
 );
 
 // 假設的目標金額
@@ -62,14 +62,14 @@ export default function SelectCoinsPage() {
       setCurrentAmount(newAmount);
       // setHasAnswer(true); // 由 useEffect 處理
     },
-    [currentAmount] // 移除 showFeedback 依賴
+    [currentAmount], // 移除 showFeedback 依賴
   );
 
   // 新增移除硬幣的處理函數
   const handleRemoveCoin = useCallback((coinToRemove: SelectedCoin) => {
     setCurrentAmount((prev) => prev - coinToRemove.value);
     setSelectedCoins((prev) =>
-      prev.filter((coin) => coin.id !== coinToRemove.id)
+      prev.filter((coin) => coin.id !== coinToRemove.id),
     );
   }, []);
 
@@ -94,8 +94,8 @@ export default function SelectCoinsPage() {
       resetGame={resetGame}
       settings={settingSection}
     >
-      <div className="flex flex-col bg-black justify-center items-center w-full h-32 rounded-md">
-        <div className="text-4xl flex items-end space-x-2 text-green-400 drop-shadow-[0_0_5px_#00ff00]">
+      <div className="flex h-32 w-full flex-col items-center justify-center rounded-md bg-black">
+        <div className="flex items-end space-x-2 text-4xl text-green-400 drop-shadow-[0_0_5px_#00ff00]">
           <span className="text-3xl font-medium">$</span>
           <span className={`${dseg7.className} text-5xl`}>
             {targetAmount !== null ? targetAmount : "--"}
@@ -113,9 +113,9 @@ export default function SelectCoinsPage() {
         handleNextQuestion={resetGame}
       >
         <div>
-          <div className="mb-6 border p-4 rounded-md min-h-[80px] w-full bg-gray-100 flex flex-col items-center">
-            <h2 className="text-lg font-semibold mb-2 self-start">已選硬幣:</h2>
-            <div className="flex flex-wrap gap-2 justify-center min-h-[40px]">
+          <div className="mb-6 flex min-h-[80px] w-full flex-col items-center rounded-md border bg-gray-100 p-4">
+            <h2 className="mb-2 self-start text-lg font-semibold">已選硬幣:</h2>
+            <div className="flex min-h-[40px] flex-wrap justify-center gap-2">
               {selectedCoins.length > 0 ? (
                 selectedCoins.map((coin) => (
                   <button
@@ -128,24 +128,23 @@ export default function SelectCoinsPage() {
                   </button>
                 ))
               ) : (
-                <p className="text-gray-500 self-center">尚未選擇任何硬幣</p>
+                <p className="self-center text-gray-500">尚未選擇任何硬幣</p>
               )}
             </div>
           </div>
 
           {/* 選擇硬幣區 */}
           <div className="mb-4">
-            <h2 className="text-lg font-semibold mb-2 text-center">
+            <h2 className="mb-2 text-center text-lg font-semibold">
               選擇硬幣:
             </h2>
             <div className="flex flex-wrap justify-center gap-4">
               {GAME_COINS.map((coin) => {
-                const size = coin.value === 50 ? 70 : 60; // 50元稍大
                 return (
                   <button
                     key={coin.value}
                     onClick={() => handleCoinClick(coin)}
-                    className={`relative transition-transform hover:scale-105 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
+                    className={`relative cursor-pointer transition-transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50`}
                     aria-label={`選擇 ${coin.name}`}
                   >
                     <Coin coinValue={coin.value} />

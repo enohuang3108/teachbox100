@@ -13,16 +13,16 @@ export const SimpleCard = ({ children, className = "p-4" }: CardProps) => {
     return (
       <div
         {...rest}
-        className={cn("border-zinc-700 size-6 absolute", className)}
+        className={cn("absolute size-6 border-zinc-700", className)}
       />
     );
   };
   return (
-    <div className="border-2 border-zinc-100 relative rounded-md">
-      <Icon className="-top-0.5 -left-0.5 border-l-2 border-t-2 rounded-tl-md" />
-      <Icon className="-top-0.5 -right-0.5 border-r-2 border-t-2 rounded-tr-md" />
-      <Icon className="-bottom-0.5 -left-0.5 border-l-2 border-b-2 rounded-bl-md" />
-      <Icon className="-bottom-0.5 -right-0.5 border-r-2 border-b-2 rounded-br-md" />
+    <div className="relative rounded-md border-2 border-zinc-100">
+      <Icon className="-top-0.5 -left-0.5 rounded-tl-md border-t-2 border-l-2" />
+      <Icon className="-top-0.5 -right-0.5 rounded-tr-md border-t-2 border-r-2" />
+      <Icon className="-bottom-0.5 -left-0.5 rounded-bl-md border-b-2 border-l-2" />
+      <Icon className="-right-0.5 -bottom-0.5 rounded-br-md border-r-2 border-b-2" />
       {children}
     </div>
   );
