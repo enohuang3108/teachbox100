@@ -20,6 +20,26 @@ const feedbackMessages = {
     "哎唷～再湊個 {} 元就完美啦！加油加油💪",
     "少了 {} 元～我先幫你 hold 住，快去翻翻錢包吧！👛",
   ],
+  correctchange: [
+    "找零正確，太棒了！",
+    "剛剛好！這就是正確的找零金額！",
+    "精準找零，你真是找零大師！",
+    "做得好！找零金額完全正確！",
+    "完美！這就是我們要找的零錢！",
+  ],
+  overchange: [
+    "哎呀！多找了 {} 元",
+    "找太多了！多給了 {} 元！",
+    "等等！多算了 {} 元，再檢查一下吧！",
+    "不對喔，多找了 {} 元！",
+  ],
+  underchange: [
+    "還差 {} 元才對喔！客人會追出來的！",
+    "錢不夠找啊，少了 {} 元！",
+    "找零不足，還差 {} 元。",
+    "再湊個 {} 元就正確了！",
+    "少了 {} 元！仔細算算看！",
+  ],
   coingameCorrect: [
     "算得真準！總共是 {} 元 👍",
     "好棒！{} 元算對了 🌟",
@@ -50,6 +70,11 @@ const feedbackStrategies = {
     replaceAmount(getRandomMessage(feedbackMessages.overpay), amount),
   underpay: (amount: number) =>
     replaceAmount(getRandomMessage(feedbackMessages.underpay), amount),
+  correctchange: () => getRandomMessage(feedbackMessages.correctchange),
+  overchange: (amount: number) =>
+    replaceAmount(getRandomMessage(feedbackMessages.overchange), amount),
+  underchange: (amount: number) =>
+    replaceAmount(getRandomMessage(feedbackMessages.underchange), amount),
   coingameCorrect: (amount: number) =>
     replaceAmount(getRandomMessage(feedbackMessages.coingameCorrect), amount),
   coingameIncorrect: (amount: number) =>

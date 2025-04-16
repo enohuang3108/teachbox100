@@ -118,3 +118,62 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* 3D Flip Utilities */
+/* @layer utilities { */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+.perspective {
+  perspective: 1000px;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden; /* Safari */
+}
+/* } */
+
+/* 卡片翻轉效果 */
+.coin-card {
+  background-color: transparent;
+  perspective: 1000px;
+}
+
+.coin-inner-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.coin-card:hover .coin-inner-card {
+  transform: rotateY(180deg);
+}
+
+.coin-front-side,
+.coin-back-side {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.coin-back-side {
+  transform: rotateY(180deg);
+}
+
+@keyframes coin-glow {
+  0% {
+    opacity: 0.3;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}

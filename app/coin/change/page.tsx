@@ -18,27 +18,42 @@ const GAME_COINS = AVAILABLE_COINS.filter((coin) =>
   [1, 5, 10, 50].includes(coin.value),
 );
 
-// 假設的目標金額
-export default function SelectCoinsPage() {
-  const [targetAmount, setTargetAmount] = useState<number | null>(null);
-  const [currentAmount, setCurrentAmount] = useState(0);
+// 找出最接近且大於等於目標金額的 50 或 100 的倍數
+const findClosestPaidAmount = (amount: number): number => {
+  if (amount <= 50) return 50;
+  if (amount <= 100) return 100;
+  // 這裡可以根據需要添加更多級距
+  return Math.ceil(amount / 100) * 100; // 暫定超過 100 就用 100 的倍數
+};
+
+export default function CoinChangePage() {
+  const [targetPrice, setTargetPrice] = useState<number | null>(null);
+  const [paidAmount, setPaidAmount] = useState<number | null>(null);
+  const [changeAmount, setChangeAmount] = useState<number | null>(null); // 應找金額
+  const [currentSelectedChange, setCurrentSelectedChange] = useState(0); // 當前選擇的找零金額
   const [selectedCoins, setSelectedCoins] = useState<SelectedCoin[]>([]);
   const [hasAnswer, setHasAnswer] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
 
   const checkAnswer = useCallback(() => {
-    if (currentAmount === targetAmount) {
+    if (currentSelectedChange === changeAmount) {
       setIsCorrect(true);
     } else {
       setIsCorrect(false);
     }
     setShowFeedback(true);
-  }, [currentAmount]);
+  }, [currentSelectedChange, changeAmount]);
 
   const setupNewQuestion = () => {
-    setTargetAmount(Math.floor(Math.random() * 100) + 1);
-    setCurrentAmount(0);
+    const newTargetPrice = Math.floor(Math.random() * 99) + 1; // 1 到 99
+    const newPaidAmount = findClosestPaidAmount(newTargetPrice);
+    const newChangeAmount = newPaidAmount - newTargetPrice;
+
+    setTargetPrice(newTargetPrice);
+    setPaidAmount(newPaidAmount);
+    setChangeAmount(newChangeAmount);
+    setCurrentSelectedChange(0);
     setSelectedCoins([]);
     setIsCorrect(null);
     setShowFeedback(false);
@@ -55,61 +70,63 @@ export default function SelectCoinsPage() {
 
   const handleCoinClick = useCallback(
     (coin: CoinType) => {
-      const newAmount = currentAmount + coin.value;
-      // 為添加的硬幣創建唯一 ID
+      const newAmount = currentSelectedChange + coin.value;
       const newSelectedCoin: SelectedCoin = { ...coin, id: Date.now() };
 
-      setSelectedCoins((prev) => [...prev, newSelectedCoin]); // 儲存 SelectedCoin 物件
-      setCurrentAmount(newAmount);
-      // setHasAnswer(true); // 由 useEffect 處理
+      setSelectedCoins((prev) => [...prev, newSelectedCoin]);
+      setCurrentSelectedChange(newAmount);
     },
-    [currentAmount], // 移除 showFeedback 依賴
+    [currentSelectedChange],
   );
 
-  // 新增移除硬幣的處理函數
   const handleRemoveCoin = useCallback((coinToRemove: SelectedCoin) => {
-    setCurrentAmount((prev) => prev - coinToRemove.value);
+    setCurrentSelectedChange((prev) => prev - coinToRemove.value);
     setSelectedCoins((prev) =>
       prev.filter((coin) => coin.id !== coinToRemove.id),
     );
   }, []);
 
-  // 偵測 currentAmount 變化來更新 hasAnswer
   useEffect(() => {
     setHasAnswer(selectedCoins.length > 0);
   }, [selectedCoins]);
 
-  const settingSection = (
-    // <GameControlPanel
-    //   answerMethod={answerMethod}
-    //   enabledCoins={enabledCoins}
-    //   isOrdered={isOrdered}
-    //   maxAmount={maxAmount}
-    // />
-    <></>
-  );
+  const settingSection = <></>;
 
   return (
     <GamePageTemplate
-      title={pages["coin-pay"].title}
+      title={pages["coin-change"].title}
       resetGame={resetGame}
       settings={settingSection}
     >
-      <AmountDisplay
-        label="售價"
-        amount={targetAmount}
-        amountColor="text-green-400"
-      />
+      <div className="mb-4 grid grid-cols-2 gap-4">
+        <AmountDisplay
+          label="售價"
+          amount={targetPrice}
+          amountColor="text-green-400"
+        />
+        <AmountDisplay
+          label="已付金額"
+          amount={paidAmount}
+          amountColor="text-yellow-400"
+        />
+      </div>
+
       <GameAnswerSection
-        question="請挑選正確的金額來付款"
+        question={`請挑選應找零的金額`}
         hasAnswer={hasAnswer}
         isCorrect={isCorrect}
-        correctFeedback={getRandomFeedback("correctpay")}
+        correctFeedback={getRandomFeedback("correctchange")}
         incorrectFeedback={
-          targetAmount
-            ? currentAmount > targetAmount
-              ? getRandomFeedback("overpay", currentAmount - targetAmount)
-              : getRandomFeedback("underpay", targetAmount - currentAmount)
+          changeAmount
+            ? currentSelectedChange > changeAmount
+              ? getRandomFeedback(
+                  "overchange",
+                  currentSelectedChange - changeAmount,
+                )
+              : getRandomFeedback(
+                  "underchange",
+                  changeAmount - currentSelectedChange,
+                )
             : ""
         }
         showFeedback={showFeedback}
@@ -118,7 +135,9 @@ export default function SelectCoinsPage() {
       >
         <div>
           <div className="mb-6 flex min-h-[80px] w-full flex-col items-center rounded-md border bg-gray-100 p-4">
-            <h2 className="mb-2 self-start text-lg font-semibold">已選硬幣:</h2>
+            <h2 className="mb-2 self-start text-lg font-semibold">
+              已選找零硬幣:
+            </h2>
             <div className="flex min-h-[40px] flex-wrap justify-center gap-2">
               {selectedCoins.length > 0 ? (
                 selectedCoins.map((coin) => (
@@ -140,7 +159,7 @@ export default function SelectCoinsPage() {
           {/* 選擇硬幣區 */}
           <div className="mb-4">
             <h2 className="mb-2 text-center text-lg font-semibold">
-              選擇硬幣:
+              選擇找零硬幣:
             </h2>
             <div className="flex flex-wrap justify-center gap-4">
               {GAME_COINS.map((coin) => {

@@ -8,7 +8,7 @@ export const FaviconButton = () => {
     <Link href="/" passHref>
       <div className="fixed top-2 left-2 cursor-pointer">
         <Image
-          src="/icons/favicon.png"
+          src="/icons/favicon_transparent.webp"
           alt="TeachBox100"
           width={50}
           height={50}

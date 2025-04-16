@@ -23,7 +23,7 @@ export const ImageCard = ({
   return (
     <Link
       href={link}
-      className={`rounded-xl w-[${cardWidth}px] overflow-hidden border border-zinc-200 bg-zinc-50 pb-3`}
+      className={`rounded-xl transition-all duration-300 hover:scale-105 w-[${cardWidth}px] overflow-hidden border border-zinc-200 bg-zinc-50 pb-3`}
     >
       <div className="relative aspect-video overflow-hidden">
         <Image
