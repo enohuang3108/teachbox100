@@ -11,7 +11,7 @@ export const pages: { [key: string]: Page } = {
     path: "/coin/introduction",
     imageSrc: "/images/cover_coin_introduction.webp",
     blurDataURL:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACBAMAAACNhmBQAAAAGFBMVEXkWzHhWy/bfVPfeU3jd03djGHhmm/ppnJS83WVAAAADklEQVQI12NgMmMoCQQAAiEA/oMLiwwAAAAASUVORK5CYII=",
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAAK0lEQVQIW2M8s2n6f0ZmNgamo5kM7M7zGRjPbZnx//MHZgY+ASaGfwy/GQDZLwxSeEEb5AAAAABJRU5ErkJggg==",
     title: "認識新臺幣",
     description: "認識新臺幣的種類與價值",
   },

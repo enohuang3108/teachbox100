@@ -31,8 +31,8 @@ const size = (coinValue: number): number => {
 
 export default function ThreeDCoin({ coinValue, scale = 1 }: CoinProps) {
   const imageSize = size(coinValue) * scale;
-  const frontSrc = `/coins/${coinValue}.webp`;
-  const backSrc = `/coins/${coinValue}_back.webp`;
+  const frontSrc = `/images/coins/${coinValue}.webp`;
+  const backSrc = `/images/coins/${coinValue}_back.webp`;
 
   return (
     <div

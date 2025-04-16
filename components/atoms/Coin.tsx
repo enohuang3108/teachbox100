@@ -34,7 +34,7 @@ export default function Coin({ coinValue }: CoinProps) {
   return (
     <div className="relative transition-transform hover:scale-105">
       <Image
-        src={`/coins/${coinValue}.webp`}
+        src={`/images/coins/${coinValue}.webp`}
         alt={`${coinValue}元硬幣`}
         width={imageSize}
         height={imageSize}

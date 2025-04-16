@@ -72,7 +72,7 @@ export default function GameControlPanel({
               }`}
             >
               <Image
-                src={`/coins/${coin.value}.webp`}
+                src={`/images/coins/${coin.value}.webp`}
                 alt={`${coin.value}元硬幣`}
                 width={60}
                 height={60}
