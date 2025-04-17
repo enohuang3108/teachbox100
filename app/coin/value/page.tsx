@@ -137,7 +137,7 @@ const generateChoices = (correctAnswer: number): number[] => {
 export default function CoinGamePage() {
   const [coins, setCoins] = useState<CoinType[]>([]);
   const [totalValue, setTotalValue] = useState(0);
-  const [answerMethod, setAnswerMethod] = useState("multiple");
+  const [answerMethod, setAnswerMethod] = useState("digit");
   const [userAnswer, setUserAnswer] = useState("");
   const [choices, setChoices] = useState<number[]>([]);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);

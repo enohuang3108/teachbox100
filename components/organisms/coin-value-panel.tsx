@@ -2,8 +2,10 @@
 
 import { GAME_SETTINGS } from "@/app/coin/value/page";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
-import Image from "next/image";
+import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import Coin from "../atoms/Coin";
+import { RadioGroup, RadioGroupItem } from "../atoms/shadcn/radio-group";
 
 interface GameControlPanelProps {
   answerMethod: string;
@@ -57,6 +59,37 @@ export default function GameControlPanel({
     setMaxAmount(sliderValue);
   };
 
+  const colorSchemes = {
+    digit: {
+      label: "數字調整",
+      bg: "group-has-[span[data-state=checked]]:bg-blue-100 hover:bg-blue-50",
+      border: "group-has-[span[data-state=checked]]:border-blue-400",
+    },
+    multiple: {
+      label: "選擇題",
+      bg: "group-has-[span[data-state=checked]]:bg-purple-100 hover:bg-purple-50",
+      border: "group-has-[span[data-state=checked]]:border-purple-400",
+    },
+    keypad: {
+      label: "手動輸入",
+      bg: "group-has-[span[data-state=checked]]:bg-gray-100 hover:bg-gray-50",
+      border: "group-has-[span[data-state=checked]]:border-gray-400",
+    },
+  };
+
+  const orderSchemes = {
+    ordered: {
+      label: "按順序排列（由小到大）",
+      bg: "group-has-[span[data-state=checked]]:bg-gray-100 hover:bg-gray-50",
+      border: "group-has-[span[data-state=checked]]:border-gray-400",
+    },
+    random: {
+      label: "隨機排列",
+      bg: "group-has-[span[data-state=checked]]:bg-orange-100 hover:bg-orange-50",
+      border: "group-has-[span[data-state=checked]]:border-orange-400",
+    },
+  };
+
   return (
     <div className="space-y-4">
       {/* 硬幣選擇 */}
@@ -71,12 +104,11 @@ export default function GameControlPanel({
                 !enabledCoins.includes(coin.value) && "opacity-50 grayscale"
               }`}
             >
-              <Image
-                src={`/images/coins/${coin.value}.webp`}
-                alt={`${coin.value}元硬幣`}
-                width={60}
-                height={60}
-                className={`object-contain`}
+              <Coin
+                key={coin.value}
+                coinValue={coin.value}
+                size={60}
+                className="cursor-pointer"
               />
               {coin.value}
             </button>
@@ -114,92 +146,51 @@ export default function GameControlPanel({
       {/* 答案方式選擇 */}
       <div className="space-y-2">
         <h3 className="mb-2 text-sm font-medium text-gray-700">回答方式</h3>
-        <div
-          className={`flex cursor-pointer items-center space-x-2 rounded-full border p-2 transition-colors ${
-            answerMethod === "multiple"
-              ? "border-purple-400 bg-purple-100 text-purple-800"
-              : "border-gray-300 text-gray-700 hover:bg-gray-100"
-          }`}
-          onClick={() => setAnswerMethod("multiple")}
+        <RadioGroup
+          value={answerMethod}
+          onValueChange={setAnswerMethod}
+          className="space-y-2"
         >
-          <div
-            className={`h-4 w-4 rounded-full border-2 ${
-              answerMethod === "multiple"
-                ? "border-purple-400 bg-purple-400"
-                : "border-gray-400"
-            }`}
-          />
-          <span className="text-sm font-medium">選擇題</span>
-        </div>
-        <div
-          className={`flex cursor-pointer items-center space-x-2 rounded-full border p-2 transition-colors ${
-            answerMethod === "keypad"
-              ? "border-gray-400 bg-gray-100 text-gray-800"
-              : "border-gray-300 text-gray-700 hover:bg-gray-100"
-          }`}
-          onClick={() => setAnswerMethod("keypad")}
-        >
-          <div
-            className={`h-4 w-4 rounded-full border-2 ${
-              answerMethod === "keypad"
-                ? "border-gray-500 bg-gray-500"
-                : "border-gray-400"
-            }`}
-          />
-          <span className="text-sm font-medium">手動輸入</span>
-        </div>
-        <div
-          className={`flex cursor-pointer items-center space-x-2 rounded-full border p-2 transition-colors ${
-            answerMethod === "digit"
-              ? "border-blue-400 bg-blue-100 text-blue-800"
-              : "border-gray-300 text-gray-700 hover:bg-gray-100"
-          }`}
-          onClick={() => setAnswerMethod("digit")}
-        >
-          <div
-            className={`h-4 w-4 rounded-full border-2 ${
-              answerMethod === "digit"
-                ? "border-blue-400 bg-blue-400"
-                : "border-gray-400"
-            }`}
-          />
-          <span className="text-sm font-medium">數字調整</span>
-        </div>
+          {Object.entries(colorSchemes).map(([value, scheme]) => (
+            <label key={value} className="group">
+              <div
+                className={cn(
+                  "flex w-full cursor-pointer items-center space-x-2 rounded-full border p-2 transition-colors",
+                  scheme.bg,
+                  scheme.border,
+                )}
+              >
+                <RadioGroupItem value={value} id={`answer-${value}`} />
+                <span className="text-sm font-medium">{scheme.label}</span>
+              </div>
+            </label>
+          ))}
+        </RadioGroup>
       </div>
 
       {/* 硬幣排序選項 */}
       <div className="space-y-2">
         <h3 className="mb-2 text-sm font-medium text-gray-700">硬幣排列</h3>
-        <div
-          className={`flex cursor-pointer items-center space-x-2 rounded-full border p-2 transition-colors ${
-            isOrdered
-              ? "border-green-400 bg-green-100 text-green-800"
-              : "border-gray-300 text-gray-700 hover:bg-gray-100"
-          }`}
-          onClick={() => setIsOrdered(true)}
+        <RadioGroup
+          value={isOrdered ? "ordered" : "random"}
+          onValueChange={(value) => setIsOrdered(value === "ordered")}
+          className="space-y-2"
         >
-          <div
-            className={`h-4 w-4 rounded-full border-2 ${
-              isOrdered ? "border-green-400 bg-green-400" : "border-gray-400"
-            }`}
-          />
-          <span className="text-sm font-medium">按順序排列（由小到大）</span>
-        </div>
-        <div
-          className={`flex cursor-pointer items-center space-x-2 rounded-full border p-2 transition-colors ${
-            !isOrdered
-              ? "border-orange-400 bg-orange-100 text-orange-800"
-              : "border-gray-300 text-gray-700 hover:bg-gray-100"
-          }`}
-          onClick={() => setIsOrdered(false)}
-        >
-          <div
-            className={`h-4 w-4 rounded-full border-2 ${
-              !isOrdered ? "border-orange-400 bg-orange-400" : "border-gray-400"
-            }`}
-          />
-          <span className="text-sm font-medium">隨機排列</span>
-        </div>
+          {Object.entries(orderSchemes).map(([value, scheme]) => (
+            <label key={value} className="group">
+              <div
+                className={cn(
+                  `flex w-full cursor-pointer items-center space-x-2 rounded-full border p-2 transition-colors`,
+                  scheme.bg,
+                  scheme.border,
+                )}
+              >
+                <RadioGroupItem value={value} id={`order-${value}`} />
+                <span className="text-sm font-medium">{scheme.label}</span>
+              </div>
+            </label>
+          ))}
+        </RadioGroup>
       </div>
     </div>
   );

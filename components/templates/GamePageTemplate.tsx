@@ -26,7 +26,7 @@ export const GamePageTemplate = ({
         <SheetTrigger>
           <SettingsGearIcon className="fixed top-16 right-4 h-10 w-10 bg-zinc-100 sm:bg-transparent sm:hover:bg-transparent" />
         </SheetTrigger>
-        <SheetContent>
+        <SheetContent className="overflow-y-auto">
           <SheetHeader className="text-left">
             <SheetTitle>設定</SheetTitle>
             {settings}

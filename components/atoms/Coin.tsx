@@ -1,10 +1,13 @@
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 interface CoinProps {
   coinValue: number;
+  size?: number;
+  className?: string;
 }
 
-const size = (coinValue: number): number => {
+const defaultSize = (coinValue: number): number => {
   switch (coinValue) {
     case 1:
     case 5:
@@ -28,8 +31,8 @@ const size = (coinValue: number): number => {
   }
 };
 
-export default function Coin({ coinValue }: CoinProps) {
-  const imageSize = size(coinValue);
+export default function Coin({ coinValue, size, className }: CoinProps) {
+  const imageSize = size ?? defaultSize(coinValue);
 
   return (
     <div className="relative transition-transform hover:scale-105">
@@ -38,7 +41,10 @@ export default function Coin({ coinValue }: CoinProps) {
         alt={`${coinValue}元硬幣`}
         width={imageSize}
         height={imageSize}
-        className={`object-contain w-[${imageSize}px] h-[${imageSize}px] md:w-[${imageSize}px] md:h-[${imageSize}px]`}
+        className={cn(
+          `object-contain w-[${imageSize}px] h-[${imageSize}px] md:w-[${imageSize}px] md:h-[${imageSize}px]`,
+          className,
+        )}
       />
     </div>
   );
