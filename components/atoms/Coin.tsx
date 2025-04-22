@@ -10,10 +10,11 @@ interface CoinProps {
 const defaultSize = (coinValue: number): number => {
   switch (coinValue) {
     case 1:
+      return 65;
     case 5:
-      return 70;
+      return 75;
     case 10:
-      return 90;
+      return 85;
     case 50:
       return 100;
     case 100:
@@ -37,7 +38,7 @@ export default function Coin({ coinValue, size, className }: CoinProps) {
   return (
     <div className="relative transition-transform hover:scale-105">
       <Image
-        src={`/images/coins/${coinValue}.webp`}
+        src={`/images/coins/${coinValue}_back.webp`}
         alt={`${coinValue}元硬幣`}
         width={imageSize}
         height={imageSize}

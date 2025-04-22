@@ -3,6 +3,7 @@ import Image from "next/image";
 interface CoinProps {
   coinValue: number;
   scale?: number;
+  front?: boolean;
 }
 
 const size = (coinValue: number): number => {
@@ -29,7 +30,11 @@ const size = (coinValue: number): number => {
   }
 };
 
-export default function ThreeDCoin({ coinValue, scale = 1 }: CoinProps) {
+export default function ThreeDCoin({
+  coinValue,
+  scale = 1,
+  front = true,
+}: CoinProps) {
   const imageSize = size(coinValue) * scale;
   const frontSrc = `/images/coins/${coinValue}.webp`;
   const backSrc = `/images/coins/${coinValue}_back.webp`;
@@ -42,8 +47,8 @@ export default function ThreeDCoin({ coinValue, scale = 1 }: CoinProps) {
       <div className="coin-inner-card">
         <div className="coin-front-side">
           <Image
-            src={frontSrc}
-            alt={`${coinValue}元 正面`}
+            src={front ? frontSrc : backSrc}
+            alt={`${coinValue}元 ${front ? "正面" : "背面"}`}
             width={imageSize}
             height={imageSize}
             className="h-full w-full object-contain"
@@ -52,8 +57,8 @@ export default function ThreeDCoin({ coinValue, scale = 1 }: CoinProps) {
         </div>
         <div className="coin-back-side">
           <Image
-            src={backSrc}
-            alt={`${coinValue}元 背面`}
+            src={front ? backSrc : frontSrc}
+            alt={`${coinValue}元 ${front ? "背面" : "正面"}`}
             width={imageSize}
             height={imageSize}
             className="h-full w-full object-contain"
