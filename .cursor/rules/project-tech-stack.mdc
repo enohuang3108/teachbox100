@@ -1,7 +1,7 @@
 ---
-description: use three part lib
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 **library:**
 - react(version:^19.1)

@@ -1,7 +1,7 @@
 ---
-description: follow project structure when create file
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Project structure
 

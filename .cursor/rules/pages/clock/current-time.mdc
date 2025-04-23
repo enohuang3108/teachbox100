@@ -1,0 +1,10 @@
+---
+description: 
+globs: app/clock/current-time/page.tsx
+alwaysApply: false
+---
+大方向: app/clock/current-time/page.tsx 這個頁面中，左邊會出現一個時鐘，分別有時針、分針、秒針，右側回答目前時間
+
+細節：
+- 需製作一個 Clock 的元件，有時針、分針、秒針。可以透過滑鼠拖拉移動來調整分針或秒針。參數可以設定精度，當精度為秒時，滑鼠拖動調整秒針；當精度為分時，滑鼠拖動調整分針。也可以傳入參數決定目前時間
+- 右側用選擇題回答目前時間，用 components/organisms/multiple-choice-answer.tsx 共用選擇題元件

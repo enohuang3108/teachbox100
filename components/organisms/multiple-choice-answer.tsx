@@ -7,14 +7,16 @@ import {
 } from "@/components/atoms/shadcn/radio-group";
 
 interface MultipleChoiceAnswerProps {
-  choices: number[];
+  choices: number[] | string[];
   selectedValue: string;
+  choicesText: (value: number | string) => string;
   onSelect: (value: string) => void;
 }
 
 export default function MultipleChoiceAnswer({
   choices,
   selectedValue,
+  choicesText,
   onSelect,
 }: MultipleChoiceAnswerProps) {
   return (
@@ -34,7 +36,7 @@ export default function MultipleChoiceAnswer({
             htmlFor={`choice-${index}`}
             className="flex-1 cursor-pointer text-lg peer-checked:text-blue-600 md:text-xl"
           >
-            {choice} 元
+            {choicesText(choice)}
           </Label>
         </div>
       ))}

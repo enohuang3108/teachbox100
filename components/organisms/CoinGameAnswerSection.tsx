@@ -46,6 +46,7 @@ export default function CoinGameAnswerSection({
           <MultipleChoiceAnswer
             choices={choices}
             selectedValue={userAnswer}
+            choicesText={(value) => `${value} 元`}
             onSelect={setUserAnswer}
           />
         ) : answerMethod === "keypad" ? (
