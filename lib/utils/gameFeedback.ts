@@ -54,39 +54,59 @@ const feedbackMessages = {
     "快成功了！但這次應該是 {} 元～試著一步一步來 🐢",
     "加油，答案是 {} 元，慢慢數不要急！⏰",
   ],
+  clockgameCorrect: [
+    "答對了！現在是 {}，你是時間管理大師！⏰",
+    "太厲害了！{} 完全正確，你是時間小天才！✨",
+    "答對啦！現在是 {}，你一定是時間精靈！🧚",
+    "完美！{} 完全正確，你根本是時鐘界的福爾摩斯！🔍",
+  ],
+  clockgameIncorrect: [
+    "可惜差一點！現在是 {}，再試一次吧！💪",
+    "再挑戰一次吧！現在是 {}，我相信你可以的！🌟",
+    "快成功了！但這次應該是 {}，加油加油！🔥",
+    "加油，現在是 {}，慢慢來不要急！🐢",
+  ],
 } as const;
 
 const getRandomMessage = (messages: readonly string[]): string =>
   messages[Math.floor(Math.random() * messages.length)];
 
-const replaceAmount = (message: string, amount?: number): string =>
-  amount !== undefined ? message.replace(/{}/g, amount.toString()) : message;
+const replaceMsg = (feedback: string, message?: string | number): string =>
+  message !== undefined
+    ? feedback.replace(/{}/g, message.toString())
+    : feedback;
 
 type FeedbackType = keyof typeof feedbackMessages;
 
 const feedbackStrategies = {
   correctpay: () => getRandomMessage(feedbackMessages.correctpay),
   overpay: (amount: number) =>
-    replaceAmount(getRandomMessage(feedbackMessages.overpay), amount),
+    replaceMsg(getRandomMessage(feedbackMessages.overpay), amount),
   underpay: (amount: number) =>
-    replaceAmount(getRandomMessage(feedbackMessages.underpay), amount),
+    replaceMsg(getRandomMessage(feedbackMessages.underpay), amount),
   correctchange: () => getRandomMessage(feedbackMessages.correctchange),
   overchange: (amount: number) =>
-    replaceAmount(getRandomMessage(feedbackMessages.overchange), amount),
+    replaceMsg(getRandomMessage(feedbackMessages.overchange), amount),
   underchange: (amount: number) =>
-    replaceAmount(getRandomMessage(feedbackMessages.underchange), amount),
+    replaceMsg(getRandomMessage(feedbackMessages.underchange), amount),
   coingameCorrect: (amount: number) =>
-    replaceAmount(getRandomMessage(feedbackMessages.coingameCorrect), amount),
+    replaceMsg(getRandomMessage(feedbackMessages.coingameCorrect), amount),
   coingameIncorrect: (amount: number) =>
-    replaceAmount(getRandomMessage(feedbackMessages.coingameIncorrect), amount),
+    replaceMsg(getRandomMessage(feedbackMessages.coingameIncorrect), amount),
+  clockgameCorrect: (message: string) =>
+    replaceMsg(getRandomMessage(feedbackMessages.clockgameCorrect), message),
+  clockgameIncorrect: (message: string) =>
+    replaceMsg(getRandomMessage(feedbackMessages.clockgameIncorrect), message),
 } as const;
 
-const createFeedback = (type: FeedbackType, amount?: number): string => {
-  const strategy = feedbackStrategies[type];
-  return strategy(amount as number);
+const createFeedback = (
+  type: FeedbackType,
+  message?: string | number,
+): string => {
+  return (feedbackStrategies[type] as any)(message);
 };
 
 export const getRandomFeedback = (
   type: FeedbackType,
-  amount?: number,
-): string => createFeedback(type, amount);
+  message?: string | number,
+): string => createFeedback(type, message);

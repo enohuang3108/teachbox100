@@ -39,4 +39,12 @@ export const pages: { [key: string]: Page } = {
     title: "找零",
     description: "學習選擇正確的錢幣或鈔票來找零",
   },
+  "clock-current-time": {
+    path: "/clock/current-time",
+    imageSrc: "/images/cover_current_time.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAALUlEQVQIWwEiAN3/AcZZM/8OJgoA+eD1APn6/AAB5NvE/+R+bQAHCgYAXcj0ABtUD9CQT3miAAAAAElFTkSuQmCC",
+    title: "現在幾點鐘",
+    description: "學習如何看懂現在時間",
+  },
 };

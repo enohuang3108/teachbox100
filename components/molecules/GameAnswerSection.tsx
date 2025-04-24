@@ -3,8 +3,8 @@
 import { Button } from "@/components/atoms/shadcn/button";
 import { getRandomConfettiEffect } from "@/lib/helpers/confetti-effects";
 import { useSound } from "@/lib/hooks/useSound";
+import { cn } from "@/lib/utils";
 import { useEffect } from "react";
-
 interface GameAnswerSectionProps {
   question: string;
   hasAnswer: boolean;
@@ -13,6 +13,7 @@ interface GameAnswerSectionProps {
   incorrectFeedback: string;
   showFeedback: boolean;
   children: React.ReactNode;
+  className?: string;
   checkAnswer: () => void;
   handleNextQuestion: () => void;
 }
@@ -25,6 +26,7 @@ export default function GameAnswerSection({
   incorrectFeedback,
   showFeedback,
   children,
+  className,
   checkAnswer,
   handleNextQuestion,
 }: GameAnswerSectionProps) {
@@ -43,7 +45,7 @@ export default function GameAnswerSection({
   }, [isCorrect]);
 
   return (
-    <div className="relative mt-16">
+    <div className={cn(`relative mt-16`, className)}>
       <h2 className="mb-6 text-3xl font-bold md:text-4xl">{question}</h2>
       {children}
       {/* 提交按鈕 */}
