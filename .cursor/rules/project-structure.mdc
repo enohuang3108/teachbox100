@@ -9,7 +9,9 @@ teachbox100/
 ├── app/ # Page components (LoginPage, DashboardPage)
 │ ├── page.tsx # Main app entry point
 │ ├── other-page # Other page
-│ │ ├── other-page 
+│ │ ├── page.tsx
+│ │ ├── layout.tsx
+│ │ ├── opengraph-image.tsx
 │
 ├── public/ # Static assets (images, fonts)
 │ ├── fonts/

@@ -1,6 +1,6 @@
 import { generateOgImageResponse, getOgImageMetadata } from "@/lib/og-image";
 
-const pageKey = "coin-pay";
+const pageKey = "coin-introduction";
 
 export const { alt, size, contentType } = getOgImageMetadata(pageKey);
 
