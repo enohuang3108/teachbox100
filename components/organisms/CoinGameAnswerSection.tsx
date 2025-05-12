@@ -1,10 +1,14 @@
 "use client";
 
-import DigitInput from "@/components/molecules/digit-input";
+import DigitAnswer, {
+  DigitConfig,
+  DigitValue,
+} from "@/components/molecules/answer/DigitAnswer";
+import KeypadAnswer from "@/components/molecules/answer/KeypadAnswer";
+import MultipleChoiceAnswer from "@/components/molecules/answer/MultipleChoiceAnswer";
 import GameAnswerSection from "@/components/molecules/GameAnswerSection";
-import KeypadAnswer from "@/components/organisms/keypad-answer";
-import MultipleChoiceAnswer from "@/components/organisms/multiple-choice-answer";
 import { getRandomFeedback } from "@/lib/utils/gameFeedback";
+import { useMemo } from "react";
 
 interface GameAnswerSectionProps {
   answerMethod: string;
@@ -30,6 +34,32 @@ export default function CoinGameAnswerSection({
   checkAnswer,
   handleNextQuestion,
 }: GameAnswerSectionProps) {
+  const digitConfig: Record<string, DigitConfig> = useMemo(
+    () => ({
+      thousand: { label: "千", max: 10, digits: 1 },
+      hundred: { label: "百", max: 10, digits: 1 },
+      ten: { label: "十", max: 10, digits: 1 },
+      one: { label: "個", max: 10, digits: 1 },
+    }),
+    [],
+  );
+
+  const digitValue: DigitValue = useMemo(() => {
+    const num = parseInt(userAnswer, 10) || 0;
+    return {
+      thousand: Math.floor(num / 1000) % 10,
+      hundred: Math.floor(num / 100) % 10,
+      ten: Math.floor(num / 10) % 10,
+      one: num % 10,
+    };
+  }, [userAnswer]);
+
+  const handleDigitChange = (newValue: Record<string, number>) => {
+    const { thousand = 0, hundred = 0, ten = 0, one = 0 } = newValue;
+    const combinedValue = thousand * 1000 + hundred * 100 + ten * 10 + one;
+    setUserAnswer(combinedValue.toString());
+  };
+
   return (
     <GameAnswerSection
       question={"硬幣總共有多少元?"}
@@ -52,7 +82,11 @@ export default function CoinGameAnswerSection({
         ) : answerMethod === "keypad" ? (
           <KeypadAnswer value={userAnswer} onChange={setUserAnswer} />
         ) : (
-          <DigitInput value={userAnswer} onChange={setUserAnswer} />
+          <DigitAnswer
+            value={digitValue}
+            onChange={handleDigitChange}
+            config={digitConfig}
+          />
         )}
       </div>
     </GameAnswerSection>

@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import Coin from "../atoms/Coin";
 import { RadioGroup, RadioGroupItem } from "../atoms/shadcn/radio-group";
 
-interface GameControlPanelProps {
+interface CoinGameSettingPanelProps {
   answerMethod: string;
   enabledCoins: number[];
   isOrdered: boolean;
@@ -18,7 +18,7 @@ interface GameControlPanelProps {
   setMaxAmount: (maxAmount: number) => void;
 }
 
-export default function GameControlPanel({
+export default function CoinGameSettingPanel({
   answerMethod,
   enabledCoins,
   isOrdered,
@@ -27,7 +27,7 @@ export default function GameControlPanel({
   setEnabledCoins,
   setIsOrdered,
   setMaxAmount,
-}: GameControlPanelProps) {
+}: CoinGameSettingPanelProps) {
   const [sliderValue, setSliderValue] = useState(maxAmount);
   // 計算最大金額上限 (基於GAME_SETTINGS.maxCoins和可用硬幣的最大值)
   const maxPossibleAmount = GAME_SETTINGS.maxPossibleAmount;

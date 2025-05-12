@@ -1,0 +1,9 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- js
+  - 永遠使用 Function Component
+- ts
+  - 除非必要，否則優先使用 interface

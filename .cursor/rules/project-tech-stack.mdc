@@ -1,19 +1,21 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: true
 ---
-**library:**
-- react(version:^19.1)
-- next(version:^15.3)
-- tailwindcss(version:^4.1)
-- typescript(version:^5.8)
+# Project Tech Stack
 
-**Form 處理與驗證:**
+**Core Libraries:**
+- react (version: ^19.1)
+- next (version: ^15.3)
+- tailwindcss (version: ^4.1)
+- typescript (version: ^5.8)
+
+**Form Handling & Validation:**
 - react-hook-form
 - zod
 
-**UI 工具與動畫:**
+**UI Utilities & Animation:**
 - clsx
 - class-variance-authority
 - lucide-react
@@ -23,14 +25,14 @@ alwaysApply: true
 - canvas-confetti
 - sonner
 
-**輸入與日期:**
+**Input & Date:**
 - input-otp
 - react-day-picker
 - date-fns
 
-**音訊:**
+**Audio:**
 - howler
 - @types/howler
 
-**Theme/暗色模式支援:**
+**Theme/Dark Mode Support:**
 - next-themes

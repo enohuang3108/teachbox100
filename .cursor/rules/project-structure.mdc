@@ -1,17 +1,17 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: true
 ---
 # Project structure
 
 teachbox100/
 ├── app/ # Page components (LoginPage, DashboardPage)
-│ ├── page.tsx # Main app entry point
+│ ├── [page.tsx](mdc:app/page.tsx) # Main app entry point
 │ ├── other-page # Other page
-│ │ ├── page.tsx
-│ │ ├── layout.tsx
-│ │ ├── opengraph-image.tsx
+│ │ ├── [page.tsx](mdc:app/other-page/page.tsx)
+│ │ ├── [layout.tsx](mdc:app/other-page/layout.tsx)
+│ │ ├── [opengraph-image.tsx](mdc:app/other-page/opengraph-image.tsx)
 │
 ├── public/ # Static assets (images, fonts)
 │ ├── fonts/
@@ -30,19 +30,19 @@ teachbox100/
 │ ├── helpers/ # Utility functions
 │ ├── hooks/ # Custom reusable hooks
 │ ├── store/ # State management (Redux/Zustand)
-│ ├── types/types.ts # Shared TypeScript types and interfaces
+│ ├── types/[types.ts](mdc:lib/types/types.ts) # Shared TypeScript types and interfaces
 │
 ├── services/ # API services (fetching data)
 │ ├── products/ # Product API services
-│ │ ├── queries.ts # React Query fetching
-| | ├── keys.ts # Query keys
-│ │ ├── mutations.ts # React Query mutations
-│ │ ├── api.ts # API functions
+│ │ ├── [queries.ts](mdc:services/products/queries.ts) # React Query fetching
+│ │ ├── [keys.ts](mdc:services/products/keys.ts) # Query keys
+│ │ ├── [mutations.ts](mdc:services/products/mutations.ts) # React Query mutations
+│ │ ├── [api.ts](mdc:services/products/api.ts) # API functions
 │
 ├── styles/ # Global styles (CSS Modules, Tailwind, etc.)
-│ ├── globals.css
+│ ├── [globals.css](mdc:styles/globals.css)
 │
-├── index.tsx # React root file
-├── .env.local # Environment variables
-├── .gitignore
-├── package.json
+├── [index.tsx](mdc:index.tsx) # React root file
+├── [.env.local](mdc:.env.local) # Environment variables
+├── [.gitignore](mdc:.gitignore)
+├── [package.json](mdc:package.json)

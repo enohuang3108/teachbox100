@@ -1,21 +1,26 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { FC, useCallback, useRef } from "react";
 
 type Precision = "minute" | "second";
 
-// 重構策略模式，減少重複代碼
+export interface ClockTime {
+  hour: number; // 0-23
+  minute: number;
+  second: number;
+}
+
 type TimeStrategy = {
   unitDegrees: number; // 每單位的角度
-  getTime: (date: Date) => number; // 獲取對應單位的時間
-  setTime: (date: Date, value: number) => Date; // 設置對應單位的時間
+  getTime: (time: ClockTime) => number; // 獲取對應單位的時間
+  setTime: (time: ClockTime, value: number) => ClockTime; // 設置對應單位的時間，回傳新物件
 };
 
 const createTimeStrategy = (
   unitDegrees: number,
-  getTimeFn: (date: Date) => number,
-  setTimeFn: (date: Date, value: number) => Date,
+  getTimeFn: (time: ClockTime) => number,
+  setTimeFn: (time: ClockTime, value: number) => ClockTime,
 ): TimeStrategy => ({
   unitDegrees,
   getTime: getTimeFn,
@@ -25,21 +30,19 @@ const createTimeStrategy = (
 const timeStrategies: Record<Precision, TimeStrategy> = {
   minute: createTimeStrategy(
     6, // 每分鐘6度
-    (date) => date.getMinutes(),
-    (date, value) => {
-      const newDate = new Date(date);
-      newDate.setMinutes(value);
-      return newDate;
-    },
+    (time: ClockTime) => time.minute,
+    (time: ClockTime, value: number): ClockTime => ({
+      ...time,
+      minute: value,
+    }),
   ),
   second: createTimeStrategy(
     6, // 每秒6度
-    (date) => date.getSeconds(),
-    (date, value) => {
-      const newDate = new Date(date);
-      newDate.setSeconds(value);
-      return newDate;
-    },
+    (time: ClockTime) => time.second ?? 0,
+    (time: ClockTime, value: number): ClockTime => ({
+      ...time,
+      second: value,
+    }),
   ),
 };
 
@@ -50,29 +53,28 @@ const angleToTimeValue = (angle: number): number => {
 };
 
 interface ClockProps {
+  time: ClockTime; // hour is 0-23
   precision?: Precision;
-  initialTime?: Date;
-  onChange?: (time: Date) => void;
+  onChange?: (time: ClockTime) => void;
   className?: string;
   draggable?: boolean;
+  showAmPm?: boolean; // Controls AM/PM display on clock face
 }
 
 const Clock: FC<ClockProps> = ({
-  precision = "second",
-  initialTime,
+  time,
+  precision = "minute",
   onChange,
   className,
   draggable = true,
+  showAmPm = false,
 }) => {
   const clockRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
-  const [time, setTime] = useState<Date>(initialTime || new Date());
-  const dragPreviousTimeRef = useRef<Date | null>(null);
+  const dragStartTimeRef = useRef<ClockTime | null>(null);
 
-  // 選擇當前策略
   const currentStrategy = timeStrategies[precision];
 
-  // 計算滑鼠點擊或觸摸事件的角度
   const calculateAngle = useCallback((e: MouseEvent | TouchEvent): number => {
     if (!clockRef.current) return 0;
 
@@ -100,49 +102,41 @@ const Clock: FC<ClockProps> = ({
     return angle;
   }, []);
 
-  // 處理拖動開始
   const handleDragStart = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
-      // 若不可拖動則直接返回
-      if (!draggable) return;
+      if (!draggable || !onChange) return;
 
       e.preventDefault();
       isDraggingRef.current = true;
-      // 在拖動開始時，設置 Ref 的初始值
-      dragPreviousTimeRef.current = new Date(time);
+      dragStartTimeRef.current = { ...time }; // Copy time
 
       const updateTimeFromDrag = (event: MouseEvent | TouchEvent) => {
-        if (!isDraggingRef.current || !dragPreviousTimeRef.current) return;
+        const baseTime = dragStartTimeRef.current;
+        if (!isDraggingRef.current || !baseTime) return;
 
         const angle = calculateAngle(event);
-        const timeValue = angleToTimeValue(angle); // 獲取新的分鐘/秒數值 (0-59)
+        const timeValue = angleToTimeValue(angle);
 
-        // 從 Ref 中獲取上一次拖動的時間狀態
-        const baseTime = dragPreviousTimeRef.current;
-        let newTime = currentStrategy.setTime(baseTime, timeValue);
+        let intermediateTime = currentStrategy.setTime(
+          { ...baseTime },
+          timeValue,
+        );
 
-        // --- 處理分針跨越整點 ---
         if (precision === "minute") {
-          const previousMinutes = dragPreviousTimeRef.current.getMinutes();
-          const newMinutes = timeValue; // timeValue 在 minute 模式下就是 newMinutes
-          const currentHours = newTime.getHours();
+          const previousMinutes = baseTime.minute;
+          const newMinutes = intermediateTime.minute;
+          let currentHours = baseTime.hour; // 0-23
 
-          // 偵測向前跨越 (例如從 58 分 -> 2 分)
+          // Adjust hour if minute hand crosses 12
           if (previousMinutes >= 50 && newMinutes <= 9) {
-            newTime.setHours(currentHours + 1);
+            currentHours = (currentHours + 1) % 24;
+          } else if (previousMinutes <= 9 && newMinutes >= 50) {
+            currentHours = (currentHours - 1 + 24) % 24;
           }
-          // 偵測向後跨越 (例如從 2 分 -> 58 分)
-          else if (previousMinutes <= 9 && newMinutes >= 50) {
-            newTime.setHours(currentHours - 1);
-          }
+          intermediateTime = { ...intermediateTime, hour: currentHours };
         }
-        // --- 結束處理 ---
-
-        setTime(newTime);
-        onChange?.(newTime);
-
-        // 更新 Ref 以記錄本次拖動後的時間
-        dragPreviousTimeRef.current = new Date(newTime);
+        // Ensure onChange receives a new object for reactivity if needed
+        onChange({ ...intermediateTime });
       };
 
       const handleMove = (event: MouseEvent | TouchEvent) => {
@@ -152,7 +146,7 @@ const Clock: FC<ClockProps> = ({
 
       const handleEnd = () => {
         isDraggingRef.current = false;
-        dragPreviousTimeRef.current = null; // 拖動結束時重置 Ref
+        dragStartTimeRef.current = null;
         document.removeEventListener("mousemove", handleMove);
         document.removeEventListener("mouseup", handleEnd);
         document.removeEventListener("touchmove", handleMove);
@@ -165,29 +159,19 @@ const Clock: FC<ClockProps> = ({
       document.addEventListener("touchend", handleEnd);
     },
     [calculateAngle, currentStrategy, draggable, onChange, precision, time],
-  ); // 確保依賴正確
+  );
 
-  // 時鐘的自動更新
-  useEffect(() => {
-    if (initialTime) {
-      setTime(initialTime);
-    } else {
-      const timer = setInterval(() => {
-        setTime(new Date());
-      }, 1000);
+  // time.hour is 0-23
+  const displayHour12 =
+    time.hour === 0 || time.hour === 12 ? 12 : time.hour % 12; // For clock face numbers and hand
+  const minutes = time.minute;
+  const seconds = time.second ?? 0;
+  const isAMForDisplay = time.hour < 12; // 0-11 is AM, 12-23 is PM
 
-      return () => clearInterval(timer);
-    }
-  }, [initialTime]);
+  const hourDegrees = (displayHour12 % 12) * 30 + minutes * 0.5; // (time.hour % 12) handles 0 as 12 for calculation if 0 means 12am
+  const minuteDegrees = minutes * 6;
+  const secondDegrees = seconds * 6;
 
-  // 計算指針角度
-  const hours = time.getHours() % 12;
-  const minutes = time.getMinutes();
-  const hourDegrees = hours * 30 + minutes * 0.5; // 每小時30度 + 分鐘的影響
-  const minuteDegrees = minutes * 6; // 每分鐘6度
-  const secondDegrees = time.getSeconds() * 6; // 每秒6度
-
-  // 渲染時鐘數字
   const renderClockNumbers = () => {
     return Array.from({ length: 12 }).map((_, i) => {
       const num = i + 1; // 1-12 的數字
@@ -222,6 +206,13 @@ const Clock: FC<ClockProps> = ({
     >
       {renderClockNumbers()}
 
+      {/* 顯示上下午指示 */}
+      {showAmPm && (
+        <div className="absolute top-[25%] left-1/2 -translate-x-1/2 transform text-lg font-bold">
+          {isAMForDisplay ? "上午" : "下午"}
+        </div>
+      )}
+
       {/* 時針 - 較短較粗 */}
       <div
         className="absolute top-1/2 left-1/2 origin-bottom rounded-full bg-black shadow-md"
@@ -236,7 +227,7 @@ const Clock: FC<ClockProps> = ({
       <div
         className={cn(
           "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-black shadow-sm",
-          { "cursor-move": precision === "minute" && draggable },
+          { "cursor-move": precision === "minute" && draggable && !!onChange },
         )}
         style={{
           height: "43%",
@@ -248,19 +239,23 @@ const Clock: FC<ClockProps> = ({
       />
 
       {/* 秒針 - 紅色，與分針長度一致 */}
-      <div
-        className={cn(
-          "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-red-500 shadow-sm",
-          { "cursor-move": precision === "second" && draggable },
-        )}
-        style={{
-          height: "43%",
-          width: "1px",
-          transform: `translate(-50%, -100%) rotate(${secondDegrees}deg)`,
-        }}
-        onMouseDown={precision === "second" ? handleDragStart : undefined}
-        onTouchStart={precision === "second" ? handleDragStart : undefined}
-      />
+      {precision === "second" && (
+        <div
+          className={cn(
+            "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-red-500 shadow-sm",
+            {
+              "cursor-move": precision === "second" && draggable && !!onChange,
+            },
+          )}
+          style={{
+            height: "43%",
+            width: "1px",
+            transform: `translate(-50%, -100%) rotate(${secondDegrees}deg)`,
+          }}
+          onMouseDown={precision === "second" ? handleDragStart : undefined}
+          onTouchStart={precision === "second" ? handleDragStart : undefined}
+        />
+      )}
 
       {/* 中心點 */}
       <div className="absolute top-1/2 left-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-black shadow" />

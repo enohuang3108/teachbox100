@@ -4,7 +4,7 @@ import { pages } from "@/app/pages.config";
 import Coin from "@/components/atoms/Coin";
 import { SimpleCard } from "@/components/atoms/SimpleCard";
 import GameAnswerSection from "@/components/organisms/CoinGameAnswerSection";
-import GameControlPanel from "@/components/organisms/coin-value-panel";
+import CoinGameSettingPanel from "@/components/organisms/CoinGameSettingPanel";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
 import type { Coin as CoinType } from "@/lib/types/types";
@@ -197,7 +197,7 @@ export default function CoinGamePage() {
   };
 
   const settingSection = (
-    <GameControlPanel
+    <CoinGameSettingPanel
       answerMethod={answerMethod}
       enabledCoins={enabledCoins}
       isOrdered={isOrdered}

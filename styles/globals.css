@@ -177,3 +177,58 @@
     opacity: 0.3;
   }
 }
+
+@layer utilities {
+  /* Animation for number transitions */
+  @keyframes slideOutUp {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-100%);
+    }
+  }
+
+  @keyframes slideInUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideOutDown {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
+
+  @keyframes slideInDown {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .slide-out-up {
+    animation: slideOutUp 0.2s forwards;
+  }
+
+  .slide-in-up {
+    animation: slideInUp 0.2s forwards;
+  }
+
+  .slide-out-down {
+    animation: slideOutDown 0.2s forwards;
+  }
+
+  .slide-in-down {
+    animation: slideInDown 0.2s forwards;
+  }
+}
