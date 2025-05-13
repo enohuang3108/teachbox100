@@ -1,5 +1,13 @@
+import { CircleHelpIcon } from "../atoms/ani-icons/CircleHelpIcon";
 import { RefreshCWIcon } from "../atoms/ani-icons/refresh-cw";
 import { SettingsGearIcon } from "../atoms/ani-icons/settings-gear";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../atoms/shadcn/dialog";
 import {
   Sheet,
   SheetContent,
@@ -14,14 +22,20 @@ export const GamePageTemplate = ({
   children,
   settings,
   resetGame,
+  tips,
 }: {
   title: string;
   children: React.ReactNode;
   settings: React.ReactNode;
   resetGame: () => void;
+  tips?: React.ReactNode;
 }) => {
   return (
     <PageTemplate title={title}>
+      <RefreshCWIcon
+        className="fixed top-4 right-4 h-10 w-10 bg-zinc-100 sm:bg-transparent sm:hover:bg-transparent"
+        onClick={resetGame}
+      />
       <Sheet>
         <SheetTrigger>
           <SettingsGearIcon className="fixed top-16 right-4 h-10 w-10 bg-zinc-100 sm:bg-transparent sm:hover:bg-transparent" />
@@ -33,10 +47,19 @@ export const GamePageTemplate = ({
           </SheetHeader>
         </SheetContent>
       </Sheet>
-      <RefreshCWIcon
-        className="fixed top-4 right-4 h-10 w-10 bg-zinc-100 sm:bg-transparent sm:hover:bg-transparent"
-        onClick={resetGame}
-      />
+      {tips && (
+        <Dialog>
+          <DialogTrigger>
+            <CircleHelpIcon className="fixed top-28 right-4 h-10 w-10 bg-zinc-100 sm:bg-transparent sm:hover:bg-transparent" />
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>提示</DialogTitle>
+              {tips}
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      )}
       {children}
     </PageTemplate>
   );

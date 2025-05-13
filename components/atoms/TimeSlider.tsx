@@ -3,40 +3,61 @@
 import { ClockTime } from "@/components/atoms/Clock";
 import { Slider } from "@/components/atoms/shadcn/slider";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useDebounce } from "@uidotdev/usehooks";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface TimeSliderProps {
   time: ClockTime;
   onChange: (time: ClockTime) => void;
   className?: string;
+  debounceTime?: number;
 }
 
 export default function TimeSlider({
   time,
   onChange,
   className,
+  debounceTime = 150,
 }: TimeSliderProps) {
   const totalMinutes = time.hour * 60 + time.minute;
   const [sliderValue, setSliderValue] = useState<number>(totalMinutes);
+  const debouncedValue = useDebounce(sliderValue, debounceTime);
+  const isInternalChange = useRef(false);
 
   useEffect(() => {
-    setSliderValue(time.hour * 60 + time.minute);
-  }, [time]);
+    if (!isInternalChange.current) {
+      const newTotalMinutes = time.hour * 60 + time.minute;
+      if (sliderValue !== newTotalMinutes) {
+        setSliderValue(newTotalMinutes);
+      }
+    }
+    isInternalChange.current = false;
+  }, [time, sliderValue]);
 
-  const handleChange = (newValue: number[]) => {
+  // 當滑塊值變化時，僅更新內部狀態
+  const handleChange = useCallback((newValue: number[]) => {
     if (!newValue.length) return;
-    const totalMinutes = newValue[0];
-    setSliderValue(totalMinutes);
+    isInternalChange.current = true;
+    setSliderValue(newValue[0]);
+  }, []);
 
-    const hour = Math.floor(totalMinutes / 60);
-    const minute = totalMinutes % 60;
+  // 當防抖值變化時，再通知父組件
+  const prevDebouncedValueRef = useRef(debouncedValue);
+  useEffect(() => {
+    // 只有當防抖值真正變化時才觸發onChange
+    if (prevDebouncedValueRef.current !== debouncedValue) {
+      const hour = Math.floor(debouncedValue / 60);
+      const minute = debouncedValue % 60;
 
-    onChange({
-      hour,
-      minute,
-      second: time.second || 0
-    });
-  };
+      onChange({
+        hour,
+        minute,
+        second: time.second || 0
+      });
+
+      prevDebouncedValueRef.current = debouncedValue;
+    }
+  }, [debouncedValue, onChange, time.second]);
 
   return (
     <div className={cn("w-full", className)}>

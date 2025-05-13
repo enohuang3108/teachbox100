@@ -130,6 +130,12 @@ export default function CurrentTimePage() {
     <GamePageTemplate
       title={pages["clock-current-time"].title}
       resetGame={resetTime}
+      tips={<div>
+        <p>
+          時：看短針，選小的（但 12、1 中間要選 12）
+        </p>
+        <p>分：看長針，5 個一數</p>
+      </div>}
       settings={clockSettings} // Pass the settings UI
     >
       <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 md:grid-cols-2">
@@ -139,7 +145,7 @@ export default function CurrentTimePage() {
             draggable={true}
             onChange={handleClockChange}
             showAmPm={true} // Controlled by the new setting
-            className="h-72 w-72 md:mb-2 md:h-80 md:w-80"
+            className="mb-16"
           />
 
           {showMinuteSlider && (
@@ -152,7 +158,7 @@ export default function CurrentTimePage() {
         </div>
 
         <GameAnswerSection
-          question={"請問時鐘的時間是？"}
+          question={"請問現在的時間是？"}
           hasAnswer={selectedAnswer !== null} // Check selectedTime
           isCorrect={isCorrect}
           correctFeedback={getRandomFeedback(

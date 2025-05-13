@@ -168,13 +168,10 @@ const Clock: FC<ClockProps> = ({
   const minuteDegrees = minutes * 6;
   const secondDegrees = seconds * 6;
 
-  const renderClockNumbers = () => {
-    if (!currentClockWidth) return;
-
+  const renderHourNumbers = () => {
     return Array.from({ length: 12 }).map((_, i) => {
       const num = i + 1; // 1-12 的數字
       const deg = i * 30 + 30; // 每個數字間隔30度
-      const distance = currentClockWidth / 2 - 22; // Position numbers inwards
       return (
         <div
           key={i}
@@ -183,7 +180,27 @@ const Clock: FC<ClockProps> = ({
             num % 3 === 0 ? "text-lg font-extrabold" : "text-base font-medium",
           )}
           style={{
-            transform: `rotate(${deg}deg) translate(0, -${distance}px) rotate(-${deg}deg)`,
+            transform: `rotate(${deg}deg) translateY(-130px) rotate(-${deg}deg)`,
+          }}
+        >
+          {num}
+        </div>
+      );
+    });
+  };
+
+  const renderMinuteNumbers = () => {
+    return Array.from({ length: 12 }).map((_, i) => {
+      const num = i * 5; // 1-12 的數字
+      const deg = i * 30 ; // 每個數字間隔30度
+      return (
+        <div
+          key={i}
+          className={cn(
+            "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-neutral-400 text-base font-medium",
+          )}
+          style={{
+            transform: `rotate(${deg}deg) translateY(-180px) rotate(-${deg}deg)`,
           }}
         >
           {num}
@@ -193,19 +210,19 @@ const Clock: FC<ClockProps> = ({
   };
 
   const renderClockTicks = () => {
-    if (!currentClockWidth) return;
 
     return Array.from({ length: 60 }).map((_, i) => {
       if (i % 5 === 0) return null; // Use null for no-render for clarity
       const deg = i * 6;
-      const distance = currentClockWidth / 2; // Position tick marks slightly inwards from the edge
 
       return (
         <div
           key={i}
-          className={"absolute left-1/2 top-1/2 h-6 w-[1px] -translate-x-1/2 -translate-y-1/2 bg-gray-500"}
+          className={cn(
+            "absolute left-1/2 top-1/2 h-4 w-[1px] -translate-x-1/2 -translate-y-1/2 bg-gray-500",
+          )}
           style={{
-            transform: `rotate(${deg}deg) translate(0, -${distance}px)`,
+            transform: `rotate(${deg}deg) translateY(149px)`,
           }}
         />
       );
@@ -240,6 +257,20 @@ const Clock: FC<ClockProps> = ({
           onTouchStart={precision === "minute" ? handleDragStart : undefined}
         />
 
+        {/* drag ball */}
+        <div
+          className={cn(
+            "absolute top-1/2 left-1/2 rounded-full bg-blue-500 size-3 -translate-x-1/2 -translate-y-full",
+            !isDraggingRef.current && "transition-transform duration-300 ease-in-out",
+            { "cursor-move": precision === "minute" && draggable && !!onChange }
+          )}
+          style={{
+            transform: `rotate(${minuteDegrees}deg) translateY(-200px)`,
+          }}
+          onMouseDown={precision === "minute" ? handleDragStart : undefined}
+          onTouchStart={precision === "minute" ? handleDragStart : undefined}
+        />
+
         {/* 秒針 */}
         {precision === "second" && (
           <div
@@ -265,12 +296,13 @@ const Clock: FC<ClockProps> = ({
       id="clock"
       ref={clockRef}
       className={cn(
-        "relative overflow-hidden h-64 w-64 rounded-full border-4 border-gray-800 bg-white touch-none",
+        "relative w-[320px] h-[320px] m-16 rounded-full border-4 border-gray-800 bg-white touch-none",
         className,
       )}
     >
       {renderClockHands()}
-      {renderClockNumbers()}
+      {renderHourNumbers()}
+      {renderMinuteNumbers()}
       {renderClockTicks()}
 
       {/* 顯示上下午指示 */}

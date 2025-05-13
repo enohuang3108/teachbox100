@@ -30,21 +30,33 @@ export default function DigitAnswer({
   className,
 }: DigitAnswerProps) {
   const digitRefs = useRef<
-    Record<
-      string,
-      { current: HTMLSpanElement | null; staging: HTMLSpanElement | null }
-    >
+    Record<string, { current: HTMLSpanElement | null; staging: HTMLSpanElement | null }>
   >({});
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  // 使用 ref 保存最新的 value，避免閉包問題
+  const valueRef = useRef<DigitValue | null>(value);
+
+  // 每次 value 變化時更新 ref
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
 
   const handleDigitChange = (key: string, increment: number) => {
     const currentSpan = digitRefs.current[key]?.current;
     const stagingSpan = digitRefs.current[key]?.staging;
     const configData = config[key];
 
+    // 使用 valueRef 取得最新值
+    const currentValue = valueRef.current || {};
+    const currentVal = currentValue[key] ?? 0;
+    const { max, digits } = configData || { max: 10, digits: 1 };
+    const newVal = (currentVal + increment + max) % max;
+
+    // 更新值
+    const newValue = { ...currentValue, [key]: newVal };
+    onChange(newValue);
+
     if (currentSpan && stagingSpan && configData) {
-      const currentVal = value?.[key] ?? 0;
-      const { max, digits } = configData;
-      const newVal = (currentVal + increment + max) % max;
       const formattedNewVal = newVal.toString().padStart(digits, "0");
 
       // Prepare staging span
@@ -79,16 +91,50 @@ export default function DigitAnswer({
         currentSpan.classList.add("slide-out-down");
         stagingSpan.classList.add("slide-in-down");
       }
-
-      onChange({ ...value, [key]: newVal });
-    } else {
-      // Fallback if refs are not ready (should normally not happen after mount)
-      const currentVal = value?.[key] ?? 0;
-      const { max } = config[key];
-      const newVal = (currentVal + increment + max) % max;
-      onChange({ ...value, [key]: newVal });
     }
   };
+
+  // Start long press timer
+  const startLongPress = (key: string, increment: number) => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    handleDigitChange(key, increment);
+
+    let delay = 500;
+    let speed = 100;
+    let pressTime = 0;
+
+    intervalRef.current = setInterval(() => {
+      pressTime += speed;
+      handleDigitChange(key, increment);
+
+      if (pressTime > 300 && speed > 50) {
+        clearInterval(intervalRef.current!);
+        speed = 50;
+        intervalRef.current = setInterval(() => {
+          handleDigitChange(key, increment);
+        }, speed);
+      }
+    }, delay);
+  };
+
+  // Stop long press timer
+  const stopLongPress = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  // Clean up interval on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
   // Format the number with leading zeros
   const formatValue = (key: string): string => {
@@ -138,7 +184,11 @@ export default function DigitAnswer({
               variant="ghost"
               size="icon"
               className="h-12 w-12 rounded-full transition-transform hover:bg-gray-100 active:scale-95 [&_svg]:size-8"
-              onClick={() => handleDigitChange(key, 1)}
+              onMouseDown={() => startLongPress(key, 1)}
+              onMouseUp={stopLongPress}
+              onMouseLeave={stopLongPress}
+              onTouchStart={() => startLongPress(key, 1)}
+              onTouchEnd={stopLongPress}
               aria-label={`add ${label}`}
             >
               <ChevronUp />
@@ -160,7 +210,11 @@ export default function DigitAnswer({
               variant="ghost"
               size="icon"
               className="h-12 w-12 rounded-full transition-transform hover:bg-gray-100 active:scale-95 [&_svg]:size-8"
-              onClick={() => handleDigitChange(key, -1)}
+              onMouseDown={() => startLongPress(key, -1)}
+              onMouseUp={stopLongPress}
+              onMouseLeave={stopLongPress}
+              onTouchStart={() => startLongPress(key, -1)}
+              onTouchEnd={stopLongPress}
               aria-label={`decrease ${label}`}
             >
               <ChevronDown />
