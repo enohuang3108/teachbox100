@@ -143,7 +143,7 @@ export default function DigitAnswer({
             >
               <ChevronUp />
             </Button>
-            <div className="relative min-w-[3.5rem] overflow-hidden rounded-md border border-gray-200 bg-white px-2 py-1 text-2xl font-bold shadow-sm md:h-14 md:min-w-[4rem] md:text-3xl">
+            <div className="relative min-w-[3.5rem] min-h-[3.5rem] overflow-hidden rounded-md border border-gray-200 bg-white px-2 py-1 text-2xl font-bold shadow-sm md:h-14 md:min-w-[4rem] md:text-3xl">
               <span
                 ref={setStagingRef(key)}
                 className="absolute inset-0 flex items-center justify-center transition-transform duration-300 ease-in-out"

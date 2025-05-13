@@ -2,6 +2,7 @@
 
 import { pages } from "@/app/pages.config";
 import Clock, { type ClockTime } from "@/components/atoms/Clock";
+import TimeSlider from "@/components/atoms/TimeSlider";
 import { Label } from "@/components/atoms/shadcn/label";
 import { Switch } from "@/components/atoms/shadcn/switch";
 import GameAnswerSection from "@/components/molecules/GameAnswerSection";
@@ -33,10 +34,10 @@ const defaultAnswer: ClockTime = {
 
 export default function CurrentTimePage() {
   const [answer, setAnswer] = useState<ClockTime>(defaultAnswer);
-  const [selectedAnswer, setSelectedAnswer] =
-    useState<ClockTime>(defaultAnswer);
+  const [selectedAnswer, setSelectedAnswer] = useState<ClockTime>(defaultAnswer);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [is24HourClock, setIs24HourClock] = useState<boolean>(true); // Setting for clock face AM/PM
+  const [is24HourClock, setIs24HourClock] = useState<boolean>(false);
+  const [showMinuteSlider, setShowMinuteSlider] = useState<boolean>(true);
 
   useEffect(() => {
     resetTime();
@@ -95,25 +96,35 @@ export default function CurrentTimePage() {
     }
   };
 
-  const handleToggleAmPm = (newIsAM: boolean) => {
-    setSelectedAnswer((prev) => ({
-      ...prev,
-      isAM: newIsAM,
-    }));
+  const handleTimeSliderChange = (newTime: ClockTime) => {
+    setAnswer(newTime);
   };
 
   const clockSettings = (
-    <div className="flex flex-col space-y-2 p-4">
+    <div className="flex flex-col space-y-4 p-4">
       <div className="flex items-center space-x-2">
         <Switch
           id="display-am-pm-clock"
           checked={is24HourClock}
           onCheckedChange={setIs24HourClock}
         />
-        <Label htmlFor="display-am-pm-clock">24 小時制</Label>
+        <Label htmlFor="display-am-pm-clock"> 隨機題目 24 小時制</Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="display-minute-slider"
+          checked={showMinuteSlider}
+          onCheckedChange={setShowMinuteSlider}
+        />
+        <Label htmlFor="display-minute-slider">顯示調整時間拉桿</Label>
       </div>
     </div>
   );
+
+  const handleClockChange = (newTime: ClockTime) => {
+    // console.log("handleClockChange", newTime);
+    setAnswer(newTime)
+  };
 
   return (
     <GamePageTemplate
@@ -122,12 +133,24 @@ export default function CurrentTimePage() {
       settings={clockSettings} // Pass the settings UI
     >
       <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 md:grid-cols-2">
-        <Clock
-          time={answer} // answer.hour is 0-23
-          draggable={false}
-          showAmPm={is24HourClock} // Controlled by the new setting
-          className="h-72 w-72 md:mb-2 md:h-80 md:w-80"
-        />
+        <div className="flex flex-col items-center">
+          <Clock
+            time={answer} // answer.hour is 0-23
+            draggable={true}
+            onChange={handleClockChange}
+            showAmPm={true} // Controlled by the new setting
+            className="h-72 w-72 md:mb-2 md:h-80 md:w-80"
+          />
+
+          {showMinuteSlider && (
+            <TimeSlider
+              time={answer}
+              onChange={handleTimeSliderChange}
+              className="mt-4 w-full max-w-[300px]"
+            />
+          )}
+        </div>
+
         <GameAnswerSection
           question={"請問時鐘的時間是？"}
           hasAnswer={selectedAnswer !== null} // Check selectedTime

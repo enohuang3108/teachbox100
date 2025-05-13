@@ -6,7 +6,7 @@ import { FC, useCallback, useRef } from "react";
 type Precision = "minute" | "second";
 
 export interface ClockTime {
-  hour: number; // 0-23
+  hour: number;
   minute: number;
   second: number;
 }
@@ -70,6 +70,7 @@ const Clock: FC<ClockProps> = ({
   showAmPm = false,
 }) => {
   const clockRef = useRef<HTMLDivElement>(null);
+  const currentClockWidth = clockRef.current?.clientWidth ?? undefined;
   const isDraggingRef = useRef(false);
   const dragStartTimeRef = useRef<ClockTime | null>(null);
 
@@ -107,27 +108,25 @@ const Clock: FC<ClockProps> = ({
       if (!draggable || !onChange) return;
 
       e.preventDefault();
+      dragStartTimeRef.current = time;
       isDraggingRef.current = true;
-      dragStartTimeRef.current = { ...time }; // Copy time
 
       const updateTimeFromDrag = (event: MouseEvent | TouchEvent) => {
-        const baseTime = dragStartTimeRef.current;
-        if (!isDraggingRef.current || !baseTime) return;
+        if (!isDraggingRef.current || !dragStartTimeRef.current) return;
 
         const angle = calculateAngle(event);
         const timeValue = angleToTimeValue(angle);
 
         let intermediateTime = currentStrategy.setTime(
-          { ...baseTime },
+          { ...dragStartTimeRef.current },
           timeValue,
         );
 
         if (precision === "minute") {
-          const previousMinutes = baseTime.minute;
+          const previousMinutes = dragStartTimeRef.current.minute;
           const newMinutes = intermediateTime.minute;
-          let currentHours = baseTime.hour; // 0-23
+          let currentHours = dragStartTimeRef.current.hour;
 
-          // Adjust hour if minute hand crosses 12
           if (previousMinutes >= 50 && newMinutes <= 9) {
             currentHours = (currentHours + 1) % 24;
           } else if (previousMinutes <= 9 && newMinutes >= 50) {
@@ -135,7 +134,7 @@ const Clock: FC<ClockProps> = ({
           }
           intermediateTime = { ...intermediateTime, hour: currentHours };
         }
-        // Ensure onChange receives a new object for reactivity if needed
+        dragStartTimeRef.current = intermediateTime;
         onChange({ ...intermediateTime });
       };
 
@@ -146,7 +145,6 @@ const Clock: FC<ClockProps> = ({
 
       const handleEnd = () => {
         isDraggingRef.current = false;
-        dragStartTimeRef.current = null;
         document.removeEventListener("mousemove", handleMove);
         document.removeEventListener("mouseup", handleEnd);
         document.removeEventListener("touchmove", handleMove);
@@ -158,36 +156,34 @@ const Clock: FC<ClockProps> = ({
       document.addEventListener("touchmove", handleMove);
       document.addEventListener("touchend", handleEnd);
     },
-    [calculateAngle, currentStrategy, draggable, onChange, precision, time],
+    [calculateAngle, currentStrategy, draggable, onChange, precision],
   );
 
-  // time.hour is 0-23
-  const displayHour12 =
-    time.hour === 0 || time.hour === 12 ? 12 : time.hour % 12; // For clock face numbers and hand
+  const displayHour12 = time.hour === 0 || time.hour === 12 ? 12 : time.hour % 12;
   const minutes = time.minute;
   const seconds = time.second ?? 0;
-  const isAMForDisplay = time.hour < 12; // 0-11 is AM, 12-23 is PM
+  const isAM = time.hour < 12;
 
-  const hourDegrees = (displayHour12 % 12) * 30 + minutes * 0.5; // (time.hour % 12) handles 0 as 12 for calculation if 0 means 12am
+  const hourDegrees = displayHour12 * 30 + minutes * 0.5;
   const minuteDegrees = minutes * 6;
   const secondDegrees = seconds * 6;
 
   const renderClockNumbers = () => {
+    if (!currentClockWidth) return;
+
     return Array.from({ length: 12 }).map((_, i) => {
       const num = i + 1; // 1-12 的數字
       const deg = i * 30 + 30; // 每個數字間隔30度
-      const distance = 140; // 距離中心的距離
+      const distance = currentClockWidth / 2 - 22; // Position numbers inwards
       return (
         <div
           key={i}
           className={cn(
-            "absolute text-base font-semibold",
-            num % 3 === 0 ? "text-lg font-bold" : "text-base font-medium",
+            "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+            num % 3 === 0 ? "text-lg font-extrabold" : "text-base font-medium",
           )}
           style={{
-            left: "50%",
-            top: "50%",
-            transform: `translate(-50%, -50%) rotate(${deg}deg) translate(0, -${distance}px) rotate(-${deg}deg)`,
+            transform: `rotate(${deg}deg) translate(0, -${distance}px) rotate(-${deg}deg)`,
           }}
         >
           {num}
@@ -196,65 +192,92 @@ const Clock: FC<ClockProps> = ({
     });
   };
 
+  const renderClockTicks = () => {
+    if (!currentClockWidth) return;
+
+    return Array.from({ length: 60 }).map((_, i) => {
+      if (i % 5 === 0) return null; // Use null for no-render for clarity
+      const deg = i * 6;
+      const distance = currentClockWidth / 2; // Position tick marks slightly inwards from the edge
+
+      return (
+        <div
+          key={i}
+          className={"absolute left-1/2 top-1/2 h-6 w-[1px] -translate-x-1/2 -translate-y-1/2 bg-gray-500"}
+          style={{
+            transform: `rotate(${deg}deg) translate(0, -${distance}px)`,
+          }}
+        />
+      );
+    });
+  };
+
+  const renderClockHands = () => {
+    return (
+      <>
+        {/* 時針 */}
+        <div
+          className={cn(
+            "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-black shadow-md w-[4px] h-[28%] -translate-x-1/2 -translate-y-full",
+            !isDraggingRef.current && "transition-transform duration-300 ease-in-out",
+          )}
+          style={{
+            transform: `rotate(${hourDegrees}deg)`,
+          }}
+        />
+
+        {/* 分針 */}
+        <div
+          className={cn(
+            "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-black shadow-sm w-[6px] h-[43%] -translate-x-1/2 -translate-y-full",
+            !isDraggingRef.current && "transition-transform duration-300 ease-in-out",
+            { "cursor-move": precision === "minute" && draggable && !!onChange }
+          )}
+          style={{
+            transform: `rotate(${minuteDegrees}deg)`,
+          }}
+          onMouseDown={precision === "minute" ? handleDragStart : undefined}
+          onTouchStart={precision === "minute" ? handleDragStart : undefined}
+        />
+
+        {/* 秒針 */}
+        {precision === "second" && (
+          <div
+            className={cn(
+              "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-red-500 shadow-sm w-[1px] h-[43%] -translate-x-1/2 -translate-y-full transition-transform duration-300 ease-in-out",
+              {
+                "cursor-move": precision === "second" && draggable && !!onChange,
+              },
+            )}
+            style={{
+              transform: `rotate(${secondDegrees}deg)`,
+            }}
+            onMouseDown={precision === "second" ? handleDragStart : undefined}
+            onTouchStart={precision === "second" ? handleDragStart : undefined}
+          />
+        )}
+      </>
+    );
+  };
+
   return (
     <div
+      id="clock"
       ref={clockRef}
       className={cn(
-        "relative h-64 w-64 rounded-full border-4 border-gray-800 bg-white",
+        "relative overflow-hidden h-64 w-64 rounded-full border-4 border-gray-800 bg-white",
         className,
       )}
     >
+      {renderClockHands()}
       {renderClockNumbers()}
+      {renderClockTicks()}
 
       {/* 顯示上下午指示 */}
-      {showAmPm && (
+      {showAmPm && currentClockWidth && (
         <div className="absolute top-[25%] left-1/2 -translate-x-1/2 transform text-lg font-bold">
-          {isAMForDisplay ? "上午" : "下午"}
+          {isAM ? "上午" : "下午"}
         </div>
-      )}
-
-      {/* 時針 - 較短較粗 */}
-      <div
-        className="absolute top-1/2 left-1/2 origin-bottom rounded-full bg-black shadow-md"
-        style={{
-          height: "28%",
-          width: "4px",
-          transform: `translate(-50%, -100%) rotate(${hourDegrees}deg)`,
-        }}
-      />
-
-      {/* 分針 - 與秒針長度一致 */}
-      <div
-        className={cn(
-          "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-black shadow-sm",
-          { "cursor-move": precision === "minute" && draggable && !!onChange },
-        )}
-        style={{
-          height: "43%",
-          width: "6px",
-          transform: `translate(-50%, -100%) rotate(${minuteDegrees}deg)`,
-        }}
-        onMouseDown={precision === "minute" ? handleDragStart : undefined}
-        onTouchStart={precision === "minute" ? handleDragStart : undefined}
-      />
-
-      {/* 秒針 - 紅色，與分針長度一致 */}
-      {precision === "second" && (
-        <div
-          className={cn(
-            "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-red-500 shadow-sm",
-            {
-              "cursor-move": precision === "second" && draggable && !!onChange,
-            },
-          )}
-          style={{
-            height: "43%",
-            width: "1px",
-            transform: `translate(-50%, -100%) rotate(${secondDegrees}deg)`,
-          }}
-          onMouseDown={precision === "second" ? handleDragStart : undefined}
-          onTouchStart={precision === "second" ? handleDragStart : undefined}
-        />
       )}
 
       {/* 中心點 */}
