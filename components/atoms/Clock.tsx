@@ -179,7 +179,7 @@ const Clock: FC<ClockProps> = ({
         <div
           key={i}
           className={cn(
-            "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+            "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none",
             num % 3 === 0 ? "text-lg font-extrabold" : "text-base font-medium",
           )}
           style={{
@@ -265,7 +265,7 @@ const Clock: FC<ClockProps> = ({
       id="clock"
       ref={clockRef}
       className={cn(
-        "relative overflow-hidden h-64 w-64 rounded-full border-4 border-gray-800 bg-white",
+        "relative overflow-hidden h-64 w-64 rounded-full border-4 border-gray-800 bg-white touch-none",
         className,
       )}
     >
@@ -275,7 +275,7 @@ const Clock: FC<ClockProps> = ({
 
       {/* 顯示上下午指示 */}
       {showAmPm && currentClockWidth && (
-        <div className="absolute top-[25%] left-1/2 -translate-x-1/2 transform text-lg font-bold">
+        <div className="absolute top-[25%] left-1/2 -translate-x-1/2 transform text-lg font-bold select-none">
           {isAM ? "上午" : "下午"}
         </div>
       )}
