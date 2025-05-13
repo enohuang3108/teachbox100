@@ -45,7 +45,7 @@ export default function GameAnswerSection({
   }, [isCorrect]);
 
   return (
-    <div className={cn(`relative mt-16`, className)}>
+    <div className={cn("relative mt-16", className)}>
       <h2 className="mb-6 text-3xl font-bold md:text-4xl">{question}</h2>
       {children}
       {/* 提交按鈕 */}

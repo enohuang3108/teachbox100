@@ -115,14 +115,14 @@ export default function NumberFlow() {
             <span
               className="text-light-950 dark:text-dark-950 absolute inset-0 flex items-center justify-center text-2xl font-semibold"
               ref={prevValueHunds}
-              style={{ transform: `translateY(-100%)` }}
+              style={{ transform: "translateY(-100%)" }}
             >
               {Math.floor(prevValue / 100)}
             </span>
             <span
               className="text-light-950 dark:text-dark-950 absolute inset-0 flex items-center justify-center text-2xl font-semibold"
               ref={nextValueHunds}
-              style={{ transform: `translateY(0%)` }}
+              style={{ transform: "translateY(0%)" }}
             >
               {Math.floor(value / 100)}
             </span>
@@ -135,14 +135,14 @@ export default function NumberFlow() {
             <span
               className="text-light-950 dark:text-dark-950 absolute inset-0 flex items-center justify-center text-2xl font-semibold"
               ref={prevValueTens}
-              style={{ transform: `translateY(-100%)` }}
+              style={{ transform: "translateY(-100%)" }}
             >
               {Math.floor(prevValue / 10) % 10}
             </span>
             <span
               className="text-light-950 dark:text-dark-950 absolute inset-0 flex items-center justify-center text-2xl font-semibold"
               ref={nextValueTens}
-              style={{ transform: `translateY(0%)` }}
+              style={{ transform: "translateY(0%)" }}
             >
               {Math.floor(value / 10) % 10}
             </span>
@@ -151,14 +151,14 @@ export default function NumberFlow() {
             <span
               className="text-light-950 dark:text-dark-950 absolute inset-0 flex items-center justify-center text-2xl font-semibold"
               ref={prevValueRef}
-              style={{ transform: `translateY(-100%)` }}
+              style={{ transform: "translateY(-100%)" }}
             >
               {prevValue % 10}
             </span>
             <span
               className="text-light-950 dark:text-dark-950 absolute inset-0 flex items-center justify-center text-2xl font-semibold"
               ref={nextValueRef}
-              style={{ transform: `translateY(0%)` }}
+              style={{ transform: "translateY(0%)" }}
             >
               {value % 10}
             </span>

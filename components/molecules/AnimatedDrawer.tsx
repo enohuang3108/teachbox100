@@ -68,7 +68,7 @@ const AnimatedDrawer = ({ children }: { children: React.ReactNode }) => {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              className="bg-primary text-primary-foreground absolute -z-10 mx-auto h-[300px] w-[300px] overflow-hidden overflow-y-auto rounded-3xl p-5"
+              className="absolute -z-10 mx-auto h-[300px] w-[300px] overflow-hidden overflow-y-auto rounded-3xl bg-primary p-5 text-primary-foreground"
               variants={setting}
               initial="initial"
               animate="animate"
@@ -80,12 +80,12 @@ const AnimatedDrawer = ({ children }: { children: React.ReactNode }) => {
         </AnimatePresence>
 
         <div className="flex items-center justify-center">
-          <div className="bg-primary z-10 mx-auto flex h-[300px] items-center justify-between rounded-2xl p-1 px-2.5">
+          <div className="z-10 mx-auto flex h-[300px] items-center justify-between rounded-2xl bg-primary p-1 px-2.5">
             <motion.button
               animate={{
                 height: 50,
               }}
-              className="bg-primary flex max-w-[50px] min-w-[50px] items-center justify-center rounded-lg bg-black"
+              className="flex max-w-[50px] min-w-[50px] items-center justify-center rounded-lg bg-black bg-primary"
               onClick={() => setIsOpen((prev) => !prev)}
             >
               <div className="h-4 w-4 rotate-45 rounded bg-white" />

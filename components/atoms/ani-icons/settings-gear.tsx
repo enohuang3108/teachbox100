@@ -55,7 +55,7 @@ const SettingsGearIcon = forwardRef<
   return (
     <div
       className={cn(
-        `hover:bg-accent flex cursor-pointer items-center justify-center rounded-md p-2 transition-colors duration-200 select-none`,
+        "hover:bg-accent flex cursor-pointer items-center justify-center rounded-md p-2 transition-colors duration-200 select-none",
         className,
       )}
       onMouseEnter={handleMouseEnter}

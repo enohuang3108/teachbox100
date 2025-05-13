@@ -112,7 +112,7 @@ export default function CoinChangePage() {
       </div>
 
       <GameAnswerSection
-        question={`請挑選應找零的金額`}
+        question={"請挑選應找零的金額"}
         hasAnswer={hasAnswer}
         isCorrect={isCorrect}
         correctFeedback={getRandomFeedback("correctchange")}
@@ -120,13 +120,13 @@ export default function CoinChangePage() {
           changeAmount
             ? currentSelectedChange > changeAmount
               ? getRandomFeedback(
-                  "overchange",
-                  currentSelectedChange - changeAmount,
-                )
+                "overchange",
+                currentSelectedChange - changeAmount,
+              )
               : getRandomFeedback(
-                  "underchange",
-                  changeAmount - currentSelectedChange,
-                )
+                "underchange",
+                changeAmount - currentSelectedChange,
+              )
             : ""
         }
         showFeedback={showFeedback}
@@ -167,7 +167,7 @@ export default function CoinChangePage() {
                   <button
                     key={coin.value}
                     onClick={() => handleCoinClick(coin)}
-                    className={`relative cursor-pointer transition-transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50`}
+                    className={"relative cursor-pointer transition-transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50"}
                     aria-label={`選擇 ${coin.name}`}
                   >
                     <Coin coinValue={coin.value} />

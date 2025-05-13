@@ -180,7 +180,7 @@ export default function CoinGameSettingPanel({
             <label key={value} className="group">
               <div
                 className={cn(
-                  `flex w-full cursor-pointer items-center space-x-2 rounded-full border p-2 transition-colors`,
+                  "flex w-full cursor-pointer items-center space-x-2 rounded-full border p-2 transition-colors",
                   scheme.bg,
                   scheme.border,
                 )}

@@ -129,7 +129,7 @@ export default function CurrentTimePage() {
           className="h-72 w-72 md:mb-2 md:h-80 md:w-80"
         />
         <GameAnswerSection
-          question={`請問時鐘的時間是？`}
+          question={"請問時鐘的時間是？"}
           hasAnswer={selectedAnswer !== null} // Check selectedTime
           isCorrect={isCorrect}
           correctFeedback={getRandomFeedback(

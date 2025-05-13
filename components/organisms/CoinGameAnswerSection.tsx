@@ -1,9 +1,6 @@
 "use client";
 
-import DigitAnswer, {
-  DigitConfig,
-  DigitValue,
-} from "@/components/molecules/answer/DigitAnswer";
+import DigitAnswer, { DigitConfig, DigitValue } from "@/components/molecules/answer/DigitAnswer";
 import KeypadAnswer from "@/components/molecules/answer/KeypadAnswer";
 import MultipleChoiceAnswer from "@/components/molecules/answer/MultipleChoiceAnswer";
 import GameAnswerSection from "@/components/molecules/GameAnswerSection";

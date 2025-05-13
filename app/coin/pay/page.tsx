@@ -148,7 +148,7 @@ export default function SelectCoinsPage() {
                   <button
                     key={coin.value}
                     onClick={() => handleCoinClick(coin)}
-                    className={`relative cursor-pointer transition-transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50`}
+                    className={"relative cursor-pointer transition-transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50"}
                     aria-label={`選擇 ${coin.name}`}
                   >
                     <Coin coinValue={coin.value} />
