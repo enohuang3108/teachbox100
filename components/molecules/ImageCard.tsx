@@ -1,6 +1,5 @@
+import { Link } from "next-view-transitions";
 import Image from "next/image";
-import Link from "next/link";
-import { unstable_ViewTransition as ViewTransition } from "react";
 
 type CardProps = {
   pageKey: string;
@@ -26,6 +25,7 @@ export const ImageCard = ({
   return (
     <Link
       href={link}
+      prefetch={true}
       className={`rounded-xl transition-all duration-300 hover:scale-105 w-[${cardWidth}px] overflow-hidden border border-zinc-200 bg-zinc-50 pb-3`}
     >
       <div className="relative aspect-video overflow-hidden">
@@ -41,9 +41,7 @@ export const ImageCard = ({
         />
       </div>
       <div className="px-2 py-0 text-start text-zinc-900 sm:px-4 sm:pb-3">
-        <ViewTransition name={`vt-title-${pageKey}`}>
-          <h3 className="mt-3 mb-1 text-lg font-bold">{cardTitle}</h3>
-        </ViewTransition>
+        <h3 className={`mt-3 mb-1 text-lg font-bold vt-${pageKey}-title`}>{cardTitle}</h3>
         <p className="text-sm leading-5">{cardDescription}</p>
       </div>
       {button && <div className="px-2">{button}</div>}

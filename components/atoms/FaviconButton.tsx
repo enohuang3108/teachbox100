@@ -1,11 +1,9 @@
-"use client";
-
+import { Link } from "next-view-transitions";
 import Image from "next/image";
-import Link from "next/link";
 
 export const FaviconButton = () => {
   return (
-    <Link href="/" passHref>
+    <Link href="/" passHref prefetch={true}>
       <div className="fixed top-3 left-3 cursor-pointer">
         <Image
           src="/icons/favicon_transparent.webp"
