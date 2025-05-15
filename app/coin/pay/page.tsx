@@ -1,6 +1,5 @@
 "use client";
 
-import { pages } from "@/app/pages.config";
 import AmountDisplay from "@/components/atoms/AmountDisplay";
 import Coin from "@/components/atoms/Coin";
 import GameAnswerSection from "@/components/molecules/GameAnswerSection";
@@ -91,7 +90,7 @@ export default function SelectCoinsPage() {
 
   return (
     <GamePageTemplate
-      title={pages["coin-pay"].title}
+      page="coin-pay"
       resetGame={resetGame}
       settings={settingSection}
     >

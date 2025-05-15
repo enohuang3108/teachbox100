@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { unstable_ViewTransition as ViewTransition } from "react";
 
 type CardProps = {
+  pageKey: string;
   imageSrc: string;
   blurDataURL: string;
   cardTitle: string;
@@ -12,6 +14,7 @@ type CardProps = {
 };
 
 export const ImageCard = ({
+  pageKey,
   imageSrc,
   blurDataURL,
   cardTitle,
@@ -38,7 +41,9 @@ export const ImageCard = ({
         />
       </div>
       <div className="px-2 py-0 text-start text-zinc-900 sm:px-4 sm:pb-3">
-        <h3 className="mt-3 mb-1 text-lg font-bold">{cardTitle}</h3>
+        <ViewTransition name={`vt-title-${pageKey}`}>
+          <h3 className="mt-3 mb-1 text-lg font-bold">{cardTitle}</h3>
+        </ViewTransition>
         <p className="text-sm leading-5">{cardDescription}</p>
       </div>
       {button && <div className="px-2">{button}</div>}

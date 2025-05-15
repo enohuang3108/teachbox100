@@ -1,9 +1,13 @@
-interface Page {
+export interface Page {
   path: string;
   imageSrc: string;
   blurDataURL: string;
   title: string;
   description: string;
+}
+
+export interface PageWithKey extends Page {
+  key: keyof typeof pages;
 }
 
 export const pages: { [key: string]: Page } = {

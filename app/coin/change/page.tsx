@@ -1,6 +1,5 @@
 "use client";
 
-import { pages } from "@/app/pages.config";
 import AmountDisplay from "@/components/atoms/AmountDisplay";
 import Coin from "@/components/atoms/Coin";
 import GameAnswerSection from "@/components/molecules/GameAnswerSection";
@@ -9,7 +8,6 @@ import { AVAILABLE_COINS } from "@/lib/constants/game";
 import type { Coin as CoinType } from "@/lib/types/types";
 import { getRandomFeedback } from "@/lib/utils/gameFeedback";
 import { useCallback, useEffect, useState } from "react";
-
 interface SelectedCoin extends CoinType {
   id: number;
 }
@@ -94,7 +92,7 @@ export default function CoinChangePage() {
 
   return (
     <GamePageTemplate
-      title={pages["coin-change"].title}
+      page="coin-change"
       resetGame={resetGame}
       settings={settingSection}
     >

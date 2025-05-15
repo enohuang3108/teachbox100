@@ -1,6 +1,5 @@
 "use client";
 
-import { pages } from "@/app/pages.config";
 import Coin from "@/components/atoms/Coin";
 import { SimpleCard } from "@/components/atoms/SimpleCard";
 import GameAnswerSection from "@/components/organisms/CoinGameAnswerSection";
@@ -211,7 +210,7 @@ export default function CoinGamePage() {
 
   return (
     <GamePageTemplate
-      title={pages["coin-value"].title}
+      page="coin-value"
       resetGame={resetGame}
       settings={settingSection}
     >

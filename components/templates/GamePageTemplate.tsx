@@ -1,3 +1,4 @@
+import { pages, type PageWithKey } from "@/app/pages.config";
 import { CircleHelpIcon } from "../atoms/ani-icons/CircleHelpIcon";
 import { RefreshCWIcon } from "../atoms/ani-icons/refresh-cw";
 import { SettingsGearIcon } from "../atoms/ani-icons/settings-gear";
@@ -18,20 +19,22 @@ import {
 import { PageTemplate } from "./PageTemplate";
 
 export const GamePageTemplate = ({
-  title,
+  page,
   children,
   settings,
   resetGame,
   tips,
 }: {
-  title: string;
+  page: keyof typeof pages;
   children: React.ReactNode;
   settings: React.ReactNode;
   resetGame: () => void;
   tips?: React.ReactNode;
 }) => {
+  const pageInfo: PageWithKey = { ...pages[page], key: page };
+
   return (
-    <PageTemplate title={title}>
+    <PageTemplate page={pageInfo}>
       <RefreshCWIcon
         className="fixed top-4 right-4 h-10 w-10 bg-zinc-100 sm:bg-transparent sm:hover:bg-transparent"
         onClick={resetGame}

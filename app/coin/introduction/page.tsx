@@ -72,11 +72,11 @@ export default function CoinIntroductionPage() {
   const getCoinSide = (coinValue: number) => {
     return coinSideMap[coinValue] !== false; // 預設為正面（true）
   };
+  const page = { ...pages["coin-introduction"], key: "coin-introduction" };
 
   return (
-    <PageTemplate title={pages["coin-introduction"].title}>
+    <PageTemplate page={page}>
       <div className="flex flex-col items-center gap-8 p-4">
-        <h2 className="text-2xl font-bold">認識新臺幣</h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {denominations.map((item) => (
             <Dialog key={item}>

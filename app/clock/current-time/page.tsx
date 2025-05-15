@@ -1,6 +1,5 @@
 "use client";
 
-import { pages } from "@/app/pages.config";
 import Clock, { type ClockTime } from "@/components/atoms/Clock";
 import TimeSlider from "@/components/atoms/TimeSlider";
 import { Label } from "@/components/atoms/shadcn/label";
@@ -122,13 +121,12 @@ export default function CurrentTimePage() {
   );
 
   const handleClockChange = (newTime: ClockTime) => {
-    // console.log("handleClockChange", newTime);
     setAnswer(newTime)
   };
 
   return (
     <GamePageTemplate
-      title={pages["clock-current-time"].title}
+      page="clock-current-time"
       resetGame={resetTime}
       tips={<div>
         <p>
