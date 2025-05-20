@@ -232,10 +232,3 @@
     animation: slideInDown 0.2s forwards;
   }
 }
-
-/* View Transitions */
-.vt-coin-introduction-title {view-transition-name: vt-coin-introduction-title}
-.vt-coin-value-title {  view-transition-name: vt-coin-value-title}
-.vt-coin-pay-title {  view-transition-name: vt-coin-pay-title}
-.vt-coin-change-title {  view-transition-name: vt-coin-change-title}
-.vt-clock-current-time-title {  view-transition-name: vt-clock-current-time-title}

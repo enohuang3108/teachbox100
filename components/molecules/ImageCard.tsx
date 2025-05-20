@@ -41,7 +41,7 @@ export const ImageCard = ({
         />
       </div>
       <div className="px-2 py-0 text-start text-zinc-900 sm:px-4 sm:pb-3">
-        <h3 className={`mt-3 mb-1 text-lg font-bold vt-${pageKey}-title`}>{cardTitle}</h3>
+        <h3 className={"mt-3 mb-1 text-lg font-bold"}>{cardTitle}</h3>
         <p className="text-sm leading-5">{cardDescription}</p>
       </div>
       {button && <div className="px-2">{button}</div>}
