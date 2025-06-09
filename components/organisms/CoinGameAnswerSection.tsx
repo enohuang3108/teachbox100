@@ -52,6 +52,8 @@ export default function CoinGameAnswerSection({
   }, [userAnswer]);
 
   const handleDigitChange = (newValue: Record<string, number>) => {
+    console.log("cc");
+
     const { thousand = 0, hundred = 0, ten = 0, one = 0 } = newValue;
     const combinedValue = thousand * 1000 + hundred * 100 + ten * 10 + one;
     setUserAnswer(combinedValue.toString());
