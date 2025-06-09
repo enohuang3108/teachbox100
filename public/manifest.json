@@ -1,10 +1,10 @@
 {
   "name": "TeachBox100",
-  "short_name": "TeachBox",
+  "short_name": "TeachBox100",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#2563eb",
+  "theme_color": "#ffffff",
   "description": "台灣互動式教育平台",
   "icons": [
     {
