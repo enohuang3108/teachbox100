@@ -1,4 +1,11 @@
 /** @type {import('next').NextConfig} */
+import pwa from "next-pwa";
+
+const withPWA = pwa({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+});
 
 const nextConfig = {
   eslint: {
@@ -32,4 +39,4 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);

@@ -26,6 +26,14 @@ export const pages: { [key: string]: Page } = {
     title: "認識新臺幣",
     description: "認識台灣新臺幣的各種面額、外觀特徵與等值換算。",
   },
+  "coin-equivalent": {
+    path: "/coin/equivalent",
+    imageSrc: "/images/cover_coin_equivalent.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAAK0lEQVQIW2O8k2rzXzAhm4FDSJTheV89A+Pv11f+P6pOZfj/n4VBIDyCAQDs0Q26LT5ryAAAAABJRU5ErkJggg==",
+    title: "金錢等值換算",
+    description: "學習不同幣值的等值換算，培養生活中的金錢運用能力。",
+  },
   "coin-value": {
     path: "/coin/value",
     imageSrc: "/images/cover_coin_value.webp",

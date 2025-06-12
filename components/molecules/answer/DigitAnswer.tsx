@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/shadcn/button";
+import { useIsMobile } from "@/lib/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useRef } from "react";
@@ -32,8 +33,8 @@ export default function DigitAnswer({
   const digitRefs = useRef<
     Record<string, { current: HTMLSpanElement | null; staging: HTMLSpanElement | null }>
   >({});
+  const isMobile = useIsMobile();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  // 使用 ref 保存最新的 value，避免閉包問題
   const valueRef = useRef<DigitValue | null>(value);
 
   // 每次 value 變化時更新 ref
@@ -172,7 +173,7 @@ export default function DigitAnswer({
   return (
     <div
       className={cn(
-        "flex items-center justify-center gap-3 md:gap-6",
+        "flex items-center justify-center gap-3 md:gap-6 select-none",
         className,
       )}
     >
@@ -184,11 +185,11 @@ export default function DigitAnswer({
               variant="ghost"
               size="icon"
               className="h-12 w-12 rounded-full transition-transform hover:bg-gray-100 active:scale-95 [&_svg]:size-8"
-              onMouseDown={() => startLongPress(key, 1)}
-              onMouseUp={stopLongPress}
-              onMouseLeave={stopLongPress}
-              onTouchStart={() => startLongPress(key, 1)}
-              onTouchEnd={stopLongPress}
+              onMouseDown={() => !isMobile && startLongPress(key, 1)}
+              onMouseUp={() => !isMobile && stopLongPress()}
+              onMouseLeave={() => !isMobile && stopLongPress()}
+              onTouchStart={() => isMobile && startLongPress(key, 1)}
+              onTouchEnd={() => isMobile && stopLongPress()}
               aria-label={`add ${label}`}
             >
               <ChevronUp />
@@ -210,11 +211,11 @@ export default function DigitAnswer({
               variant="ghost"
               size="icon"
               className="h-12 w-12 rounded-full transition-transform hover:bg-gray-100 active:scale-95 [&_svg]:size-8"
-              onMouseDown={() => startLongPress(key, -1)}
-              onMouseUp={stopLongPress}
-              onMouseLeave={stopLongPress}
-              onTouchStart={() => startLongPress(key, -1)}
-              onTouchEnd={stopLongPress}
+              onMouseDown={() => !isMobile && startLongPress(key, -1)}
+              onMouseUp={() => !isMobile && stopLongPress()}
+              onMouseLeave={() => !isMobile && stopLongPress()}
+              onTouchStart={() => isMobile && startLongPress(key, -1)}
+              onTouchEnd={() => isMobile && stopLongPress()}
               aria-label={`decrease ${label}`}
             >
               <ChevronDown />

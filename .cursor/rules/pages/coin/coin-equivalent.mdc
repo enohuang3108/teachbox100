@@ -1,0 +1,10 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+大方向: /coin/equivalent 這個頁面中，會一個硬幣或鈔票，分別有 5、10、50、100、200、500、100、2000 的面額，下方的答題區域使用者可以選擇等值的硬幣或鈔票來回答
+
+細節：
+- 硬幣使用 /components/atoms/Coin.tsx 的元件
+- 答提區使用

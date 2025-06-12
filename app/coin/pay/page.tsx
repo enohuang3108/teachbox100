@@ -14,7 +14,7 @@ interface SelectedCoin extends CoinType {
 }
 
 const GAME_COINS = AVAILABLE_COINS.filter((coin) =>
-  [1, 5, 10, 50].includes(coin.value),
+  [1, 5, 10, 50, 100].includes(coin.value),
 );
 
 // 假設的目標金額
@@ -25,6 +25,7 @@ export default function SelectCoinsPage() {
   const [hasAnswer, setHasAnswer] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [maxAmount, setMaxAmount] = useState<number>(50);
 
   const checkAnswer = useCallback(() => {
     if (currentAmount === targetAmount) {
@@ -36,7 +37,7 @@ export default function SelectCoinsPage() {
   }, [currentAmount]);
 
   const setupNewQuestion = () => {
-    setTargetAmount(Math.floor(Math.random() * 100) + 1);
+    setTargetAmount(Math.floor(Math.random() * maxAmount) + 1);
     setCurrentAmount(0);
     setSelectedCoins([]);
     setIsCorrect(null);
@@ -79,13 +80,31 @@ export default function SelectCoinsPage() {
   }, [selectedCoins]);
 
   const settingSection = (
-    // <GameControlPanel
-    //   answerMethod={answerMethod}
-    //   enabledCoins={enabledCoins}
-    //   isOrdered={isOrdered}
-    //   maxAmount={maxAmount}
-    // />
-    <></>
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-700">最大金錢上限</h3>
+          <span className="rounded-full bg-blue-100 px-2 py-1 text-sm font-medium text-blue-600">
+            {maxAmount} 元
+          </span>
+        </div>
+        <div className="relative pt-1">
+          <input
+            type="range"
+            min="10"
+            max={500}
+            step="10"
+            value={maxAmount}
+            onChange={e => setMaxAmount(Number(e.target.value))}
+            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-blue-500"
+          />
+          <div className="mt-1 flex justify-between text-xs text-gray-500">
+            <span>10 元</span>
+            <span>500 元</span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 
   return (

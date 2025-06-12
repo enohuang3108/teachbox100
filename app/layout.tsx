@@ -29,6 +29,11 @@ export default function RootLayout({
   return (
     <ViewTransitions>
       <html lang="zh-TW">
+        <head>
+          <link rel="manifest" href="/manifest.json" />
+          <meta name="theme-color" content="#2563eb" />
+          <link rel="icon" href="/icons/icon-192x192.png" />
+        </head>
         <body className={inter.className + " m-0 overflow-scroll p-0"}>
           <PostHogProvider>
             <FaviconButton />
