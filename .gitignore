@@ -28,3 +28,7 @@ next-env.d.ts
 
 # others
 .DS_Store
+
+# pwa
+sw.js
+workbox-*.js

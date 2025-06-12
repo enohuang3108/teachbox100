@@ -5,6 +5,34 @@ const withPWA = pwa({
   dest: "public",
   register: true,
   skipWaiting: true,
+  cacheOnFrontEndNav: true,
+  runtimeCaching:[
+    {
+      urlPattern: /^https?.*/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "offlineCache",
+        expiration: {
+          maxEntries: 200,
+          maxAgeSeconds: 30 * 24 * 60 * 60
+        }
+      }
+    },
+    {
+      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "images-cache",
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 30 * 24 * 60 * 60
+        }
+      }
+    }
+  ],
+  fallbacks: {
+    document: "/offline",
+  }
 });
 
 const nextConfig = {
