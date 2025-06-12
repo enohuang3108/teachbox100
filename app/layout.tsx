@@ -31,8 +31,8 @@ export default function RootLayout({
       <html lang="zh-TW">
         <head>
           <link rel="manifest" href="/manifest.json" />
-          <meta name="theme-color" content="#2563eb" />
-          <link rel="icon" href="/icons/icon-192x192.png" />
+          <meta name="theme-color" content="#ffffff" />
+          <link rel="icon" href="/icons/favicon.png" />
         </head>
         <body className={inter.className + " m-0 overflow-scroll p-0"}>
           <PostHogProvider>
