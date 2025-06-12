@@ -1,42 +1,70 @@
 /** @type {import('next').NextConfig} */
 import pwa from "next-pwa";
 
+const isDev = process.env.NODE_ENV === "development";
+
 const withPWA = pwa({
   dest: "public",
   register: true,
   skipWaiting: true,
   cacheOnFrontEndNav: true,
-  disable: process.env.NODE_ENV === "development",
-  runtimeCaching:[
-    {
-      urlPattern: /^https?.*/,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "offlineCache",
-        expiration: {
-          maxEntries: 200,
-          maxAgeSeconds: 30 * 24 * 60 * 60
-        },
-        networkTimeoutSeconds: 3
-      }
-    },
-    {
-      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-      handler: "CacheFirst",
-      options: {
-        cacheName: "images-cache",
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 30 * 24 * 60 * 60
-        }
-      }
-    }
-  ],
+  disable: isDev,
+  cacheStartUrl: true,
+  dynamicStartUrl: false,
   fallbacks: {
     document: "/offline",
   },
-  cacheStartUrl: true,
-  dynamicStartUrl: false
+  additionalManifestEntries: [
+    { url: "/", revision: null },
+    { url: "/offline", revision: null },
+  ],
+  runtimeCaching: [
+    {
+      urlPattern: /^\/$/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "start-url",
+        expiration: {
+          maxEntries: 10,
+          maxAgeSeconds: 7 * 24 * 60 * 60,
+        },
+        networkTimeoutSeconds: 3,
+      },
+    },
+    {
+      urlPattern: /\/offline/,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "offline-page",
+        expiration: {
+          maxEntries: 1,
+          maxAgeSeconds: 30 * 24 * 60 * 60,
+        },
+      },
+    },
+    {
+      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico|woff2?|ttf|eot|otf|mp4|webm|mp3|wav)$/,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "assets-cache",
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 30 * 24 * 60 * 60,
+        },
+      },
+    },
+    {
+      urlPattern: /^\/_next\/static\/.*/i,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "static-resources",
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 30 * 24 * 60 * 60,
+        },
+      },
+    },
+  ],
 });
 
 const nextConfig = {
@@ -67,7 +95,6 @@ const nextConfig = {
       },
     ];
   },
-  // This is required to support PostHog trailing slash API requests
   skipTrailingSlashRedirect: true,
 };
 

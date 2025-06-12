@@ -30,5 +30,6 @@ next-env.d.ts
 .DS_Store
 
 # pwa
-sw.js
-workbox-*.js
+**/public/workbox-*.js
+**/public/fallback-*.js
+**/public/sw.js
