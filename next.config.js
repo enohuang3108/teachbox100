@@ -6,6 +6,7 @@ const withPWA = pwa({
   register: true,
   skipWaiting: true,
   cacheOnFrontEndNav: true,
+  disable: process.env.NODE_ENV === "development",
   runtimeCaching:[
     {
       urlPattern: /^https?.*/,
@@ -15,7 +16,8 @@ const withPWA = pwa({
         expiration: {
           maxEntries: 200,
           maxAgeSeconds: 30 * 24 * 60 * 60
-        }
+        },
+        networkTimeoutSeconds: 3
       }
     },
     {
@@ -32,7 +34,9 @@ const withPWA = pwa({
   ],
   fallbacks: {
     document: "/offline",
-  }
+  },
+  cacheStartUrl: true,
+  dynamicStartUrl: false
 });
 
 const nextConfig = {
