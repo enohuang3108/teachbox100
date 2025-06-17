@@ -3,6 +3,7 @@
 import AmountDisplay from "@/components/atoms/AmountDisplay";
 import Coin from "@/components/atoms/Coin";
 import GameAnswerSection from "@/components/molecules/GameAnswerSection";
+import { MaxAmount } from "@/components/molecules/setting/MaxAmount";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
 import type { Coin as CoinType } from "@/lib/types/types";
@@ -79,39 +80,15 @@ export default function SelectCoinsPage() {
     setHasAnswer(selectedCoins.length > 0);
   }, [selectedCoins]);
 
-  const settingSection = (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-700">最大金錢上限</h3>
-          <span className="rounded-full bg-blue-100 px-2 py-1 text-sm font-medium text-blue-600">
-            {maxAmount} 元
-          </span>
-        </div>
-        <div className="relative pt-1">
-          <input
-            type="range"
-            min="10"
-            max={500}
-            step="10"
-            value={maxAmount}
-            onChange={e => setMaxAmount(Number(e.target.value))}
-            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-blue-500"
-          />
-          <div className="mt-1 flex justify-between text-xs text-gray-500">
-            <span>10 元</span>
-            <span>500 元</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const settings = [
+    <MaxAmount key="maxAmount" maxAmount={maxAmount} setMaxAmount={setMaxAmount} />
+  ];
 
   return (
     <GamePageTemplate
       page="coin-pay"
       resetGame={resetGame}
-      settings={settingSection}
+      settings={settings}
     >
       <AmountDisplay
         label="售價"

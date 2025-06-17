@@ -1,80 +1,41 @@
 "use client";
 
-import CoinComponent from "@/components/atoms/Coin"; // Renamed to avoid conflict with type
+import CoinComponent from "@/components/atoms/Coin";
 import GameAnswerSection from "@/components/molecules/GameAnswerSection";
-import CoinGameSettingPanel from "@/components/organisms/CoinGameSettingPanel";
+import { AvailableCoins } from "@/components/molecules/setting/AvailableCoins";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
-import type { Coin as CoinType } from "@/lib/types/types"; // Import Coin type
+import type { Coin as CoinType } from "@/lib/types/types";
 import { getRandomFeedback } from "@/lib/utils/gameFeedback";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-// 工具：洗牌
-function shuffle<T>(arr: T[]): T[] {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-// 工具：產生一個指定範圍的目標硬幣
-function getRandomTargetCoin(gameCoins: CoinType[], currentMaxAmount: number): CoinType {
-  const targetDenominations = [5, 10, 50, 100];
-  const possibleTargets = gameCoins.filter(
-    (coin) => targetDenominations.includes(coin.value) && coin.value <= currentMaxAmount
-  );
-
-  if (possibleTargets.length > 0) {
-    return possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
-  }
-
-  // Fallback: if no 5,10,50,100 are available/valid, pick any from gameCoins <= currentMaxAmount
-  const fallbackCandidates = gameCoins.filter(coin => coin.value <= currentMaxAmount);
-  if (fallbackCandidates.length > 0) {
-    return fallbackCandidates[Math.floor(Math.random() * fallbackCandidates.length)];
-  }
-  // Super fallback: if gameCoins is empty or all are > maxAmount.
-  return AVAILABLE_COINS.find(c => c.value === 5) || AVAILABLE_COINS[0] || { value: 5, name: "5元" };
+function getRandomTargetCoin(gameCoins: CoinType[]): CoinType {
+  return gameCoins[Math.floor(Math.random() * gameCoins.length)];
 }
 
 export default function CoinEquivalentPage() {
-  // 設定區
-  const initialMaxAmount = 100;
   const initialEnabledCoinValues = [1, 5, 10, 50];
 
   const [enabledCoins, setEnabledCoins] = useState(initialEnabledCoinValues);
-  const [maxAmount, setMaxAmount] = useState(initialMaxAmount);
-  const [isOrdered, setIsOrdered] = useState(true);
 
-  // 依設定過濾可用硬幣 (for game play and initial target generation)
   const gameCoins = useMemo(() => {
     let coins = AVAILABLE_COINS.filter(c => enabledCoins.includes(c.value));
-    if (!isOrdered) coins = shuffle(coins);
-    else coins = coins.sort((a, b) => a.value - b.value);
     return coins;
-  }, [enabledCoins, isOrdered]);
+  }, [enabledCoins]);
 
-  // 遊戲狀態
-  const [target, setTarget] = useState<CoinType>(() => getRandomTargetCoin(gameCoins, maxAmount));
+  const [target, setTarget] = useState<CoinType>(gameCoins[0]);
   const [selectedCoins, setSelectedCoins] = useState<number[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
-  // 重新出題 - target 也要依最新的 gameCoins, maxAmount 更新
-  useCallback(() => {
-    setTarget(getRandomTargetCoin(gameCoins, maxAmount));
-    setSelectedCoins([]);
-    setShowFeedback(false);
-    setIsCorrect(null);
-  }, [gameCoins, maxAmount]);
+  useEffect(() => {
+    setTarget(getRandomTargetCoin(gameCoins));
+  }, [gameCoins]);
 
-  // 選硬幣
   const handleCoinClick = (coin: CoinType) => {
     setSelectedCoins((prev) => [...prev, coin.value]);
   };
-  // 移除已選硬幣
+
   const handleRemoveCoin = (value: number, idx: number) => {
     setSelectedCoins((prev) => {
       const arr = prev.slice();
@@ -83,46 +44,34 @@ export default function CoinEquivalentPage() {
     });
   };
 
-  // 檢查答案
   const checkAnswer = () => {
     const sum = selectedCoins.reduce((a, b) => a + b, 0);
-    if (sum === target.value) { // Corrected: target.value
+    if (sum === target.value) {
       setIsCorrect(true);
     } else {
       setIsCorrect(false);
     }
     setShowFeedback(true);
   };
-  // resetGame function to be passed to GamePageTemplate
+
   const resetGame = useCallback(() => {
-    setTarget(getRandomTargetCoin(gameCoins, maxAmount));
+    setTarget(getRandomTargetCoin(gameCoins));
     setSelectedCoins([]);
     setShowFeedback(false);
     setIsCorrect(null);
-  }, [gameCoins, maxAmount]);
+  }, [gameCoins]);
 
-  // 設定區元件
-  const settingSection = (
-    <CoinGameSettingPanel
-      answerMethod={"coin-equivalent"} // Not really used for settings but part of props
-      enabledCoins={enabledCoins}
-      isOrdered={isOrdered}
-      maxAmount={maxAmount}
-      setAnswerMethod={() => {}} // Not used for this game mode
-      setEnabledCoins={setEnabledCoins}
-      setIsOrdered={setIsOrdered}
-      setMaxAmount={setMaxAmount}
-    />
-  );
+  const settings = [
+    <AvailableCoins key="availableCoins" enabledCoins={enabledCoins} setEnabledCoins={setEnabledCoins}/>
+  ]
 
-  // 回饋訊息
   const currentAmount = selectedCoins.reduce((a, b) => a + b, 0);
 
   return (
     <GamePageTemplate
       page="coin-equivalent"
-      resetGame={resetGame} // Pass the memoized resetGame
-      settings={settingSection}
+      resetGame={resetGame}
+      settings={settings}
     >
       <div className="mx-auto max-w-xl">
         <div className="mb-4 flex flex-col items-center">

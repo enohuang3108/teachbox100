@@ -6,7 +6,7 @@ alwaysApply: false
 大方向: app/clock/current-time/page.tsx 這個頁面中，左邊會出現一個時鐘，分別有時針、分針、秒針，右側回答目前時間
 
 細節：
-- 設定中可以設定答題模式，有選擇題或上下選取，參考 [CoinGameSettingPanel.tsx](mdc:components/organisms/CoinGameSettingPanel.tsx)
+- 設定中可以設定答題模式，有選擇題或上下選取
     1. 用選擇題回答目前時間，用 [MultipleChoiceAnswer.tsx](mdc:components/molecules/answer/MultipleChoiceAnswer.tsx) 共用元件
     2. 用上下選取回答目前時間，用 [DigitAnswer.tsx](mdc:components/molecules/answer/DigitAnswer.tsx) 共用元件
 - @Clock.tsx

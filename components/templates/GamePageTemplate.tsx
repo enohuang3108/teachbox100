@@ -27,7 +27,7 @@ export const GamePageTemplate = ({
 }: {
   page: keyof typeof pages;
   children: React.ReactNode;
-  settings: React.ReactNode;
+  settings: React.ReactNode[];
   resetGame: () => void;
   tips?: React.ReactNode;
 }) => {

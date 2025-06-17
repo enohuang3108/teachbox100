@@ -99,26 +99,24 @@ export default function CurrentTimePage() {
     setAnswer(newTime);
   };
 
-  const clockSettings = (
-    <div className="flex flex-col space-y-4 p-4">
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="display-am-pm-clock"
-          checked={is24HourClock}
-          onCheckedChange={setIs24HourClock}
-        />
-        <Label htmlFor="display-am-pm-clock"> 隨機題目 24 小時制</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="display-minute-slider"
-          checked={showMinuteSlider}
-          onCheckedChange={setShowMinuteSlider}
-        />
-        <Label htmlFor="display-minute-slider">顯示調整時間拉桿</Label>
-      </div>
+  const settings = [
+    <div key="is24HourClock" className="flex items-center space-x-2">
+      <Switch
+        id="display-am-pm-clock"
+        checked={is24HourClock}
+        onCheckedChange={setIs24HourClock}
+      />
+      <Label htmlFor="display-am-pm-clock"> 隨機上下午 (24 小時制)</Label>
+    </div>,
+    <div key="showMinuteSlider" className="flex items-center space-x-2">
+      <Switch
+        id="display-minute-slider"
+        checked={showMinuteSlider}
+        onCheckedChange={setShowMinuteSlider}
+      />
+      <Label htmlFor="display-minute-slider">顯示調整時間拉桿</Label>
     </div>
-  );
+  ]
 
   const handleClockChange = (newTime: ClockTime) => {
     setAnswer(newTime)
@@ -134,7 +132,7 @@ export default function CurrentTimePage() {
         </p>
         <p>分：看長針，5 個一數</p>
       </div>}
-      settings={clockSettings} // Pass the settings UI
+      settings={settings}
     >
       <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-10 md:grid-cols-2">
         <div className="flex flex-col items-center">

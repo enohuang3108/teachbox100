@@ -2,8 +2,11 @@
 
 import Coin from "@/components/atoms/Coin";
 import { SimpleCard } from "@/components/atoms/SimpleCard";
+import { AnswerMethod } from "@/components/molecules/setting/AnswerMethod";
+import { AvailableCoins } from "@/components/molecules/setting/AvailableCoins";
+import { CoinsOrder } from "@/components/molecules/setting/CoinsOrder";
+import { MaxAmount } from "@/components/molecules/setting/MaxAmount";
 import GameAnswerSection from "@/components/organisms/CoinGameAnswerSection";
-import CoinGameSettingPanel from "@/components/organisms/CoinGameSettingPanel";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
 import type { Coin as CoinType } from "@/lib/types/types";
@@ -195,24 +198,18 @@ export default function CoinGamePage() {
     }, 300); // 等待淡出動畫完成 (需與 CSS transition duration 匹配)
   };
 
-  const settingSection = (
-    <CoinGameSettingPanel
-      answerMethod={answerMethod}
-      enabledCoins={enabledCoins}
-      isOrdered={isOrdered}
-      maxAmount={maxAmount}
-      setAnswerMethod={setAnswerMethod}
-      setEnabledCoins={setEnabledCoins}
-      setIsOrdered={setIsOrdered}
-      setMaxAmount={setMaxAmount}
-    />
-  );
+  const settings = [
+    <AvailableCoins key="availableCoins" enabledCoins={enabledCoins} setEnabledCoins={setEnabledCoins}/>,
+    <MaxAmount key="maxAmount" maxAmount={maxAmount} setMaxAmount={setMaxAmount}/>,
+    <AnswerMethod key="answerMethod" answerMethod={answerMethod} setAnswerMethod={setAnswerMethod}/>,
+    <CoinsOrder key="coinsOrder" isOrdered={isOrdered} setIsOrdered={setIsOrdered}/>
+  ];
 
   return (
     <GamePageTemplate
       page="coin-value"
       resetGame={resetGame}
-      settings={settingSection}
+      settings={settings}
     >
       {/* 硬幣顯示區域 */}
       <SimpleCard>
