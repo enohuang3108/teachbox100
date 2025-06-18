@@ -232,3 +232,16 @@
     animation: slideInDown 0.2s forwards;
   }
 }
+
+@theme {
+  --animate-spin-slow-infinite: custom-spin 10s linear infinite;
+
+  @keyframes custom-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
