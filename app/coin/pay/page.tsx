@@ -2,6 +2,7 @@
 
 import AmountDisplay from "@/components/atoms/AmountDisplay";
 import Coin from "@/components/atoms/Coin";
+import { Product3D } from "@/components/atoms/Product3D";
 import GameAnswerSection from "@/components/molecules/GameAnswerSection";
 import { MaxAmount } from "@/components/molecules/setting/MaxAmount";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
@@ -90,6 +91,14 @@ export default function SelectCoinsPage() {
       resetGame={resetGame}
       settings={settings}
     >
+      <div className="mb-6 flex flex-col items-center">
+        <Product3D
+          modelPath="/3d_model/baseball.glb"
+          productName="棒球"
+          price={targetAmount || 0}
+          className="mb-4"
+        />
+      </div>
       <AmountDisplay
         label="售價"
         amount={targetAmount}

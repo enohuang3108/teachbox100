@@ -102,14 +102,14 @@ export default function CoinChangePage() {
     >
       <div className="mb-4 grid grid-cols-2 gap-4">
         <AmountDisplay
-          label="售價"
-          amount={targetPrice}
-          amountColor="text-green-400"
-        />
-        <AmountDisplay
           label="已付金額"
           amount={paidAmount}
           amountColor="text-yellow-400"
+        />
+        <AmountDisplay
+          label="售價"
+          amount={targetPrice}
+          amountColor="text-green-400"
         />
       </div>
 
