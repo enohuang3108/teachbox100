@@ -11,8 +11,7 @@ interface Product3DProps {
   cameraControls?: boolean;
 }
 
-export const
-Product3D: React.FC<Product3DProps> = ({
+export const Product3D: React.FC<Product3DProps> = ({
   modelPath,
   productName,
   className = "",
@@ -26,25 +25,25 @@ Product3D: React.FC<Product3DProps> = ({
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
-        <model-viewer
-          src={modelPath}
-          alt={`3D 模型：${productName}`}
-          auto-rotate={autoRotate}
-          camera-controls={cameraControls}
-          disable-zoom={true}
-          interaction-prompt="none"
-          camera-orbit="0deg 75deg 1.5m"
-          field-of-view="30deg"
-          shadow-intensity="0"
-          environment-image="neutral"
-          loading="auto"
-          reveal="auto"
-          className="h-64 w-64 rounded-lg"
-          style={{
-            width: "256px",
-            height: "256px",
-          }}
-        ></model-viewer>
-      </div>
+      <model-viewer
+        src={modelPath}
+        alt={`3D 模型：${productName}`}
+        auto-rotate={autoRotate}
+        camera-controls={cameraControls}
+        disable-zoom={true}
+        interaction-prompt="none"
+        camera-orbit="0deg 75deg 1.5m"
+        field-of-view="30deg"
+        shadow-intensity="0"
+        environment-image="neutral"
+        loading="auto"
+        reveal="auto"
+        className="h-64 w-64 rounded-lg"
+        style={{
+          width: "256px",
+          height: "256px",
+        }}
+      ></model-viewer>
+    </div>
   );
 };
