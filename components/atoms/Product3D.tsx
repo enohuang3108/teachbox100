@@ -42,7 +42,9 @@ export const Product3D: React.FC<Product3DProps> = ({
         style={{
           width: "256px",
           height: "256px",
-        }}
+          "--progress-bar-color": "transparent",
+          "--progress-bar-height": "0px",
+        } as React.CSSProperties}
       ></model-viewer>
     </div>
   );
