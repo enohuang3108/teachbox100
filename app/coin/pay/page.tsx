@@ -7,6 +7,7 @@ import GameAnswerSection from "@/components/molecules/GameAnswerSection";
 import { MaxAmount } from "@/components/molecules/setting/MaxAmount";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
+import { PRODUCTS, type Product } from "@/lib/constants/products";
 import type { Coin as CoinType } from "@/lib/types/types";
 import { getRandomFeedback } from "@/lib/utils/gameFeedback";
 import { useCallback, useEffect, useState } from "react";
@@ -16,18 +17,18 @@ interface SelectedCoin extends CoinType {
 }
 
 const GAME_COINS = AVAILABLE_COINS.filter((coin) =>
-  [1, 5, 10, 50, 100].includes(coin.value),
+  [1, 5, 10, 50, 100].includes(coin.value)
 );
 
-// 假設的目標金額
 export default function SelectCoinsPage() {
   const [targetAmount, setTargetAmount] = useState<number | null>(null);
+  const [currentProduct, setCurrentProduct] = useState<Product>(PRODUCTS[0]);
   const [currentAmount, setCurrentAmount] = useState(0);
   const [selectedCoins, setSelectedCoins] = useState<SelectedCoin[]>([]);
   const [hasAnswer, setHasAnswer] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [maxAmount, setMaxAmount] = useState<number>(50);
+  const [maxAmount, setMaxAmount] = useState<number>(150);
 
   const checkAnswer = useCallback(() => {
     if (currentAmount === targetAmount) {
@@ -38,8 +39,34 @@ export default function SelectCoinsPage() {
     setShowFeedback(true);
   }, [currentAmount]);
 
-  const setupNewQuestion = () => {
-    setTargetAmount(Math.floor(Math.random() * maxAmount) + 1);
+  const setupNewQuestion = (): void => {
+    // 篩選出價格區間不超過最大金額的商品
+    const availableProducts: Product[] = PRODUCTS.filter(
+      (product: Product): boolean => product.priceRange[0] <= maxAmount
+    );
+
+    // 如果沒有符合條件的商品，使用價格最低的商品
+    const productsToChooseFrom =
+      availableProducts.length > 0
+        ? availableProducts
+        : [
+            PRODUCTS.reduce((min, product) =>
+              product.priceRange[0] < min.priceRange[0] ? product : min
+            ),
+          ];
+
+    const randomProduct =
+      productsToChooseFrom[
+        Math.floor(Math.random() * productsToChooseFrom.length)
+      ];
+    const [minPrice, maxPrice] = randomProduct.priceRange;
+    const price =
+      Math.floor(
+        Math.random() * (Math.min(maxPrice, maxAmount) - minPrice + 1)
+      ) + minPrice;
+
+    setCurrentProduct(randomProduct);
+    setTargetAmount(price);
     setCurrentAmount(0);
     setSelectedCoins([]);
     setIsCorrect(null);
@@ -47,17 +74,17 @@ export default function SelectCoinsPage() {
     setHasAnswer(false);
   };
 
-  const resetGame = () => {
+  const resetGame = (): void => {
     setupNewQuestion();
   };
 
   useEffect(() => {
     resetGame();
-  }, []);
+  }, [maxAmount]);
 
   const handleCoinClick = useCallback(
-    (coin: CoinType) => {
-      const newAmount = currentAmount + coin.value;
+    (coin: CoinType): void => {
+      const newAmount: number = currentAmount + coin.value;
       // 為添加的硬幣創建唯一 ID
       const newSelectedCoin: SelectedCoin = { ...coin, id: Date.now() };
 
@@ -65,14 +92,14 @@ export default function SelectCoinsPage() {
       setCurrentAmount(newAmount);
       // setHasAnswer(true); // 由 useEffect 處理
     },
-    [currentAmount], // 移除 showFeedback 依賴
+    [currentAmount] // 移除 showFeedback 依賴
   );
 
   // 新增移除硬幣的處理函數
-  const handleRemoveCoin = useCallback((coinToRemove: SelectedCoin) => {
-    setCurrentAmount((prev) => prev - coinToRemove.value);
+  const handleRemoveCoin = useCallback((coinToRemove: SelectedCoin): void => {
+    setCurrentAmount((prev: number) => prev - coinToRemove.value);
     setSelectedCoins((prev) =>
-      prev.filter((coin) => coin.id !== coinToRemove.id),
+      prev.filter((coin) => coin.id !== coinToRemove.id)
     );
   }, []);
 
@@ -82,28 +109,28 @@ export default function SelectCoinsPage() {
   }, [selectedCoins]);
 
   const settings = [
-    <MaxAmount key="maxAmount" maxAmount={maxAmount} setMaxAmount={setMaxAmount} />
+    <MaxAmount
+      key="maxAmount"
+      maxAmount={maxAmount}
+      setMaxAmount={setMaxAmount}
+    />,
   ];
 
   return (
-    <GamePageTemplate
-      page="coin-pay"
-      resetGame={resetGame}
-      settings={settings}
-    >
-      <div className="mb-6 flex flex-col items-center">
+    <GamePageTemplate page="coin-pay" resetGame={resetGame} settings={settings}>
+      <div className="mb-4 grid grid-cols-2 gap-4 items-center">
         <Product3D
-          modelPath="/3d_model/baseball.glb"
-          productName="棒球"
+          modelPath={currentProduct.modelPath}
+          productName={currentProduct.name}
           price={targetAmount || 0}
-          className="mb-4"
+          className="mx-16"
+        />
+        <AmountDisplay
+          label="售價"
+          amount={targetAmount}
+          amountColor="text-green-400"
         />
       </div>
-      <AmountDisplay
-        label="售價"
-        amount={targetAmount}
-        amountColor="text-green-400"
-      />
       <GameAnswerSection
         question="請挑選正確的金額來付款"
         hasAnswer={hasAnswer}
@@ -122,8 +149,8 @@ export default function SelectCoinsPage() {
       >
         <div>
           <div className="mb-6 flex min-h-[80px] w-full flex-col items-center rounded-md border bg-gray-100 p-4">
-            <h2 className="mb-2 self-start text-lg font-semibold">已選硬幣:</h2>
-            <div className="flex min-h-[40px] flex-wrap justify-center gap-2">
+            {/* <h2 className="mb-2 self-start text-lg font-semibold">已選硬幣:</h2> */}
+            <div className="flex min-h-[100px] flex-wrap justify-center gap-2 transition-all">
               {selectedCoins.length > 0 ? (
                 selectedCoins.map((coin) => (
                   <button
@@ -152,7 +179,9 @@ export default function SelectCoinsPage() {
                   <button
                     key={coin.value}
                     onClick={() => handleCoinClick(coin)}
-                    className={"relative cursor-pointer transition-transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50"}
+                    className={
+                      "relative cursor-pointer transition-transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50"
+                    }
                     aria-label={`選擇 ${coin.name}`}
                   >
                     <Coin coinValue={coin.value} />
