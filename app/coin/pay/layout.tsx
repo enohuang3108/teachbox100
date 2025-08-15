@@ -1,3 +1,4 @@
+import { PRODUCTS } from "@/lib/constants/products";
 import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
@@ -15,5 +16,20 @@ export default function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <>{children}</>;
+  return (
+    <>
+      <head>
+        {PRODUCTS.map((product) => (
+          <link
+            key={product.name}
+            rel="preload"
+            href={product.modelPath}
+            as="fetch"
+            crossOrigin="anonymous"
+          />
+        ))}
+      </head>
+      {children}
+    </>
+  );
 }
