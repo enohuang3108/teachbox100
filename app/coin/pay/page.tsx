@@ -50,10 +50,10 @@ export default function SelectCoinsPage() {
       availableProducts.length > 0
         ? availableProducts
         : [
-            PRODUCTS.reduce((min, product) =>
-              product.priceRange[0] < min.priceRange[0] ? product : min
-            ),
-          ];
+          PRODUCTS.reduce((min, product) =>
+            product.priceRange[0] < min.priceRange[0] ? product : min
+          ),
+        ];
 
     const randomProduct =
       productsToChooseFrom[
