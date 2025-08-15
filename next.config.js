@@ -79,6 +79,8 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  compress: true,
+  poweredByHeader: false,
   async rewrites() {
     return [
       {
