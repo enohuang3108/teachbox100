@@ -13,7 +13,7 @@ const AmountDisplay: React.FC<AmountDisplayProps> = ({
   amountColor,
 }) => {
   return (
-    <div className="flex h-32 flex-col items-center justify-center rounded-md bg-zinc-800">
+    <div className="flex h-32 w-full flex-col items-center justify-center rounded-md bg-zinc-800">
       <div className="mb-1 pb-2 text-sm font-medium text-gray-400">{label}</div>
       <div
         className={`flex items-end space-x-2 text-5xl font-bold ${amountColor} [text-shadow:0_0_20px]`}

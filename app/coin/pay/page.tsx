@@ -50,10 +50,10 @@ export default function SelectCoinsPage() {
       availableProducts.length > 0
         ? availableProducts
         : [
-          PRODUCTS.reduce((min, product) =>
-            product.priceRange[0] < min.priceRange[0] ? product : min
-          ),
-        ];
+            PRODUCTS.reduce((min, product) =>
+              product.priceRange[0] < min.priceRange[0] ? product : min
+            ),
+          ];
 
     const randomProduct =
       productsToChooseFrom[
@@ -118,12 +118,12 @@ export default function SelectCoinsPage() {
 
   return (
     <GamePageTemplate page="coin-pay" resetGame={resetGame} settings={settings}>
-      <div className="mb-4 grid grid-cols-2 gap-4 items-center">
+      <div className="mb-4 flex flex-col items-center gap-4 sm:flex-row sm:items-center">
         <Product3D
           modelPath={currentProduct.modelPath}
           productName={currentProduct.name}
           price={targetAmount || 0}
-          className="mx-16"
+          className="mx-4"
         />
         <AmountDisplay
           label="售價"
