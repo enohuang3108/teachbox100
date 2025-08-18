@@ -3,7 +3,7 @@
 import AmountDisplay from "@/components/atoms/AmountDisplay";
 import Coin from "@/components/atoms/Coin";
 import GameAnswerSection from "@/components/molecules/GameAnswerSection";
-import { MaxAmount } from "@/components/molecules/setting/MaxAmount";
+import { useMaxAmount } from "@/components/molecules/setting/MaxAmount";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
 import type { Coin as CoinType } from "@/lib/types/types";
@@ -34,7 +34,7 @@ export default function CoinChangePage() {
   const [hasAnswer, setHasAnswer] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [maxAmount, setMaxAmount] = useState<number>(50);
+  const { maxAmount, MaxAmountComponent } = useMaxAmount();
 
   const checkAnswer = useCallback(() => {
     if (currentSelectedChange === changeAmount) {
@@ -91,7 +91,7 @@ export default function CoinChangePage() {
   }, [selectedCoins]);
 
   const settings = [
-    <MaxAmount key="maxAmount" maxAmount={maxAmount} setMaxAmount={setMaxAmount} />
+    <MaxAmountComponent key="maxAmount" />
   ];
 
   return (

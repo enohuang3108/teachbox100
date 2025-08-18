@@ -50,6 +50,14 @@ export const pages: { [key: string]: Page } = {
     title: "學習付款",
     description: "模擬商店付款情境，學習如何使用硬幣正確付款，培養生活中的金錢使用能力。",
   },
+  "coin-transaction": {
+    path: "/coin/transaction",
+    imageSrc: "/images/cover_coin_pay.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACBAMAAACNhmBQAAAAGFBMVEWKUj2vfVnLo3vVr33MoXXRrIHOr43PqoDH/NHxAAAADklEQVQI12MocmMIEAYABAsBHHBsQLkAAAAASUVORK5CYII=",
+    title: "學習購物",
+    description: "模擬商店購物情境，學習如何使用硬幣正確付款，培養生活中的金錢使用能力。",
+  },
   "coin-change": {
     path: "/coin/change",
     imageSrc: "/images/cover_coin_change.webp",

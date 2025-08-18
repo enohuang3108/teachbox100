@@ -5,7 +5,7 @@ import { SimpleCard } from "@/components/atoms/SimpleCard";
 import { AnswerMethod } from "@/components/molecules/setting/AnswerMethod";
 import { AvailableCoins } from "@/components/molecules/setting/AvailableCoins";
 import { CoinsOrder } from "@/components/molecules/setting/CoinsOrder";
-import { MaxAmount } from "@/components/molecules/setting/MaxAmount";
+import { useMaxAmount } from "@/components/molecules/setting/MaxAmount";
 import GameAnswerSection from "@/components/organisms/CoinGameAnswerSection";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
@@ -148,7 +148,7 @@ export default function CoinGamePage() {
     1, 5, 10, 50, 100, 500, 1000,
   ]);
   const [isOrdered, setIsOrdered] = useState<boolean>(true);
-  const [maxAmount, setMaxAmount] = useState<number>(100);
+  const { maxAmount, MaxAmountComponent } = useMaxAmount();
 
   // 重置遊戲的核心邏輯
   const setupNewQuestion = () => {
@@ -200,7 +200,7 @@ export default function CoinGamePage() {
 
   const settings = [
     <AvailableCoins key="availableCoins" enabledCoins={enabledCoins} setEnabledCoins={setEnabledCoins}/>,
-    <MaxAmount key="maxAmount" maxAmount={maxAmount} setMaxAmount={setMaxAmount}/>,
+    <MaxAmountComponent key="maxAmount" />,
     <AnswerMethod key="answerMethod" answerMethod={answerMethod} setAnswerMethod={setAnswerMethod}/>,
     <CoinsOrder key="coinsOrder" isOrdered={isOrdered} setIsOrdered={setIsOrdered}/>
   ];
