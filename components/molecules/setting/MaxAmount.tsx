@@ -1,13 +1,22 @@
-interface MaxAmountProps {
-  maxAmount: number;
-  setMaxAmount: (value: number) => void;
-}
+import { useEffect, useState } from 'react';
 
-export const MaxAmount: React.FC<MaxAmountProps> = ({
-  maxAmount,
-  setMaxAmount,
-}) => {
-  return (
+export const useMaxAmount = () => {
+  const [maxAmount, setMaxAmount] = useState<number>(300);
+
+  // 從 localStorage 載入設定
+  useEffect(() => {
+    const saved = localStorage.getItem('maxAmount');
+    if (saved) {
+      setMaxAmount(parseInt(saved));
+    }
+  }, []);
+
+  const updateMaxAmount = (value: number) => {
+    setMaxAmount(value);
+    localStorage.setItem('maxAmount', value.toString());
+  };
+
+  const MaxAmountComponent = () => (
     <div className="space-y-4">
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -23,7 +32,7 @@ export const MaxAmount: React.FC<MaxAmountProps> = ({
             max={2000}
             step="10"
             value={maxAmount}
-            onChange={(e) => setMaxAmount(Number(e.target.value))}
+            onChange={(e) => updateMaxAmount(Number(e.target.value))}
             className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-blue-500"
           />
           <div className="mt-1 flex justify-between text-xs text-gray-500">
@@ -34,4 +43,10 @@ export const MaxAmount: React.FC<MaxAmountProps> = ({
       </div>
     </div>
   );
+
+  return {
+    maxAmount,
+    setMaxAmount: updateMaxAmount,
+    MaxAmountComponent,
+  };
 };

@@ -4,7 +4,7 @@ import AmountDisplay from "@/components/atoms/AmountDisplay";
 import Coin from "@/components/atoms/Coin";
 import { Product3D } from "@/components/atoms/Product3D";
 import GameAnswerSection from "@/components/molecules/GameAnswerSection";
-import { MaxAmount } from "@/components/molecules/setting/MaxAmount";
+import { useMaxAmount } from "@/components/molecules/setting/MaxAmount";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
 import { PRODUCTS, type Product } from "@/lib/constants/products";
@@ -16,9 +16,10 @@ interface SelectedCoin extends CoinType {
   id: number;
 }
 
-const GAME_COINS = AVAILABLE_COINS.filter((coin) =>
-  [1, 5, 10, 50, 100].includes(coin.value)
-);
+// 根據最大金額動態過濾可用硬幣
+const getAvailableCoins = (maxAmount: number) => {
+  return AVAILABLE_COINS.filter((coin) => coin.value <= maxAmount);
+};
 
 export default function SelectCoinsPage() {
   const [targetAmount, setTargetAmount] = useState<number | null>(null);
@@ -28,7 +29,7 @@ export default function SelectCoinsPage() {
   const [hasAnswer, setHasAnswer] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [maxAmount, setMaxAmount] = useState<number>(150);
+  const { maxAmount, MaxAmountComponent } = useMaxAmount();
 
   const checkAnswer = useCallback(() => {
     if (currentAmount === targetAmount) {
@@ -109,11 +110,7 @@ export default function SelectCoinsPage() {
   }, [selectedCoins]);
 
   const settings = [
-    <MaxAmount
-      key="maxAmount"
-      maxAmount={maxAmount}
-      setMaxAmount={setMaxAmount}
-    />,
+    <MaxAmountComponent key="maxAmount" />,
   ];
 
   return (
@@ -174,7 +171,7 @@ export default function SelectCoinsPage() {
               選擇硬幣:
             </h2>
             <div className="flex flex-wrap justify-center gap-4">
-              {GAME_COINS.map((coin) => {
+              {getAvailableCoins(maxAmount).map((coin) => {
                 return (
                   <button
                     key={coin.value}
