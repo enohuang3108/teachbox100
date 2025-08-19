@@ -13,7 +13,7 @@ export interface PageWithKey extends Page {
 export const appInfo ={
   path: "/",
   imageSrc: "/icons/favicon.webp",
-  title: "TeachBox100 | 台灣互動式教育平台",
+  title: "TeachBox100 | 台灣互動式教學平台",
   description: "專為台灣學童設計的互動式學習平台，提供時鐘辨識、金錢計算與實用生活技能遊戲，讓孩子在趣味中學習實用知識，適合學齡前至國小學生或特教生使用。",
 }
 

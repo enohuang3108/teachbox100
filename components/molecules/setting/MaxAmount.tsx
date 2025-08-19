@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export const useMaxAmount = () => {
   const [maxAmount, setMaxAmount] = useState<number>(300);
 
   // 從 localStorage 載入設定
   useEffect(() => {
-    const saved = localStorage.getItem('maxAmount');
+    const saved = localStorage.getItem("maxAmount");
     if (saved) {
       setMaxAmount(parseInt(saved));
     }
@@ -13,7 +13,7 @@ export const useMaxAmount = () => {
 
   const updateMaxAmount = (value: number) => {
     setMaxAmount(value);
-    localStorage.setItem('maxAmount', value.toString());
+    localStorage.setItem("maxAmount", value.toString());
   };
 
   const MaxAmountComponent = () => (
