@@ -24,7 +24,7 @@ export const pages: { [key: string]: Page } = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAAK0lEQVQIW2M8s2n6f0ZmNgamo5kM7M7zGRjPbZnx//MHZgY+ASaGfwy/GQDZLwxSeEEb5AAAAABJRU5ErkJggg==",
     title: "認識新臺幣",
-    description: "認識台灣新臺幣的各種面額、外觀特徵與等值換算。",
+    description: "認識台灣新臺幣的各種面額、外觀特徵與相等值的硬幣、鈔票。",
   },
   "coin-equivalent": {
     path: "/coin/equivalent",
@@ -32,7 +32,7 @@ export const pages: { [key: string]: Page } = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAAK0lEQVQIW2O8k2rzXzAhm4FDSJTheV89A+Pv11f+P6pOZfj/n4VBIDyCAQDs0Q26LT5ryAAAAABJRU5ErkJggg==",
     title: "金錢等值換算",
-    description: "學習不同幣值的等值換算，培養生活中的金錢運用能力。",
+    description: "練習硬幣、鈔票的等值換算。",
   },
   "coin-value": {
     path: "/coin/value",
@@ -40,31 +40,31 @@ export const pages: { [key: string]: Page } = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACBAMAAACNhmBQAAAAGFBMVEXkWzHhWy/bfVPfeU3jd03djGHhmm/ppnJS83WVAAAADklEQVQI12NgMmMoCQQAAiEA/oMLiwwAAAAASUVORK5CYII=",
     title: "計算金錢價值",
-    description: "學習計算不同幣值總和，提供多種答題模式與難度設定。",
+    description: "練習計算硬幣、鈔票相加後的總價值。",
   },
   "coin-pay": {
     path: "/coin/pay",
     imageSrc: "/images/cover_coin_pay.webp",
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACBAMAAACNhmBQAAAAGFBMVEWKUj2vfVnLo3vVr33MoXXRrIHOr43PqoDH/NHxAAAADklEQVQI12MocmMIEAYABAsBHHBsQLkAAAAASUVORK5CYII=",
-    title: "學習付款",
-    description: "模擬商店付款情境，學習如何使用硬幣正確付款，培養生活中的金錢使用能力。",
+    title: "付款",
+    description: "模擬商店付款情境，練習如何挑選正確的硬幣進行付款。",
   },
   "coin-transaction": {
     path: "/coin/transaction",
-    imageSrc: "/images/cover_coin_pay.webp",
+    imageSrc: "/images/cover_coin_transaction.webp",
     blurDataURL:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACBAMAAACNhmBQAAAAGFBMVEWKUj2vfVnLo3vVr33MoXXRrIHOr43PqoDH/NHxAAAADklEQVQI12MocmMIEAYABAsBHHBsQLkAAAAASUVORK5CYII=",
-    title: "學習購物",
-    description: "模擬商店購物情境，學習如何使用硬幣正確付款，培養生活中的金錢使用能力。",
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAADCAYAAABbNsX4AAAASklEQVQIWwE/AMD/AeRfIf8E+f0A/v/9AAIHBAADCgEAAfPahf/0lbMAAermAAxtSQD75TUAAetoLP//CAMAYbT1AJ9HCQD78/cAXMMbETcd3KEAAAAASUVORK5CYII=",
+    title: "購物",
+    description: "模擬商店購物情境，練習如何挑選商品、計算總金額、以及付款的能力。",
   },
   "coin-change": {
     path: "/coin/change",
     imageSrc: "/images/cover_coin_change.webp",
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAAK0lEQVQIW2N8Gar0n5GFlYEznpvhvWQ5A+Oj88v/c3bUMvz9x8DAxMjAAAC/nQrBs+CLpQAAAABJRU5ErkJggg==",
-    title: "學習找零",
-    description: "模擬商店找零情境，培養正確計算與找零能力，學習基礎數學與金錢運用。",
+    title: "找零",
+    description: "模擬商店找零情境，練習計算出正確應該找零的金額。",
   },
   "clock-current-time": {
     path: "/clock/current-time",
@@ -72,6 +72,6 @@ export const pages: { [key: string]: Page } = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAALUlEQVQIWwEiAN3/AcZZM/8OJgoA+eD1APn6/AAB5NvE/+R+bQAHCgYAXcj0ABtUD9CQT3miAAAAAElFTkSuQmCC",
     title: "學習讀時鐘",
-    description: "學習看時鐘與辨認時針、分針，練習正確判讀時間。",
+    description: "練習辨認時針、分針，並且判讀出正確時間。",
   },
 };

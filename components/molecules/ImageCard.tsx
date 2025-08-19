@@ -26,7 +26,7 @@ export const ImageCard = ({
     <Link
       href={link}
       prefetch={true}
-      className="rounded-xl transition-all duration-300 hover:scale-105 overflow-hidden border border-zinc-200 bg-zinc-50 pb-3"
+      className="rounded-xl transition-all min-h-[280px] duration-300 hover:scale-105 overflow-hidden border border-zinc-200 bg-zinc-50 pb-3"
       style={{ width: cardWidth }}
     >
       <div className="relative aspect-video overflow-hidden">

@@ -51,10 +51,10 @@ export default function SelectCoinsPage() {
       availableProducts.length > 0
         ? availableProducts
         : [
-          PRODUCTS.reduce((min, product) =>
-            product.priceRange[0] < min.priceRange[0] ? product : min
-          ),
-        ];
+            PRODUCTS.reduce((min, product) =>
+              product.priceRange[0] < min.priceRange[0] ? product : min
+            ),
+          ];
 
     const randomProduct =
       productsToChooseFrom[
@@ -109,9 +109,7 @@ export default function SelectCoinsPage() {
     setHasAnswer(selectedCoins.length > 0);
   }, [selectedCoins]);
 
-  const settings = [
-    <MaxAmountComponent key="maxAmount" />,
-  ];
+  const settings = [<MaxAmountComponent key="maxAmount" />];
 
   return (
     <GamePageTemplate page="coin-pay" resetGame={resetGame} settings={settings}>
@@ -140,13 +138,14 @@ export default function SelectCoinsPage() {
               : getRandomFeedback("underpay", targetAmount - currentAmount)
             : ""
         }
+        submitMessage="付款"
         showFeedback={showFeedback}
         checkAnswer={checkAnswer}
         handleNextQuestion={resetGame}
       >
         <div>
           <div className="mb-6 flex min-h-[80px] w-full flex-col items-center rounded-md border bg-gray-100 p-4">
-            {/* <h2 className="mb-2 self-start text-lg font-semibold">已選硬幣:</h2> */}
+            <h2 className="mb-2 self-start text-lg font-semibold">已選擇:</h2>
             <div className="flex min-h-[100px] flex-wrap justify-center gap-2 transition-all">
               {selectedCoins.length > 0 ? (
                 selectedCoins.map((coin) => (

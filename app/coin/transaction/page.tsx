@@ -27,9 +27,9 @@ interface ShelfProduct extends Product {
 }
 
 // 根據最大金額動態過濾可用硬幣
-const getAvailableCoins = (maxAmount: number) => {
-  return AVAILABLE_COINS.filter((coin) => coin.value <= maxAmount);
-};
+// const getAvailableCoins = (maxAmount: number) => {
+//   return AVAILABLE_COINS.filter((coin) => coin.value <= maxAmount);
+// };
 
 export default function SelectCoinsPage() {
   const [targetAmount, setTargetAmount] = useState<number>(0);
@@ -165,7 +165,7 @@ export default function SelectCoinsPage() {
     setHasAnswer(selectedCoins.length > 0 && selectedProducts.length > 0);
   }, [selectedCoins, selectedProducts]);
 
-  const settings = [<MaxAmountComponent key="maxAmount" />];
+  const settings = [<MaxAmountComponent name="商品單價上限" key="maxAmount" />];
 
   return (
     <GamePageTemplate
@@ -175,19 +175,10 @@ export default function SelectCoinsPage() {
     >
       {/* 商品架 - 只在客戶端渲染 */}
       {isClient ? (
-        shelfProducts.length > 0 ? (
-          <ProductShelf
-            products={shelfProducts}
-            onProductSelect={handleProductSelect}
-          />
-        ) : (
-          <div className="w-full mb-8 flex items-center justify-center h-64 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 rounded-2xl">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 mb-4"></div>
-              <p className="text-gray-800 font-medium">正在準備商品架...</p>
-            </div>
-          </div>
-        )
+        <ProductShelf
+          products={shelfProducts}
+          onProductSelect={handleProductSelect}
+        />
       ) : (
         <div className="w-full mb-8 flex items-center justify-center h-64 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 rounded-2xl">
           <div className="text-center">
@@ -217,36 +208,34 @@ export default function SelectCoinsPage() {
           )}
         </>
       )}
-
-      <GameAnswerSection
-        question="請選擇正確的硬幣來付款"
-        hasAnswer={hasAnswer}
-        isCorrect={isCorrect}
-        correctFeedback={getRandomFeedback("correctpay")}
-        incorrectFeedback={
-          targetAmount > 0
-            ? currentAmount > targetAmount
-              ? getRandomFeedback("overpay", currentAmount - targetAmount)
-              : getRandomFeedback("underpay", targetAmount - currentAmount)
-            : "請先選擇商品再付款"
-        }
-        showFeedback={showFeedback}
-        checkAnswer={checkAnswer}
-        handleNextQuestion={resetGame}
-      >
-        {targetAmount > 0 && (
+      {targetAmount > 0 && (
+        <GameAnswerSection
+          question="請選擇正確的金額來付款"
+          hasAnswer={hasAnswer}
+          isCorrect={isCorrect}
+          correctFeedback={getRandomFeedback("correctpay")}
+          incorrectFeedback={
+            targetAmount > 0
+              ? currentAmount > targetAmount
+                ? getRandomFeedback("overpay", currentAmount - targetAmount)
+                : getRandomFeedback("underpay", targetAmount - currentAmount)
+              : "請先選擇商品再付款"
+          }
+          submitMessage="付款"
+          showFeedback={showFeedback}
+          checkAnswer={checkAnswer}
+          handleNextQuestion={resetGame}
+        >
           <div>
             <div className="mb-6 flex min-h-[80px] w-full flex-col items-center rounded-md border bg-gray-100 p-4">
-              <h2 className="mb-2 self-start text-lg font-semibold">
-                已選硬幣: ${currentAmount}
-              </h2>
+              <h2 className="mb-2 self-start text-lg font-semibold">已選擇:</h2>
               <div className="flex min-h-[100px] flex-wrap justify-center gap-2 transition-all">
                 {selectedCoins.length > 0 ? (
                   selectedCoins.map((coin) => (
                     <button
                       key={coin.id}
                       onClick={() => handleRemoveCoin(coin)}
-                      className="transition-transform hover:scale-110 active:scale-95"
+                      className="transition-transform hover:scale-110 active:scale-95 cursor-pointer"
                       // aria-label={`移除 ${coin.name}`}
                     >
                       <Coin coinValue={coin.value} />
@@ -264,7 +253,7 @@ export default function SelectCoinsPage() {
                 選擇硬幣:
               </h2>
               <div className="flex flex-wrap justify-center gap-4">
-                {getAvailableCoins(maxAmount).map((coin) => {
+                {AVAILABLE_COINS.map((coin) => {
                   return (
                     <button
                       key={coin.value}
@@ -272,7 +261,7 @@ export default function SelectCoinsPage() {
                       className={
                         "relative cursor-pointer transition-transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50"
                       }
-                      // aria-label={`選擇 ${coin.name}`}
+                      aria-label={`選擇 ${coin.name}`}
                     >
                       <Coin coinValue={coin.value} />
                     </button>
@@ -281,8 +270,8 @@ export default function SelectCoinsPage() {
               </div>
             </div>
           </div>
-        )}
-      </GameAnswerSection>
+        </GameAnswerSection>
+      )}
     </GamePageTemplate>
   );
 }

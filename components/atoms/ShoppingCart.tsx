@@ -49,11 +49,6 @@ export const ShoppingCart = ({
     <div className="w-full mb-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">購物車</h2>
-        {selectedProducts.length > 0 && (
-          <div className="text-lg font-semibold text-green-600">
-            總計：${totalAmount}
-          </div>
-        )}
       </div>
 
       <div
@@ -77,17 +72,17 @@ export const ShoppingCart = ({
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {selectedProducts.map((product) => (
-              <div
+              <button
+                onClick={() => onProductRemove(product.id)}
                 key={product.id}
-                className="bg-white rounded-lg p-3 shadow-md border border-gray-200 relative group"
+                className="bg-white cursor-pointer rounded-lg p-3 shadow-md border border-gray-200 relative group"
               >
-                <button
-                  onClick={() => onProductRemove(product.id)}
+                <div
                   className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   aria-label={`移除 ${product.name}`}
                 >
                   ×
-                </button>
+                </div>
 
                 <Product3D
                   modelPath={product.modelPath}
@@ -104,7 +99,7 @@ export const ShoppingCart = ({
                     ${product.price}
                   </p>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}

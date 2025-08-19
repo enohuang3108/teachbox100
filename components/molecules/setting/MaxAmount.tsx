@@ -16,11 +16,15 @@ export const useMaxAmount = () => {
     localStorage.setItem("maxAmount", value.toString());
   };
 
-  const MaxAmountComponent = () => (
+  const MaxAmountComponent = ({
+    name = "最大金錢上限",
+  }: {
+    name?: string;
+  }) => (
     <div className="space-y-4">
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-700">最大金錢上限</h3>
+          <h3 className="text-sm font-medium text-gray-700">{name}</h3>
           <span className="rounded-full bg-blue-100 px-2 py-1 text-sm font-medium text-blue-600">
             {maxAmount} 元
           </span>

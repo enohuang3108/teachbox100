@@ -12,6 +12,7 @@ interface GameAnswerSectionProps {
   correctFeedback: string;
   incorrectFeedback: string;
   showFeedback: boolean;
+  submitMessage?: string;
   children: React.ReactNode;
   className?: string;
   checkAnswer: () => void;
@@ -25,6 +26,7 @@ export default function GameAnswerSection({
   correctFeedback,
   incorrectFeedback,
   showFeedback,
+  submitMessage= "確定",
   children,
   className,
   checkAnswer,
@@ -55,7 +57,7 @@ export default function GameAnswerSection({
           className="w-full rounded-full bg-black py-5 text-xl text-white hover:bg-gray-800 md:py-6 md:text-2xl"
           disabled={!hasAnswer || showFeedback}
         >
-          確定
+          {submitMessage}
         </Button>
       </div>
 
