@@ -50,9 +50,9 @@ export const pages: { [key: string]: Page } = {
     title: "付款",
     description: "模擬商店付款情境，練習如何挑選正確的硬幣進行付款。",
   },
-  "coin-transaction": {
-    path: "/coin/transaction",
-    imageSrc: "/images/cover_coin_transaction.webp",
+  "coin-buy": {
+    path: "/coin/buy",
+    imageSrc: "/images/cover_coin_buy.webp",
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAADCAYAAABbNsX4AAAASklEQVQIWwE/AMD/AeRfIf8E+f0A/v/9AAIHBAADCgEAAfPahf/0lbMAAermAAxtSQD75TUAAetoLP//CAMAYbT1AJ9HCQD78/cAXMMbETcd3KEAAAAASUVORK5CYII=",
     title: "購物",
