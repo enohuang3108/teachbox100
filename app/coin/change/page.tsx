@@ -66,6 +66,7 @@ export default function CoinChangePage() {
 
   useEffect(() => {
     resetGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCoinClick = useCallback(

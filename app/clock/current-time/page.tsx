@@ -40,6 +40,7 @@ export default function CurrentTimePage() {
 
   useEffect(() => {
     resetTime();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const resetTime = () => {

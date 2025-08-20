@@ -170,16 +170,19 @@ export default function CoinGamePage() {
   // 當硬幣啟用狀態變更時重置遊戲
   useEffect(() => {
     resetGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabledCoins]);
 
   // 當硬幣排序設定或最大金錢上限變更時重置遊戲
   useEffect(() => {
     resetGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOrdered, maxAmount]);
 
   // 初始化遊戲
   useEffect(() => {
     resetGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 檢查答案

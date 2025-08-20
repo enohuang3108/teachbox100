@@ -38,7 +38,7 @@ export default function SelectCoinsPage() {
       setIsCorrect(false);
     }
     setShowFeedback(true);
-  }, [currentAmount]);
+  }, [currentAmount, targetAmount]);
 
   const setupNewQuestion = (): void => {
     // 篩選出價格區間不超過最大金額的商品
@@ -81,6 +81,7 @@ export default function SelectCoinsPage() {
 
   useEffect(() => {
     resetGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maxAmount]);
 
   const handleCoinClick = useCallback(
