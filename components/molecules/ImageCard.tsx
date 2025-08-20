@@ -13,7 +13,7 @@ type CardProps = {
 };
 
 export const ImageCard = ({
-  pageKey,
+  pageKey: _pageKey,
   imageSrc,
   blurDataURL,
   cardTitle,

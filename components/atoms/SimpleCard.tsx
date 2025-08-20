@@ -5,7 +5,7 @@ interface CardProps {
   className?: string;
 }
 
-export const SimpleCard = ({ children, className = "p-4" }: CardProps) => {
+export const SimpleCard = ({ children, className: _className = "p-4" }: CardProps) => {
   const Icon = ({
     className,
     ...rest

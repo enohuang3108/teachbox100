@@ -22,7 +22,7 @@ export const Product3D = ({
 }: Product3DProps) => {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const [isClient, setIsClient] = useState(false);
+  const [_isClient, setIsClient] = useState(false);
   const modelViewerRef = useRef<any>(null);
 
   useEffect(() => {

@@ -40,7 +40,7 @@ export const ShoppingCart = ({
     }
   };
 
-  const totalAmount = selectedProducts.reduce(
+  const _totalAmount = selectedProducts.reduce(
     (sum, product) => sum + product.price,
     0
   );
