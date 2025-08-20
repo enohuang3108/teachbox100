@@ -26,10 +26,12 @@ export const ImageCard = ({
     <Link
       href={link}
       prefetch={true}
-      className="rounded-xl transition-all sm:min-h-[280px] duration-300 hover:scale-105 overflow-hidden border border-zinc-200 bg-zinc-50 pb-3"
+      className="group relative rounded-xl transition-all sm:min-h-[280px] duration-300 hover:scale-[1.02] hover:shadow-lg overflow-hidden border border-border/50 bg-card/80 backdrop-blur-sm pb-3 hover:border-primary/30 hover:bg-card"
       style={{ width: cardWidth }}
     >
       <div className="relative aspect-video overflow-hidden">
+        {/* Overlay gradient on hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
         <Image
           fill
           src={imageSrc}
@@ -41,11 +43,11 @@ export const ImageCard = ({
           alt="image"
         />
       </div>
-      <div className="px-2 py-0 text-start text-zinc-900 sm:px-4 sm:pb-3">
-        <h3 className={"mt-3 mb-1 text-lg font-bold"}>{cardTitle}</h3>
-        <p className="text-sm leading-5">{cardDescription}</p>
+      <div className="px-2 py-0 text-start text-card-foreground sm:px-4 sm:pb-3">
+        <h3 className="mt-3 mb-1 text-lg font-bold group-hover:text-primary transition-colors duration-200">{cardTitle}</h3>
+        <p className="text-sm leading-5 text-muted-foreground group-hover:text-card-foreground/80 transition-colors duration-200">{cardDescription}</p>
       </div>
-      {button && <div className="px-2">{button}</div>}
+      {button && <div className="px-2 sm:px-4">{button}</div>}
     </Link>
   );
 };
