@@ -41,8 +41,9 @@ export default function ThreeDCoin({
 
   return (
     <div
-      className="coin-card"
-      style={{ width: `${imageSize}px`, height: `${imageSize}px` }}
+      className="coin-card m-auto"
+      // TODO: enhance layout
+      style={{ width: `${imageSize}px`, aspectRatio: coinValue >= 100 ? "2 / 1" : "1 / 1" }}
     >
       <div className="coin-inner-card">
         <div className="coin-front-side">
@@ -51,7 +52,7 @@ export default function ThreeDCoin({
             alt={`${coinValue}元 ${front ? "正面" : "背面"}`}
             width={imageSize}
             height={imageSize}
-            className="h-full w-full object-contain"
+            className="h-auto w-full object-contain"
             priority
           />
         </div>
@@ -61,7 +62,7 @@ export default function ThreeDCoin({
             alt={`${coinValue}元 ${front ? "背面" : "正面"}`}
             width={imageSize}
             height={imageSize}
-            className="h-full w-full object-contain"
+            className="h-auto w-full object-contain"
           />
         </div>
       </div>
