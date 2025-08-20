@@ -31,7 +31,7 @@ export default function OfflinePage() {
       if (response.ok) {
         window.location.reload()
       }
-    } catch (error) {
+    } catch {
       console.log("仍然離線")
     }
   }

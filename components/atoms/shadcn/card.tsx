@@ -40,6 +40,7 @@ const CardTitle = React.forwardRef<
       className
     )}
     {...props}
+    // eslint-disable-next-line jsx-a11y/heading-has-content
   />
 ));
 CardTitle.displayName = "CardTitle";
