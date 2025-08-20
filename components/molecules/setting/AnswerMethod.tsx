@@ -34,7 +34,7 @@ export const AnswerMethod:React.FC<AnswerMethodProps> =({answerMethod, setAnswer
         className="space-y-2"
       >
         {Object.entries(colorSchemes).map(([value, scheme]) => (
-          <label key={value} className="group">
+          <label key={value} className="group" htmlFor={`answer-${value}`}>
             <div
               className={cn(
                 "flex w-full cursor-pointer items-center space-x-2 rounded-full border p-2 transition-colors",

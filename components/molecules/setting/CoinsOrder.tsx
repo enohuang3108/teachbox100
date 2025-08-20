@@ -29,7 +29,7 @@ export const CoinsOrder:React.FC<CoinsOrderProps> = ({isOrdered, setIsOrdered}) 
         className="space-y-2"
       >
         {Object.entries(orderSchemes).map(([value, scheme]) => (
-          <label key={value} className="group">
+          <label key={value} className="group" htmlFor={`order-${value}`}>
             <div
               className={cn(
                 "flex w-full cursor-pointer items-center space-x-2 rounded-full border p-2 transition-colors",

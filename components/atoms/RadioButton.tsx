@@ -44,13 +44,15 @@ export function RadioButton({
     : "border-gray-400";
 
   return (
-    <div
+    <button
       className={`flex cursor-pointer items-center space-x-2 rounded-full border p-2 transition-colors ${activeStyle}`}
       onClick={onClick}
+      type="button"
+      aria-label={`${isSelected ? "已選擇" : "未選擇"} ${label}`}
     >
       <div className={`h-4 w-4 rounded-full border-2 ${dotStyle}`} />
       <span className="text-sm font-medium">{label}</span>
-    </div>
+    </button>
   );
 }
 

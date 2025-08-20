@@ -33,19 +33,13 @@ const DraggableProduct = ({
 
   return (
     <div className="relative group">
-      <div
+      <button
         draggable
         onDragStart={handleDragStart}
         onClick={handleClick}
         className="relative bottom-2 cursor-pointer transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95 p-4 pb-0"
-        role="button"
-        tabIndex={0}
-        onKeyPress={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            handleClick();
-          }
-        }}
         aria-label={`選擇商品：${product.name}，價格 ${product.currentPrice} 元`}
+        type="button"
       >
         <div className="mx-auto flex items-center justify-center">
           <Product3D
@@ -62,7 +56,7 @@ const DraggableProduct = ({
             +
           </div>
         </div>
-      </div>
+      </button>
       <div>
         <div className="relative inset-x-0 bottom-0 h-4 bg-gradient-to-t from-gray-800 via-gray-700 to-gray-600 rounded-b-lg shadow-lg"></div>
         <div className="relative inset-x-0 bottom-4 h-2 bg-gray-900 rounded-sm opacity-50"></div>

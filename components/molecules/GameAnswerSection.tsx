@@ -44,7 +44,7 @@ export default function GameAnswerSection({
     } else {
       playWrongSound();
     }
-  }, [isCorrect]);
+  }, [isCorrect, playCorrectSound, playWrongSound]);
 
   return (
     <div className={cn("relative mt-16", className)}>

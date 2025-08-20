@@ -156,7 +156,7 @@ const Clock: FC<ClockProps> = ({
       document.addEventListener("touchmove", handleMove);
       document.addEventListener("touchend", handleEnd);
     },
-    [calculateAngle, currentStrategy, draggable, onChange, precision],
+    [calculateAngle, currentStrategy, draggable, onChange, precision, time],
   );
 
   const displayHour12 = time.hour === 0 || time.hour === 12 ? 12 : time.hour % 12;
