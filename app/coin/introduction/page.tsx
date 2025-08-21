@@ -131,15 +131,6 @@ export default function CoinIntroductionPage() {
   return (
     <PageTemplate page={page}>
       <div className="container mx-auto flex flex-col items-center gap-8 p-4">
-        {/* 頁面標題 */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold mb-4">新台幣硬幣介紹</h1>
-          <p className="text-muted-foreground text-lg">
-            點擊任一硬幣，深入了解其特色與等值換算
-          </p>
-        </div>
-
-        {/* 硬幣網格 */}
         <TooltipProvider>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {denominations.map((item) => {

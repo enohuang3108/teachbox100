@@ -31,6 +31,11 @@ export const PageTemplate = ({
             <h1 className={"mb-8 text-4xl font-bold md:text-5xl lg:text-6xl"}>
               {page.title}
             </h1>
+              {page.guide && (
+                <p className="text-muted-foreground text-lg">
+                  <span>{page.guide}</span>
+                </p>
+              )}
           </div>
         </div>
         <div className="mx-auto w-full max-w-4xl">

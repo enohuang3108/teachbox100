@@ -4,6 +4,7 @@ export interface Page {
   blurDataURL: string;
   title: string;
   description: string;
+  guide?: string;
 }
 
 export interface PageWithKey extends Page {
@@ -25,6 +26,7 @@ export const pages: { [key: string]: Page } = {
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAAK0lEQVQIW2M8s2n6f0ZmNgamo5kM7M7zGRjPbZnx//MHZgY+ASaGfwy/GQDZLwxSeEEb5AAAAABJRU5ErkJggg==",
     title: "認識新臺幣",
     description: "認識台灣新臺幣的各種面額、外觀特徵與相等值的硬幣、鈔票。",
+    guide: "點擊任一硬幣或鈔票，了解特色與相等值的金錢。",
   },
   "coin-equivalent": {
     path: "/coin/equivalent",
@@ -73,5 +75,6 @@ export const pages: { [key: string]: Page } = {
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAALUlEQVQIWwEiAN3/AcZZM/8OJgoA+eD1APn6/AAB5NvE/+R+bQAHCgYAXcj0ABtUD9CQT3miAAAAAElFTkSuQmCC",
     title: "學習讀時鐘",
     description: "練習辨認時針、分針，並且判讀出正確時間。",
+    guide: "拖動時針或是下方滑桿來調整時間。"
   },
 };
