@@ -36,14 +36,20 @@ export default function Coin({ coinValue, size, className }: CoinProps) {
   const imageSize = size ?? defaultSize(coinValue);
 
   return (
-    <div className="relative transition-transform hover:scale-105">
+    <div 
+      className="relative transition-transform hover:scale-105"
+      style={{
+        width: `${imageSize}px`,
+        height: `${imageSize}px`,
+      }}
+    >
       <Image
         src={`/images/coins/${coinValue}_back.webp`}
         alt={`${coinValue}元硬幣`}
         width={imageSize}
         height={imageSize}
         className={cn(
-          `object-contain w-[${imageSize}px] h-[${imageSize}px] md:w-[${imageSize}px] md:h-[${imageSize}px]`,
+          "object-contain w-full h-full",
           className,
         )}
       />

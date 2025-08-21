@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 interface CoinProps {
   coinValue: number;
@@ -35,36 +37,52 @@ export default function ThreeDCoin({
   scale = 1,
   front = true,
 }: CoinProps) {
+  const [isFlipped, setIsFlipped] = useState(false);
   const imageSize = size(coinValue) * scale;
   const frontSrc = `/images/coins/${coinValue}.webp`;
   const backSrc = `/images/coins/${coinValue}_back.webp`;
 
   return (
     <div
-      className="coin-card m-auto"
-      // TODO: enhance layout
-      style={{ width: `${imageSize}px`, aspectRatio: coinValue >= 100 ? "2 / 1" : "1 / 1" }}
+      className="relative m-auto [perspective:2000px]"
+      style={{ width: `${imageSize}px` }}
+      onMouseEnter={() => setIsFlipped(true)}
+      onMouseLeave={() => setIsFlipped(false)}
     >
-      <div className="coin-inner-card">
-        <div className="coin-front-side">
-          <Image
-            src={front ? frontSrc : backSrc}
-            alt={`${coinValue}元 ${front ? "正面" : "背面"}`}
-            width={imageSize}
-            height={imageSize}
-            className="h-auto w-full object-contain"
-            priority
-          />
-        </div>
-        <div className="coin-back-side">
-          <Image
-            src={front ? backSrc : frontSrc}
-            alt={`${coinValue}元 ${front ? "背面" : "正面"}`}
-            width={imageSize}
-            height={imageSize}
-            className="h-auto w-full object-contain"
-          />
-        </div>
+      <div
+        className={cn(
+          "relative w-full",
+          "[transform-style:preserve-3d]",
+          "transition-all duration-700",
+          isFlipped
+            ? "[transform:rotateY(180deg)]"
+            : "[transform:rotateY(0deg)]"
+        )}
+      >
+        {/* 底層圖片，提供自然高度 */}
+        <Image
+          src={front ? frontSrc : backSrc}
+          alt={`${coinValue}元 ${front ? "正面" : "背面"}`}
+          width={imageSize}
+          height={imageSize}
+          className={cn(
+            "h-auto w-full object-contain",
+            "[backface-visibility:hidden] [transform:rotateY(0deg)]"
+          )}
+          priority
+        />
+        
+        {/* 頂層圖片，疊加顯示 */}
+        <Image
+          src={front ? backSrc : frontSrc}
+          alt={`${coinValue}元 ${front ? "背面" : "正面"}`}
+          width={imageSize}
+          height={imageSize}
+          className={cn(
+            "absolute inset-0 h-auto w-full object-contain",
+            "[backface-visibility:hidden] [transform:rotateY(180deg)]"
+          )}
+        />
       </div>
     </div>
   );
