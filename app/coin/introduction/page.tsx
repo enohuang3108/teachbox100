@@ -84,7 +84,6 @@ const getCoinEquivalents = (value: number) => {
     equivalents.push({
       value: 1,
       count: value,
-      description: `1 元 × ${value}`,
     });
   }
 
@@ -92,7 +91,6 @@ const getCoinEquivalents = (value: number) => {
     equivalents.push({
       value: 5,
       count: value / 5,
-      description: `5 元 × ${value / 5}`,
     });
   }
 
@@ -100,7 +98,6 @@ const getCoinEquivalents = (value: number) => {
     equivalents.push({
       value: 10,
       count: value / 10,
-      description: `10 元 × ${value / 10}`,
     });
   }
 
@@ -108,7 +105,6 @@ const getCoinEquivalents = (value: number) => {
     equivalents.push({
       value: 50,
       count: value / 50,
-      description: `50 元 × ${value / 50}`,
     });
   }
 
@@ -172,43 +168,45 @@ export default function CoinIntroductionPage() {
                       <p>點擊查看 {item} 元硬幣詳細資訊</p>
                     </TooltipContent>
                   </Tooltip>
-                  <DialogContent className="max-h-[90vh] overflow-hidden p-0 sm:max-w-[1000px]">
+                  <DialogContent className="max-h-[95vh] overflow-hidden p-0 sm:max-w-[1000px] w-[95vw]">
                     <DialogTitle className="sr-only">
                       {item} 元 硬幣介紹
                     </DialogTitle>
                     <div className="flex h-full flex-col lg:flex-row">
-                      {/* 左側硬幣展示區 */}
-                      <div className="flex flex-1 items-center justify-center bg-gradient-to-br from-background to-muted/20 p-8">
+                      {/* 硬幣展示區 */}
+                      <div className="flex flex-1 items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4 sm:p-6 lg:p-8">
                         <Card className="flex flex-col w-full max-w-[350px] bg-card/80 backdrop-blur">
-                          <CardHeader className="text-center">
-                            <CardTitle className="text-2xl">新台幣 {item} 元</CardTitle>
+                          <CardHeader className="text-center pb-3 sm:pb-6">
+                            <CardTitle className="text-xl sm:text-2xl">新台幣 {item} 元</CardTitle>
                           </CardHeader>
-                          <CardContent className="flex flex-col shrink items-center gap-6">
-                            <div className="grow flex w-full max-w-[280px] items-center justify-center">
+                          <CardContent className="flex flex-col items-center gap-3 sm:gap-6">
+                            <div className="flex w-full max-w-[200px] sm:max-w-[280px] items-center justify-center">
                               {getCoinSide(item) ? (
-                                <ThreeDCoin coinValue={item} front={true} scale={3} />
+                                <ThreeDCoin coinValue={item} front={true} scale={2.5} />
                               ) : (
                                 <ThreeDCoin
                                   coinValue={item}
                                   front={false}
-                                  scale={3}
+                                  scale={2.5}
                                 />
                               )}
                             </div>
 
                             {/* 正反面切換按鈕 */}
-                            <div className="flex gap-3">
+                            <div className="flex gap-2 sm:gap-3">
                               <Button
                                 onClick={() => handleCoinSideToggle(item, true)}
                                 variant={getCoinSide(item) ? "default" : "outline"}
-                                className="px-6"
+                                className="px-4 sm:px-6 text-sm sm:text-base"
+                                size="sm"
                               >
                                 正面
                               </Button>
                               <Button
                                 onClick={() => handleCoinSideToggle(item, false)}
                                 variant={!getCoinSide(item) ? "default" : "outline"}
-                                className="px-6"
+                                className="px-4 sm:px-6 text-sm sm:text-base"
+                                size="sm"
                               >
                                 背面
                               </Button>
@@ -217,35 +215,32 @@ export default function CoinIntroductionPage() {
                         </Card>
                       </div>
 
-                      {/* 右側資訊區 */}
-                      <div className="flex flex-1 flex-col overflow-y-auto bg-muted/30 p-8">
-                        <div className="space-y-6">
+                      {/* 資訊區 */}
+                      <div className="flex flex-1 flex-col overflow-y-auto bg-muted/30 p-4 sm:p-6 lg:p-8 max-h-[50vh] lg:max-h-none">
+                        <div className="space-y-4 sm:space-y-6">
                           <div>
-                            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                            <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 flex items-center gap-2">
                               <span className="w-2 h-2 bg-primary rounded-full"></span>
                               等值硬幣換算
                             </h3>
-                            <Separator className="mb-4" />
+                            <Separator className="mb-3 sm:mb-4" />
 
                             {getCoinEquivalents(item).length > 0 ? (
-                              <div className="space-y-3">
+                              <div className="space-y-2 sm:space-y-3">
                                 {getCoinEquivalents(item).map((equivalent, index) => (
                                   <Card key={index} className="transition-shadow hover:shadow-md">
-                                    <CardContent className="flex items-center gap-4 p-4">
+                                    <CardContent className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4">
                                       <div className="flex-shrink-0">
                                         <div className="relative">
-                                          <Coin coinValue={equivalent.value} size={50} />
+                                          <Coin coinValue={equivalent.value} size={40} />
                                         </div>
                                       </div>
-                                      <div className="flex-1">
-                                        <div className="font-medium text-lg">
-                                          {equivalent.description}
-                                        </div>
-                                        <div className="text-sm text-muted-foreground">
+                                      <div className="flex-1 min-w-0">
+                                        <div className="text-sm text-foreground">
                                           {equivalent.count} 枚 × {equivalent.value} 元
                                         </div>
                                       </div>
-                                      <Badge variant="secondary">
+                                      <Badge variant="secondary" className="text-xs sm:text-sm shrink-0">
                                         = {item} 元
                                       </Badge>
                                     </CardContent>
@@ -254,11 +249,11 @@ export default function CoinIntroductionPage() {
                               </div>
                             ) : (
                               <Card className="border-dashed">
-                                <CardContent className="flex items-center justify-center p-8">
+                                <CardContent className="flex items-center justify-center p-4 sm:p-8">
                                   <div className="text-center text-muted-foreground">
-                                    <div className="text-4xl mb-2">💰</div>
-                                    <p>此面額為最小單位</p>
-                                    <p className="text-sm">無其他硬幣可等值換算</p>
+                                    <div className="text-2xl sm:text-4xl mb-2">💰</div>
+                                    <p className="text-sm sm:text-base">此面額為最小單位</p>
+                                    <p className="text-xs sm:text-sm">無其他硬幣可等值換算</p>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -267,25 +262,25 @@ export default function CoinIntroductionPage() {
 
                           {/* 硬幣圖案說明 */}
                           <div>
-                            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                            <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 flex items-center gap-2">
                               <span className="w-2 h-2 bg-secondary rounded-full"></span>
                               圖案說明
                             </h3>
-                            <Separator className="mb-4" />
-                            <div className="space-y-3">
+                            <Separator className="mb-3 sm:mb-4" />
+                            <div className="space-y-2 sm:space-y-3">
                               {(() => {
                                 const design = getCoinDesigns(item);
                                 return (
                                   <>
                                     <Card className="transition-colors hover:bg-muted/50">
-                                      <CardContent className="p-4">
-                                        <div className="flex items-center gap-3">
-                                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                                            <span className="text-sm font-bold text-primary">正</span>
+                                      <CardContent className="p-3 sm:p-4">
+                                        <div className="flex items-center gap-2 sm:gap-3">
+                                          <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                                            <span className="text-xs sm:text-sm font-bold text-primary">正</span>
                                           </div>
-                                          <div>
-                                            <div className="font-medium">正面圖案</div>
-                                            <div className="text-sm text-muted-foreground">
+                                          <div className="min-w-0 flex-1">
+                                            <div className="font-medium text-sm sm:text-base">正面圖案</div>
+                                            <div className="text-xs sm:text-sm text-muted-foreground break-words">
                                               {design.front}
                                             </div>
                                           </div>
@@ -294,14 +289,14 @@ export default function CoinIntroductionPage() {
                                     </Card>
 
                                     <Card className="transition-colors hover:bg-muted/50">
-                                      <CardContent className="p-4">
-                                        <div className="flex items-center gap-3">
-                                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10">
-                                            <span className="text-sm font-bold text-secondary-foreground">背</span>
+                                      <CardContent className="p-3 sm:p-4">
+                                        <div className="flex items-center gap-2 sm:gap-3">
+                                          <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-secondary/10 shrink-0">
+                                            <span className="text-xs sm:text-sm font-bold text-secondary-foreground">背</span>
                                           </div>
-                                          <div>
-                                            <div className="font-medium">背面圖案</div>
-                                            <div className="text-sm text-muted-foreground">
+                                          <div className="min-w-0 flex-1">
+                                            <div className="font-medium text-sm sm:text-base">背面圖案</div>
+                                            <div className="text-xs sm:text-sm text-muted-foreground break-words">
                                               {design.back}
                                             </div>
                                           </div>

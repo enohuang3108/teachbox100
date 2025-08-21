@@ -25,7 +25,7 @@ export const PageTemplate = ({
           __html: JSON.stringify(breadcrumbSchema)
         }}
       />
-      <main className="flex min-h-screen flex-col items-center justify-center p-4 pt-14 md:p-8 md:pt-4">
+      <main className="flex min-h-screen flex-col items-center justify-center p-4 pt-16 md:p-8 md:pt-16">
         <div className="mx-auto w-full max-w-4xl">
           <div className="w-full">
             <h1 className={"mb-8 text-4xl font-bold md:text-5xl lg:text-6xl"}>
