@@ -1,6 +1,7 @@
 "use client";
 
 import CoinComponent from "@/components/atoms/Coin";
+import SelectedCoinsList, { type SelectedCoin } from "@/components/molecules/SelectedCoinsList";
 import GameAnswerSection from "@/components/molecules/GameAnswerSection";
 import { AvailableCoins } from "@/components/molecules/setting/AvailableCoins";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
@@ -19,12 +20,12 @@ export default function CoinEquivalentPage() {
   const [enabledCoins, setEnabledCoins] = useState(initialEnabledCoinValues);
 
   const gameCoins = useMemo(() => {
-    let coins = AVAILABLE_COINS.filter(c => enabledCoins.includes(c.value));
+    let coins = AVAILABLE_COINS.filter((c) => enabledCoins.includes(c.value));
     return coins;
   }, [enabledCoins]);
 
   const [target, setTarget] = useState<CoinType>(gameCoins[0]);
-  const [selectedCoins, setSelectedCoins] = useState<number[]>([]);
+  const [selectedCoins, setSelectedCoins] = useState<SelectedCoin[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
@@ -33,19 +34,16 @@ export default function CoinEquivalentPage() {
   }, [gameCoins]);
 
   const handleCoinClick = (coin: CoinType) => {
-    setSelectedCoins((prev) => [...prev, coin.value]);
+    const selectedCoin: SelectedCoin = { ...coin, id: Date.now() + Math.random() };
+    setSelectedCoins((prev) => [...prev, selectedCoin]);
   };
 
-  const handleRemoveCoin = (value: number, idx: number) => {
-    setSelectedCoins((prev) => {
-      const arr = prev.slice();
-      arr.splice(idx, 1);
-      return arr;
-    });
+  const handleRemoveCoin = (coinToRemove: SelectedCoin) => {
+    setSelectedCoins((prev) => prev.filter((coin) => coin.id !== coinToRemove.id));
   };
 
   const checkAnswer = () => {
-    const sum = selectedCoins.reduce((a, b) => a + b, 0);
+    const sum = selectedCoins.reduce((a, b) => a + b.value, 0);
     if (sum === target.value) {
       setIsCorrect(true);
     } else {
@@ -62,10 +60,14 @@ export default function CoinEquivalentPage() {
   }, [gameCoins]);
 
   const settings = [
-    <AvailableCoins key="availableCoins" enabledCoins={enabledCoins} setEnabledCoins={setEnabledCoins}/>
-  ]
+    <AvailableCoins
+      key="availableCoins"
+      enabledCoins={enabledCoins}
+      setEnabledCoins={setEnabledCoins}
+    />,
+  ];
 
-  const currentAmount = selectedCoins.reduce((a, b) => a + b, 0);
+  const currentAmount = selectedCoins.reduce((a, b) => a + b.value, 0);
 
   return (
     <GamePageTemplate
@@ -77,7 +79,7 @@ export default function CoinEquivalentPage() {
         <div className="mb-4 flex flex-col items-center">
           {/* 顯示目標硬幣 */}
           <div className="mb-2 flex min-h-[120px] items-center justify-center">
-            {target && <CoinComponent coinValue={target.value} size={150} />} {/* Corrected */}
+            {target && <CoinComponent coinValue={target.value} size={150} />}
           </div>
         </div>
         <GameAnswerSection
@@ -99,33 +101,27 @@ export default function CoinEquivalentPage() {
           <div>
             {/* 已選硬幣區 */}
             <div className="mb-6 flex min-h-[80px] w-full flex-col items-center rounded-md border bg-gray-100 p-4">
-              <h2 className="mb-2 self-start text-lg font-semibold">已選硬幣:</h2>
-              <div className="flex min-h-[40px] flex-wrap justify-center gap-2">
-                {selectedCoins.length > 0 ? (
-                  selectedCoins.map((value, idx) => (
-                    <button
-                      key={idx + "-selected"}
-                      onClick={() => handleRemoveCoin(value, idx)}
-                      className="transition-transform hover:scale-110 active:scale-95"
-                      aria-label={`移除 ${value}元`}
-                    >
-                      <CoinComponent coinValue={value} /> {/* Corrected */}
-                    </button>
-                  ))
-                ) : (
-                  <p className="self-center text-gray-500">尚未選擇</p>
-                )}
-              </div>
+              <h2 className="mb-2 self-start text-lg font-semibold">
+                已選硬幣:
+              </h2>
+              <SelectedCoinsList
+                selectedCoins={selectedCoins}
+                onRemoveCoin={handleRemoveCoin}
+              />
             </div>
             {/* 選擇硬幣區 */}
             <div className="mb-4">
-              <h2 className="mb-2 text-center text-lg font-semibold">點選硬幣或鈔票:</h2>
+              <h2 className="mb-2 text-center text-lg font-semibold">
+                點選硬幣或鈔票:
+              </h2>
               <div className="flex flex-wrap justify-center gap-4">
                 {gameCoins.map((coin) => (
                   <button
                     key={coin.value}
                     onClick={() => handleCoinClick(coin)}
-                    className={"relative cursor-pointer transition-transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50"}
+                    className={
+                      "relative cursor-pointer transition-transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50"
+                    }
                     aria-label={`選擇 ${coin.name}`}
                   >
                     <CoinComponent coinValue={coin.value} /> {/* Corrected */}

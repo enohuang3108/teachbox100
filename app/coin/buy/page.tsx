@@ -5,6 +5,7 @@ import Coin from "@/components/atoms/Coin";
 import { ProductShelf } from "@/components/atoms/ProductShelf";
 import { ShoppingCart } from "@/components/atoms/ShoppingCart";
 import GameAnswerSection from "@/components/molecules/GameAnswerSection";
+import SelectedCoinsList, { type SelectedCoin } from "@/components/molecules/SelectedCoinsList";
 import { useMaxAmount } from "@/components/molecules/setting/MaxAmount";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
@@ -13,9 +14,6 @@ import type { Coin as CoinType } from "@/lib/types/types";
 import { getRandomFeedback } from "@/lib/utils/gameFeedback";
 import { useCallback, useEffect, useState } from "react";
 
-interface SelectedCoin extends CoinType {
-  id: number;
-}
 
 interface SelectedProduct extends Product {
   id: string;
@@ -143,7 +141,7 @@ export default function SelectCoinsPage() {
     (coin: CoinType): void => {
       const newAmount: number = currentAmount + coin.value;
       // 為添加的硬幣創建唯一 ID
-      const newSelectedCoin: SelectedCoin = { ...coin, id: Date.now() };
+      const newSelectedCoin: SelectedCoin = { ...coin, id: Date.now() + Math.random() };
 
       setSelectedCoins((prev) => [...prev, newSelectedCoin]); // 儲存 SelectedCoin 物件
       setCurrentAmount(newAmount);
@@ -228,23 +226,11 @@ export default function SelectCoinsPage() {
         >
           <div>
             <div className="mb-6 flex min-h-[80px] w-full flex-col items-center rounded-md border bg-gray-100 p-4">
-              <h2 className="mb-2 self-start text-lg font-semibold">已選擇:</h2>
-              <div className="flex min-h-[100px] flex-wrap justify-center gap-2 transition-all">
-                {selectedCoins.length > 0 ? (
-                  selectedCoins.map((coin) => (
-                    <button
-                      key={coin.id}
-                      onClick={() => handleRemoveCoin(coin)}
-                      className="transition-transform hover:scale-110 active:scale-95 cursor-pointer"
-                      // aria-label={`移除 ${coin.name}`}
-                    >
-                      <Coin coinValue={coin.value} />
-                    </button>
-                  ))
-                ) : (
-                  <p className="self-center text-gray-500">尚未選擇任何硬幣</p>
-                )}
-              </div>
+              <h2 className="mb-2 self-start text-lg font-semibold">已選硬幣:</h2>
+              <SelectedCoinsList
+                selectedCoins={selectedCoins}
+                onRemoveCoin={handleRemoveCoin}
+              />
             </div>
 
             {/* 選擇硬幣區 */}

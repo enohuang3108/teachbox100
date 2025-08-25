@@ -3,15 +3,13 @@
 import AmountDisplay from "@/components/atoms/AmountDisplay";
 import Coin from "@/components/atoms/Coin";
 import GameAnswerSection from "@/components/molecules/GameAnswerSection";
+import SelectedCoinsList, { type SelectedCoin } from "@/components/molecules/SelectedCoinsList";
 import { useMaxAmount } from "@/components/molecules/setting/MaxAmount";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
 import type { Coin as CoinType } from "@/lib/types/types";
 import { getRandomFeedback } from "@/lib/utils/gameFeedback";
 import { useCallback, useEffect, useState } from "react";
-interface SelectedCoin extends CoinType {
-  id: number;
-}
 
 const GAME_COINS = AVAILABLE_COINS.filter((coin) =>
   [1, 5, 10, 50, 100].includes(coin.value),
@@ -72,7 +70,7 @@ export default function CoinChangePage() {
   const handleCoinClick = useCallback(
     (coin: CoinType) => {
       const newAmount = currentSelectedChange + coin.value;
-      const newSelectedCoin: SelectedCoin = { ...coin, id: Date.now() };
+      const newSelectedCoin: SelectedCoin = { ...coin, id: Date.now() + Math.random() };
 
       setSelectedCoins((prev) => [...prev, newSelectedCoin]);
       setCurrentSelectedChange(newAmount);
@@ -141,22 +139,10 @@ export default function CoinChangePage() {
             <h2 className="mb-2 self-start text-lg font-semibold">
               已選找零硬幣:
             </h2>
-            <div className="flex min-h-[40px] flex-wrap justify-center gap-2">
-              {selectedCoins.length > 0 ? (
-                selectedCoins.map((coin) => (
-                  <button
-                    key={coin.id}
-                    onClick={() => handleRemoveCoin(coin)}
-                    className="transition-transform hover:scale-110 active:scale-95"
-                    aria-label={`移除 ${coin.name}`}
-                  >
-                    <Coin coinValue={coin.value} />
-                  </button>
-                ))
-              ) : (
-                <p className="self-center text-gray-500">尚未選擇任何硬幣</p>
-              )}
-            </div>
+            <SelectedCoinsList
+              selectedCoins={selectedCoins}
+              onRemoveCoin={handleRemoveCoin}
+            />
           </div>
 
           {/* 選擇硬幣區 */}
