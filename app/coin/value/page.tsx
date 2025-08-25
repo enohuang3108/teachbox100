@@ -1,11 +1,10 @@
 "use client";
 
-import Coin from "@/components/atoms/Coin";
-import { SimpleCard } from "@/components/atoms/SimpleCard";
 import { AnswerMethod } from "@/components/molecules/setting/AnswerMethod";
 import { AvailableCoins } from "@/components/molecules/setting/AvailableCoins";
 import { CoinsOrder } from "@/components/molecules/setting/CoinsOrder";
 import { useMaxAmount } from "@/components/molecules/setting/MaxAmount";
+import CoinDisplayArea from "@/components/molecules/CoinDisplayArea";
 import GameAnswerSection from "@/components/organisms/CoinGameAnswerSection";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
@@ -148,17 +147,26 @@ export default function CoinGamePage() {
     1, 5, 10, 50, 100, 500, 1000,
   ]);
   const [isOrdered, setIsOrdered] = useState<boolean>(true);
+  const [isGeneratingNewCoins, setIsGeneratingNewCoins] = useState(false);
+  const [coinsKey, setCoinsKey] = useState(Date.now()); // 用於強制重新渲染硬幣動畫
   const { maxAmount, MaxAmountComponent } = useMaxAmount();
 
   // 重置遊戲的核心邏輯
   const setupNewQuestion = () => {
+    setIsGeneratingNewCoins(true);
+    
+    // 使用 React 的狀態批次更新機制來優化渲染
     const newCoins = generateRandomCoins(enabledCoins, isOrdered, maxAmount);
     const newTotal = calculateTotal(newCoins);
+    
+    // 批次更新所有相關狀態
     setCoins(newCoins);
     setTotalValue(newTotal);
     setUserAnswer("");
     setChoices(generateChoices(newTotal));
     setIsCorrect(null);
+    setCoinsKey(Date.now()); // 更新 key 以觸發動畫重新渲染
+    setIsGeneratingNewCoins(false);
   };
 
   // 初始化和重置遊戲
@@ -196,9 +204,7 @@ export default function CoinGamePage() {
   // 處理點擊 "下一題"
   const handleNextQuestion = () => {
     setShowFeedback(false); // 立即開始淡出
-    setTimeout(() => {
-      setupNewQuestion(); // 延遲重置題目狀態
-    }, 300); // 等待淡出動畫完成 (需與 CSS transition duration 匹配)
+    setupNewQuestion(); // 立即重置題目狀態，讓 CSS 動畫處理視覺效果
   };
 
   const settings = [
@@ -215,13 +221,13 @@ export default function CoinGamePage() {
       settings={settings}
     >
       {/* 硬幣顯示區域 */}
-      <SimpleCard>
-        <div className="mx-auto flex min-h-[120px] flex-wrap items-center justify-center gap-2 p-4 md:min-h-[160px] md:gap-4">
-          {coins.map((coin, index) => (
-            <Coin key={index} coinValue={coin.value} />
-          ))}
-        </div>
-      </SimpleCard>
+      <CoinDisplayArea
+        coins={coins}
+        showFeedback={showFeedback}
+        isCorrect={isCorrect}
+        isGeneratingNewCoins={isGeneratingNewCoins}
+        animationKey={coinsKey}
+      />
 
       {/* 使用答案區域組件 */}
       <GameAnswerSection
