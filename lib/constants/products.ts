@@ -25,4 +25,7 @@ export const PRODUCTS: Product[] = [
   { name: "泡麵", modelPath: "/3d_model/noodles.glb", priceRange: [40, 60] },
   { name: "排球", modelPath: "/3d_model/volleyball.glb", priceRange: [200, 500] },
   { name: "魔術方塊", modelPath: "/3d_model/magic-cube.glb", priceRange: [120, 250] },
+  { name: "薯條", modelPath: "/3d_model/fries.glb", priceRange: [65, 65] },
+  { name: "珍珠奶茶", modelPath: "/3d_model/milk-tea.glb", priceRange: [55, 70] },
+  { name: "冰淇淋", modelPath: "/3d_model/ice-cream.glb", priceRange: [40, 70] },
 ];
