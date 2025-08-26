@@ -26,11 +26,9 @@ export default function MultipleChoiceAnswer({
       className="space-y-2"
     >
       {choices.map((choice, index) => (
-        <button
+        <div
           key={index}
-          className="flex cursor-pointer items-center space-x-2 rounded-lg border border-gray-200 bg-white p-3 transition-colors hover:bg-gray-100 w-full text-left"
-          onClick={() => onSelect(choice.toString())}
-          type="button"
+          className="flex cursor-pointer items-center space-x-2 rounded-lg border border-gray-200 bg-white p-3 transition-colors hover:bg-gray-100 w-full"
         >
           <RadioGroupItem value={choice.toString()} id={`choice-${index}`} />
           <Label
@@ -39,7 +37,7 @@ export default function MultipleChoiceAnswer({
           >
             {choicesText(choice)}
           </Label>
-        </button>
+        </div>
       ))}
     </RadioGroup>
   );
