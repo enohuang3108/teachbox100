@@ -28,4 +28,8 @@ export const PRODUCTS: Product[] = [
   { name: "薯條", modelPath: "/3d_model/fries.glb", priceRange: [65, 65] },
   { name: "珍珠奶茶", modelPath: "/3d_model/milk-tea.glb", priceRange: [55, 70] },
   { name: "冰淇淋", modelPath: "/3d_model/ice-cream.glb", priceRange: [40, 70] },
+  { name: "熱狗", modelPath: "/3d_model/hotdog.glb", priceRange: [40, 60] },
+  { name: "糖葫蘆", modelPath: "/3d_model/candied-haws.glb", priceRange: [40, 60] },
+  { name: "直笛", modelPath: "/3d_model/recorder.glb", priceRange: [200, 400] },
+  { name: "披薩", modelPath: "/3d_model/pizza.glb", priceRange: [40, 70] },
 ];
