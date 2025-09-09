@@ -10,7 +10,7 @@ export interface JsonLdSchema {
   [key: string]: any;
 }
 
-const BASE_URL = "https://teachbox100.com";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://teachbox100.com";
 
 const COMMON_AUDIENCE = [
   {

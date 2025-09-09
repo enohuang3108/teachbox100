@@ -7,6 +7,7 @@ import "@/styles/globals.css";
 import type { Metadata, Viewport } from "next";
 import { ViewTransitions } from "next-view-transitions";
 import { Inter } from "next/font/google";
+import Head from "next/head";
 import Script from "next/script";
 import type React from "react";
 
@@ -18,7 +19,10 @@ export const metadata: Metadata = {
   },
   title: appInfo.title,
   description: appInfo.description,
-};
+  alternates: {
+    canonical: process.env.NEXT_PUBLIC_SITE_URL || "https://teachbox100.com",
+  },
+}
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -31,16 +35,18 @@ export default function RootLayout({
   return (
     <ViewTransitions>
       <html lang="zh-TW">
-        <head>
+        <Head>
           <link rel="manifest" href="/manifest.json" />
           <meta name="theme-color" content="#ffffff" />
           <link rel="icon" href="/icons/favicon.png" />
+        </Head>
+        {process.env.NEXT_PUBLIC_UMAMI_URL && process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
           <Script
-            src="https://umami.enohuang.com/script.js"
-            data-website-id="6635e402-e86f-4794-9431-50977c8de764"
+            src={process.env.NEXT_PUBLIC_UMAMI_URL}
+            data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
             strategy="afterInteractive"
           />
-        </head>
+        )}
         <body className={inter.className + " m-0 overflow-scroll p-0"}>
           <div className="hidden noscript:block">
             <div className="fixed inset-0 bg-yellow-50 z-50 flex items-center justify-center p-4">
