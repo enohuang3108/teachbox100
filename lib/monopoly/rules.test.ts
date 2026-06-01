@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   answerQuestion,
   confirmPurchase,
+  drawAndApplyCard,
   resolveLanding,
   startGame,
   takeTurn,
@@ -169,12 +170,18 @@ describe("answerQuestion / confirmPurchase 買地", () => {
 describe("蓋房", () => {
   function ownAndLand() {
     let s = game();
-    s = { ...s, players: replaceForTest(s.players, 0, { position: 1, ownedTiles: [1] }) };
+    s = {
+      ...s,
+      players: replaceForTest(s.players, 0, { position: 1, ownedTiles: [1] }),
+    };
     return resolveLanding(s, seqRng([0])); // buildQuestion
   }
   it("答對並確認 → houses+1、扣 houseCost", () => {
     let s = answerQuestion(ownAndLand(), true);
-    expect(s.pendingAction).toMatchObject({ kind: "confirmBuild", tileIndex: 1 });
+    expect(s.pendingAction).toMatchObject({
+      kind: "confirmBuild",
+      tileIndex: 1,
+    });
     s = confirmPurchase(s, true);
     expect(s.players[0].houses[1]).toBe(1);
     expect(s.players[0].money).toBe(15000 - 1000); // houseCost = price/2 = 1000
@@ -185,14 +192,63 @@ describe("破產", () => {
   it("付不出過路費 → 破產、釋地、後續被跳過", () => {
     let s = game();
     // p1 擁有 tile 1 並蓋滿房子（高額過路費）
-    s = { ...s, players: replaceForTest(s.players, 1, { ownedTiles: [1], houses: { 1: 3 } }) };
+    s = {
+      ...s,
+      players: replaceForTest(s.players, 1, {
+        ownedTiles: [1],
+        houses: { 1: 3 },
+      }),
+    };
     // p0 錢只剩 100，停在 tile 1
-    s = { ...s, players: replaceForTest(s.players, 0, { position: 1, money: 100 }) };
+    s = {
+      ...s,
+      players: replaceForTest(s.players, 0, { position: 1, money: 100 }),
+    };
     s = resolveLanding(s, seqRng([0])); // 觸發 payToll
     expect(s.players[0].bankrupt).toBe(true);
     expect(s.players[0].money).toBe(0);
     expect(s.players[0].ownedTiles).toEqual([]);
     // 地主收到 p0 能付的 100
     expect(s.players[1].money).toBe(15000 + 100);
+  });
+});
+
+function landOnCard(_deck: "chance" | "fate", pos: number) {
+  let s = game();
+  s = { ...s, players: replaceForTest(s.players, 0, { position: pos }) };
+  return s;
+}
+
+describe("drawAndApplyCard", () => {
+  it("money 卡 → 加錢並結束回合", () => {
+    // 機會格 index 2，seqRng 第一個值挑卡：挑到 c1(+2000)
+    let s = landOnCard("chance", 2);
+    s = resolveLanding(s, seqRng([0])); // pendingAction drawCard chance, card index 0 = c1 +2000
+    s = drawAndApplyCard(s, seqRng([0]));
+    expect(s.players[0].money).toBe(15000 + 2000);
+    expect(s.currentPlayerIndex).toBe(1);
+  });
+
+  it("moveTo 起點(0) → 移動後落點結算（起點無事、結束回合）", () => {
+    let s = landOnCard("chance", 2);
+    // 強制抽到 c5 (moveTo 0)：CHANCE_CARDS index 4 → rng 0.7*6=4
+    s = resolveLanding(s, seqRng([4 / 6 + 0.001]));
+    s = drawAndApplyCard(s, seqRng([0]));
+    expect(s.players[0].position).toBe(0);
+  });
+
+  it("jail 卡 → skipTurns=1", () => {
+    let s = landOnCard("fate", 5);
+    // FATE_CARDS index 3 = f4 jail → rng 3/6+eps
+    s = resolveLanding(s, seqRng([3 / 6 + 0.001]));
+    s = drawAndApplyCard(s, seqRng([0]));
+    expect(s.players[0].skipTurns).toBe(1);
+  });
+
+  it("連鎖達上限會強制結束（不會無限迴圈）", () => {
+    let s = landOnCard("chance", 2);
+    s = resolveLanding(s, seqRng([0]));
+    s = drawAndApplyCard(s, seqRng([0.99]));
+    expect(s.pendingAction === null || s.pendingAction.kind !== "drawCard").toBe(true);
   });
 });

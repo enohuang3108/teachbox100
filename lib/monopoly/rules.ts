@@ -2,6 +2,7 @@ import { BOARD, BOARD_SIZE } from "./board";
 import { deckOf } from "./cards";
 import { pickIndex, rollOne, type Rng } from "./rng";
 import type {
+  Card,
   GameSettings,
   GameState,
   Player,
@@ -10,6 +11,8 @@ import type {
   Question,
 } from "./types";
 import { isProperty } from "./types";
+
+const MAX_CHAIN = 10;
 
 // === 不可變工具 ===
 function replacePlayer(
@@ -307,4 +310,69 @@ export function takeTurn(state: GameState, rng: Rng): GameState {
     log,
   };
   return resolveLanding(moved, rng);
+}
+
+// === 機會/命運卡片效果 ===
+function applyCardEffect(state: GameState, card: Card, rng: Rng): GameState {
+  const idx = state.currentPlayerIndex;
+  const player = state.players[idx];
+  const log0 = addLog(state.log, `${player.name} 抽到「${card.text}」`);
+
+  switch (card.effect.kind) {
+    case "money": {
+      const amt = card.effect.amount;
+      if (amt >= 0) {
+        const players = replacePlayer(state.players, idx, { money: player.money + amt });
+        return endTurn({ ...state, players, log: log0 });
+      }
+      return endTurn(chargeOrBankrupt({ ...state, log: log0 }, idx, -amt, null));
+    }
+    case "jail": {
+      const players = replacePlayer(state.players, idx, { skipTurns: 1 });
+      return endTurn({ ...state, players, log: addLog(log0, `${player.name} 進入監獄`) });
+    }
+    case "skip": {
+      const players = replacePlayer(state.players, idx, { skipTurns: 1 });
+      return endTurn({ ...state, players, log: addLog(log0, `${player.name} 暫停一回合`) });
+    }
+    case "move":
+    case "moveTo": {
+      const newPos =
+        card.effect.kind === "move"
+          ? (((player.position + card.effect.steps) % BOARD_SIZE) + BOARD_SIZE) % BOARD_SIZE
+          : card.effect.tileIndex;
+      const passedStart =
+        card.effect.kind === "move" &&
+        card.effect.steps > 0 &&
+        player.position + card.effect.steps >= BOARD_SIZE;
+      let players = replacePlayer(state.players, idx, { position: newPos });
+      let lapsByPlayer = state.lapsByPlayer;
+      let log = log0;
+      if (passedStart) {
+        players = replacePlayer(players, idx, {
+          money: players[idx].money + state.settings.passStartBonus,
+        });
+        lapsByPlayer = { ...lapsByPlayer, [player.id]: (lapsByPlayer[player.id] ?? 0) + 1 };
+        log = addLog(log, `${player.name} 經過起點 +$${state.settings.passStartBonus}`);
+      }
+      // 移動後重新結算落點（連鎖）
+      return resolveLanding({ ...state, players, lapsByPlayer, log, pendingAction: null }, rng);
+    }
+    default:
+      return endTurn({ ...state, log: log0 });
+  }
+}
+
+export function drawAndApplyCard(state: GameState, rng: Rng): GameState {
+  let s = state;
+  let chain = 0;
+  while (s.pendingAction?.kind === "drawCard") {
+    if (chain >= MAX_CHAIN) {
+      return endTurn({ ...s, log: addLog(s.log, "連鎖過多，強制結束回合") });
+    }
+    const card = s.pendingAction.card;
+    s = applyCardEffect({ ...s, pendingAction: null }, card, rng);
+    chain++;
+  }
+  return s;
 }
