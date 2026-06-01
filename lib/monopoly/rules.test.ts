@@ -3,6 +3,7 @@ import {
   answerQuestion,
   confirmPurchase,
   drawAndApplyCard,
+  ranking,
   resolveLanding,
   startGame,
   takeTurn,
@@ -63,7 +64,7 @@ function game() {
 
 describe("takeTurn 擲骰與移動", () => {
   it("擲骰移動並記錄 lastRoll（兩顆骰 0.99,0.99 → 6+6=12）", () => {
-    const s = takeTurn(game(), seqRng([0.99, 0.99]));
+    const s = takeTurn(game(), seqRng([0.99, 0.99]), 0);
     expect(s.lastRoll).toEqual([6, 6]);
     expect(s.players[0].position).toBe(12); // 0 -> 12
   });
@@ -71,7 +72,7 @@ describe("takeTurn 擲骰與移動", () => {
   it("繞過起點發薪並 lap+1（從 23 擲 5 → 繞回 4）", () => {
     let s = game();
     s = { ...s, players: replaceForTest(s.players, 0, { position: 23 }) };
-    s = takeTurn(s, seqRng([0.5, 0])); // 4 + 1 = 5; 23+5=28 %24 =4，經過起點
+    s = takeTurn(s, seqRng([0.5, 0]), 0); // 4 + 1 = 5; 23+5=28 %24 =4，經過起點
     expect(s.players[0].position).toBe(4);
     expect(s.players[0].money).toBe(
       DEFAULT_SETTINGS.startingMoney + DEFAULT_SETTINGS.passStartBonus,
@@ -82,7 +83,7 @@ describe("takeTurn 擲骰與移動", () => {
   it("skipTurns>0 時跳過該玩家、不擲骰、換下一位", () => {
     let s = game();
     s = { ...s, players: replaceForTest(s.players, 0, { skipTurns: 1 }) };
-    const after = takeTurn(s, seqRng([0.99, 0.99]));
+    const after = takeTurn(s, seqRng([0.99, 0.99]), 0);
     expect(after.players[0].skipTurns).toBe(0);
     expect(after.lastRoll).toBeNull();
     expect(after.currentPlayerIndex).toBe(1);
@@ -93,7 +94,7 @@ describe("resolveLanding 各格", () => {
   it("無主地 → buyQuestion", () => {
     let s = game();
     s = { ...s, players: replaceForTest(s.players, 0, { position: 1 }) };
-    s = resolveLanding(s, seqRng([0]));
+    s = resolveLanding(s, seqRng([0]), 0);
     expect(s.pendingAction?.kind).toBe("buyQuestion");
   });
 
@@ -103,21 +104,21 @@ describe("resolveLanding 各格", () => {
       ...s,
       players: replaceForTest(s.players, 0, { position: 1, ownedTiles: [1] }),
     };
-    s = resolveLanding(s, seqRng([0]));
+    s = resolveLanding(s, seqRng([0]), 0);
     expect(s.pendingAction?.kind).toBe("buildQuestion");
   });
 
   it("機會格 → drawCard(chance)", () => {
     let s = game();
     s = { ...s, players: replaceForTest(s.players, 0, { position: 2 }) };
-    s = resolveLanding(s, seqRng([0]));
+    s = resolveLanding(s, seqRng([0]), 0);
     expect(s.pendingAction).toMatchObject({ kind: "drawCard", deck: "chance" });
   });
 
   it("監獄格 → skipTurns=1 並結束回合（pendingAction 為 null）", () => {
     let s = game();
     s = { ...s, players: replaceForTest(s.players, 0, { position: 7 }) };
-    s = resolveLanding(s, seqRng([0]));
+    s = resolveLanding(s, seqRng([0]), 0);
     expect(s.players[0].skipTurns).toBe(1);
     expect(s.pendingAction).toBeNull();
   });
@@ -126,33 +127,33 @@ describe("resolveLanding 各格", () => {
 function landedOnUnowned() {
   let s = game();
   s = { ...s, players: replaceForTest(s.players, 0, { position: 1 }) };
-  return resolveLanding(s, seqRng([0])); // pendingAction = buyQuestion(tile 1)
+  return resolveLanding(s, seqRng([0]), 0); // pendingAction = buyQuestion(tile 1)
 }
 
 describe("answerQuestion / confirmPurchase 買地", () => {
   it("答對 → confirmBuy", () => {
-    const s = answerQuestion(landedOnUnowned(), true);
+    const s = answerQuestion(landedOnUnowned(), true, 0);
     expect(s.pendingAction).toMatchObject({ kind: "confirmBuy", tileIndex: 1 });
   });
 
   it("答錯 → 不能買、結束回合、換人", () => {
-    const s = answerQuestion(landedOnUnowned(), false);
+    const s = answerQuestion(landedOnUnowned(), false, 0);
     expect(s.pendingAction).toBeNull();
     expect(s.players[0].ownedTiles).toEqual([]);
     expect(s.currentPlayerIndex).toBe(1);
   });
 
   it("confirm 買 → 扣地價、取得地、換人", () => {
-    let s = answerQuestion(landedOnUnowned(), true);
-    s = confirmPurchase(s, true);
+    let s = answerQuestion(landedOnUnowned(), true, 0);
+    s = confirmPurchase(s, true, 0);
     expect(s.players[0].ownedTiles).toEqual([1]);
     expect(s.players[0].money).toBe(15000 - 2000);
     expect(s.currentPlayerIndex).toBe(1);
   });
 
   it("confirm 不買 → 不扣錢、不取得", () => {
-    let s = answerQuestion(landedOnUnowned(), true);
-    s = confirmPurchase(s, false);
+    let s = answerQuestion(landedOnUnowned(), true, 0);
+    s = confirmPurchase(s, false, 0);
     expect(s.players[0].ownedTiles).toEqual([]);
     expect(s.players[0].money).toBe(15000);
   });
@@ -160,8 +161,8 @@ describe("answerQuestion / confirmPurchase 買地", () => {
   it("錢不足無法買", () => {
     let s = landedOnUnowned();
     s = { ...s, players: replaceForTest(s.players, 0, { money: 100 }) };
-    s = answerQuestion(s, true);
-    s = confirmPurchase(s, true);
+    s = answerQuestion(s, true, 0);
+    s = confirmPurchase(s, true, 0);
     expect(s.players[0].ownedTiles).toEqual([]);
     expect(s.players[0].money).toBe(100);
   });
@@ -174,15 +175,15 @@ describe("蓋房", () => {
       ...s,
       players: replaceForTest(s.players, 0, { position: 1, ownedTiles: [1] }),
     };
-    return resolveLanding(s, seqRng([0])); // buildQuestion
+    return resolveLanding(s, seqRng([0]), 0); // buildQuestion
   }
   it("答對並確認 → houses+1、扣 houseCost", () => {
-    let s = answerQuestion(ownAndLand(), true);
+    let s = answerQuestion(ownAndLand(), true, 0);
     expect(s.pendingAction).toMatchObject({
       kind: "confirmBuild",
       tileIndex: 1,
     });
-    s = confirmPurchase(s, true);
+    s = confirmPurchase(s, true, 0);
     expect(s.players[0].houses[1]).toBe(1);
     expect(s.players[0].money).toBe(15000 - 1000); // houseCost = price/2 = 1000
   });
@@ -204,7 +205,7 @@ describe("破產", () => {
       ...s,
       players: replaceForTest(s.players, 0, { position: 1, money: 100 }),
     };
-    s = resolveLanding(s, seqRng([0])); // 觸發 payToll
+    s = resolveLanding(s, seqRng([0]), 0); // 觸發 payToll
     expect(s.players[0].bankrupt).toBe(true);
     expect(s.players[0].money).toBe(0);
     expect(s.players[0].ownedTiles).toEqual([]);
@@ -223,8 +224,8 @@ describe("drawAndApplyCard", () => {
   it("money 卡 → 加錢並結束回合", () => {
     // 機會格 index 2，seqRng 第一個值挑卡：挑到 c1(+2000)
     let s = landOnCard("chance", 2);
-    s = resolveLanding(s, seqRng([0])); // pendingAction drawCard chance, card index 0 = c1 +2000
-    s = drawAndApplyCard(s, seqRng([0]));
+    s = resolveLanding(s, seqRng([0]), 0); // pendingAction drawCard chance, card index 0 = c1 +2000
+    s = drawAndApplyCard(s, seqRng([0]), 0);
     expect(s.players[0].money).toBe(15000 + 2000);
     expect(s.currentPlayerIndex).toBe(1);
   });
@@ -232,23 +233,72 @@ describe("drawAndApplyCard", () => {
   it("moveTo 起點(0) → 移動後落點結算（起點無事、結束回合）", () => {
     let s = landOnCard("chance", 2);
     // 強制抽到 c5 (moveTo 0)：CHANCE_CARDS index 4 → rng 0.7*6=4
-    s = resolveLanding(s, seqRng([4 / 6 + 0.001]));
-    s = drawAndApplyCard(s, seqRng([0]));
+    s = resolveLanding(s, seqRng([4 / 6 + 0.001]), 0);
+    s = drawAndApplyCard(s, seqRng([0]), 0);
     expect(s.players[0].position).toBe(0);
   });
 
   it("jail 卡 → skipTurns=1", () => {
     let s = landOnCard("fate", 5);
     // FATE_CARDS index 3 = f4 jail → rng 3/6+eps
-    s = resolveLanding(s, seqRng([3 / 6 + 0.001]));
-    s = drawAndApplyCard(s, seqRng([0]));
+    s = resolveLanding(s, seqRng([3 / 6 + 0.001]), 0);
+    s = drawAndApplyCard(s, seqRng([0]), 0);
     expect(s.players[0].skipTurns).toBe(1);
   });
 
   it("連鎖達上限會強制結束（不會無限迴圈）", () => {
     let s = landOnCard("chance", 2);
-    s = resolveLanding(s, seqRng([0]));
-    s = drawAndApplyCard(s, seqRng([0.99]));
-    expect(s.pendingAction === null || s.pendingAction.kind !== "drawCard").toBe(true);
+    s = resolveLanding(s, seqRng([0]), 0);
+    s = drawAndApplyCard(s, seqRng([0.99]), 0);
+    expect(
+      s.pendingAction === null || s.pendingAction.kind !== "drawCard",
+    ).toBe(true);
+  });
+});
+
+describe("結束條件", () => {
+  it("moneyGoal 達標立即結束、該玩家第一", () => {
+    let s = startGame(
+      { ...DEFAULT_SETTINGS, endCondition: { type: "moneyGoal", amount: 16000 } },
+      Q,
+      PLAYERS,
+      0,
+    );
+    s = { ...s, players: replaceForTest(s.players, 0, { position: 2 }) };
+    // 機會格抽 c1 +2000 → 17000 >= 16000
+    s = resolveLanding(s, seqRng([0]), 0);
+    s = drawAndApplyCard(s, seqRng([0]), 0);
+    expect(s.phase).toBe("gameover");
+    expect(ranking(s)[0].name).toBe("小明");
+  });
+
+  it("time 到 → 結束", () => {
+    let s = startGame(
+      { ...DEFAULT_SETTINGS, endCondition: { type: "time", minutes: 10 } },
+      Q,
+      PLAYERS,
+      0,
+    );
+    // 經過 11 分鐘（毫秒）
+    s = takeTurn(s, seqRng([0, 0]), 11 * 60 * 1000);
+    expect(s.phase).toBe("gameover");
+  });
+
+  it("lastOneStanding：只剩一位非破產 → 結束", () => {
+    let s = game();
+    s = { ...s, players: replaceForTest(s.players, 1, { bankrupt: true }) };
+    s = {
+      ...s,
+      settings: { ...s.settings, endCondition: { type: "lastOneStanding" } },
+    };
+    s = takeTurn(s, seqRng([0, 0]), 0); // p0 擲 1+1 落 start
+    expect(s.phase).toBe("gameover");
+  });
+
+  it("ranking 依現金排序，同分比資產", () => {
+    let s = game();
+    s = { ...s, players: replaceForTest(s.players, 0, { money: 5000, ownedTiles: [1] }) };
+    s = { ...s, players: replaceForTest(s.players, 1, { money: 5000 }) };
+    expect(ranking(s)[0].name).toBe("小明"); // 同現金，p0 有資產
   });
 });
