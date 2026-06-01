@@ -17,6 +17,7 @@ export interface BaseTile {
   index: number;
   type: TileType;
   name: string;
+  image?: string; // 圖示路徑（地標／機會／命運），可選
 }
 
 export interface PropertyTile extends BaseTile {
@@ -90,10 +91,26 @@ export const DEFAULT_SETTINGS: GameSettings = {
 };
 
 export const PLAYER_COLORS: string[] = [
-  "#ef4444", "#f97316", "#eab308", "#22c55e", "#14b8a6",
-  "#3b82f6", "#6366f1", "#a855f7", "#ec4899", "#f43f5e",
-  "#84cc16", "#06b6d4", "#0ea5e9", "#8b5cf6", "#d946ef",
-  "#10b981", "#f59e0b", "#64748b", "#7c3aed", "#db2777",
+  "#ef4444",
+  "#f97316",
+  "#eab308",
+  "#22c55e",
+  "#14b8a6",
+  "#3b82f6",
+  "#6366f1",
+  "#a855f7",
+  "#ec4899",
+  "#f43f5e",
+  "#84cc16",
+  "#06b6d4",
+  "#0ea5e9",
+  "#8b5cf6",
+  "#d946ef",
+  "#10b981",
+  "#f59e0b",
+  "#64748b",
+  "#7c3aed",
+  "#db2777",
 ];
 
 // === 進行中事件 ===
