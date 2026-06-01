@@ -80,7 +80,46 @@ function drawQuestion(state: GameState, rng: Rng): Question {
   return state.questions[pickIndex(state.questions.length, rng)];
 }
 
-// === 過路費（Task 9 會強化破產） ===
+// === 收款／破產 ===
+// 向 payerIdx 收取 amount，付給 ownerId（ownerId 為 null 表示付給銀行）。
+// 不足以支付 → 破產：付出全部現金、釋地、money=0、bankrupt=true。
+function chargeOrBankrupt(
+  state: GameState,
+  payerIdx: number,
+  amount: number,
+  ownerId: string | null,
+): GameState {
+  const payer = state.players[payerIdx];
+  let players = state.players;
+  let log = state.log;
+
+  if (payer.money >= amount) {
+    players = replacePlayer(players, payerIdx, { money: payer.money - amount });
+    if (ownerId) {
+      const oi = players.findIndex((p) => p.id === ownerId);
+      players = replacePlayer(players, oi, {
+        money: players[oi].money + amount,
+      });
+    }
+    log = addLog(log, `${payer.name} 支付 $${amount}`);
+  } else {
+    const paid = payer.money;
+    players = replacePlayer(players, payerIdx, {
+      money: 0,
+      bankrupt: true,
+      ownedTiles: [],
+      houses: {},
+    });
+    if (ownerId) {
+      const oi = players.findIndex((p) => p.id === ownerId);
+      players = replacePlayer(players, oi, { money: players[oi].money + paid });
+    }
+    log = addLog(log, `${payer.name} 破產了！`);
+  }
+  return { ...state, players, log };
+}
+
+// === 過路費 ===
 function payToll(
   state: GameState,
   payerIdx: number,
@@ -90,18 +129,7 @@ function payToll(
   const houses =
     state.players.find((p) => p.id === ownerId)!.houses[prop.index] ?? 0;
   const toll = prop.toll[houses];
-  const ownerIdx = state.players.findIndex((p) => p.id === ownerId);
-  let players = replacePlayer(state.players, payerIdx, {
-    money: state.players[payerIdx].money - toll,
-  });
-  players = replacePlayer(players, ownerIdx, {
-    money: players[ownerIdx].money + toll,
-  });
-  const log = addLog(
-    state.log,
-    `${state.players[payerIdx].name} 付過路費 $${toll} 給 ${state.players[ownerIdx].name}`,
-  );
-  return endTurn({ ...state, players, log });
+  return endTurn(chargeOrBankrupt(state, payerIdx, toll, ownerId));
 }
 
 // === 落點判定 ===

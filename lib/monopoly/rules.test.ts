@@ -180,3 +180,19 @@ describe("蓋房", () => {
     expect(s.players[0].money).toBe(15000 - 1000); // houseCost = price/2 = 1000
   });
 });
+
+describe("破產", () => {
+  it("付不出過路費 → 破產、釋地、後續被跳過", () => {
+    let s = game();
+    // p1 擁有 tile 1 並蓋滿房子（高額過路費）
+    s = { ...s, players: replaceForTest(s.players, 1, { ownedTiles: [1], houses: { 1: 3 } }) };
+    // p0 錢只剩 100，停在 tile 1
+    s = { ...s, players: replaceForTest(s.players, 0, { position: 1, money: 100 }) };
+    s = resolveLanding(s, seqRng([0])); // 觸發 payToll
+    expect(s.players[0].bankrupt).toBe(true);
+    expect(s.players[0].money).toBe(0);
+    expect(s.players[0].ownedTiles).toEqual([]);
+    // 地主收到 p0 能付的 100
+    expect(s.players[1].money).toBe(15000 + 100);
+  });
+});
