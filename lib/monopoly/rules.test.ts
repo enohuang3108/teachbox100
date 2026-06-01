@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { resolveLanding, startGame, takeTurn } from "./rules";
+import {
+  answerQuestion,
+  confirmPurchase,
+  resolveLanding,
+  startGame,
+  takeTurn,
+} from "./rules";
 import { seqRng } from "./rng";
 import {
   DEFAULT_SETTINGS,
@@ -92,7 +98,10 @@ describe("resolveLanding 各格", () => {
 
   it("自己的地 → buildQuestion", () => {
     let s = game();
-    s = { ...s, players: replaceForTest(s.players, 0, { position: 1, ownedTiles: [1] }) };
+    s = {
+      ...s,
+      players: replaceForTest(s.players, 0, { position: 1, ownedTiles: [1] }),
+    };
     s = resolveLanding(s, seqRng([0]));
     expect(s.pendingAction?.kind).toBe("buildQuestion");
   });
@@ -110,5 +119,64 @@ describe("resolveLanding 各格", () => {
     s = resolveLanding(s, seqRng([0]));
     expect(s.players[0].skipTurns).toBe(1);
     expect(s.pendingAction).toBeNull();
+  });
+});
+
+function landedOnUnowned() {
+  let s = game();
+  s = { ...s, players: replaceForTest(s.players, 0, { position: 1 }) };
+  return resolveLanding(s, seqRng([0])); // pendingAction = buyQuestion(tile 1)
+}
+
+describe("answerQuestion / confirmPurchase 買地", () => {
+  it("答對 → confirmBuy", () => {
+    const s = answerQuestion(landedOnUnowned(), true);
+    expect(s.pendingAction).toMatchObject({ kind: "confirmBuy", tileIndex: 1 });
+  });
+
+  it("答錯 → 不能買、結束回合、換人", () => {
+    const s = answerQuestion(landedOnUnowned(), false);
+    expect(s.pendingAction).toBeNull();
+    expect(s.players[0].ownedTiles).toEqual([]);
+    expect(s.currentPlayerIndex).toBe(1);
+  });
+
+  it("confirm 買 → 扣地價、取得地、換人", () => {
+    let s = answerQuestion(landedOnUnowned(), true);
+    s = confirmPurchase(s, true);
+    expect(s.players[0].ownedTiles).toEqual([1]);
+    expect(s.players[0].money).toBe(15000 - 2000);
+    expect(s.currentPlayerIndex).toBe(1);
+  });
+
+  it("confirm 不買 → 不扣錢、不取得", () => {
+    let s = answerQuestion(landedOnUnowned(), true);
+    s = confirmPurchase(s, false);
+    expect(s.players[0].ownedTiles).toEqual([]);
+    expect(s.players[0].money).toBe(15000);
+  });
+
+  it("錢不足無法買", () => {
+    let s = landedOnUnowned();
+    s = { ...s, players: replaceForTest(s.players, 0, { money: 100 }) };
+    s = answerQuestion(s, true);
+    s = confirmPurchase(s, true);
+    expect(s.players[0].ownedTiles).toEqual([]);
+    expect(s.players[0].money).toBe(100);
+  });
+});
+
+describe("蓋房", () => {
+  function ownAndLand() {
+    let s = game();
+    s = { ...s, players: replaceForTest(s.players, 0, { position: 1, ownedTiles: [1] }) };
+    return resolveLanding(s, seqRng([0])); // buildQuestion
+  }
+  it("答對並確認 → houses+1、扣 houseCost", () => {
+    let s = answerQuestion(ownAndLand(), true);
+    expect(s.pendingAction).toMatchObject({ kind: "confirmBuild", tileIndex: 1 });
+    s = confirmPurchase(s, true);
+    expect(s.players[0].houses[1]).toBe(1);
+    expect(s.players[0].money).toBe(15000 - 1000); // houseCost = price/2 = 1000
   });
 });
