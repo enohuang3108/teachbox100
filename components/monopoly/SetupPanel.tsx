@@ -10,10 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/atoms/shadcn/select";
-import { buildTemplateBlob, parseQuestions, rowsFromFile } from "@/lib/monopoly/excel";
+import {
+  buildTemplateBlob,
+  parseQuestions,
+  rowsFromFile,
+} from "@/lib/monopoly/excel";
 import { useMonopolyStore } from "@/lib/monopoly/store";
 import { PLAYER_COLORS, type EndCondition } from "@/lib/monopoly/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function SetupPanel() {
   const {
@@ -40,6 +44,15 @@ export function SetupPanel() {
     );
     setPlayers(next);
   }
+
+  // 進頁面（或人數變更）時，確保 draftPlayers 與人數同步，
+  // 否則使用者未手動編輯玩家時 draftPlayers 為空，begin() 會因人數不足而失效。
+  useEffect(() => {
+    if (draftPlayers.length !== playerCount) {
+      syncPlayers(playerCount);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playerCount]);
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -84,7 +97,9 @@ export function SetupPanel() {
           </Button>
         </div>
         {draftQuestions.length > 0 && (
-          <p className="text-sm text-green-600">已載入 {draftQuestions.length} 題</p>
+          <p className="text-sm text-green-600">
+            已載入 {draftQuestions.length} 題
+          </p>
         )}
         {errors.length > 0 && (
           <ul className="max-h-40 overflow-y-auto text-sm text-red-600">
@@ -148,7 +163,9 @@ export function SetupPanel() {
           <Label>骰子數量</Label>
           <Select
             value={String(draftSettings.diceCount)}
-            onValueChange={(v) => updateSettings({ diceCount: Number(v) as 1 | 2 })}
+            onValueChange={(v) =>
+              updateSettings({ diceCount: Number(v) as 1 | 2 })
+            }
           >
             <SelectTrigger>
               <SelectValue />
