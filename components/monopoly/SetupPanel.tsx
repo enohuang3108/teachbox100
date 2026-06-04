@@ -17,6 +17,7 @@ import {
 } from "@/lib/monopoly/excel";
 import { useMonopolyStore } from "@/lib/monopoly/store";
 import { PLAYER_COLORS, type EndCondition } from "@/lib/monopoly/types";
+import { PlayerAvatar } from "./Avatar";
 import { useEffect, useState } from "react";
 
 export function SetupPanel() {
@@ -127,9 +128,10 @@ export function SetupPanel() {
         <div className="grid grid-cols-2 gap-2">
           {Array.from({ length: playerCount }, (_, i) => (
             <div key={i} className="flex items-center gap-2">
-              <span
-                className="h-4 w-4 rounded-full"
-                style={{ background: PLAYER_COLORS[i % PLAYER_COLORS.length] }}
+              <PlayerAvatar
+                id={`p${i}`}
+                color={PLAYER_COLORS[i % PLAYER_COLORS.length]}
+                size={32}
               />
               <Input
                 value={draftPlayers[i]?.name ?? `玩家${i + 1}`}

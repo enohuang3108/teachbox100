@@ -5,6 +5,7 @@ import NextImage from "next/image";
 import type { ReactNode } from "react";
 import { BOARD } from "@/lib/monopoly/board";
 import { isProperty, type Player, type Tile } from "@/lib/monopoly/types";
+import { PlayerAvatar } from "./Avatar";
 
 const HOUSE_IMG = "/images/monopoly/house.webp";
 
@@ -31,22 +32,6 @@ const SPECIAL: Record<string, { bg: string; emoji?: string }> = {
   fate: { bg: "bg-violet-50" },
 };
 
-// 玩家棋子（頭＋身體的 pawn 造型）
-function Pawn({ color }: { color: string }) {
-  return (
-    <span className="flex flex-col items-center leading-none drop-shadow">
-      <span
-        className="block h-2 w-2 rounded-full ring-1 ring-white"
-        style={{ background: color }}
-      />
-      <span
-        className="-mt-[3px] block h-2.5 w-3 rounded-t-[45%] rounded-b-[25%] ring-1 ring-white"
-        style={{ background: color }}
-      />
-    </span>
-  );
-}
-
 interface Walking {
   playerId: string;
   pos: number;
@@ -68,7 +53,9 @@ function TileCard({
   const houses = owner ? (owner.houses[tile.index] ?? 0) : 0;
   const renderPos = (p: Player) =>
     walking && walking.playerId === p.id ? walking.pos : p.position;
-  const here = players.filter((p) => !p.bankrupt && renderPos(p) === tile.index);
+  const here = players.filter(
+    (p) => !p.bankrupt && renderPos(p) === tile.index,
+  );
   const special = SPECIAL[tile.type];
 
   return (
@@ -93,7 +80,13 @@ function TileCard({
         {houses > 0 && (
           <span className="flex shrink-0">
             {Array.from({ length: houses }).map((_, i) => (
-              <NextImage key={i} src={HOUSE_IMG} alt="" width={10} height={10} />
+              <NextImage
+                key={i}
+                src={HOUSE_IMG}
+                alt=""
+                width={10}
+                height={10}
+              />
             ))}
           </span>
         )}
@@ -127,11 +120,11 @@ function TileCard({
                 layoutId={`pawn-${p.id}`}
                 transition={{ type: "spring", stiffness: 500, damping: 32 }}
               >
-                <Pawn color={p.color} />
+                <PlayerAvatar id={p.id} color={p.color} size={40} />
               </motion.span>
             ) : (
               <span key={p.id} title={p.name}>
-                <Pawn color={p.color} />
+                <PlayerAvatar id={p.id} color={p.color} size={36} />
               </span>
             ),
           )}

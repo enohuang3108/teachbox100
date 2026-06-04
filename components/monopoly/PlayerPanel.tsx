@@ -1,9 +1,12 @@
 "use client";
 
 import type { GameState } from "@/lib/monopoly/types";
+import { PlayerAvatar } from "./Avatar";
 
 export function PlayerPanel({ game }: { game: GameState }) {
-  const leader = Math.max(...game.players.map((p) => (p.bankrupt ? -1 : p.money)));
+  const leader = Math.max(
+    ...game.players.map((p) => (p.bankrupt ? -1 : p.money)),
+  );
 
   return (
     <div className="flex h-full flex-col gap-4">
@@ -19,12 +22,7 @@ export function PlayerPanel({ game }: { game: GameState }) {
                 active ? "ring-2 ring-amber-400" : "ring-1 ring-black/5"
               } ${p.bankrupt ? "opacity-40 grayscale" : ""}`}
             >
-              <span
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-bold text-white shadow-inner"
-                style={{ background: p.color }}
-              >
-                {p.name.slice(0, 1)}
-              </span>
+              <PlayerAvatar id={p.id} color={p.color} size={40} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <span className="truncate text-sm font-bold text-zinc-800">

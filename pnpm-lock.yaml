@@ -104,6 +104,9 @@ importers:
       '@uidotdev/usehooks':
         specifier: ^2.4.1
         version: 2.4.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      beanheads:
+        specifier: ^0.3.3
+        version: 0.3.3(react@19.1.0)
       canvas-confetti:
         specifier: ^1.9.3
         version: 1.9.3
@@ -2234,6 +2237,12 @@ packages:
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
+
+  beanheads@0.3.3:
+    resolution: {integrity: sha512-xcL8FA02+5mIsonwXxnXqd11eXR534VgXCusogBn0t5JXNckaD1UgH0C65wq5h1osK8bbv+2IYpNQM9OplVFVQ==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>=16'
 
   big.js@5.2.2:
     resolution: {integrity: sha512-vyL2OymJxmarO8gxMr0mhChsO9QGwhynfuu4+MHTAW6czfq9humCB7rKpUjDd9YUiDPU4mzpyupFSvOClAwbmQ==}
@@ -6386,6 +6395,10 @@ snapshots:
       - supports-color
 
   balanced-match@1.0.2: {}
+
+  beanheads@0.3.3(react@19.1.0):
+    dependencies:
+      react: 19.1.0
 
   big.js@5.2.2: {}
 
