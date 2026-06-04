@@ -1,5 +1,6 @@
 "use client";
 
+import { LayoutGroup, motion } from "motion/react";
 import NextImage from "next/image";
 import type { ReactNode } from "react";
 import { BOARD } from "@/lib/monopoly/board";
@@ -30,13 +31,44 @@ const SPECIAL: Record<string, { bg: string; emoji?: string }> = {
   fate: { bg: "bg-violet-50" },
 };
 
-function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
+// 玩家棋子（頭＋身體的 pawn 造型）
+function Pawn({ color }: { color: string }) {
+  return (
+    <span className="flex flex-col items-center leading-none drop-shadow">
+      <span
+        className="block h-2 w-2 rounded-full ring-1 ring-white"
+        style={{ background: color }}
+      />
+      <span
+        className="-mt-[3px] block h-2.5 w-3 rounded-t-[45%] rounded-b-[25%] ring-1 ring-white"
+        style={{ background: color }}
+      />
+    </span>
+  );
+}
+
+interface Walking {
+  playerId: string;
+  pos: number;
+}
+
+function TileCard({
+  tile,
+  players,
+  walking,
+}: {
+  tile: Tile;
+  players: Player[];
+  walking?: Walking | null;
+}) {
   const property = isProperty(tile);
   const owner = property
     ? players.find((p) => p.ownedTiles.includes(tile.index))
     : undefined;
   const houses = owner ? (owner.houses[tile.index] ?? 0) : 0;
-  const here = players.filter((p) => !p.bankrupt && p.position === tile.index);
+  const renderPos = (p: Player) =>
+    walking && walking.playerId === p.id ? walking.pos : p.position;
+  const here = players.filter((p) => !p.bankrupt && renderPos(p) === tile.index);
   const special = SPECIAL[tile.type];
 
   return (
@@ -87,15 +119,22 @@ function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
         </div>
       )}
       {here.length > 0 && (
-        <div className="absolute inset-x-0 bottom-0 flex flex-wrap justify-center gap-0.5 bg-white/75 p-0.5 backdrop-blur-sm">
-          {here.map((p) => (
-            <span
-              key={p.id}
-              title={p.name}
-              className="h-2.5 w-2.5 rounded-full border border-white shadow ring-1 ring-black/10"
-              style={{ background: p.color }}
-            />
-          ))}
+        <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-center gap-0.5 bg-white/75 p-0.5 backdrop-blur-sm">
+          {here.map((p) =>
+            walking && walking.playerId === p.id ? (
+              <motion.span
+                key={p.id}
+                layoutId={`pawn-${p.id}`}
+                transition={{ type: "spring", stiffness: 500, damping: 32 }}
+              >
+                <Pawn color={p.color} />
+              </motion.span>
+            ) : (
+              <span key={p.id} title={p.name}>
+                <Pawn color={p.color} />
+              </span>
+            ),
+          )}
         </div>
       )}
     </div>
@@ -105,33 +144,37 @@ function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
 export function Board({
   players,
   currentIndex,
+  walking,
   center,
 }: {
   players: Player[];
   currentIndex: number;
+  walking?: Walking | null;
   center?: ReactNode;
 }) {
   return (
     <div className="aspect-square w-full max-w-[820px]">
-      <div className="grid h-full w-full grid-cols-7 grid-rows-7 gap-1.5 rounded-[20px] border-[6px] border-amber-950/10 bg-[#fdf4e3] p-1.5 shadow-[0_18px_50px_-18px_rgba(120,80,20,0.5)]">
-        {BOARD.map((tile) => {
-          const pos = tilePos(tile.index);
-          return (
-            <div
-              key={tile.index}
-              style={{ gridRow: pos.row, gridColumn: pos.col }}
-            >
-              <TileCard tile={tile} players={players} />
-            </div>
-          );
-        })}
-        <div
-          className="m-1 flex items-center justify-center rounded-2xl bg-emerald-50/70 p-3 ring-1 ring-emerald-900/10"
-          style={{ gridColumn: "2 / 7", gridRow: "2 / 7" }}
-        >
-          {center}
+      <LayoutGroup>
+        <div className="grid h-full w-full grid-cols-7 grid-rows-7 gap-1.5 rounded-[20px] border-[6px] border-amber-950/10 bg-[#fdf4e3] p-1.5 shadow-[0_18px_50px_-18px_rgba(120,80,20,0.5)]">
+          {BOARD.map((tile) => {
+            const pos = tilePos(tile.index);
+            return (
+              <div
+                key={tile.index}
+                style={{ gridRow: pos.row, gridColumn: pos.col }}
+              >
+                <TileCard tile={tile} players={players} walking={walking} />
+              </div>
+            );
+          })}
+          <div
+            className="m-1 flex items-center justify-center rounded-2xl bg-emerald-50/70 p-3 ring-1 ring-emerald-900/10"
+            style={{ gridColumn: "2 / 7", gridRow: "2 / 7" }}
+          >
+            {center}
+          </div>
         </div>
-      </div>
+      </LayoutGroup>
       <span className="sr-only">目前玩家：{players[currentIndex]?.name}</span>
     </div>
   );

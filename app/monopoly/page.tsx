@@ -8,12 +8,20 @@ import { GameOverDialog } from "@/components/monopoly/GameOverDialog";
 import { PlayerPanel } from "@/components/monopoly/PlayerPanel";
 import { QuestionDialog } from "@/components/monopoly/QuestionDialog";
 import { SetupPanel } from "@/components/monopoly/SetupPanel";
+import { BOARD_SIZE } from "@/lib/monopoly/board";
 import { realisticEffect } from "@/lib/helpers/confetti-effects";
 import { useMonopolyStore } from "@/lib/monopoly/store";
 
+const STEP_MS = 240; // 每走一格的間隔
+
 export default function MonopolyPage() {
   const [hydrated, setHydrated] = useState(false);
-  const { game, roll, answer, confirm, resolveCard, reset } = useMonopolyStore();
+  const [rolling, setRolling] = useState(false);
+  const [walk, setWalk] = useState<{ playerId: string; pos: number } | null>(
+    null,
+  );
+  const { game, roll, answer, confirm, resolveCard, reset } =
+    useMonopolyStore();
 
   useEffect(() => setHydrated(true), []);
 
@@ -30,6 +38,39 @@ export default function MonopolyPage() {
   const pa = game.pendingAction;
   const rollDisabled = pa !== null;
   const current = game.players[game.currentPlayerIndex];
+  const animating = rolling || walk !== null;
+
+  // 擲骰流程：翻滾動畫 → 結算 → 棋子一格一格走 → 結束後才觸發後續事件
+  function handleRoll() {
+    if (!game || rollDisabled || animating) return;
+    const moverIdx = game.currentPlayerIndex;
+    const mover = game.players[moverIdx];
+    const fromPos = mover.position;
+    const moverId = mover.id;
+
+    setRolling(true);
+    window.setTimeout(() => {
+      setRolling(false);
+      roll();
+
+      const next = useMonopolyStore.getState().game;
+      const dice = next?.lastRoll;
+      const steps = dice ? dice.reduce((a, b) => a + b, 0) : 0;
+      if (steps <= 0) return; // 暫停回合等情況：不走格
+
+      let step = 0;
+      const advance = () => {
+        step += 1;
+        setWalk({ playerId: moverId, pos: (fromPos + step) % BOARD_SIZE });
+        if (step >= steps) {
+          window.setTimeout(() => setWalk(null), STEP_MS); // 最後一步落定後解除
+          return;
+        }
+        window.setTimeout(advance, STEP_MS);
+      };
+      advance();
+    }, 700);
+  }
 
   const center = (
     <div className="flex w-full max-w-[18rem] flex-col items-center gap-3 text-center">
@@ -45,7 +86,13 @@ export default function MonopolyPage() {
           輪到 {current?.name}
         </span>
       </div>
-      <Dice lastRoll={game.lastRoll} disabled={rollDisabled} onRoll={roll} />
+      <Dice
+        lastRoll={game.lastRoll}
+        rolling={rolling}
+        count={game.settings.diceCount}
+        disabled={rollDisabled || animating}
+        onRoll={handleRoll}
+      />
       <div className="w-full space-y-0.5 rounded-xl bg-white/70 p-2 text-left text-[11px] leading-snug text-zinc-500 ring-1 ring-black/5">
         {game.log.slice(0, 3).map((line, i) => (
           <div key={i} className={i === 0 ? "font-semibold text-zinc-800" : ""}>
@@ -63,6 +110,7 @@ export default function MonopolyPage() {
           <Board
             players={game.players}
             currentIndex={game.currentPlayerIndex}
+            walking={walk}
             center={center}
           />
         </div>
@@ -82,16 +130,24 @@ export default function MonopolyPage() {
         </aside>
       </div>
 
-      {(pa?.kind === "buyQuestion" || pa?.kind === "buildQuestion") && (
-        <QuestionDialog pending={pa} question={pa.question} onAnswered={answer} />
-      )}
-      {(pa?.kind === "confirmBuy" || pa?.kind === "confirmBuild") && (
-        <PurchaseConfirm
-          label={pa.kind === "confirmBuy" ? "購買這塊地？" : "在這裡蓋一棟房子？"}
-          onConfirm={confirm}
-        />
-      )}
-      {pa?.kind === "drawCard" && (
+      {!animating &&
+        (pa?.kind === "buyQuestion" || pa?.kind === "buildQuestion") && (
+          <QuestionDialog
+            pending={pa}
+            question={pa.question}
+            onAnswered={answer}
+          />
+        )}
+      {!animating &&
+        (pa?.kind === "confirmBuy" || pa?.kind === "confirmBuild") && (
+          <PurchaseConfirm
+            label={
+              pa.kind === "confirmBuy" ? "購買這塊地？" : "在這裡蓋一棟房子？"
+            }
+            onConfirm={confirm}
+          />
+        )}
+      {!animating && pa?.kind === "drawCard" && (
         <CardDialog pending={pa} onResolve={resolveCard} />
       )}
 
