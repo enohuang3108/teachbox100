@@ -38,27 +38,27 @@ function HouseMarker({ color, size }: { color: string; size: number }) {
   );
 }
 
-// 24 格沿 9×5 方框邊緣排列（1-indexed row/col）。起點(0)在左上角，順時針。
+// 34 格沿 12×7 方框邊緣排列（1-indexed row/col）。起點(0)在左上角，順時針。
 function tilePos(i: number): { row: number; col: number } {
-  if (i <= 8) return { row: 1, col: i + 1 }; // 上排 0..8
-  if (i <= 12) return { row: i - 7, col: 9 }; // 右排 9..12（第 2..5 列）
-  if (i <= 20) return { row: 5, col: 21 - i }; // 下排 13..20（第 8..1 欄）
-  return { row: 25 - i, col: 1 }; // 左排 21..23（第 4..2 列）
+  if (i <= 11) return { row: 1, col: i + 1 }; // 上排 0..11（第 1..12 欄）
+  if (i <= 17) return { row: i - 10, col: 12 }; // 右排 12..17（第 2..7 列）
+  if (i <= 28) return { row: 7, col: 29 - i }; // 下排 18..28（第 11..1 欄）
+  return { row: 35 - i, col: 1 }; // 左排 29..33（第 6..2 列）
 }
 
 // 房子放在土地「靠近遊戲中心」的內側邊緣（依格子在環上的位置決定方向）
 function innerEdge(i: number): { cell: string; stack: string } {
-  if (i <= 8)
+  if (i <= 11)
     return {
       cell: "items-end justify-center",
       stack: "flex-row translate-y-[130%]",
     }; // 上排：底邊朝中心
-  if (i <= 12)
+  if (i <= 17)
     return {
       cell: "items-center justify-start",
       stack: "flex-col -translate-x-[130%]",
     }; // 右排：左邊朝中心
-  if (i <= 20)
+  if (i <= 28)
     return {
       cell: "items-start justify-center",
       stack: "flex-row -translate-y-[130%]",
@@ -123,7 +123,7 @@ function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
             src={tile.image}
             alt={tile.name}
             fill
-            sizes="110px"
+            sizes="90px"
             className="object-contain p-0.5"
           />
         ) : special?.emoji ? (
@@ -156,9 +156,9 @@ export function Board({
     walking && walking.playerId === p.id ? walking.pos : p.position;
 
   return (
-    <div className="aspect-[9/5] w-[min(97vw,calc((100vh_-_1.5rem)*1.8))]">
+    <div className="aspect-[12/7] w-[min(98vw,calc((100vh_-_1.5rem)*1.714))]">
       <LayoutGroup>
-        <div className="relative grid h-full w-full grid-cols-9 grid-rows-5 gap-1.5 rounded-[20px] border-[6px] border-amber-950/10 bg-[#fdf4e3] p-1.5 shadow-[0_18px_50px_-18px_rgba(120,80,20,0.5)]">
+        <div className="relative grid h-full w-full grid-cols-[repeat(12,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-1 rounded-[20px] border-[6px] border-amber-950/10 bg-[#fdf4e3] p-1 shadow-[0_18px_50px_-18px_rgba(120,80,20,0.5)]">
           {BOARD.map((tile) => {
             const pos = tilePos(tile.index);
             return (
@@ -173,13 +173,13 @@ export function Board({
 
           <div
             className="m-1 flex items-center justify-center rounded-2xl bg-emerald-50/70 p-3 ring-1 ring-emerald-900/10"
-            style={{ gridColumn: "2 / 9", gridRow: "2 / 5" }}
+            style={{ gridColumn: "2 / 12", gridRow: "2 / 7" }}
           >
             {center}
           </div>
 
           {/* 房子覆蓋層：擁有的土地在靠近中心的內側邊緣放上玩家顏色的房子 */}
-          <div className="pointer-events-none absolute inset-0 grid grid-cols-9 grid-rows-5 gap-1.5 p-1.5">
+          <div className="pointer-events-none absolute inset-0 grid grid-cols-[repeat(12,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-1 p-1">
             {BOARD.map((tile) => {
               if (!isProperty(tile)) return null;
               const owner = players.find((p) =>
@@ -213,7 +213,7 @@ export function Board({
           </div>
 
           {/* 棋子覆蓋層：與格子對齊、不裁切，棋子放大或走格都不會被切到鄰格 */}
-          <div className="pointer-events-none absolute inset-0 grid grid-cols-9 grid-rows-5 gap-1.5 p-1.5">
+          <div className="pointer-events-none absolute inset-0 grid grid-cols-[repeat(12,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-1 p-1">
             {BOARD.map((tile) => {
               const here = players.filter(
                 (p) => !p.bankrupt && renderPos(p) === tile.index,

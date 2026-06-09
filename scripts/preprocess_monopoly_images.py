@@ -7,6 +7,7 @@ import numpy as np
 from PIL import Image
 
 SRC = Path("public/images/monopoly")
+RAW = SRC / "source-raw"
 OUT = SRC / "processed"
 OUT.mkdir(exist_ok=True)
 
@@ -97,16 +98,21 @@ def split_grid(path: Path, rows: int, cols: int):
 def main():
     singles = {"機會卡": "chance", "命運卡": "fate", "房子": "house"}
     for zh, en in singles.items():
-        src = SRC / f"{zh}.png"
+        src = RAW / f"{zh}.png"
         if src.exists():
             print(f"[single] {zh}.png")
             process(Image.open(src), en)
 
-    grid = SRC / "景點.png"
-    if grid.exists():
-        print("[grid] 景點.png -> 16 cells")
-        for i, cell in enumerate(split_grid(grid, 4, 4), start=1):
-            process(cell, f"landmark-{i:02d}")
+    grids = [
+        ("景點.png", 4, 4, 1),     # 第一批 4x4 -> landmark-01..16
+        ("景點02.png", 3, 3, 16),  # 第二批 3x3 -> landmark-16..24
+    ]
+    for fname, rows, cols, start in grids:
+        grid = RAW / fname
+        if grid.exists():
+            print(f"[grid] {fname} -> {rows * cols} cells (start {start})")
+            for i, cell in enumerate(split_grid(grid, rows, cols), start=start):
+                process(cell, f"landmark-{i:02d}")
 
 
 if __name__ == "__main__":

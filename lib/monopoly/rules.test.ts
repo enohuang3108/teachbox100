@@ -69,10 +69,10 @@ describe("takeTurn 擲骰與移動", () => {
     expect(s.players[0].position).toBe(12); // 0 -> 12
   });
 
-  it("繞過起點發薪並 lap+1（從 23 擲 5 → 繞回 4）", () => {
+  it("繞過起點發薪並 lap+1（從 33 擲 5 → 繞回 4）", () => {
     let s = game();
-    s = { ...s, players: replaceForTest(s.players, 0, { position: 23 }) };
-    s = takeTurn(s, seqRng([0.5, 0]), 0); // 4 + 1 = 5; 23+5=28 %24 =4，經過起點
+    s = { ...s, players: replaceForTest(s.players, 0, { position: 33 }) };
+    s = takeTurn(s, seqRng([0.5, 0]), 0); // 4 + 1 = 5; 33+5=38 %34 =4，經過起點
     expect(s.players[0].position).toBe(4);
     expect(s.players[0].money).toBe(
       DEFAULT_SETTINGS.startingMoney + DEFAULT_SETTINGS.passStartBonus,
@@ -110,14 +110,14 @@ describe("resolveLanding 各格", () => {
 
   it("機會格 → drawCard(chance)", () => {
     let s = game();
-    s = { ...s, players: replaceForTest(s.players, 0, { position: 2 }) };
+    s = { ...s, players: replaceForTest(s.players, 0, { position: 3 }) };
     s = resolveLanding(s, seqRng([0]), 0);
     expect(s.pendingAction).toMatchObject({ kind: "drawCard", deck: "chance" });
   });
 
   it("監獄格 → skipTurns=1 並結束回合（pendingAction 為 null）", () => {
     let s = game();
-    s = { ...s, players: replaceForTest(s.players, 0, { position: 7 }) };
+    s = { ...s, players: replaceForTest(s.players, 0, { position: 11 }) };
     s = resolveLanding(s, seqRng([0]), 0);
     expect(s.players[0].skipTurns).toBe(1);
     expect(s.pendingAction).toBeNull();
@@ -222,8 +222,8 @@ function landOnCard(_deck: "chance" | "fate", pos: number) {
 
 describe("drawAndApplyCard", () => {
   it("money 卡 → 加錢並結束回合", () => {
-    // 機會格 index 2，seqRng 第一個值挑卡：挑到 c1(+2000)
-    let s = landOnCard("chance", 2);
+    // 機會格 index 3，seqRng 第一個值挑卡：挑到 c1(+2000)
+    let s = landOnCard("chance", 3);
     s = resolveLanding(s, seqRng([0]), 0); // pendingAction drawCard chance, card index 0 = c1 +2000
     s = drawAndApplyCard(s, seqRng([0]), 0);
     expect(s.players[0].money).toBe(15000 + 2000);
@@ -231,7 +231,7 @@ describe("drawAndApplyCard", () => {
   });
 
   it("moveTo 起點(0) → 移動後落點結算（起點無事、結束回合）", () => {
-    let s = landOnCard("chance", 2);
+    let s = landOnCard("chance", 3);
     // 強制抽到 c5 (moveTo 0)：CHANCE_CARDS index 4 → rng 0.7*6=4
     s = resolveLanding(s, seqRng([4 / 6 + 0.001]), 0);
     s = drawAndApplyCard(s, seqRng([0]), 0);
@@ -239,7 +239,7 @@ describe("drawAndApplyCard", () => {
   });
 
   it("jail 卡 → skipTurns=1", () => {
-    let s = landOnCard("fate", 5);
+    let s = landOnCard("fate", 6);
     // FATE_CARDS index 3 = f4 jail → rng 3/6+eps
     s = resolveLanding(s, seqRng([3 / 6 + 0.001]), 0);
     s = drawAndApplyCard(s, seqRng([0]), 0);
@@ -259,12 +259,15 @@ describe("drawAndApplyCard", () => {
 describe("結束條件", () => {
   it("moneyGoal 達標立即結束、該玩家第一", () => {
     let s = startGame(
-      { ...DEFAULT_SETTINGS, endCondition: { type: "moneyGoal", amount: 16000 } },
+      {
+        ...DEFAULT_SETTINGS,
+        endCondition: { type: "moneyGoal", amount: 16000 },
+      },
       Q,
       PLAYERS,
       0,
     );
-    s = { ...s, players: replaceForTest(s.players, 0, { position: 2 }) };
+    s = { ...s, players: replaceForTest(s.players, 0, { position: 3 }) };
     // 機會格抽 c1 +2000 → 17000 >= 16000
     s = resolveLanding(s, seqRng([0]), 0);
     s = drawAndApplyCard(s, seqRng([0]), 0);
@@ -297,7 +300,10 @@ describe("結束條件", () => {
 
   it("ranking 依現金排序，同分比資產", () => {
     let s = game();
-    s = { ...s, players: replaceForTest(s.players, 0, { money: 5000, ownedTiles: [1] }) };
+    s = {
+      ...s,
+      players: replaceForTest(s.players, 0, { money: 5000, ownedTiles: [1] }),
+    };
     s = { ...s, players: replaceForTest(s.players, 1, { money: 5000 }) };
     expect(ranking(s)[0].name).toBe("小明"); // 同現金，p0 有資產
   });
