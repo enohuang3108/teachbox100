@@ -51,6 +51,8 @@ export function beanProps(id: string): AvatarProps {
     clothingColor: pick(CLOTHING_COLOR, s, 8),
     accessory: pick(ACCESSORY, s, 9),
     hat: pick(HAT, s, 10),
+    // hatColor 必須指定，否則 beanheads 每次 render 會隨機挑色造成帽子閃爍
+    hatColor: pick(CLOTHING_COLOR, s, 12),
     body: pick(BODY, s, 11),
     facialHair: "none",
     graphic: "none",
