@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>body{margin:0;background:#e7f5ec;display:flex;gap:8px;padding:16px}
+.cell{display:flex;flex-direction:column;align-items:center;font:bold 14px sans-serif;color:#065f46}
+.box{width:240px;height:240px}</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+</head><body>
+<div id="root"></div>
+<script>
+const root=document.getElementById('root');
+let pending=6;
+async function load(n){
+  const data=await fetch('./dice/dice-'+n+'.json').then(r=>r.json());
+  const cell=document.createElement('div');cell.className='cell';
+  const box=document.createElement('div');box.className='box';
+  const label=document.createElement('div');label.textContent='dice-'+n;
+  cell.appendChild(box);cell.appendChild(label);root.appendChild(cell);
+  const anim=lottie.loadAnimation({container:box,renderer:'svg',loop:false,autoplay:false,animationData:data});
+  anim.addEventListener('DOMLoaded',()=>{anim.goToAndStop(anim.totalFrames-1,true);pending--;if(pending===0)document.title='READY';});
+}
+(async()=>{for(let n=1;n<=6;n++)await load(n);})();
+</script></body></html>

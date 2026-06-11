@@ -54,6 +54,7 @@ export interface Player {
   id: string;
   name: string;
   color: string;
+  character: string; // 角色 slug，對應 lib/monopoly/characters.ts
   money: number;
   position: number;
   ownedTiles: number[];
@@ -65,6 +66,7 @@ export interface Player {
 export interface PlayerInput {
   name: string;
   color: string;
+  character: string; // 角色 slug，對應 lib/monopoly/characters.ts
 }
 
 // === 設定 ===
@@ -90,27 +92,29 @@ export const DEFAULT_SETTINGS: GameSettings = {
   endCondition: { type: "time", minutes: 40 },
 };
 
+// 玩家代表色。此陣列的「順序」即是設定頁顏色選擇器的顯示順序，
+// 要調整排列直接改這裡即可（目前依色系排：紅→橙→黃→綠→青→藍→紫→粉→灰）。
 export const PLAYER_COLORS: string[] = [
-  "#ef4444",
-  "#f97316",
-  "#eab308",
-  "#22c55e",
-  "#14b8a6",
-  "#3b82f6",
-  "#6366f1",
-  "#a855f7",
-  "#ec4899",
-  "#f43f5e",
-  "#84cc16",
-  "#06b6d4",
-  "#0ea5e9",
-  "#8b5cf6",
-  "#d946ef",
-  "#10b981",
-  "#f59e0b",
-  "#64748b",
-  "#7c3aed",
-  "#db2777",
+  "#f43f5e", // rose 玫瑰
+  "#ef4444", // red 紅
+  "#f97316", // orange 橙
+  "#f59e0b", // amber 琥珀
+  "#eab308", // yellow 黃
+  "#84cc16", // lime 萊姆
+  "#22c55e", // green 綠
+  "#10b981", // emerald 翡翠
+  "#14b8a6", // teal 藍綠
+  "#06b6d4", // cyan 青
+  "#0ea5e9", // sky 天藍
+  "#3b82f6", // blue 藍
+  "#6366f1", // indigo 靛
+  "#7c3aed", // violet-700 深紫
+  "#8b5cf6", // violet 紫羅蘭
+  "#a855f7", // purple 紫
+  "#d946ef", // fuchsia 洋紅
+  "#ec4899", // pink 粉
+  "#db2777", // pink-600 深粉
+  "#64748b", // slate 灰藍（中性）
 ];
 
 // === 進行中事件 ===

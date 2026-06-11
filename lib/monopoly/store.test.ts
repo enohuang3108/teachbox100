@@ -20,8 +20,8 @@ describe("store", () => {
 
     s.importQuestions(Q);
     s.setPlayers([
-      { name: "A", color: "#f00" },
-      { name: "B", color: "#00f" },
+      { name: "A", color: "#f00", character: "capybara" },
+      { name: "B", color: "#00f", character: "quokka" },
     ]);
     useMonopolyStore.getState().begin();
     expect(useMonopolyStore.getState().game?.phase).toBe("playing");
@@ -31,8 +31,8 @@ describe("store", () => {
     const s = useMonopolyStore.getState();
     s.importQuestions(Q);
     s.setPlayers([
-      { name: "A", color: "#f00" },
-      { name: "B", color: "#00f" },
+      { name: "A", color: "#f00", character: "capybara" },
+      { name: "B", color: "#00f", character: "quokka" },
     ]);
     useMonopolyStore.getState().begin();
     useMonopolyStore.getState().roll();

@@ -29,8 +29,8 @@ const Q: Question[] = [
   { id: "q1", type: "boolean", text: "台北是台灣首都", answer: "是" },
 ];
 const PLAYERS: PlayerInput[] = [
-  { name: "小明", color: "#ef4444" },
-  { name: "小華", color: "#3b82f6" },
+  { name: "小明", color: "#ef4444", character: "capybara" },
+  { name: "小華", color: "#3b82f6", character: "quokka" },
 ];
 
 describe("startGame", () => {

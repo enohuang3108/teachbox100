@@ -237,11 +237,19 @@ export function Board({
                           damping: 32,
                         }}
                       >
-                        <PlayerAvatar id={p.id} color={p.color} size={40} />
+                        <PlayerAvatar
+                          character={p.character}
+                          color={p.color}
+                          size={40}
+                        />
                       </motion.span>
                     ) : (
                       <span key={p.id} title={p.name}>
-                        <PlayerAvatar id={p.id} color={p.color} size={36} />
+                        <PlayerAvatar
+                          character={p.character}
+                          color={p.color}
+                          size={36}
+                        />
                       </span>
                     ),
                   )}

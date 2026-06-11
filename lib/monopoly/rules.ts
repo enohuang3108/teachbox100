@@ -38,6 +38,7 @@ export function startGame(
     id: `p${i}`,
     name: input.name,
     color: input.color,
+    character: input.character,
     money: settings.startingMoney,
     position: 0,
     ownedTiles: [],

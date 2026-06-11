@@ -15,9 +15,11 @@ import {
   parseQuestions,
   rowsFromFile,
 } from "@/lib/monopoly/excel";
+import { defaultCharacterId } from "@/lib/monopoly/characters";
 import { useMonopolyStore } from "@/lib/monopoly/store";
 import { PLAYER_COLORS, type EndCondition } from "@/lib/monopoly/types";
-import { PlayerAvatar } from "./Avatar";
+import { CharacterPicker } from "./CharacterPicker";
+import { ColorPicker } from "./ColorPicker";
 import { useEffect, useState } from "react";
 
 export function SetupPanel() {
@@ -35,13 +37,29 @@ export function SetupPanel() {
   const playerCount = draftSettings.playerCount;
 
   function syncPlayers(count: number) {
-    const next = Array.from(
-      { length: count },
-      (_, i) =>
-        draftPlayers[i] ?? {
-          name: `玩家${i + 1}`,
-          color: PLAYER_COLORS[i % PLAYER_COLORS.length],
-        },
+    const next = Array.from({ length: count }, (_, i) => {
+      const existing = draftPlayers[i];
+      if (existing) {
+        // 補上舊版 persist 可能缺少的 character，避免落到預設貓熊
+        return existing.character
+          ? existing
+          : { ...existing, character: defaultCharacterId(i) };
+      }
+      return {
+        name: `玩家${i + 1}`,
+        color: PLAYER_COLORS[i % PLAYER_COLORS.length],
+        character: defaultCharacterId(i),
+      };
+    });
+    setPlayers(next);
+  }
+
+  function updatePlayer(
+    index: number,
+    patch: Partial<(typeof draftPlayers)[number]>,
+  ) {
+    const next = draftPlayers.map((p, i) =>
+      i === index ? { ...p, ...patch } : p,
     );
     setPlayers(next);
   }
@@ -49,7 +67,9 @@ export function SetupPanel() {
   // 進頁面（或人數變更）時，確保 draftPlayers 與人數同步，
   // 否則使用者未手動編輯玩家時 draftPlayers 為空，begin() 會因人數不足而失效。
   useEffect(() => {
-    if (draftPlayers.length !== playerCount) {
+    const lengthMismatch = draftPlayers.length !== playerCount;
+    const missingCharacter = draftPlayers.some((p) => !p.character);
+    if (lengthMismatch || missingCharacter) {
       syncPlayers(playerCount);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,27 +145,41 @@ export function SetupPanel() {
             syncPlayers(n);
           }}
         />
+        <p className="text-sm text-muted-foreground">
+          點擊頭像可更換角色、點擊色塊可更換代表色
+        </p>
         <div className="grid grid-cols-2 gap-2">
-          {Array.from({ length: playerCount }, (_, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <PlayerAvatar
-                id={`p${i}`}
-                color={PLAYER_COLORS[i % PLAYER_COLORS.length]}
-                size={32}
-              />
-              <Input
-                value={draftPlayers[i]?.name ?? `玩家${i + 1}`}
-                onChange={(e) => {
-                  const next = [...draftPlayers];
-                  next[i] = {
-                    name: e.target.value,
-                    color: PLAYER_COLORS[i % PLAYER_COLORS.length],
-                  };
-                  setPlayers(next);
-                }}
-              />
-            </div>
-          ))}
+          {Array.from({ length: playerCount }, (_, i) => {
+            const character =
+              draftPlayers[i]?.character ?? defaultCharacterId(i);
+            const color =
+              draftPlayers[i]?.color ?? PLAYER_COLORS[i % PLAYER_COLORS.length];
+            const charsTakenByOthers = draftPlayers
+              .filter((_, j) => j !== i)
+              .map((p) => p.character);
+            const colorsTakenByOthers = draftPlayers
+              .filter((_, j) => j !== i)
+              .map((p) => p.color);
+            return (
+              <div key={i} className="flex items-center gap-2">
+                <CharacterPicker
+                  value={character}
+                  color={color}
+                  takenByOthers={charsTakenByOthers}
+                  onSelect={(id) => updatePlayer(i, { character: id })}
+                />
+                <ColorPicker
+                  value={color}
+                  takenByOthers={colorsTakenByOthers}
+                  onSelect={(c) => updatePlayer(i, { color: c })}
+                />
+                <Input
+                  value={draftPlayers[i]?.name ?? `玩家${i + 1}`}
+                  onChange={(e) => updatePlayer(i, { name: e.target.value })}
+                />
+              </div>
+            );
+          })}
         </div>
       </section>
 

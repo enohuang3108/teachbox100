@@ -1,88 +1,76 @@
 "use client";
 
-import { motion } from "motion/react";
+import Lottie from "lottie-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/atoms/shadcn/button";
 
-// 各點數的 pip 位置（3×3 格索引）
-const PIPS: Record<number, number[]> = {
-  1: [4],
-  2: [0, 8],
-  3: [0, 4, 8],
-  4: [0, 2, 6, 8],
-  5: [0, 2, 4, 6, 8],
-  6: [0, 2, 3, 5, 6, 8],
-};
+// 每個點數對應一支落定在該數字的 Lottie 擲骰動畫（放在 public/lottie/dice）
+const dicePath = (value: number) => `/lottie/dice/dice-${value}.json`;
 
-function DieFace({ value }: { value: number }) {
-  const on = new Set(PIPS[value] ?? []);
-  return (
-    <div className="grid h-12 w-12 grid-cols-3 grid-rows-3 gap-0.5 rounded-xl border border-black/10 bg-white p-2 shadow-md">
-      {Array.from({ length: 9 }).map((_, i) => (
-        <span
-          key={i}
-          className={`m-auto h-2 w-2 rounded-full ${on.has(i) ? "bg-zinc-800" : "bg-transparent"}`}
-        />
-      ))}
-    </div>
-  );
+// 動畫資料快取，每個點數只下載一次
+const animCache: Record<number, unknown> = {};
+
+function loadDiceAnim(value: number): Promise<unknown> {
+  if (animCache[value]) return Promise.resolve(animCache[value]);
+  return fetch(dicePath(value))
+    .then((r) => r.json())
+    .then((data) => {
+      animCache[value] = data;
+      return data;
+    });
 }
 
-// 翻滾中：持續旋轉＋跳動，面數快速亂跳
-function RollingDie() {
-  const [face, setFace] = useState(1);
+// 單顆骰子：載入並播放對應點數的動畫，播完停在該數字
+function Die({ value }: { value: number }) {
+  const [data, setData] = useState<unknown>(animCache[value] ?? null);
+
   useEffect(() => {
-    const id = setInterval(() => setFace(Math.floor(Math.random() * 6) + 1), 90);
-    return () => clearInterval(id);
-  }, []);
-  return (
-    <motion.div
-      animate={{ rotate: 360, y: [0, -12, 0] }}
-      transition={{
-        rotate: { repeat: Infinity, duration: 0.5, ease: "linear" },
-        y: { repeat: Infinity, duration: 0.45, ease: "easeInOut" },
-      }}
-    >
-      <DieFace value={face} />
-    </motion.div>
-  );
-}
+    let alive = true;
+    loadDiceAnim(value)
+      .then((d) => {
+        if (alive) setData(d);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [value]);
 
-// 落定：彈簧效果現出結果
-function SettledDie({ value }: { value: number }) {
+  if (!data) return <div className="h-16 w-16" />;
   return (
-    <motion.div
-      initial={{ rotate: -160, scale: 0.4, opacity: 0 }}
-      animate={{ rotate: 0, scale: 1, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 280, damping: 16 }}
-    >
-      <DieFace value={value} />
-    </motion.div>
+    <Lottie animationData={data} loop={false} autoplay className="h-16 w-16" />
   );
 }
 
 export function Dice({
   lastRoll,
   rolling,
-  count,
+  rollSeq,
   disabled,
   onRoll,
 }: {
   lastRoll: number[] | null;
   rolling: boolean;
-  count: number;
+  rollSeq: number;
   disabled: boolean;
   onRoll: () => void;
 }) {
+  // 首次互動前先把 6 支動畫預載進快取，避免第一次擲骰要等下載
+  useEffect(() => {
+    for (let v = 1; v <= 6; v += 1) {
+      loadDiceAnim(v).catch(() => {});
+    }
+  }, []);
+
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="flex min-h-[3rem] items-center gap-2">
-        {rolling ? (
-          Array.from({ length: count }).map((_, i) => <RollingDie key={i} />)
-        ) : lastRoll && lastRoll.length > 0 ? (
-          lastRoll.map((d, i) => <SettledDie key={`${i}-${d}`} value={d} />)
+      <div className="flex min-h-[4rem] items-center gap-2">
+        {lastRoll && lastRoll.length > 0 ? (
+          lastRoll.map((d, i) => <Die key={`${rollSeq}-${i}`} value={d} />)
         ) : (
-          <span className="text-xs text-emerald-700/50">擲骰子開始你的回合</span>
+          <span className="text-xs text-emerald-700/50">
+            擲骰子開始你的回合
+          </span>
         )}
       </div>
       <Button

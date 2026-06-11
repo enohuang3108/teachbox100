@@ -13,10 +13,12 @@ import { realisticEffect } from "@/lib/helpers/confetti-effects";
 import { useMonopolyStore } from "@/lib/monopoly/store";
 
 const STEP_MS = 240; // 每走一格的間隔
+const ROLL_MS = 1333; // 擲骰 Lottie 動畫長度（80 幀 @ 60fps）
 
 export default function MonopolyPage() {
   const [hydrated, setHydrated] = useState(false);
   const [rolling, setRolling] = useState(false);
+  const [rollSeq, setRollSeq] = useState(0);
   const [logOpen, setLogOpen] = useState(false);
   const [walk, setWalk] = useState<{ playerId: string; pos: number } | null>(
     null,
@@ -48,15 +50,24 @@ export default function MonopolyPage() {
     const fromPos = mover.position;
     const moverId = mover.id;
 
+    // 先把棋子釘在起點並啟動擲骰動畫，接著立刻擲骰取得實際點數
+    // （動畫期間 walk 已設值，animating 為真，買地／問答對話框不會提早跳出）
+    setWalk({ playerId: moverId, pos: fromPos });
     setRolling(true);
+    setRollSeq((s) => s + 1);
+    roll();
+
+    const next = useMonopolyStore.getState().game;
+    const dice = next?.lastRoll;
+    const steps = dice ? dice.reduce((a, b) => a + b, 0) : 0;
+
+    // 等擲骰動畫落定後，棋子再一格一格走
     window.setTimeout(() => {
       setRolling(false);
-      roll();
-
-      const next = useMonopolyStore.getState().game;
-      const dice = next?.lastRoll;
-      const steps = dice ? dice.reduce((a, b) => a + b, 0) : 0;
-      if (steps <= 0) return; // 暫停回合等情況：不走格
+      if (steps <= 0) {
+        setWalk(null); // 暫停回合等情況：不走格
+        return;
+      }
 
       let step = 0;
       const advance = () => {
@@ -69,7 +80,7 @@ export default function MonopolyPage() {
         window.setTimeout(advance, STEP_MS);
       };
       advance();
-    }, 700);
+    }, ROLL_MS);
   }
 
   const center = (
@@ -87,7 +98,7 @@ export default function MonopolyPage() {
             >
               <div className={active ? "" : "grayscale"}>
                 <PlayerAvatar
-                  id={p.id}
+                  character={p.character}
                   color={p.color}
                   size={active ? 84 : 44}
                 />
@@ -112,7 +123,7 @@ export default function MonopolyPage() {
       <Dice
         lastRoll={game.lastRoll}
         rolling={rolling}
-        count={game.settings.diceCount}
+        rollSeq={rollSeq}
         disabled={rollDisabled || animating}
         onRoll={handleRoll}
       />
