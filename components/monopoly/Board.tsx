@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGroup, motion } from "motion/react";
+import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import NextImage from "next/image";
 import type { ReactNode } from "react";
 import { BOARD } from "@/lib/monopoly/board";
@@ -79,9 +79,9 @@ function bandColor(index: number): string {
 
 const SPECIAL: Record<string, { bg: string; emoji?: string }> = {
   start: { bg: "bg-emerald-100", emoji: "🏁" },
-  jail: { bg: "bg-zinc-200", emoji: "🚔" },
-  chance: { bg: "bg-amber-50" },
-  fate: { bg: "bg-violet-50" },
+  jail: { bg: "bg-stone-200", emoji: "🚔" },
+  chance: { bg: "bg-amber-50", emoji: "❓" },
+  fate: { bg: "bg-violet-50", emoji: "✨" },
 };
 
 interface Walking {
@@ -99,10 +99,14 @@ function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
 
   return (
     <div
-      className={`relative flex h-full flex-col overflow-hidden rounded-lg border border-black/5 shadow-sm ${property ? "bg-white" : (special?.bg ?? "bg-white")}`}
+      className={`relative flex h-full flex-col overflow-hidden rounded-lg border border-stone-900/[0.06] shadow-sm ${property ? "bg-[#fffdf8]" : (special?.bg ?? "bg-[#fffdf8]")}`}
       style={
         owner
-          ? { outline: `2px solid ${owner.color}`, outlineOffset: "-2px" }
+          ? {
+              outline: `2.5px solid ${owner.color}`,
+              outlineOffset: "-2.5px",
+              boxShadow: `0 0 0 1px ${owner.color}33, var(--tw-shadow, 0 0 #0000)`,
+            }
           : undefined
       }
     >
@@ -113,7 +117,7 @@ function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
         />
       )}
       <div className="px-1 pt-0.5">
-        <span className="block truncate text-[10px] font-bold text-zinc-700">
+        <span className="block truncate text-[10px] font-bold text-stone-700">
           {tile.name}
         </span>
       </div>
@@ -133,8 +137,8 @@ function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
         ) : null}
       </div>
       {property && (
-        <div className="px-1 pb-0.5 text-[9px] font-semibold text-zinc-400">
-          ${tile.price}
+        <div className="px-1 pb-0.5 text-[9px] font-semibold tabular-nums text-stone-400">
+          ${tile.price.toLocaleString()}
         </div>
       )}
     </div>
@@ -145,11 +149,13 @@ export function Board({
   players,
   currentIndex,
   walking,
+  landing,
   center,
 }: {
   players: Player[];
   currentIndex: number;
   walking?: Walking | null;
+  landing?: { pos: number; color: string } | null;
   center?: ReactNode;
 }) {
   const renderPos = (p: Player) =>
@@ -158,7 +164,7 @@ export function Board({
   return (
     <div className="aspect-[12/7] w-[min(98vw,calc((100vh_-_1.5rem)*1.714))]">
       <LayoutGroup>
-        <div className="relative grid h-full w-full grid-cols-[repeat(12,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-1 rounded-[20px] border-[6px] border-amber-950/10 bg-[#fdf4e3] p-1 shadow-[0_18px_50px_-18px_rgba(120,80,20,0.5)]">
+        <div className="relative grid h-full w-full grid-cols-[repeat(12,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-1 rounded-[22px] border-[6px] border-amber-950/[0.08] bg-[#fdf4e3] bg-[radial-gradient(circle_at_50%_38%,#fefaf0,transparent_70%)] p-1 shadow-[0_2px_0_0_rgba(255,255,255,0.6)_inset,0_22px_55px_-20px_rgba(120,80,20,0.55)]">
           {BOARD.map((tile) => {
             const pos = tilePos(tile.index);
             return (
@@ -172,7 +178,7 @@ export function Board({
           })}
 
           <div
-            className="m-1 flex items-center justify-center rounded-2xl bg-emerald-50/70 p-3 ring-1 ring-emerald-900/10"
+            className="m-1 flex items-center justify-center rounded-2xl bg-emerald-50/80 bg-[radial-gradient(circle_at_50%_30%,oklch(0.97_0.03_160),transparent_75%)] p-3 shadow-[0_1px_0_0_rgba(255,255,255,0.7)_inset] ring-1 ring-emerald-900/[0.08]"
             style={{ gridColumn: "2 / 12", gridRow: "2 / 7" }}
           >
             {center}
@@ -200,11 +206,23 @@ export function Board({
                 >
                   <div className={`flex gap-0.5 ${edge.stack}`}>
                     {Array.from({ length: count }).map((_, i) => (
-                      <HouseMarker
+                      // 新蓋的房子從 0 彈跳出現（overshoot），既有的維持不動
+                      <motion.span
                         key={i}
-                        color={owner.color}
-                        size={count > 2 ? 24 : 32}
-                      />
+                        className="inline-block"
+                        initial={{ scale: 0, y: -8 }}
+                        animate={{ scale: 1, y: 0 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 480,
+                          damping: 14,
+                        }}
+                      >
+                        <HouseMarker
+                          color={owner.color}
+                          size={count > 2 ? 24 : 32}
+                        />
+                      </motion.span>
                     ))}
                   </div>
                 </div>
@@ -212,50 +230,102 @@ export function Board({
             })}
           </div>
 
-          {/* 棋子覆蓋層：與格子對齊、不裁切，棋子放大或走格都不會被切到鄰格 */}
+          {/* 棋子覆蓋層：每位玩家一個固定元素（穩定 key，頭像不會每格重新掛載），
+              靠 layout spring 平滑滑到目標格，走路時持續輕微擺動，避免一格一格卡頓 */}
           <div className="pointer-events-none absolute inset-0 grid grid-cols-[repeat(12,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-1 p-1">
-            {BOARD.map((tile) => {
-              const here = players.filter(
-                (p) => !p.bankrupt && renderPos(p) === tile.index,
-              );
-              if (here.length === 0) return null;
-              const pos = tilePos(tile.index);
-              return (
-                <div
-                  key={tile.index}
-                  className="flex flex-wrap items-center justify-center gap-0.5"
-                  style={{ gridRow: pos.row, gridColumn: pos.col }}
+            {players
+              .filter((p) => !p.bankrupt)
+              .map((p) => {
+                const tileIndex = renderPos(p);
+                const pos = tilePos(tileIndex);
+                const isWalking = walking?.playerId === p.id;
+                // 同格多人時縮小並左右排開，間距 ≥ 頭像寬度，邊緣不重疊
+                const mates = players.filter(
+                  (q) => !q.bankrupt && renderPos(q) === tileIndex,
+                );
+                const n = mates.length;
+                const order = mates.findIndex((q) => q.id === p.id);
+                const pawnSize = n <= 1 ? 46 : n === 2 ? 38 : n === 3 ? 32 : 28;
+                const spacing = pawnSize + 3;
+                const offsetX = (order - (n - 1) / 2) * spacing;
+                return (
+                  <motion.div
+                    key={p.id}
+                    layout
+                    transition={{
+                      type: "spring",
+                      stiffness: 360,
+                      damping: 30,
+                    }}
+                    className="flex items-center justify-center"
+                    style={{
+                      gridRow: pos.row,
+                      gridColumn: pos.col,
+                      zIndex: isWalking ? 20 : 10,
+                    }}
+                  >
+                    <motion.span
+                      className="inline-block"
+                      animate={{
+                        x: offsetX,
+                        y: isWalking ? [0, -9, 0] : 0,
+                        scale: isWalking ? 1.1 : 1,
+                      }}
+                      transition={
+                        isWalking
+                          ? {
+                              y: {
+                                duration: 0.4,
+                                ease: "easeInOut",
+                                repeat: Infinity,
+                              },
+                              x: { duration: 0.2 },
+                              scale: { duration: 0.2 },
+                            }
+                          : { duration: 0.2 }
+                      }
+                    >
+                      <PlayerAvatar
+                        character={p.character}
+                        color={p.color}
+                        size={pawnSize}
+                        bold
+                      />
+                    </motion.span>
+                  </motion.div>
+                );
+              })}
+          </div>
+
+          {/* 落地光環：棋子走完最後一格時，在落點脈動一圈玩家代表色 */}
+          <div className="pointer-events-none absolute inset-0 grid grid-cols-[repeat(12,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-1 p-1">
+            <AnimatePresence>
+              {landing && (
+                <motion.div
+                  key={`${landing.pos}-${landing.color}`}
+                  className="flex items-center justify-center"
+                  style={{
+                    gridRow: tilePos(landing.pos).row,
+                    gridColumn: tilePos(landing.pos).col,
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                 >
-                  {here.map((p) =>
-                    walking && walking.playerId === p.id ? (
-                      <motion.span
-                        key={p.id}
-                        layoutId={`pawn-${p.id}`}
-                        transition={{
-                          type: "spring",
-                          stiffness: 500,
-                          damping: 32,
-                        }}
-                      >
-                        <PlayerAvatar
-                          character={p.character}
-                          color={p.color}
-                          size={40}
-                        />
-                      </motion.span>
-                    ) : (
-                      <span key={p.id} title={p.name}>
-                        <PlayerAvatar
-                          character={p.character}
-                          color={p.color}
-                          size={36}
-                        />
-                      </span>
-                    ),
-                  )}
-                </div>
-              );
-            })}
+                  <motion.span
+                    className="block rounded-full"
+                    style={{
+                      width: 38,
+                      height: 38,
+                      border: `3px solid ${landing.color}`,
+                    }}
+                    initial={{ scale: 0.35, opacity: 0.7 }}
+                    animate={{ scale: 1.9, opacity: 0 }}
+                    transition={{ duration: 0.55, ease: "easeOut" }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </LayoutGroup>

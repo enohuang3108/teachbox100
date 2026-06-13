@@ -8,20 +8,31 @@ export function PlayerAvatar({
   color,
   size = 32,
   ring = true,
+  bold = false,
+  ringWidth,
 }: {
   character: string;
   color: string;
   size?: number;
   ring?: boolean;
+  bold?: boolean; // 棋盤棋子用：更明顯的圈圈 ＋ 柔和投影
+  ringWidth?: number; // 自訂圈圈粗細（純色描邊、無投影）
 }) {
   const def = characterById(character);
+  let boxShadow: string | undefined;
+  if (bold) {
+    const ringW = Math.max(3, Math.round(size * 0.085));
+    boxShadow = `0 0 0 ${ringW}px ${color}, 0 ${Math.max(1, ringW / 2)}px ${ringW * 2}px rgba(0,0,0,0.25)`;
+  } else if (ring) {
+    boxShadow = `0 0 0 ${ringWidth ?? 2}px ${color}`;
+  }
   return (
     <span
       className="inline-grid shrink-0 place-items-center overflow-hidden rounded-full bg-white"
       style={{
         width: size,
         height: size,
-        boxShadow: ring ? `0 0 0 2px ${color}` : undefined,
+        boxShadow,
       }}
     >
       {/* 完整顯示整隻角色，留一點內距避免頂端被圓框切到 */}

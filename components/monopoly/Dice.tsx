@@ -77,7 +77,7 @@ export function Dice({
         size="lg"
         disabled={disabled || rolling}
         onClick={onRoll}
-        className="rounded-full bg-amber-500 px-8 font-bold text-white shadow-lg shadow-amber-500/30 transition hover:bg-amber-600 disabled:opacity-50"
+        className="rounded-full bg-amber-500 px-8 font-bold text-white shadow-lg shadow-amber-500/30 transition duration-150 ease-out hover:-translate-y-0.5 hover:bg-amber-600 hover:shadow-xl hover:shadow-amber-500/40 active:translate-y-0 active:scale-95 disabled:opacity-50 disabled:hover:translate-y-0"
       >
         {rolling ? "擲骰中…" : "🎲 擲骰子"}
       </Button>
