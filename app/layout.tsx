@@ -13,6 +13,7 @@ import type React from "react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://teachbox100.com"),
   icons: {
     icon: appInfo.imageSrc,
   },

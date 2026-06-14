@@ -81,9 +81,9 @@ export const pages: { [key: string]: Page } = {
   },
   monopoly: {
     path: "/monopoly",
-    imageSrc: "/images/cover_monopoly.webp",
+    imageSrc: "/images/cover_monopoly_v2.webp",
     blurDataURL:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAAK0lEQVQIW2M8s2n6f0ZmNgamo5kM7M7zGRjPbZnx//MHZgY+ASaGfwy/GQDZLwxSeEEb5AAAAABJRU5ErkJggg==",
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAIAAAD38zoCAAAAiElEQVR4nAF9AIL/Aeh5SgQeHwEKC/vT0AMMEAH7/Pvn4////wQJQkUGJQ7++AD82tj27/D3JSv/Gh0H4uEC/evo/vjpAQX+AP7+/AIG7gf03/Pe/Q4LBPvh4QITMv7v3//39wYIDQUDCQ8OD/z+FQT82tr81tYDFhoCDREE9vMQ7vv+8PsG89fN9kHi/C96zQAAAABJRU5ErkJggg==",
     title: "大富翁",
     description: "匯入自訂題庫，答對才能買地蓋房，最多 20 人同樂的教學大富翁。",
     guide: "老師先匯入 Excel 題庫並設定規則，再開始遊戲。",
