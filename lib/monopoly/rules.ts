@@ -15,6 +15,9 @@ import { isProperty } from "./types";
 
 const MAX_CHAIN = 10;
 
+// 監獄格位置（供「進監獄」卡片直接移動棋子過去）
+const JAIL_INDEX = BOARD.find((t) => t.type === "jail")?.index ?? 0;
+
 // === 不可變工具 ===
 function replacePlayer(
   players: Player[],
@@ -132,7 +135,7 @@ function isGameOver(state: GameState, now: number): boolean {
   }
 }
 
-function checkEnd(state: GameState, now: number): GameState {
+export function checkEnd(state: GameState, now: number): GameState {
   if (isGameOver(state, now)) {
     return {
       ...state,
@@ -487,7 +490,11 @@ function applyCardEffect(
       );
     }
     case "jail": {
-      const players = replacePlayer(state.players, idx, { skipTurns: 1 });
+      // 直接移動棋子到監獄格，並暫停一回合
+      const players = replacePlayer(state.players, idx, {
+        position: JAIL_INDEX,
+        skipTurns: 1,
+      });
       return endTurn(
         {
           ...state,
