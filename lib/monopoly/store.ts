@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { defaultRng } from "./rng";
 import {
   answerCardQuiz,
+  answerPassStart,
   answerQuestion,
   checkEnd,
   confirmPurchase,
@@ -31,6 +32,7 @@ interface MonopolyStore {
   begin: () => void;
   roll: () => void;
   answer: (correct: boolean) => void;
+  answerPassStart: (correct: boolean) => void;
   confirm: (accept: boolean) => void;
   resolveCard: () => void;
   rollCardDice: () => void;
@@ -74,6 +76,11 @@ export const useMonopolyStore = create<MonopolyStore>()(
         const g = get().game;
         if (!g) return;
         set({ game: answerQuestion(g, correct, now()) });
+      },
+      answerPassStart: (correct) => {
+        const g = get().game;
+        if (!g) return;
+        set({ game: answerPassStart(g, correct, defaultRng, now()) });
       },
       confirm: (accept) => {
         const g = get().game;

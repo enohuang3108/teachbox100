@@ -29,7 +29,6 @@ const STEP_MS = 240; // 每走一格的間隔
 const ROLL_MS = 1333; // 擲骰 Lottie 動畫長度（80 幀 @ 60fps）
 const CUTSCENE_MS = 2500; // 金流／監獄／通過起點等過場顯示時間
 const BANNER_MS = 2000; // 「換你了」橫幅顯示時間
-const PASS_MS = CUTSCENE_MS; // 通過起點時暫停腳步、播 +2000 過場的時間
 
 export default function MonopolyPage() {
   const [hydrated, setHydrated] = useState(false);
@@ -48,14 +47,25 @@ export default function MonopolyPage() {
   const [queue, setQueue] = useState<CutsceneEvent[]>([]);
   const [displayIndex, setDisplayIndex] = useState(0); // 中央 HUD 高亮的角色（換場演完才切）
   const [displayMoney, setDisplayMoney] = useState<Record<string, number>>({}); // HUD 顯示用金額（過場演完才同步）
+  const [crossPaused, setCrossPaused] = useState(false); // 棋子走到起點那格暫停、等加碼題作答
   const banneredIdx = useRef<number | null>(null);
   const pendingIdx = useRef<number | null>(null); // 換場演完後要切到的角色 index
   const lastEventSeq = useRef<number>(0);
-  const synthSeq = useRef<number>(0); // page 自製過場（通過起點）的遞減 seq
+  // 暫停在起點時保存的走路進度，供答完加碼題後續走
+  const walkDescRef = useRef<{
+    fromPos: number;
+    steps: number;
+    moverId: string;
+    color: string;
+    startStep: number;
+  } | null>(null);
+  const synthSeq = useRef<number>(0); // UI 自製過場（過起點 🏁）的遞減 seq
+  const resumePendingRef = useRef(false); // 🏁 過場播完後要續走
   const {
     game,
     roll,
     answer,
+    answerPassStart,
     confirm,
     resolveCard,
     rollCardDice,
@@ -101,6 +111,14 @@ export default function MonopolyPage() {
     if (!cutscene) return;
     const t = window.setTimeout(() => setCutscene(null), CUTSCENE_MS);
     return () => window.clearTimeout(t);
+  }, [cutscene]);
+
+  // 過起點 🏁 加錢過場播完後，從起點那格續走到目的地
+  useEffect(() => {
+    if (cutscene) return;
+    if (!resumePendingRef.current) return;
+    resumePendingRef.current = false;
+    resumeWalk();
   }, [cutscene]);
 
   useEffect(() => {
@@ -201,48 +219,68 @@ export default function MonopolyPage() {
       return;
     }
 
-    // 通過起點的那一步（cumulative 首次達到一圈）；用來在該瞬間觸發 +2000 過場
-    const bonus = game.settings.passStartBonus;
-    const passStep = fromPos + steps >= BOARD_SIZE ? BOARD_SIZE - fromPos : -1;
-
-    // 等擲骰動畫落定後，棋子再一格一格走
+    // 等擲骰動畫落定後，棋子再一格一格走（走到起點那格會暫停跳出加碼題）
     window.setTimeout(() => {
       setRolling(false);
       if (steps <= 0) {
         setWalk(null); // 暫停回合等情況：不走格
         return;
       }
-
-      let step = 0;
-      const advance = () => {
-        step += 1;
-        const pos = (fromPos + step) % BOARD_SIZE;
-        setWalk({ playerId: moverId, pos });
-        // 走到起點那一刻：暫停腳步、播 +2000 過場，演完再續走
-        const crossing = passStep > 0 && step === passStep && bonus > 0;
-        if (crossing) {
-          synthSeq.current -= 1;
-          setCutscene({
-            seq: synthSeq.current,
-            kind: "passStart",
-            playerId: moverId,
-            amount: bonus,
-          });
-        }
-        const delay = crossing ? PASS_MS : STEP_MS;
-        if (step >= steps) {
-          // 最後一步落定後解除，並在落點脈動一圈代表色光環
-          window.setTimeout(() => {
-            setWalk(null);
-            setLanding({ pos, color: mover.color });
-            window.setTimeout(() => setLanding(null), 560);
-          }, delay);
-          return;
-        }
-        window.setTimeout(advance, delay);
-      };
-      advance();
+      runWalk({ fromPos, steps, moverId, color: mover.color, startStep: 0 });
     }, ROLL_MS);
+  }
+
+  // 走完最後一步：解除走路狀態，並在落點脈動一圈代表色光環
+  function finishWalk(pos: number, color: string) {
+    window.setTimeout(() => {
+      setWalk(null);
+      setLanding({ pos, color });
+      window.setTimeout(() => setLanding(null), 560);
+    }, STEP_MS);
+  }
+
+  // 棋子一格一格走；走到起點那格（pos 歸 0）就暫停，讓過起點加碼題當場跳出，
+  // 答完由 resumeWalk 從暫停點續走到目的地，再由 pendingAction 接續落地。
+  function runWalk(desc: {
+    fromPos: number;
+    steps: number;
+    moverId: string;
+    color: string;
+    startStep: number;
+  }) {
+    const { fromPos, steps, moverId, color } = desc;
+    const passStep = fromPos + steps >= BOARD_SIZE ? BOARD_SIZE - fromPos : -1;
+    let step = desc.startStep;
+    const advance = () => {
+      step += 1;
+      const pos = (fromPos + step) % BOARD_SIZE;
+      setWalk({ playerId: moverId, pos });
+      // 走到起點那格：暫停腳步，加碼題（takeTurn 已設好的 pendingAction）當場跳出
+      if (step === passStep) {
+        walkDescRef.current = { ...desc, startStep: step };
+        setCrossPaused(true);
+        return;
+      }
+      if (step >= steps) {
+        finishWalk(pos, color);
+        return;
+      }
+      window.setTimeout(advance, STEP_MS);
+    };
+    advance();
+  }
+
+  // 答完過起點加碼題：解除暫停，從起點那格續走到目的地（剛好停在起點則直接收尾）
+  function resumeWalk() {
+    const desc = walkDescRef.current;
+    walkDescRef.current = null;
+    setCrossPaused(false);
+    if (!desc) return;
+    if (desc.startStep >= desc.steps) {
+      finishWalk((desc.fromPos + desc.steps) % BOARD_SIZE, desc.color);
+      return;
+    }
+    runWalk(desc);
   }
 
   const center = (
@@ -390,6 +428,28 @@ export default function MonopolyPage() {
           question={pa.question}
           player={game.players[game.currentPlayerIndex]}
           onAnswered={answerCardQuiz}
+        />
+      )}
+      {(crossPaused || !busy) && pa?.kind === "passStartQuestion" && (
+        <QuestionDialog
+          pending={pa}
+          question={pa.question}
+          player={game.players[game.currentPlayerIndex]}
+          onAnswered={(correct) => {
+            const player = game.players[game.currentPlayerIndex];
+            const reward = correct ? pa.rewardRight : pa.rewardWrong;
+            answerPassStart(correct);
+            // 棋子仍停在起點，當場播 🏁 加錢過場；演完才由 effect 觸發續走
+            synthSeq.current -= 1;
+            resumePendingRef.current = true;
+            setCrossPaused(false);
+            setCutscene({
+              seq: synthSeq.current,
+              kind: "passStart",
+              playerId: player.id,
+              amount: reward,
+            });
+          }}
         />
       )}
       {!busy && pa?.kind === "cardDice" && (

@@ -29,16 +29,19 @@ export function QuestionDialog({
   const open =
     pending?.kind === "buyQuestion" ||
     pending?.kind === "buildQuestion" ||
-    pending?.kind === "cardQuiz";
+    pending?.kind === "cardQuiz" ||
+    pending?.kind === "passStartQuestion";
   if (!open) return null;
 
-  // 標題：買地／蓋房用固定字樣；互動答題卡則顯示卡片描述的獎懲內容
+  // 標題：買地／蓋房用固定字樣；過起點加碼題標出答對／答錯獎金；互動答題卡顯示卡片描述
   const title =
     pending.kind === "buyQuestion"
       ? "答對才能購買"
       : pending.kind === "buildQuestion"
         ? "答對才能蓋房"
-        : pending.card.text;
+        : pending.kind === "passStartQuestion"
+          ? `經過起點加碼題！答對 +$${pending.rewardRight.toLocaleString()}、答錯 +$${pending.rewardWrong.toLocaleString()}`
+          : pending.card.text;
 
   function judge(correct: boolean) {
     setRevealed(correct);

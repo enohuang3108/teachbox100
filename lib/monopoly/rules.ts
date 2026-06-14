@@ -18,6 +18,9 @@ const MAX_CHAIN = 10;
 // 監獄格位置（供「進監獄」卡片直接移動棋子過去）
 const JAIL_INDEX = BOARD.find((t) => t.type === "jail")?.index ?? 0;
 
+// 過起點加碼問答：答對固定加碼此金額；答錯則退回原本的 passStartBonus 設定值
+const PASS_START_QUIZ_BONUS = 3000;
+
 // === 不可變工具 ===
 function replacePlayer(
   players: Player[],
@@ -223,6 +226,53 @@ function payToll(
     }),
     now,
   );
+}
+
+// 通過起點：先停下來出加碼題，圈數先 +1，結算（加錢）與後續落地延後到 answerPassStart。
+// 傳入的 state 須已把棋子移到新位置、但尚未發放過起點獎勵。
+function goPassStart(state: GameState, rng: Rng): GameState {
+  const idx = state.currentPlayerIndex;
+  const player = state.players[idx];
+  const lapsByPlayer = {
+    ...state.lapsByPlayer,
+    [player.id]: (state.lapsByPlayer[player.id] ?? 0) + 1,
+  };
+  return {
+    ...state,
+    lapsByPlayer,
+    log: addLog(state.log, `${player.name} 經過起點，加碼問答`),
+    pendingAction: {
+      kind: "passStartQuestion",
+      question: drawQuestion(state, rng),
+      rewardRight: PASS_START_QUIZ_BONUS,
+      rewardWrong: state.settings.passStartBonus,
+    },
+  };
+}
+
+// 玩家作答過起點加碼題後結算：答對加碼、答錯給原本獎勵，播 🏁 過場後繼續落地。
+export function answerPassStart(
+  state: GameState,
+  correct: boolean,
+  rng: Rng,
+  now: number,
+): GameState {
+  const pa = state.pendingAction;
+  if (pa?.kind !== "passStartQuestion") return state;
+  const idx = state.currentPlayerIndex;
+  const player = state.players[idx];
+  const reward = correct ? pa.rewardRight : pa.rewardWrong;
+  const players = replacePlayer(state.players, idx, {
+    money: player.money + reward,
+  });
+  const log = addLog(
+    state.log,
+    `${player.name} 經過起點${correct ? "答對" : "答錯"} +$${reward}`,
+  );
+  // 🏁 加錢過場改由 UI 在答題當下立即播（棋子還停在起點），演完才續走，
+  // 故這裡不推 cutsceneEvent，只結算金額後續結算落點。
+  const next = { ...state, players, log, pendingAction: null };
+  return resolveLanding(next, rng, now);
 }
 
 // === 落點判定 ===
@@ -444,32 +494,12 @@ export function takeTurn(state: GameState, rng: Rng, now: number): GameState {
   const newPos = (player.position + sum) % BOARD_SIZE;
   const passedStart = player.position + sum >= BOARD_SIZE;
 
-  let players = replacePlayer(state.players, idx, { position: newPos });
-  let lapsByPlayer = state.lapsByPlayer;
-  let log = addLog(state.log, `${player.name} 擲出 ${dice.join("+")}=${sum}`);
+  const players = replacePlayer(state.players, idx, { position: newPos });
+  const log = addLog(state.log, `${player.name} 擲出 ${dice.join("+")}=${sum}`);
+  const moved: GameState = { ...state, players, lastRoll: dice, log };
 
-  if (passedStart) {
-    players = replacePlayer(players, idx, {
-      money: players[idx].money + state.settings.passStartBonus,
-    });
-    lapsByPlayer = {
-      ...lapsByPlayer,
-      [player.id]: (lapsByPlayer[player.id] ?? 0) + 1,
-    };
-    log = addLog(
-      log,
-      `${player.name} 經過起點 +$${state.settings.passStartBonus}`,
-    );
-  }
-
-  // 過起點獎勵金已在上面入帳；+2000 過場改由 UI 在「走到起點那一刻」觸發
-  const moved: GameState = {
-    ...state,
-    players,
-    lapsByPlayer,
-    lastRoll: dice,
-    log,
-  };
+  // 過起點：先出加碼題，獎勵與落地延後到玩家作答完
+  if (passedStart) return goPassStart(moved, rng);
   return resolveLanding(moved, rng, now);
 }
 
@@ -575,28 +605,16 @@ function applyCardEffect(
         card.effect.kind === "move" &&
         card.effect.steps > 0 &&
         player.position + card.effect.steps >= BOARD_SIZE;
-      let players = replacePlayer(state.players, idx, { position: newPos });
-      let lapsByPlayer = state.lapsByPlayer;
-      let log = log0;
-      if (passedStart) {
-        players = replacePlayer(players, idx, {
-          money: players[idx].money + state.settings.passStartBonus,
-        });
-        lapsByPlayer = {
-          ...lapsByPlayer,
-          [player.id]: (lapsByPlayer[player.id] ?? 0) + 1,
-        };
-        log = addLog(
-          log,
-          `${player.name} 經過起點 +$${state.settings.passStartBonus}`,
-        );
-      }
-      // 移動後重新結算落點（連鎖）
-      return resolveLanding(
-        { ...state, players, lapsByPlayer, log, pendingAction: null },
-        rng,
-        now,
-      );
+      const players = replacePlayer(state.players, idx, { position: newPos });
+      const moved: GameState = {
+        ...state,
+        players,
+        log: log0,
+        pendingAction: null,
+      };
+      // 過起點先出加碼題；否則直接重新結算落點（連鎖）
+      if (passedStart) return goPassStart(moved, rng);
+      return resolveLanding(moved, rng, now);
     }
     default:
       return endTurn({ ...state, log: log0 }, now);
@@ -712,23 +730,11 @@ export function resolveCardDice(
     case "diceMove": {
       const newPos = (player.position + v) % BOARD_SIZE;
       const passedStart = player.position + v >= BOARD_SIZE;
-      let players = replacePlayer(base.players, idx, { position: newPos });
-      let lapsByPlayer = base.lapsByPlayer;
-      let log = addLog(base.log, `${player.name} 擲出 ${v}，前進 ${v} 格`);
-      if (passedStart) {
-        players = replacePlayer(players, idx, {
-          money: players[idx].money + base.settings.passStartBonus,
-        });
-        lapsByPlayer = {
-          ...lapsByPlayer,
-          [player.id]: (lapsByPlayer[player.id] ?? 0) + 1,
-        };
-        log = addLog(
-          log,
-          `${player.name} 經過起點 +$${base.settings.passStartBonus}`,
-        );
-      }
-      return resolveLanding({ ...base, players, lapsByPlayer, log }, rng, now);
+      const players = replacePlayer(base.players, idx, { position: newPos });
+      const log = addLog(base.log, `${player.name} 擲出 ${v}，前進 ${v} 格`);
+      const moved: GameState = { ...base, players, log, pendingAction: null };
+      if (passedStart) return goPassStart(moved, rng);
+      return resolveLanding(moved, rng, now);
     }
     default:
       return endTurn(base, now);

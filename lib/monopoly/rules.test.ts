@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   answerCardQuiz,
+  answerPassStart,
   answerQuestion,
   confirmPurchase,
   drawAndApplyCard,
@@ -72,15 +73,27 @@ describe("takeTurn 擲骰與移動", () => {
     expect(s.players[0].position).toBe(12); // 0 -> 12
   });
 
-  it("繞過起點發薪並 lap+1（從 33 擲 5 → 繞回 4）", () => {
+  it("繞過起點觸發加碼題並 lap+1（從 33 擲 5 → 繞回 4，先不發薪）", () => {
     let s = game();
     s = { ...s, players: replaceForTest(s.players, 0, { position: 33 }) };
     s = takeTurn(s, seqRng([0.5, 0]), 0); // 4 + 1 = 5; 33+5=38 %34 =4，經過起點
     expect(s.players[0].position).toBe(4);
-    expect(s.players[0].money).toBe(
+    // 過起點先停下出加碼題，獎金尚未入帳，但圈數已 +1
+    expect(s.pendingAction).toMatchObject({ kind: "passStartQuestion" });
+    expect(s.players[0].money).toBe(DEFAULT_SETTINGS.startingMoney);
+    expect(s.lapsByPlayer["p0"]).toBe(1);
+  });
+
+  it("過起點加碼題答對 +3000、答錯 +passStartBonus，作答後續結算落點", () => {
+    let s = game();
+    s = { ...s, players: replaceForTest(s.players, 0, { position: 33 }) };
+    s = takeTurn(s, seqRng([0.5, 0]), 0); // 繞回 4，pendingAction = passStartQuestion
+    const right = answerPassStart(s, true, seqRng([0]), 0);
+    expect(right.players[0].money).toBe(DEFAULT_SETTINGS.startingMoney + 3000);
+    const wrong = answerPassStart(s, false, seqRng([0]), 0);
+    expect(wrong.players[0].money).toBe(
       DEFAULT_SETTINGS.startingMoney + DEFAULT_SETTINGS.passStartBonus,
     );
-    expect(s.lapsByPlayer["p0"]).toBe(1);
   });
 
   it("skipTurns>0 時跳過該玩家、不擲骰、換下一位", () => {
@@ -351,13 +364,16 @@ describe("互動式卡片", () => {
     expect(win.players[0].money).toBe(8000 + 2000);
   });
 
-  it("diceMove：點數即前進步數，經過起點加獎勵", () => {
+  it("diceMove：點數即前進步數，經過起點觸發加碼題（作答後才發獎）", () => {
     let s = drawInteractive("chance", 3, 5); // c6 diceMove
     s = { ...s, players: replaceForTest(s.players, 0, { position: 30 }) };
     s = rollCardDice(s, seqRng([3 / 6 + 0.001])); // 4 → 30+4=34 → 起點
     s = resolveCardDice(s, seqRng([0]), 0);
     expect(s.players[0].position).toBe(0);
-    expect(s.players[0].money).toBe(8000 + DEFAULT_SETTINGS.passStartBonus);
+    expect(s.pendingAction).toMatchObject({ kind: "passStartQuestion" });
+    expect(s.players[0].money).toBe(8000); // 尚未發獎
+    const after = answerPassStart(s, true, seqRng([0]), 0);
+    expect(after.players[0].money).toBe(8000 + 3000);
   });
 
   it("quiz 答對：得獎金（機會 c7 +2000）", () => {

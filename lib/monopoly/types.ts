@@ -170,6 +170,13 @@ export type PendingAction =
   | { kind: "cardDice"; card: Card; rolled: number | null }
   // 互動答題卡：從題庫抽出的題目，待玩家作答
   | { kind: "cardQuiz"; card: Card; question: Question }
+  // 過起點加碼題：答對 +rewardRight、答錯 +rewardWrong（原本獎勵）
+  | {
+      kind: "passStartQuestion";
+      question: Question;
+      rewardRight: number;
+      rewardWrong: number;
+    }
   | null;
 
 // === 過場事件（供 UI 播放聚光燈過場；seq 遞增讓 UI 偵測「新事件」）===
