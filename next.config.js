@@ -1,70 +1,17 @@
 /** @type {import('next').NextConfig} */
-import pwa from "next-pwa";
+import withSerwistInit from "@serwist/next";
+import { randomUUID } from "node:crypto";
 
 const isDev = process.env.NODE_ENV === "development";
 
-const withPWA = pwa({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  cacheOnFrontEndNav: true,
+// next-pwa（不支援 Next 15）已換成現役維護的 @serwist/next。
+// 快取策略改由 app/sw.ts 內的 defaultCache 提供；dev 停用避免 HMR 衝突。
+const withSerwist = withSerwistInit({
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
   disable: isDev,
-  cacheStartUrl: true,
-  dynamicStartUrl: false,
-  fallbacks: {
-    document: "/offline",
-  },
-  additionalManifestEntries: [
-    { url: "/", revision: null },
-    { url: "/offline", revision: null },
-  ],
-  runtimeCaching: [
-    {
-      urlPattern: /^\/$/,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "start-url",
-        expiration: {
-          maxEntries: 10,
-          maxAgeSeconds: 7 * 24 * 60 * 60,
-        },
-        networkTimeoutSeconds: 3,
-      },
-    },
-    {
-      urlPattern: /\/offline/,
-      handler: "CacheFirst",
-      options: {
-        cacheName: "offline-page",
-        expiration: {
-          maxEntries: 1,
-          maxAgeSeconds: 30 * 24 * 60 * 60,
-        },
-      },
-    },
-    {
-      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico|woff2?|ttf|eot|otf|mp4|webm|mp3|wav)$/,
-      handler: "CacheFirst",
-      options: {
-        cacheName: "assets-cache",
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 30 * 24 * 60 * 60,
-        },
-      },
-    },
-    {
-      urlPattern: /^\/_next\/static\/.*/i,
-      handler: "CacheFirst",
-      options: {
-        cacheName: "static-resources",
-        expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 30 * 24 * 60 * 60,
-        },
-      },
-    },
-  ],
+  // 離線時 fallback 用的頁面先 precache（沿用既有 /offline 頁）
+  additionalPrecacheEntries: [{ url: "/offline", revision: randomUUID() }],
 });
 
 const nextConfig = {
@@ -83,10 +30,13 @@ const nextConfig = {
     if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) {
       return [];
     }
-    
-    const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
-    const posthogStaticHost = process.env.NEXT_PUBLIC_POSTHOG_STATIC_HOST || "https://us-assets.i.posthog.com";
-    
+
+    const posthogHost =
+      process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
+    const posthogStaticHost =
+      process.env.NEXT_PUBLIC_POSTHOG_STATIC_HOST ||
+      "https://us-assets.i.posthog.com";
+
     return [
       {
         source: "/ingest/static/:path*",
@@ -105,4 +55,4 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
 };
 
-export default withPWA(nextConfig);
+export default withSerwist(nextConfig);

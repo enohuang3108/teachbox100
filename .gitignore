@@ -43,3 +43,5 @@ __pycache__/
 **/public/workbox-*.js
 **/public/fallback-*.js
 **/public/sw.js
+**/public/sw.js.map
+**/public/swe-worker-*.js
