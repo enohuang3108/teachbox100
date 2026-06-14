@@ -3,6 +3,7 @@ import { deckOf } from "./cards";
 import { pickIndex, rollOne, type Rng } from "./rng";
 import type {
   Card,
+  CutsceneEvent,
   GameSettings,
   GameState,
   Player,
@@ -25,6 +26,25 @@ function replacePlayer(
 
 function addLog(log: string[], message: string): string[] {
   return [message, ...log].slice(0, 100);
+}
+
+// 分配式 Omit：保留 union 各成員的判別鍵
+type DistributiveOmit<T, K extends keyof T> = T extends unknown
+  ? Omit<T, K>
+  : never;
+
+// 把過場事件 append 進佇列（seq 由前一筆遞增，供 UI 依序播放並去重）。
+// 一次行動可累積多筆（例如連抽卡），由 UI 逐一播完。保留最近 12 筆。
+function withCutsceneEvent(
+  state: GameState,
+  ev: DistributiveOmit<CutsceneEvent, "seq">,
+): GameState {
+  const prev = state.cutsceneEvents ?? [];
+  const seq = (prev.length ? prev[prev.length - 1].seq : 0) + 1;
+  return {
+    ...state,
+    cutsceneEvents: [...prev, { ...ev, seq } as CutsceneEvent].slice(-12),
+  };
 }
 
 // === 開始遊戲 ===
@@ -186,7 +206,18 @@ function payToll(
   const houses =
     state.players.find((p) => p.id === ownerId)!.houses[prop.index] ?? 0;
   const toll = prop.toll[houses];
-  return endTurn(chargeOrBankrupt(state, payerIdx, toll, ownerId), now);
+  const payerId = state.players[payerIdx].id;
+  const charged = chargeOrBankrupt(state, payerIdx, toll, ownerId);
+  return endTurn(
+    withCutsceneEvent(charged, {
+      kind: "toll",
+      payerId,
+      ownerId,
+      amount: toll,
+      tileName: prop.name,
+    }),
+    now,
+  );
 }
 
 // === 落點判定 ===
@@ -308,11 +339,19 @@ export function confirmPurchase(
       ownedTiles: [...player.ownedTiles, tile.index],
     });
     return endTurn(
-      {
-        ...state,
-        players,
-        log: addLog(state.log, `${player.name} 購買了 ${tile.name}`),
-      },
+      withCutsceneEvent(
+        {
+          ...state,
+          players,
+          log: addLog(state.log, `${player.name} 購買了 ${tile.name}`),
+        },
+        {
+          kind: "buy",
+          playerId: player.id,
+          amount: tile.price,
+          tileName: tile.name,
+        },
+      ),
       now,
     );
   }
@@ -333,11 +372,19 @@ export function confirmPurchase(
     houses: { ...player.houses, [tile.index]: current + 1 },
   });
   return endTurn(
-    {
-      ...state,
-      players,
-      log: addLog(state.log, `${player.name} 在 ${tile.name} 蓋了一棟房子`),
-    },
+    withCutsceneEvent(
+      {
+        ...state,
+        players,
+        log: addLog(state.log, `${player.name} 在 ${tile.name} 蓋了一棟房子`),
+      },
+      {
+        kind: "build",
+        playerId: player.id,
+        amount: tile.houseCost,
+        tileName: tile.name,
+      },
+    ),
     now,
   );
 }
@@ -356,7 +403,13 @@ export function takeTurn(state: GameState, rng: Rng, now: number): GameState {
       skipTurns: player.skipTurns - 1,
     });
     const log = addLog(state.log, `${player.name} 暫停一回合`);
-    return endTurn({ ...state, players, log, lastRoll: null }, now);
+    return endTurn(
+      withCutsceneEvent(
+        { ...state, players, log, lastRoll: null },
+        { kind: "skip", playerId: player.id },
+      ),
+      now,
+    );
   }
 
   const dice = Array.from({ length: state.settings.diceCount }, () =>
@@ -384,6 +437,7 @@ export function takeTurn(state: GameState, rng: Rng, now: number): GameState {
     );
   }
 
+  // 過起點獎勵金已在上面入帳；+2000 過場改由 UI 在「走到起點那一刻」觸發
   const moved: GameState = {
     ...state,
     players,
@@ -408,14 +462,25 @@ function applyCardEffect(
   switch (card.effect.kind) {
     case "money": {
       const amt = card.effect.amount;
+      const cardEv = {
+        kind: "card" as const,
+        playerId: player.id,
+        amount: amt,
+      };
       if (amt >= 0) {
         const players = replacePlayer(state.players, idx, {
           money: player.money + amt,
         });
-        return endTurn({ ...state, players, log: log0 }, now);
+        return endTurn(
+          withCutsceneEvent({ ...state, players, log: log0 }, cardEv),
+          now,
+        );
       }
       return endTurn(
-        chargeOrBankrupt({ ...state, log: log0 }, idx, -amt, null),
+        withCutsceneEvent(
+          chargeOrBankrupt({ ...state, log: log0 }, idx, -amt, null),
+          cardEv,
+        ),
         now,
       );
     }

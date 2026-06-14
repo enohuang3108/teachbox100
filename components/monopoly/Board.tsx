@@ -136,11 +136,24 @@ function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
           </div>
         ) : null}
       </div>
-      {property && (
-        <div className="px-1 pb-0.5 text-[9px] font-semibold tabular-nums text-stone-400">
-          ${tile.price.toLocaleString()}
-        </div>
-      )}
+      {property &&
+        (owner ? (
+          // 已買：顯示踩到要繳的租金（隨房子棟數變高），用地主代表色標示
+          <div
+            className="px-1 pb-0.5 text-[9px] font-extrabold tabular-nums"
+            style={{ color: owner.color }}
+          >
+            租 $
+            {tile.toll[
+              Math.min(owner.houses[tile.index] ?? 0, tile.toll.length - 1)
+            ].toLocaleString()}
+          </div>
+        ) : (
+          // 未買：顯示購買價
+          <div className="px-1 pb-0.5 text-[9px] font-semibold tabular-nums text-stone-400">
+            售 ${tile.price.toLocaleString()}
+          </div>
+        ))}
     </div>
   );
 }

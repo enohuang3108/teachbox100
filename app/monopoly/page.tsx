@@ -7,17 +7,19 @@ import { Board } from "@/components/monopoly/Board";
 import { CardDialog } from "@/components/monopoly/CardDialog";
 import { Dice } from "@/components/monopoly/Dice";
 import { GameOverDialog } from "@/components/monopoly/GameOverDialog";
+import { MoneyCutscene } from "@/components/monopoly/MoneyCutscene";
 import { MoneyDisplay } from "@/components/monopoly/MoneyDisplay";
 import { QuestionDialog } from "@/components/monopoly/QuestionDialog";
 import { SetupPanel } from "@/components/monopoly/SetupPanel";
 import { TurnBanner } from "@/components/monopoly/TurnBanner";
 import { BOARD_SIZE } from "@/lib/monopoly/board";
-import type { Player } from "@/lib/monopoly/types";
+import type { CutsceneEvent, Player } from "@/lib/monopoly/types";
 import { realisticEffect } from "@/lib/helpers/confetti-effects";
 import { useMonopolyStore } from "@/lib/monopoly/store";
 
 const STEP_MS = 240; // 每走一格的間隔
 const ROLL_MS = 1333; // 擲骰 Lottie 動畫長度（80 幀 @ 60fps）
+const PASS_MS = 1600; // 通過起點時暫停腳步、播 +2000 過場的時間
 
 export default function MonopolyPage() {
   const [hydrated, setHydrated] = useState(false);
@@ -31,14 +33,53 @@ export default function MonopolyPage() {
     null,
   );
   const [turnPlayer, setTurnPlayer] = useState<Player | null>(null);
+  const [cutscene, setCutscene] = useState<CutsceneEvent | null>(null);
+  const [queue, setQueue] = useState<CutsceneEvent[]>([]);
+  const [displayIndex, setDisplayIndex] = useState(0); // 中央 HUD 高亮的角色（換場演完才切）
   const banneredIdx = useRef<number | null>(null);
+  const pendingIdx = useRef<number | null>(null); // 換場演完後要切到的角色 index
+  const lastEventSeq = useRef<number>(0);
+  const synthSeq = useRef<number>(0); // page 自製過場（通過起點）的遞減 seq
   const { game, roll, answer, confirm, resolveCard, reset } =
     useMonopolyStore();
 
   const pa = game?.pendingAction ?? null;
   const animating = rolling || walk !== null;
+  // 棋子走動／過場播放中／還有待播過場 都算「忙碌」：暫不彈對話框、回合轉場、擲骰
+  const busy = animating || cutscene !== null || queue.length > 0;
 
-  useEffect(() => setHydrated(true), []);
+  useEffect(() => {
+    setHydrated(true);
+    // 進場時把已看過的事件 seq 設為當前最大值，避免重整後重播
+    const evs = useMonopolyStore.getState().game?.cutsceneEvents ?? [];
+    lastEventSeq.current = evs.length ? evs[evs.length - 1].seq : 0;
+  }, []);
+
+  // 收集規則產生的新過場事件，依序排入佇列（落地／結算類，走完棋再播）
+  useEffect(() => {
+    if (!game || game.phase !== "playing") return;
+    const evs = game.cutsceneEvents ?? [];
+    const fresh = evs.filter((e) => e.seq > lastEventSeq.current);
+    if (fresh.length === 0) return;
+    lastEventSeq.current = evs[evs.length - 1].seq;
+    setQueue((q) => [...q, ...fresh]);
+  }, [game]);
+
+  // 逐一播放佇列：沒有正在播、棋子也走完時，取下一個來播
+  useEffect(() => {
+    if (cutscene || animating) return;
+    if (queue.length === 0) return;
+    setCutscene(queue[0]);
+    setQueue((q) => q.slice(1));
+  }, [queue, cutscene, animating]);
+
+  // 過場自動消失（收租雙方演久一點）
+  useEffect(() => {
+    if (!cutscene) return;
+    const dur = cutscene.kind === "toll" ? 1900 : 1500;
+    const t = window.setTimeout(() => setCutscene(null), dur);
+    return () => window.clearTimeout(t);
+  }, [cutscene]);
 
   useEffect(() => {
     if (game?.phase === "gameover") realisticEffect();
@@ -51,12 +92,15 @@ export default function MonopolyPage() {
       banneredIdx.current = null;
       return;
     }
-    if (animating || pa !== null) return;
+    if (busy || pa !== null) return;
     const idx = game.currentPlayerIndex;
     if (banneredIdx.current === idx) return;
-    const first = banneredIdx.current === null;
-    banneredIdx.current = idx;
-    if (first) return;
+    // 首位／重整：沒有換場橫幅，HUD 直接同步到目前角色
+    if (banneredIdx.current === null) {
+      banneredIdx.current = idx;
+      setDisplayIndex(idx);
+      return;
+    }
     const t = window.setTimeout(() => {
       // 觸發前再次確認：仍是同一位、無待處理事件才彈（避免下一位已搶先操作）
       const g = useMonopolyStore.getState().game;
@@ -65,16 +109,22 @@ export default function MonopolyPage() {
         g.currentPlayerIndex === idx &&
         !g.pendingAction
       ) {
+        // 只有「真的要彈」這一刻才標記去重，避免提早被取消的排程永久卡住
+        banneredIdx.current = idx;
+        pendingIdx.current = idx; // 等橫幅演完才把 HUD 切到這位
         setTurnPlayer(g.players[idx]);
       }
-    }, 850);
+    }, 300);
     return () => window.clearTimeout(t);
-  }, [game, animating, pa]);
+  }, [game, busy, pa]);
 
-  // 橫幅自動消失
+  // 橫幅自動消失；消失的那一刻才把中央 HUD 切到新角色
   useEffect(() => {
     if (!turnPlayer) return;
-    const t = window.setTimeout(() => setTurnPlayer(null), 1600);
+    const t = window.setTimeout(() => {
+      setTurnPlayer(null);
+      if (pendingIdx.current !== null) setDisplayIndex(pendingIdx.current);
+    }, 1600);
     return () => window.clearTimeout(t);
   }, [turnPlayer]);
 
@@ -88,7 +138,7 @@ export default function MonopolyPage() {
 
   // 擲骰流程：翻滾動畫 → 結算 → 棋子一格一格走 → 結束後才觸發後續事件
   function handleRoll() {
-    if (!game || rollDisabled || animating) return;
+    if (!game || rollDisabled || busy) return;
     const moverIdx = game.currentPlayerIndex;
     const mover = game.players[moverIdx];
     const fromPos = mover.position;
@@ -105,6 +155,17 @@ export default function MonopolyPage() {
     const dice = next?.lastRoll;
     const steps = dice ? dice.reduce((a, b) => a + b, 0) : 0;
 
+    // 被暫停（監獄／跳過）：沒有點數，不播骰子動畫，直接讓「暫停一回合」過場接手
+    if (!dice) {
+      setRolling(false);
+      setWalk(null);
+      return;
+    }
+
+    // 通過起點的那一步（cumulative 首次達到一圈）；用來在該瞬間觸發 +2000 過場
+    const bonus = game.settings.passStartBonus;
+    const passStep = fromPos + steps >= BOARD_SIZE ? BOARD_SIZE - fromPos : -1;
+
     // 等擲骰動畫落定後，棋子再一格一格走
     window.setTimeout(() => {
       setRolling(false);
@@ -116,20 +177,30 @@ export default function MonopolyPage() {
       let step = 0;
       const advance = () => {
         step += 1;
-        setWalk({ playerId: moverId, pos: (fromPos + step) % BOARD_SIZE });
+        const pos = (fromPos + step) % BOARD_SIZE;
+        setWalk({ playerId: moverId, pos });
+        // 走到起點那一刻：暫停腳步、播 +2000 過場，演完再續走
+        const crossing = passStep > 0 && step === passStep && bonus > 0;
+        if (crossing) {
+          synthSeq.current -= 1;
+          setCutscene({
+            seq: synthSeq.current,
+            kind: "passStart",
+            playerId: moverId,
+            amount: bonus,
+          });
+        }
+        const delay = crossing ? PASS_MS : STEP_MS;
         if (step >= steps) {
           // 最後一步落定後解除，並在落點脈動一圈代表色光環
           window.setTimeout(() => {
             setWalk(null);
-            setLanding({
-              pos: (fromPos + steps) % BOARD_SIZE,
-              color: mover.color,
-            });
+            setLanding({ pos, color: mover.color });
             window.setTimeout(() => setLanding(null), 560);
-          }, STEP_MS);
+          }, delay);
           return;
         }
-        window.setTimeout(advance, STEP_MS);
+        window.setTimeout(advance, delay);
       };
       advance();
     }, ROLL_MS);
@@ -140,7 +211,7 @@ export default function MonopolyPage() {
       {/* 玩家清單：輪到的放大上色、其餘黑白 */}
       <div className="flex flex-wrap items-end justify-center gap-x-5 gap-y-2">
         {game.players.map((p, i) => {
-          const active = i === game.currentPlayerIndex;
+          const active = i === displayIndex;
           return (
             <motion.div
               key={p.id}
@@ -187,7 +258,7 @@ export default function MonopolyPage() {
         lastRoll={game.lastRoll}
         rolling={rolling}
         rollSeq={rollSeq}
-        disabled={rollDisabled || animating}
+        disabled={rollDisabled || busy}
         onRoll={handleRoll}
       />
     </div>
@@ -225,30 +296,31 @@ export default function MonopolyPage() {
         />
       </div>
 
+      <MoneyCutscene event={cutscene} players={game.players} />
       <TurnBanner player={turnPlayer} />
 
       {logOpen && (
         <LogDialog log={game.log} onClose={() => setLogOpen(false)} />
       )}
 
-      {!animating &&
+      {!busy &&
         (pa?.kind === "buyQuestion" || pa?.kind === "buildQuestion") && (
           <QuestionDialog
             pending={pa}
             question={pa.question}
+            player={game.players[game.currentPlayerIndex]}
             onAnswered={answer}
           />
         )}
-      {!animating &&
-        (pa?.kind === "confirmBuy" || pa?.kind === "confirmBuild") && (
-          <PurchaseConfirm
-            label={
-              pa.kind === "confirmBuy" ? "購買這塊地？" : "在這裡蓋一棟房子？"
-            }
-            onConfirm={confirm}
-          />
-        )}
-      {!animating && pa?.kind === "drawCard" && (
+      {!busy && (pa?.kind === "confirmBuy" || pa?.kind === "confirmBuild") && (
+        <PurchaseConfirm
+          label={
+            pa.kind === "confirmBuy" ? "購買這塊地？" : "在這裡蓋一棟房子？"
+          }
+          onConfirm={confirm}
+        />
+      )}
+      {!busy && pa?.kind === "drawCard" && (
         <CardDialog pending={pa} onResolve={resolveCard} />
       )}
 

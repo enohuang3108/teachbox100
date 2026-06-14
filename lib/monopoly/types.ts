@@ -126,6 +126,34 @@ export type PendingAction =
   | { kind: "drawCard"; deck: "chance" | "fate"; card: Card }
   | null;
 
+// === 過場事件（供 UI 播放聚光燈過場；seq 遞增讓 UI 偵測「新事件」）===
+export type CutsceneEvent =
+  | {
+      seq: number;
+      kind: "toll";
+      payerId: string;
+      ownerId: string;
+      amount: number;
+      tileName: string;
+    }
+  | { seq: number; kind: "passStart"; playerId: string; amount: number }
+  | { seq: number; kind: "card"; playerId: string; amount: number }
+  | {
+      seq: number;
+      kind: "buy";
+      playerId: string;
+      amount: number;
+      tileName: string;
+    }
+  | {
+      seq: number;
+      kind: "build";
+      playerId: string;
+      amount: number;
+      tileName: string;
+    }
+  | { seq: number; kind: "skip"; playerId: string }; // 監獄／暫停一回合
+
 // === 整體狀態 ===
 export type GamePhase = "setup" | "playing" | "gameover";
 
@@ -140,4 +168,5 @@ export interface GameState {
   startedAt: number | null;
   lapsByPlayer: Record<string, number>;
   log: string[];
+  cutsceneEvents?: CutsceneEvent[]; // 近期過場事件佇列（依序播放；seq 遞增供 UI 去重）
 }
