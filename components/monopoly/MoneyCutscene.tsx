@@ -1,7 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
+import { useEffect } from "react";
 import type { CutsceneEvent, Player } from "@/lib/monopoly/types";
+import { useSound } from "@/lib/hooks/useSound";
 import { PlayerAvatar } from "./Avatar";
 
 function fmt(n: number): string {
@@ -90,6 +92,16 @@ export function MoneyCutscene({
   players: Player[];
 }) {
   const byId = (id: string) => players.find((p) => p.id === id);
+  const { playMoneySound, playJailSound } = useSound();
+
+  // 新的過場出現時播音效：監獄 skip 用警笛、其餘金錢類用金錢音效
+  const seq = event ? event.seq : null;
+  const isJail = event?.kind === "skip";
+  useEffect(() => {
+    if (seq === null) return;
+    if (isJail) playJailSound();
+    else playMoneySound();
+  }, [seq, isJail, playJailSound, playMoneySound]);
 
   let label = "";
   let body: React.ReactNode = null;
