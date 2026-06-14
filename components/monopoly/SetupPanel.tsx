@@ -1,6 +1,13 @@
 "use client";
 
 import { Button } from "@/components/atoms/shadcn/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/atoms/shadcn/dialog";
 import { Input } from "@/components/atoms/shadcn/input";
 import { Label } from "@/components/atoms/shadcn/label";
 import {
@@ -11,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/atoms/shadcn/select";
 import {
+  AI_QUESTION_PROMPT,
   buildTemplateBlob,
   parseQuestions,
   rowsFromFile,
@@ -33,6 +41,8 @@ export function SetupPanel() {
     begin,
   } = useMonopolyStore();
   const [errors, setErrors] = useState<string[]>([]);
+  const [promptOpen, setPromptOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const playerCount = draftSettings.playerCount;
 
@@ -100,6 +110,17 @@ export function SetupPanel() {
     a.download = "大富翁題庫範本.xlsx";
     a.click();
     URL.revokeObjectURL(url);
+    setCopied(false);
+    setPromptOpen(true);
+  }
+
+  async function copyPrompt() {
+    try {
+      await navigator.clipboard.writeText(AI_QUESTION_PROMPT);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
   }
 
   const canStart = draftQuestions.length > 0 && playerCount >= 2;
@@ -129,7 +150,31 @@ export function SetupPanel() {
             ))}
           </ul>
         )}
+        <p className="text-sm text-muted-foreground">
+          想用 AI 快速出題？點「下載範本」後會提供可貼給 ChatGPT／Claude
+          的提示詞。
+        </p>
       </section>
+
+      {/* AI 出題提示詞 */}
+      <Dialog open={promptOpen} onOpenChange={setPromptOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>用 AI 快速產生題庫</DialogTitle>
+            <DialogDescription>
+              已下載 Excel 範本。複製下方提示詞貼給
+              ChatGPT／Claude，並補上你要的主題與題數；AI 會產生 Excel
+              檔，下載後用上方「選擇檔案」匯入即可。
+            </DialogDescription>
+          </DialogHeader>
+          <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap rounded-md bg-muted p-3 text-sm">
+            {AI_QUESTION_PROMPT}
+          </pre>
+          <Button onClick={copyPrompt} className="w-full">
+            {copied ? "已複製！" : "複製提示詞"}
+          </Button>
+        </DialogContent>
+      </Dialog>
 
       {/* 玩家設定 */}
       <section className="space-y-2 rounded-lg border p-4">

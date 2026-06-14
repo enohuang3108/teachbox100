@@ -34,7 +34,10 @@ function str(v: unknown): string {
 
 export function parseQuestions(rows: RawRow[]): ParseResult {
   if (rows.length === 0) {
-    return { ok: false, errors: [{ row: 1, message: "題庫不可為空，請至少提供一題" }] };
+    return {
+      ok: false,
+      errors: [{ row: 1, message: "題庫不可為空，請至少提供一題" }],
+    };
   }
   const errors: ParseError[] = [];
   const questions: Question[] = [];
@@ -48,7 +51,10 @@ export function parseQuestions(rows: RawRow[]): ParseResult {
 
     const type = TYPE_MAP[typeText];
     if (!type) {
-      errors.push({ row: rowNum, message: `題型「${typeText}」不合法，須為 選擇／是非／簡答` });
+      errors.push({
+        row: rowNum,
+        message: `題型「${typeText}」不合法，須為 選擇／是非／簡答`,
+      });
       return;
     }
     if (!text) {
@@ -72,14 +78,20 @@ export function parseQuestions(rows: RawRow[]): ParseResult {
       const letterIdx = LETTER_TO_INDEX[answerRaw.toUpperCase()];
       if (letterIdx !== undefined) {
         if (letterIdx >= options.length) {
-          errors.push({ row: rowNum, message: `正確答案「${answerRaw}」對應的選項不存在` });
+          errors.push({
+            row: rowNum,
+            message: `正確答案「${answerRaw}」對應的選項不存在`,
+          });
           return;
         }
         answer = options[letterIdx];
       } else if (options.includes(answerRaw)) {
         answer = answerRaw;
       } else {
-        errors.push({ row: rowNum, message: `正確答案「${answerRaw}」不在選項中` });
+        errors.push({
+          row: rowNum,
+          message: `正確答案「${answerRaw}」不在選項中`,
+        });
         return;
       }
       questions.push({ id: `q${i}`, type, text, options, answer, explanation });
@@ -93,7 +105,10 @@ export function parseQuestions(rows: RawRow[]): ParseResult {
       if (yes.includes(answerRaw)) answer = "是";
       else if (no.includes(answerRaw)) answer = "否";
       else {
-        errors.push({ row: rowNum, message: `是非題答案「${answerRaw}」須為 是／否` });
+        errors.push({
+          row: rowNum,
+          message: `是非題答案「${answerRaw}」須為 是／否`,
+        });
         return;
       }
       questions.push({ id: `q${i}`, type, text, answer, explanation });
@@ -115,6 +130,28 @@ export async function rowsFromFile(file: File): Promise<RawRow[]> {
   const sheet = wb.Sheets[wb.SheetNames[0]];
   return XLSX.utils.sheet_to_json<RawRow>(sheet, { defval: "" });
 }
+
+// === 給 AI 產生題庫用的提示詞 ===
+// 與上方欄位格式同一處維護，避免規格漂移。
+export const AI_QUESTION_PROMPT = `你是一位出題助手。請依照以下規格，幫我產生一份可直接匯入的 Excel (.xlsx) 題庫檔案。
+
+【欄位格式】第一列為下列標題，順序固定：
+題型｜題目｜選項A｜選項B｜選項C｜選項D｜正確答案｜解析
+
+【填寫規則】
+1. 題型：限填「選擇」「是非」「簡答」其中之一。
+2. 選擇題：選項A～D至少填兩個；正確答案填對應字母（A／B／C／D）或選項文字。
+3. 是非題：選項欄位留空；正確答案填「是」或「否」。
+4. 簡答題：選項欄位留空；正確答案直接填答案文字。
+5. 解析：可留空，建議簡短說明。
+
+【範例】
+選擇｜台灣最高的山是？｜玉山｜雪山｜合歡山｜阿里山｜A｜玉山海拔3952公尺
+是非｜台北是台灣的首都｜｜｜｜｜是｜
+簡答｜台灣最長的河川是？｜｜｜｜｜濁水溪｜
+
+【我的需求】
+請依上述格式，產生〈在此補上：年級／科目／主題／題數，例如「國小三年級數學乘法，共20題，以選擇題為主」〉，最後輸出成可下載的 .xlsx 檔案。`;
 
 // === 下載範本 ===
 export function buildTemplateBlob(): Blob {
@@ -151,7 +188,16 @@ export function buildTemplateBlob(): Blob {
     },
   ];
   const ws = XLSX.utils.json_to_sheet(data, {
-    header: ["題型", "題目", "選項A", "選項B", "選項C", "選項D", "正確答案", "解析"],
+    header: [
+      "題型",
+      "題目",
+      "選項A",
+      "選項B",
+      "選項C",
+      "選項D",
+      "正確答案",
+      "解析",
+    ],
   });
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "題庫");
