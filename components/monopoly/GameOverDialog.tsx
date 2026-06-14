@@ -23,7 +23,7 @@ export function GameOverDialog({
   const order = ranking(game);
   return (
     <Dialog open={game.phase === "gameover"}>
-      <DialogContent>
+      <DialogContent hideClose>
         <DialogHeader>
           <DialogTitle>遊戲結束 — 最終排名</DialogTitle>
         </DialogHeader>

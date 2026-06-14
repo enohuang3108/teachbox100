@@ -246,6 +246,26 @@ export function SetupPanel() {
               <SelectItem value="laps">完成圈數</SelectItem>
             </SelectContent>
           </Select>
+          {draftSettings.endCondition.type === "time" && (
+            <div className="mt-2">
+              <Label className="text-sm text-muted-foreground">
+                時間（分鐘）
+              </Label>
+              <Input
+                type="number"
+                min={1}
+                max={180}
+                value={draftSettings.endCondition.minutes}
+                onChange={(e) => {
+                  const minutes = Math.min(
+                    180,
+                    Math.max(1, Number(e.target.value) || 1),
+                  );
+                  updateSettings({ endCondition: { type: "time", minutes } });
+                }}
+              />
+            </div>
+          )}
         </div>
       </section>
 

@@ -86,7 +86,7 @@ export interface GameSettings {
 
 export const DEFAULT_SETTINGS: GameSettings = {
   playerCount: 4,
-  startingMoney: 15000,
+  startingMoney: 8000,
   diceCount: 2,
   passStartBonus: 2000,
   endCondition: { type: "time", minutes: 40 },

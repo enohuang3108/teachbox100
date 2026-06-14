@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { defaultRng } from "./rng";
 import {
   answerQuestion,
+  checkEnd,
   confirmPurchase,
   drawAndApplyCard,
   startGame,
@@ -29,6 +30,7 @@ interface MonopolyStore {
   answer: (correct: boolean) => void;
   confirm: (accept: boolean) => void;
   resolveCard: () => void;
+  endIfTimeUp: () => void;
   reset: () => void;
 }
 
@@ -50,7 +52,9 @@ export const useMonopolyStore = create<MonopolyStore>()(
       begin: () => {
         const { draftSettings, draftQuestions, draftPlayers } = get();
         if (draftQuestions.length === 0 || draftPlayers.length < 2) return;
-        set({ game: startGame(draftSettings, draftQuestions, draftPlayers, now()) });
+        set({
+          game: startGame(draftSettings, draftQuestions, draftPlayers, now()),
+        });
       },
 
       roll: () => {
@@ -72,6 +76,15 @@ export const useMonopolyStore = create<MonopolyStore>()(
         const g = get().game;
         if (!g) return;
         set({ game: drawAndApplyCard(g, defaultRng, now()) });
+      },
+      // 時間到結束條件：由右上角倒數計時器歸零時呼叫，主動把遊戲收尾。
+      // （平時結束判定只在擲骰／回合結束觸發，沒人操作時不會自動結束）
+      endIfTimeUp: () => {
+        const g = get().game;
+        if (!g || g.phase !== "playing") return;
+        if (g.settings.endCondition.type !== "time") return;
+        const next = checkEnd(g, now());
+        if (next.phase === "gameover") set({ game: next });
       },
       reset: () => set({ game: null }),
     }),

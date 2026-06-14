@@ -1,15 +1,9 @@
 "use client";
 
-import { Button } from "@/components/atoms/shadcn/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/atoms/shadcn/dialog";
-import type { PendingAction } from "@/lib/monopoly/types";
+import type { PendingAction, Player } from "@/lib/monopoly/types";
 import { motion } from "motion/react";
 import NextImage from "next/image";
+import { PlayerAvatar } from "./Avatar";
 
 const DECK_IMG: Record<"chance" | "fate", string> = {
   chance: "/images/monopoly/chance.webp",
@@ -18,40 +12,104 @@ const DECK_IMG: Record<"chance" | "fate", string> = {
 
 export function CardDialog({
   pending,
+  player,
   onResolve,
 }: {
   pending: PendingAction;
+  player: Player;
   onResolve: () => void;
 }) {
-  const open = pending?.kind === "drawCard";
-  if (!open || pending?.kind !== "drawCard") return null;
+  if (pending?.kind !== "drawCard") return null;
+
+  const size = 96;
+  const deckLabel = pending.deck === "chance" ? "機會" : "命運";
 
   return (
-    <Dialog open={open}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {pending.deck === "chance" ? "機會" : "命運"}
-          </DialogTitle>
-        </DialogHeader>
-        <motion.div
-          initial={{ rotateY: 90, opacity: 0 }}
-          animate={{ rotateY: 0, opacity: 1 }}
-          className="flex flex-col items-center gap-3 rounded-lg border-2 p-6 text-center text-lg font-medium"
-        >
-          <NextImage
-            src={DECK_IMG[pending.deck]}
-            alt={pending.deck === "chance" ? "機會卡" : "命運卡"}
-            width={120}
-            height={160}
-            className="h-40 w-auto"
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-stone-950/55 px-4 backdrop-blur-sm">
+      {/* 玩家頭像 ＋ 光暈（沿用過場聚光燈風格） */}
+      <div className="flex flex-col items-center gap-2">
+        <div className="relative flex items-center justify-center">
+          <motion.span
+            className="pointer-events-none absolute rounded-full"
+            style={{
+              width: size * 2.5,
+              height: size * 2.5,
+              background: `radial-gradient(circle, ${player.color}99 0%, ${player.color}33 40%, ${player.color}00 70%)`,
+              filter: "blur(6px)",
+            }}
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: [0.85, 1.08, 1], opacity: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.04 }}
           />
+          <motion.div
+            className="relative"
+            initial={{ scale: 0, rotate: -20 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 360,
+              damping: 16,
+              delay: 0.06,
+            }}
+          >
+            <PlayerAvatar
+              character={player.character}
+              color={player.color}
+              size={size}
+              ringWidth={5}
+            />
+          </motion.div>
+        </div>
+        <div
+          className="max-w-[8rem] truncate text-base font-bold text-white/85"
+          style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
+        >
+          {player.name}
+        </div>
+      </div>
+
+      <motion.div
+        className="text-base font-bold tracking-wide text-white/85"
+        style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.16 }}
+      >
+        {deckLabel}
+      </motion.div>
+
+      {/* 翻牌：卡圖 ＋ 內容 */}
+      <motion.div
+        initial={{ rotateY: 90, opacity: 0 }}
+        animate={{ rotateY: 0, opacity: 1 }}
+        transition={{ delay: 0.18, duration: 0.4 }}
+        className="flex flex-col items-center gap-3"
+      >
+        <NextImage
+          src={DECK_IMG[pending.deck]}
+          alt={`${deckLabel}卡`}
+          width={180}
+          height={240}
+          className="h-56 w-auto drop-shadow-[0_8px_20px_rgba(0,0,0,0.45)]"
+        />
+        <p
+          className="max-w-[20rem] text-center text-xl font-extrabold text-white"
+          style={{ textShadow: "0 2px 10px rgba(0,0,0,0.55)" }}
+        >
           {pending.card.text}
-        </motion.div>
-        <Button className="w-full" onClick={onResolve}>
-          確定
-        </Button>
-      </DialogContent>
-    </Dialog>
+        </p>
+      </motion.div>
+
+      <motion.button
+        type="button"
+        className="w-full max-w-sm rounded-xl bg-emerald-500 px-4 py-3 font-bold text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-600"
+        initial={{ y: 12, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        onClick={onResolve}
+      >
+        確定
+      </motion.button>
+    </div>
   );
 }
