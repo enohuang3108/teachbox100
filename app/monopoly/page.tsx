@@ -445,6 +445,7 @@ function PurchaseConfirm({
   const afterLevel = isBuy ? 0 : currentLevel + 1;
   const toHotel = !isBuy && afterLevel > tile.maxHouses;
   const amount = isBuy ? tile.price : buildCostFor(tile, currentLevel);
+  const affordable = player.money >= amount;
   const label = isBuy
     ? `購買${tile.name}？`
     : toHotel
@@ -479,6 +480,12 @@ function PurchaseConfirm({
         >
           ${amount.toLocaleString()}
         </p>
+        <p
+          className="text-base font-semibold tabular-nums text-white/75"
+          style={{ textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}
+        >
+          目前存款 ${player.money.toLocaleString()}
+        </p>
       </motion.div>
 
       {/* 過路費階梯：別人踩到要付的金額，蓋越多房子越高（標出成交後的等級） */}
@@ -496,20 +503,32 @@ function PurchaseConfirm({
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.28 }}
       >
-        <button
-          type="button"
-          className="flex-1 rounded-xl bg-emerald-500 px-4 py-3 font-bold text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-600"
-          onClick={() => onConfirm(true)}
-        >
-          {confirmText}
-        </button>
-        <button
-          type="button"
-          className="flex-1 rounded-xl bg-white px-4 py-3 font-medium text-stone-600 shadow-lg transition hover:bg-stone-100"
-          onClick={() => onConfirm(false)}
-        >
-          跳過
-        </button>
+        {affordable ? (
+          <>
+            <button
+              type="button"
+              className="flex-1 rounded-xl bg-emerald-500 px-4 py-3 font-bold text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-600"
+              onClick={() => onConfirm(true)}
+            >
+              {confirmText}
+            </button>
+            <button
+              type="button"
+              className="flex-1 rounded-xl bg-white px-4 py-3 font-medium text-stone-600 shadow-lg transition hover:bg-stone-100"
+              onClick={() => onConfirm(false)}
+            >
+              跳過
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            className="flex-1 rounded-xl bg-stone-200 px-4 py-3 font-bold text-stone-500 shadow-lg transition hover:bg-stone-300"
+            onClick={() => onConfirm(false)}
+          >
+            存款不足
+          </button>
+        )}
       </motion.div>
     </div>
   );

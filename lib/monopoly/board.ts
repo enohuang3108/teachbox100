@@ -13,9 +13,9 @@ type Tier = {
   hotel: number;
 };
 
-const ECO: Tier = { toll: [0.15, 0.45, 0.9, 1.5], house: 0.4, hotel: 0.6 }; // 經濟地 ≤1400
-const MID: Tier = { toll: [0.12, 0.45, 0.95, 1.6], house: 0.4, hotel: 0.6 }; // 中價地 1500–2400
-const PRIME: Tier = { toll: [0.1, 0.4, 0.9, 1.6], house: 0.35, hotel: 0.55 }; // 蛋黃地 ≥2500
+const ECO: Tier = { toll: [0.15, 0.4, 0.75, 1.2], house: 0.4, hotel: 0.6 }; // 經濟地 ≤1400
+const MID: Tier = { toll: [0.12, 0.4, 0.78, 1.3], house: 0.4, hotel: 0.6 }; // 中價地 1500–2400
+const PRIME: Tier = { toll: [0.1, 0.35, 0.75, 1.3], house: 0.35, hotel: 0.55 }; // 蛋黃地 ≥2500
 
 const round10 = (n: number): number => Math.round(n / 10) * 10;
 

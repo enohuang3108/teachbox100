@@ -57,9 +57,9 @@ export function MoneyCutscene({
   const byId = (id: string) => players.find((p) => p.id === id);
   const { playMoneySound, playJailSound } = useSound();
 
-  // 新的過場出現時播音效：監獄 skip 用警笛、其餘金錢類用金錢音效
+  // 新的過場出現時播音效：只有進監獄用警笛，其餘（含休息暫停）用金錢音效
   const seq = event ? event.seq : null;
-  const isJail = event?.kind === "skip";
+  const isJail = event?.kind === "skip" && event.reason === "jail";
   useEffect(() => {
     if (seq === null) return;
     if (isJail) playJailSound();
@@ -72,10 +72,11 @@ export function MoneyCutscene({
   if (event) {
     if (event.kind === "skip") {
       const p = byId(event.playerId);
-      label = "監獄 🚔";
+      const jail = event.reason === "jail";
+      label = jail ? "監獄 🚔" : "休息 😴";
       body = p ? (
         <div className="flex flex-col items-center gap-2">
-          <SpotlightAvatar player={p} haloSize={240} grayscale name />
+          <SpotlightAvatar player={p} haloSize={240} grayscale={jail} name />
           <motion.div
             className="text-3xl font-extrabold text-amber-300"
             style={{ textShadow: "0 2px 10px rgba(0,0,0,0.55)" }}

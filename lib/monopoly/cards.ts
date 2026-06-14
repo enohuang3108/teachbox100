@@ -29,7 +29,7 @@ export const CHANCE_CARDS: Card[] = [
   {
     id: "c5",
     deck: "chance",
-    text: "財神到！擲骰子，點數 ×$500 入袋",
+    text: "中大獎！擲骰子，點數 ×$500 入袋",
     effect: { kind: "diceReward", perPip: 500 },
   },
   {
@@ -42,7 +42,11 @@ export const CHANCE_CARDS: Card[] = [
     id: "c7",
     deck: "chance",
     text: "益智搶答：答對獨得 $2000（答錯不罰）",
-    effect: { kind: "quiz", reward: 2000, onWrong: { kind: "money", amount: 0 } },
+    effect: {
+      kind: "quiz",
+      reward: 2000,
+      onWrong: { kind: "money", amount: 0 },
+    },
   },
   {
     id: "c8",
@@ -100,7 +104,11 @@ export const FATE_CARDS: Card[] = [
     id: "f6",
     deck: "fate",
     text: "突擊測驗：答錯罰 $1000（答對沒事）",
-    effect: { kind: "quiz", reward: 0, onWrong: { kind: "money", amount: 1000 } },
+    effect: {
+      kind: "quiz",
+      reward: 0,
+      onWrong: { kind: "money", amount: 1000 },
+    },
   },
   {
     id: "f7",

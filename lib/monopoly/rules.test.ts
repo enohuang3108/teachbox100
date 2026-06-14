@@ -124,6 +124,13 @@ describe("resolveLanding 各格", () => {
     s = resolveLanding(s, seqRng([0]), 0);
     expect(s.players[0].skipTurns).toBe(1);
     expect(s.pendingAction).toBeNull();
+    // 踩到監獄要觸發關監獄（暫停一回合）過場
+    const last = s.cutsceneEvents?.at(-1);
+    expect(last).toMatchObject({
+      kind: "skip",
+      playerId: s.players[0].id,
+      reason: "jail",
+    });
   });
 });
 
@@ -265,12 +272,26 @@ describe("drawAndApplyCard", () => {
     expect(s.players[0].position).toBe(0);
   });
 
-  it("jail 卡 → skipTurns=1", () => {
+  it("jail 卡 → skipTurns=1 並記 skipReason=jail", () => {
     let s = landOnCard("fate", 6);
     // FATE_CARDS index 3 = f4 jail（共 10 張）→ rng 3/10+eps
     s = resolveLanding(s, seqRng([3 / 10 + 0.001]), 0);
     s = drawAndApplyCard(s, seqRng([0]), 0);
     expect(s.players[0].skipTurns).toBe(1);
+    expect(s.players[0].skipReason).toBe("jail");
+    expect(s.cutsceneEvents?.at(-1)).toMatchObject({
+      kind: "skip",
+      reason: "jail",
+    });
+  });
+
+  it("生病卡（skip）→ skipReason=rest，不是監獄", () => {
+    let s = landOnCard("fate", 6);
+    // FATE_CARDS index 4 = f5 skip（生病休息）→ rng 4/10+eps
+    s = resolveLanding(s, seqRng([4 / 10 + 0.001]), 0);
+    s = drawAndApplyCard(s, seqRng([0]), 0);
+    expect(s.players[0].skipTurns).toBe(1);
+    expect(s.players[0].skipReason).toBe("rest");
   });
 
   it("連鎖達上限會強制結束（不會無限迴圈）", () => {
@@ -353,10 +374,15 @@ describe("互動式卡片", () => {
     expect(after.players[0].money).toBe(8000 - 1000);
   });
 
-  it("quiz 答錯 jail：進監獄並暫停一回合（命運 f7）", () => {
+  it("quiz 答錯 jail：進監獄並暫停一回合、當下觸發監獄過場（命運 f7）", () => {
     const s = drawInteractive("fate", 6, 6); // f7 onWrong jail
     const after = answerCardQuiz(s, false, 0);
     expect(after.players[0].skipTurns).toBe(1);
+    expect(after.players[0].skipReason).toBe("jail");
+    expect(after.cutsceneEvents?.at(-1)).toMatchObject({
+      kind: "skip",
+      reason: "jail",
+    });
   });
 });
 

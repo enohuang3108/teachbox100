@@ -240,9 +240,18 @@ export function resolveLanding(
     case "start":
       return endTurn(state, now);
     case "jail": {
-      const players = replacePlayer(state.players, idx, { skipTurns: 1 });
+      const players = replacePlayer(state.players, idx, {
+        skipTurns: 1,
+        skipReason: "jail",
+      });
       const log = addLog(state.log, `${player.name} 進入監獄，暫停一回合`);
-      return endTurn({ ...state, players, log }, now);
+      return endTurn(
+        withCutsceneEvent(
+          { ...state, players, log },
+          { kind: "skip", playerId: player.id, reason: "jail" },
+        ),
+        now,
+      );
     }
     case "chance":
     case "fate": {
@@ -412,14 +421,17 @@ export function takeTurn(state: GameState, rng: Rng, now: number): GameState {
   const player = state.players[idx];
 
   if (player.skipTurns > 0) {
+    const remaining = player.skipTurns - 1;
+    const reason = player.skipReason ?? "rest";
     const players = replacePlayer(state.players, idx, {
-      skipTurns: player.skipTurns - 1,
+      skipTurns: remaining,
+      skipReason: remaining > 0 ? player.skipReason : undefined,
     });
     const log = addLog(state.log, `${player.name} 暫停一回合`);
     return endTurn(
       withCutsceneEvent(
         { ...state, players, log, lastRoll: null },
-        { kind: "skip", playerId: player.id },
+        { kind: "skip", playerId: player.id, reason },
       ),
       now,
     );
@@ -523,18 +535,25 @@ function applyCardEffect(
       const players = replacePlayer(state.players, idx, {
         position: JAIL_INDEX,
         skipTurns: 1,
+        skipReason: "jail",
       });
       return endTurn(
-        {
-          ...state,
-          players,
-          log: addLog(log0, `${player.name} 進入監獄`),
-        },
+        withCutsceneEvent(
+          {
+            ...state,
+            players,
+            log: addLog(log0, `${player.name} 進入監獄`),
+          },
+          { kind: "skip", playerId: player.id, reason: "jail" },
+        ),
         now,
       );
     }
     case "skip": {
-      const players = replacePlayer(state.players, idx, { skipTurns: 1 });
+      const players = replacePlayer(state.players, idx, {
+        skipTurns: 1,
+        skipReason: "rest",
+      });
       return endTurn(
         {
           ...state,
@@ -766,13 +785,17 @@ export function answerCardQuiz(
     const players = replacePlayer(base.players, idx, {
       position: JAIL_INDEX,
       skipTurns: 1,
+      skipReason: "jail",
     });
     return endTurn(
-      {
-        ...base,
-        players,
-        log: addLog(base.log, `${player.name} 答錯，被關進監獄`),
-      },
+      withCutsceneEvent(
+        {
+          ...base,
+          players,
+          log: addLog(base.log, `${player.name} 答錯，被關進監獄`),
+        },
+        { kind: "skip", playerId: player.id, reason: "jail" },
+      ),
       now,
     );
   }

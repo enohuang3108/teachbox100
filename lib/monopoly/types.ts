@@ -98,8 +98,12 @@ export interface Player {
   ownedTiles: number[];
   houses: Record<number, number>;
   skipTurns: number;
+  skipReason?: SkipReason; // 暫停原因：監獄 or 休息（生病）
   bankrupt: boolean;
 }
+
+// 暫停一回合的原因：影響過場動畫呈現（監獄 🚔 ／ 休息 😴）
+export type SkipReason = "jail" | "rest";
 
 export interface PlayerInput {
   name: string;
@@ -201,7 +205,7 @@ export type CutsceneEvent =
       amount: number;
       tileName: string;
     }
-  | { seq: number; kind: "skip"; playerId: string }; // 監獄／暫停一回合
+  | { seq: number; kind: "skip"; playerId: string; reason: SkipReason }; // 監獄／休息：暫停一回合
 
 // === 整體狀態 ===
 export type GamePhase = "setup" | "playing" | "gameover";
