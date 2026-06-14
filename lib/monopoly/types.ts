@@ -137,7 +137,14 @@ export type CutsceneEvent =
       tileName: string;
     }
   | { seq: number; kind: "passStart"; playerId: string; amount: number }
-  | { seq: number; kind: "card"; playerId: string; amount: number }
+  | {
+      seq: number;
+      kind: "card";
+      playerId: string;
+      amount: number;
+      deck: "chance" | "fate";
+      text: string;
+    }
   | {
       seq: number;
       kind: "buy";

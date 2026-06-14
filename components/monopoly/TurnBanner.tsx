@@ -11,7 +11,7 @@ export function TurnBanner({ player }: { player: Player | null }) {
       {player && (
         <motion.div
           key="turn-backdrop"
-          className="pointer-events-none fixed inset-0 z-40 bg-stone-950/55 backdrop-blur-sm"
+          className="fixed inset-0 z-40 bg-stone-950/55 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

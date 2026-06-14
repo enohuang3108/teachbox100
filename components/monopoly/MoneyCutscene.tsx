@@ -181,7 +181,10 @@ export function MoneyCutscene({
       const p = byId(event.playerId);
       const labels: Record<string, string> = {
         passStart: "經過起點 🏁",
-        card: "命運機會",
+        card:
+          event.kind === "card"
+            ? `${event.deck === "chance" ? "機會" : "命運"}：${event.text}`
+            : "",
         buy: `購買 · ${"tileName" in event ? event.tileName : ""}`,
         build: `蓋房 · ${"tileName" in event ? event.tileName : ""}`,
       };
@@ -199,7 +202,7 @@ export function MoneyCutscene({
       {event && (
         <motion.div
           key="money-backdrop"
-          className="pointer-events-none fixed inset-0 z-40 bg-stone-950/55 backdrop-blur-sm"
+          className="fixed inset-0 z-40 bg-stone-950/55 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -216,7 +219,7 @@ export function MoneyCutscene({
           transition={{ type: "spring", stiffness: 320, damping: 24 }}
         >
           <div
-            className="mb-6 text-sm font-bold uppercase tracking-[0.3em] text-white/70"
+            className="mb-6 max-w-[34rem] text-center text-base font-bold tracking-wide text-white/85"
             style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
           >
             {label}

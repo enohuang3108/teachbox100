@@ -19,7 +19,9 @@ import { useMonopolyStore } from "@/lib/monopoly/store";
 
 const STEP_MS = 240; // 每走一格的間隔
 const ROLL_MS = 1333; // 擲骰 Lottie 動畫長度（80 幀 @ 60fps）
-const PASS_MS = 1600; // 通過起點時暫停腳步、播 +2000 過場的時間
+const CUTSCENE_MS = 2500; // 金流／監獄／通過起點等過場顯示時間
+const BANNER_MS = 2000; // 「換你了」橫幅顯示時間
+const PASS_MS = CUTSCENE_MS; // 通過起點時暫停腳步、播 +2000 過場的時間
 
 export default function MonopolyPage() {
   const [hydrated, setHydrated] = useState(false);
@@ -36,6 +38,7 @@ export default function MonopolyPage() {
   const [cutscene, setCutscene] = useState<CutsceneEvent | null>(null);
   const [queue, setQueue] = useState<CutsceneEvent[]>([]);
   const [displayIndex, setDisplayIndex] = useState(0); // 中央 HUD 高亮的角色（換場演完才切）
+  const [displayMoney, setDisplayMoney] = useState<Record<string, number>>({}); // HUD 顯示用金額（過場演完才同步）
   const banneredIdx = useRef<number | null>(null);
   const pendingIdx = useRef<number | null>(null); // 換場演完後要切到的角色 index
   const lastEventSeq = useRef<number>(0);
@@ -76,14 +79,22 @@ export default function MonopolyPage() {
   // 過場自動消失（收租雙方演久一點）
   useEffect(() => {
     if (!cutscene) return;
-    const dur = cutscene.kind === "toll" ? 1900 : 1500;
-    const t = window.setTimeout(() => setCutscene(null), dur);
+    const t = window.setTimeout(() => setCutscene(null), CUTSCENE_MS);
     return () => window.clearTimeout(t);
   }, [cutscene]);
 
   useEffect(() => {
     if (game?.phase === "gameover") realisticEffect();
   }, [game?.phase]);
+
+  // HUD 顯示用金額：只在「走棋＋過場都結束」的閒置時刻才同步到真實金額，
+  // 走棋／支付過場期間維持舊值，讓金額在支付過場演完後才滾動到新值
+  useEffect(() => {
+    if (!game || busy) return;
+    setDisplayMoney(
+      Object.fromEntries(game.players.map((p) => [p.id, p.money])),
+    );
+  }, [game, busy]);
 
   // 回合轉場：棋子走完、無待處理事件的閒置時刻才彈橫幅（首次掛載不彈）
   // 並等金額滾動動畫跑完再彈，避免蓋住正在跳動的金額
@@ -124,7 +135,7 @@ export default function MonopolyPage() {
     const t = window.setTimeout(() => {
       setTurnPlayer(null);
       if (pendingIdx.current !== null) setDisplayIndex(pendingIdx.current);
-    }, 1600);
+    }, BANNER_MS);
     return () => window.clearTimeout(t);
   }, [turnPlayer]);
 
@@ -247,7 +258,10 @@ export default function MonopolyPage() {
                     active ? "text-sm" : "text-xs"
                   }`}
                 >
-                  <MoneyDisplay value={p.money} className="text-emerald-700" />
+                  <MoneyDisplay
+                    value={displayMoney[p.id] ?? p.money}
+                    className="text-emerald-700"
+                  />
                 </div>
               </div>
             </motion.div>

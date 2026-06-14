@@ -466,6 +466,8 @@ function applyCardEffect(
         kind: "card" as const,
         playerId: player.id,
         amount: amt,
+        deck: card.deck,
+        text: card.text,
       };
       if (amt >= 0) {
         const players = replacePlayer(state.players, idx, {

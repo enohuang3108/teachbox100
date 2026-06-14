@@ -69,14 +69,6 @@ function innerEdge(i: number): { cell: string; stack: string } {
   }; // 左排：右邊朝中心
 }
 
-// 大富翁式分組色帶：每 3 個地產一組
-const GROUP_COLORS = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#a855f7"];
-const PROPERTY_ORDER = BOARD.filter(isProperty).map((t) => t.index);
-function bandColor(index: number): string {
-  const pos = PROPERTY_ORDER.indexOf(index);
-  return GROUP_COLORS[Math.floor(pos / 3) % GROUP_COLORS.length];
-}
-
 const SPECIAL: Record<string, { bg: string; emoji?: string }> = {
   start: { bg: "bg-emerald-100", emoji: "🏁" },
   jail: { bg: "bg-stone-200", emoji: "🚔" },
@@ -110,12 +102,6 @@ function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
           : undefined
       }
     >
-      {property && (
-        <div
-          className="h-2 w-full shrink-0"
-          style={{ background: bandColor(tile.index) }}
-        />
-      )}
       <div className="px-1 pt-0.5">
         <span className="block truncate text-[10px] font-bold text-stone-700">
           {tile.name}
@@ -143,7 +129,7 @@ function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
             className="px-1 pb-0.5 text-[9px] font-extrabold tabular-nums"
             style={{ color: owner.color }}
           >
-            租 $
+            過路費$
             {tile.toll[
               Math.min(owner.houses[tile.index] ?? 0, tile.toll.length - 1)
             ].toLocaleString()}
@@ -205,10 +191,13 @@ export function Board({
                 p.ownedTiles.includes(tile.index),
               );
               if (!owner) return null;
+              // 顯示「實際蓋的房子數」：0 間不放房子（持有以外框＋租金表示），
+              // 蓋 1/2/3 間就放對應數量，每蓋一間就多一棟看得出來
               const count = Math.min(
-                Math.max(owner.houses[tile.index] ?? 0, 1),
-                4,
+                owner.houses[tile.index] ?? 0,
+                tile.maxHouses,
               );
+              if (count < 1) return null;
               const pos = tilePos(tile.index);
               const edge = innerEdge(tile.index);
               return (
