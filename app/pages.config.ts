@@ -11,12 +11,13 @@ export interface PageWithKey extends Page {
   key: keyof typeof pages;
 }
 
-export const appInfo ={
+export const appInfo = {
   path: "/",
   imageSrc: "/icons/favicon.webp",
   title: "TeachBox100 | 台灣互動式教學平台",
-  description: "專為台灣學童設計的互動式學習平台，提供時鐘辨識、金錢計算與實用生活技能遊戲，讓孩子在趣味中學習實用知識，適合學齡前至國小學生或特教生使用。",
-}
+  description:
+    "專為台灣學童設計的互動式學習平台，提供時鐘辨識、金錢計算與實用生活技能遊戲，讓孩子在趣味中學習實用知識，適合學齡前至國小學生或特教生使用。",
+};
 
 export const pages: { [key: string]: Page } = {
   "coin-introduction": {
@@ -58,7 +59,8 @@ export const pages: { [key: string]: Page } = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAADCAYAAABbNsX4AAAASklEQVQIWwE/AMD/AeRfIf8E+f0A/v/9AAIHBAADCgEAAfPahf/0lbMAAermAAxtSQD75TUAAetoLP//CAMAYbT1AJ9HCQD78/cAXMMbETcd3KEAAAAASUVORK5CYII=",
     title: "購物",
-    description: "模擬商店購物情境，練習如何挑選商品、計算總金額、以及付款的能力。",
+    description:
+      "模擬商店購物情境，練習如何挑選商品、計算總金額、以及付款的能力。",
   },
   "coin-change": {
     path: "/coin/change",
@@ -75,6 +77,15 @@ export const pages: { [key: string]: Page } = {
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAALUlEQVQIWwEiAN3/AcZZM/8OJgoA+eD1APn6/AAB5NvE/+R+bQAHCgYAXcj0ABtUD9CQT3miAAAAAElFTkSuQmCC",
     title: "學習讀時鐘",
     description: "練習辨認時針、分針，並且判讀出正確時間。",
-    guide: "拖動時針或是下方滑桿來調整時間。"
+    guide: "拖動時針或是下方滑桿來調整時間。",
+  },
+  monopoly: {
+    path: "/monopoly",
+    imageSrc: "/images/cover_monopoly_v2.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAFCAIAAAD38zoCAAAAiElEQVR4nAF9AIL/Aeh5SgQeHwEKC/vT0AMMEAH7/Pvn4////wQJQkUGJQ7++AD82tj27/D3JSv/Gh0H4uEC/evo/vjpAQX+AP7+/AIG7gf03/Pe/Q4LBPvh4QITMv7v3//39wYIDQUDCQ8OD/z+FQT82tr81tYDFhoCDREE9vMQ7vv+8PsG89fN9kHi/C96zQAAAABJRU5ErkJggg==",
+    title: "大富翁",
+    description: "匯入自訂題庫，答對才能買地蓋房，最多 20 人同樂的教學大富翁。",
+    guide: "老師先匯入 Excel 題庫並設定規則，再開始遊戲。",
   },
 };

@@ -29,6 +29,16 @@ next-env.d.ts
 # others
 .DS_Store
 
+# test coverage
+/coverage
+
+# playwright-cli working dir (snapshots / screenshots / logs) — any depth
+.playwright-cli/
+
+# python caches (scripts/)
+__pycache__/
+*.pyc
+
 # pwa
 **/public/workbox-*.js
 **/public/fallback-*.js
