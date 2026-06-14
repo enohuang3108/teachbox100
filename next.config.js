@@ -79,18 +79,26 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   async rewrites() {
+    // Only enable PostHog rewrites if we have a PostHog key
+    if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+      return [];
+    }
+    
+    const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
+    const posthogStaticHost = process.env.NEXT_PUBLIC_POSTHOG_STATIC_HOST || "https://us-assets.i.posthog.com";
+    
     return [
       {
         source: "/ingest/static/:path*",
-        destination: "https://us-assets.i.posthog.com/static/:path*",
+        destination: `${posthogStaticHost}/static/:path*`,
       },
       {
         source: "/ingest/:path*",
-        destination: "https://us.i.posthog.com/:path*",
+        destination: `${posthogHost}/:path*`,
       },
       {
         source: "/ingest/decide",
-        destination: "https://us.i.posthog.com/decide",
+        destination: `${posthogHost}/decide`,
       },
     ];
   },

@@ -2,7 +2,7 @@ import { pages } from "@/app/pages.config";
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://teachbox100.com";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://teachbox100.com";
   
   const defaultPages = [
     {
