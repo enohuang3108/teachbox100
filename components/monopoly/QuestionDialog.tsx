@@ -9,9 +9,8 @@ import {
 } from "@/components/atoms/shadcn/dialog";
 import { useSound } from "@/lib/hooks/useSound";
 import type { PendingAction, Player, Question } from "@/lib/monopoly/types";
-import { motion } from "motion/react";
 import { useState } from "react";
-import { PlayerAvatar } from "./Avatar";
+import { SpotlightAvatar } from "./SpotlightAvatar";
 
 export function QuestionDialog({
   pending,
@@ -28,8 +27,18 @@ export function QuestionDialog({
   const [revealed, setRevealed] = useState<boolean | null>(null);
 
   const open =
-    pending?.kind === "buyQuestion" || pending?.kind === "buildQuestion";
+    pending?.kind === "buyQuestion" ||
+    pending?.kind === "buildQuestion" ||
+    pending?.kind === "cardQuiz";
   if (!open) return null;
+
+  // 標題：買地／蓋房用固定字樣；互動答題卡則顯示卡片描述的獎懲內容
+  const title =
+    pending.kind === "buyQuestion"
+      ? "答對才能購買"
+      : pending.kind === "buildQuestion"
+        ? "答對才能蓋房"
+        : pending.card.text;
 
   function judge(correct: boolean) {
     setRevealed(correct);
@@ -45,50 +54,18 @@ export function QuestionDialog({
     <Dialog open={open}>
       <DialogContent className="overflow-visible" hideClose>
         {/* 浮在 dialog 上緣外側：玩家頭像 ＋ 名稱 ＋ 光暈（沿用過場聚光燈風格） */}
-        <div className="absolute bottom-full left-1/2 mb-4 flex -translate-x-1/2 flex-col items-center gap-1.5">
-          <div className="relative flex items-center justify-center">
-            <motion.span
-              className="pointer-events-none absolute rounded-full"
-              style={{
-                width: 240,
-                height: 240,
-                background: `radial-gradient(circle, ${player.color}99 0%, ${player.color}33 40%, ${player.color}00 70%)`,
-                filter: "blur(6px)",
-              }}
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: [0.85, 1.08, 1], opacity: 1 }}
-              transition={{ duration: 0.6, ease: "easeOut", delay: 0.04 }}
-            />
-            <motion.div
-              className="relative"
-              initial={{ scale: 0, rotate: -20 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{
-                type: "spring",
-                stiffness: 360,
-                damping: 16,
-                delay: 0.06,
-              }}
-            >
-              <PlayerAvatar
-                character={player.character}
-                color={player.color}
-                size={96}
-                ringWidth={5}
-              />
-            </motion.div>
-          </div>
-          <div
-            className="max-w-[10rem] truncate text-base font-bold text-white/90"
-            style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
-          >
-            {player.name}
-          </div>
+        <div className="absolute bottom-full left-1/2 mb-4 -translate-x-1/2">
+          <SpotlightAvatar
+            player={player}
+            haloSize={240}
+            name
+            nameClassName="max-w-[10rem] text-base font-bold text-white/90"
+          />
         </div>
 
         <DialogHeader>
           <DialogTitle className="text-center text-base font-bold text-stone-600">
-            {pending?.kind === "buyQuestion" ? "答對才能購買" : "答對才能蓋房"}
+            {title}
           </DialogTitle>
         </DialogHeader>
 

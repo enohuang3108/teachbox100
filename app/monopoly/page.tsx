@@ -1,13 +1,14 @@
 "use client";
 
 import { motion } from "motion/react";
-import { RotateCcw, ScrollText } from "lucide-react";
+import { RotateCcw, ScrollText, Target } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { PlayerAvatar } from "@/components/monopoly/Avatar";
 import { AudioSettings } from "@/components/monopoly/AudioSettings";
 import { BgmController } from "@/components/monopoly/BgmController";
-import { Board } from "@/components/monopoly/Board";
+import { Board, HouseMarker, HotelMarker } from "@/components/monopoly/Board";
 import { CardDialog } from "@/components/monopoly/CardDialog";
+import { CardDiceDialog } from "@/components/monopoly/CardDiceDialog";
 import { Countdown } from "@/components/monopoly/Countdown";
 import { Dice } from "@/components/monopoly/Dice";
 import { GameOverDialog } from "@/components/monopoly/GameOverDialog";
@@ -15,10 +16,11 @@ import { MoneyCutscene } from "@/components/monopoly/MoneyCutscene";
 import { MoneyDisplay } from "@/components/monopoly/MoneyDisplay";
 import { QuestionDialog } from "@/components/monopoly/QuestionDialog";
 import { SetupPanel } from "@/components/monopoly/SetupPanel";
+import { SpotlightAvatar } from "@/components/monopoly/SpotlightAvatar";
 import { TurnBanner } from "@/components/monopoly/TurnBanner";
 import { BOARD, BOARD_SIZE } from "@/lib/monopoly/board";
-import type { CutsceneEvent, Player } from "@/lib/monopoly/types";
-import { isProperty } from "@/lib/monopoly/types";
+import type { CutsceneEvent, Player, PropertyTile } from "@/lib/monopoly/types";
+import { buildCostFor, isProperty } from "@/lib/monopoly/types";
 import { realisticEffect } from "@/lib/helpers/confetti-effects";
 import { useSound } from "@/lib/hooks/useSound";
 import { useMonopolyStore } from "@/lib/monopoly/store";
@@ -50,8 +52,18 @@ export default function MonopolyPage() {
   const pendingIdx = useRef<number | null>(null); // 換場演完後要切到的角色 index
   const lastEventSeq = useRef<number>(0);
   const synthSeq = useRef<number>(0); // page 自製過場（通過起點）的遞減 seq
-  const { game, roll, answer, confirm, resolveCard, endIfTimeUp, reset } =
-    useMonopolyStore();
+  const {
+    game,
+    roll,
+    answer,
+    confirm,
+    resolveCard,
+    rollCardDice,
+    resolveCardDice,
+    answerCardQuiz,
+    endIfTimeUp,
+    reset,
+  } = useMonopolyStore();
   const { playDiceSound } = useSound();
 
   const pa = game?.pendingAction ?? null;
@@ -257,13 +269,16 @@ export default function MonopolyPage() {
                 <PlayerAvatar
                   character={p.character}
                   color={p.color}
-                  size={active ? 84 : 44}
+                  size={active ? 104 : 56}
+                  ringWidth={active ? 6 : 4}
                 />
               </motion.div>
               <div className="text-center leading-tight">
                 <div
-                  className={`max-w-[6rem] truncate font-bold ${
-                    active ? "text-sm text-stone-800" : "text-xs text-stone-400"
+                  className={`max-w-[7rem] truncate font-bold ${
+                    active
+                      ? "text-base text-stone-800"
+                      : "text-sm text-stone-400"
                   }`}
                 >
                   {p.name}
@@ -271,7 +286,7 @@ export default function MonopolyPage() {
                 </div>
                 <div
                   className={`font-extrabold tabular-nums ${
-                    active ? "text-sm" : "text-xs"
+                    active ? "text-base" : "text-sm"
                   }`}
                 >
                   <MoneyDisplay
@@ -302,6 +317,15 @@ export default function MonopolyPage() {
       <div className="fixed right-3 top-3 z-40 flex items-center gap-2">
         {game.phase === "playing" && timeEndsAt !== null && (
           <Countdown endsAt={timeEndsAt} onExpire={endIfTimeUp} />
+        )}
+        {game.phase === "playing" && ec.type === "moneyGoal" && (
+          <div
+            className="flex h-10 items-center gap-1.5 rounded-full bg-stone-50 px-4 text-sm font-bold tabular-nums text-emerald-700 shadow-md ring-1 ring-stone-900/5"
+            title="目標金額"
+            aria-label="目標金額"
+          >
+            <Target className="h-4 w-4" />${ec.amount.toLocaleString()}
+          </div>
         )}
         <AudioSettings />
         <button
@@ -360,23 +384,31 @@ export default function MonopolyPage() {
             onAnswered={answer}
           />
         )}
+      {!busy && pa?.kind === "cardQuiz" && (
+        <QuestionDialog
+          pending={pa}
+          question={pa.question}
+          player={game.players[game.currentPlayerIndex]}
+          onAnswered={answerCardQuiz}
+        />
+      )}
+      {!busy && pa?.kind === "cardDice" && (
+        <CardDiceDialog
+          pending={pa}
+          player={game.players[game.currentPlayerIndex]}
+          onRoll={rollCardDice}
+          onResolve={resolveCardDice}
+        />
+      )}
       {!busy &&
         (pa?.kind === "confirmBuy" || pa?.kind === "confirmBuild") &&
         (() => {
           const tile = BOARD[pa.tileIndex];
-          const amount = isProperty(tile)
-            ? pa.kind === "confirmBuy"
-              ? tile.price
-              : tile.houseCost
-            : 0;
+          if (!isProperty(tile)) return null;
           return (
             <PurchaseConfirm
-              label={
-                pa.kind === "confirmBuy"
-                  ? `購買${tile.name}？`
-                  : `在${tile.name}蓋一棟房子？`
-              }
-              amount={amount}
+              kind={pa.kind}
+              tile={tile}
               player={game.players[game.currentPlayerIndex]}
               onConfirm={confirm}
             />
@@ -396,60 +428,33 @@ export default function MonopolyPage() {
 }
 
 function PurchaseConfirm({
-  label,
-  amount,
+  kind,
+  tile,
   player,
   onConfirm,
 }: {
-  label: string;
-  amount: number;
+  kind: "confirmBuy" | "confirmBuild";
+  tile: PropertyTile;
   player: Player;
   onConfirm: (accept: boolean) => void;
 }) {
   const size = 96;
+  const isBuy = kind === "confirmBuy";
+  // 蓋房：目前等級 → 蓋完等級；買地：成交後為空地（0）。蓋滿房子後再蓋即升旅館。
+  const currentLevel = player.houses[tile.index] ?? 0;
+  const afterLevel = isBuy ? 0 : currentLevel + 1;
+  const toHotel = !isBuy && afterLevel > tile.maxHouses;
+  const amount = isBuy ? tile.price : buildCostFor(tile, currentLevel);
+  const label = isBuy
+    ? `購買${tile.name}？`
+    : toHotel
+      ? `在${tile.name}蓋旅館？`
+      : `在${tile.name}蓋一棟房子？`;
+  const confirmText = isBuy ? "購買" : toHotel ? "蓋旅館" : "蓋房子";
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-stone-950/55 px-4 backdrop-blur-sm">
       {/* 玩家頭像 ＋ 光暈（沿用過場聚光燈風格） */}
-      <div className="flex flex-col items-center gap-2">
-        <div className="relative flex items-center justify-center">
-          <motion.span
-            className="pointer-events-none absolute rounded-full"
-            style={{
-              width: size * 2.5,
-              height: size * 2.5,
-              background: `radial-gradient(circle, ${player.color}99 0%, ${player.color}33 40%, ${player.color}00 70%)`,
-              filter: "blur(6px)",
-            }}
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: [0.85, 1.08, 1], opacity: 1 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.04 }}
-          />
-          <motion.div
-            className="relative"
-            initial={{ scale: 0, rotate: -20 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 360,
-              damping: 16,
-              delay: 0.06,
-            }}
-          >
-            <PlayerAvatar
-              character={player.character}
-              color={player.color}
-              size={size}
-              ringWidth={5}
-            />
-          </motion.div>
-        </div>
-        <div
-          className="max-w-[8rem] truncate text-base font-bold text-white/85"
-          style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
-        >
-          {player.name}
-        </div>
-      </div>
+      <SpotlightAvatar player={player} size={size} name />
 
       <motion.div
         className="flex flex-col items-center gap-1.5 text-center"
@@ -476,6 +481,15 @@ function PurchaseConfirm({
         </p>
       </motion.div>
 
+      {/* 過路費階梯：別人踩到要付的金額，蓋越多房子越高（標出成交後的等級） */}
+      <TollSchedule
+        toll={tile.toll}
+        highlight={afterLevel}
+        maxHouses={tile.maxHouses}
+        isBuy={isBuy}
+        color={player.color}
+      />
+
       <motion.div
         className="flex w-full max-w-sm gap-3"
         initial={{ y: 12, opacity: 0 }}
@@ -487,7 +501,7 @@ function PurchaseConfirm({
           className="flex-1 rounded-xl bg-emerald-500 px-4 py-3 font-bold text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-600"
           onClick={() => onConfirm(true)}
         >
-          購買
+          {confirmText}
         </button>
         <button
           type="button"
@@ -498,6 +512,82 @@ function PurchaseConfirm({
         </button>
       </motion.div>
     </div>
+  );
+}
+
+// 過路費階梯：每個建設等級對應的過路費（toll[等級]）。
+// 等級 0=空地、1..maxHouses=房子、最高一級=旅館。
+// highlight = 成交後的等級，會被框起來標示「踩到要付這麼多」。
+function TollSchedule({
+  toll,
+  highlight,
+  maxHouses,
+  isBuy,
+  color,
+}: {
+  toll: number[];
+  highlight: number;
+  maxHouses: number;
+  isBuy: boolean;
+  color: string;
+}) {
+  return (
+    <motion.div
+      className="flex flex-col items-center gap-2"
+      initial={{ y: 10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ delay: 0.24 }}
+    >
+      <p
+        className="text-xs font-medium text-white/70"
+        style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
+      >
+        {isBuy
+          ? "別人踩到要付的過路費（蓋房子、旅館越多越高）"
+          : "蓋好後別人踩到要付的過路費"}
+      </p>
+      <div className="flex items-end gap-1.5">
+        {toll.map((t, level) => {
+          const on = level === highlight;
+          const isHotel = level > maxHouses;
+          return (
+            <div key={level} className="flex items-center gap-1.5">
+              {level > 0 && <span className="text-sm text-white/35">›</span>}
+              <div
+                className={`flex min-w-[3.5rem] flex-col items-center gap-0.5 rounded-lg px-2 py-1.5 transition ${
+                  on
+                    ? "bg-amber-400/20 ring-2 ring-amber-300"
+                    : "bg-white/5 ring-1 ring-white/10"
+                }`}
+              >
+                {level === 0 ? (
+                  <span className="text-[11px] leading-none text-white/70">
+                    空地
+                  </span>
+                ) : isHotel ? (
+                  <span className="flex h-[18px] items-center gap-0.5">
+                    <HotelMarker color={color} size={18} />
+                  </span>
+                ) : (
+                  <span className="flex h-[18px] items-center gap-0.5">
+                    {Array.from({ length: level }).map((_, i) => (
+                      <HouseMarker key={i} color={color} size={14} />
+                    ))}
+                  </span>
+                )}
+                <span
+                  className={`text-sm font-extrabold tabular-nums leading-none ${
+                    on ? "text-amber-300" : "text-white/60"
+                  }`}
+                >
+                  ${t.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </motion.div>
   );
 }
 

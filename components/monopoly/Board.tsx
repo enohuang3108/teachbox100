@@ -2,13 +2,13 @@
 
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import NextImage from "next/image";
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import { BOARD } from "@/lib/monopoly/board";
 import { isProperty, type Player, type Tile } from "@/lib/monopoly/types";
 import { PlayerAvatar } from "./Avatar";
 
 // 玩家顏色的小房子（買地/蓋房後放在土地前方），可隨玩家顏色上色
-function HouseMarker({ color, size }: { color: string; size: number }) {
+export function HouseMarker({ color, size }: { color: string; size: number }) {
   return (
     <svg
       width={size}
@@ -34,6 +34,48 @@ function HouseMarker({ color, size }: { color: string; size: number }) {
         fill="#ffffff"
         fillOpacity="0.9"
       />
+    </svg>
+  );
+}
+
+// 旅館（蓋滿房子後的最終形態）：比房子寬、雙層樓附窗戶，仍用玩家代表色標示所屬。
+export function HotelMarker({ color, size }: { color: string; size: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      aria-hidden
+      style={{ filter: "drop-shadow(0 1px 1.5px rgba(0,0,0,0.4))" }}
+    >
+      {/* 屋頂 */}
+      <path
+        d="M3 12 L16 3.5 L29 12 Z"
+        fill={color}
+        stroke="#ffffff"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M3 12 L16 3.5 L29 12 Z" fill="#000000" fillOpacity="0.18" />
+      {/* 樓體 */}
+      <rect
+        x="5.5"
+        y="12"
+        width="21"
+        height="16.5"
+        rx="1.2"
+        fill={color}
+        stroke="#ffffff"
+        strokeWidth="1.5"
+      />
+      {/* 窗戶 2×2 ＋ 門 */}
+      <g fill="#ffffff" fillOpacity="0.92">
+        <rect x="8.5" y="15" width="3.6" height="3.6" rx="0.6" />
+        <rect x="19.9" y="15" width="3.6" height="3.6" rx="0.6" />
+        <rect x="8.5" y="20.4" width="3.6" height="3.6" rx="0.6" />
+        <rect x="19.9" y="20.4" width="3.6" height="3.6" rx="0.6" />
+        <rect x="13.8" y="20" width="4.4" height="8.5" rx="0.6" />
+      </g>
     </svg>
   );
 }
@@ -81,8 +123,14 @@ interface Walking {
   pos: number;
 }
 
-// 格子（僅美術；棋子畫在獨立覆蓋層）
-function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
+// 格子（僅美術；棋子畫在獨立覆蓋層）。memo：棋子走動時 players 參照不變則不重畫。
+const TileCard = memo(function TileCard({
+  tile,
+  players,
+}: {
+  tile: Tile;
+  players: Player[];
+}) {
   const property = isProperty(tile);
   const owner = property
     ? players.find((p) => p.ownedTiles.includes(tile.index))
@@ -104,7 +152,7 @@ function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
     >
       {tile.type !== "start" && (
         <div className="px-1 pt-0.5">
-          <span className="block truncate text-[10px] font-bold text-stone-700">
+          <span className="block truncate text-center text-xs font-bold text-stone-700">
             {tile.name}
           </span>
         </div>
@@ -128,7 +176,7 @@ function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
         (owner ? (
           // 已買：顯示踩到要繳的租金（隨房子棟數變高），用地主代表色標示
           <div
-            className="px-1 pb-0.5 text-[9px] font-extrabold tabular-nums"
+            className="px-1 pb-0.5 text-center text-[11px] font-extrabold tabular-nums"
             style={{ color: owner.color }}
           >
             過路費$
@@ -138,13 +186,72 @@ function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
           </div>
         ) : (
           // 未買：顯示購買價
-          <div className="px-1 pb-0.5 text-[9px] font-semibold tabular-nums text-stone-400">
+          <div className="px-1 pb-0.5 text-center text-[11px] font-semibold tabular-nums text-stone-400">
             售 ${tile.price.toLocaleString()}
           </div>
         ))}
     </div>
   );
-}
+});
+
+// 房子覆蓋層：擁有且已蓋房的土地在內側邊緣放上玩家顏色的房子。
+// memo：只依賴 players，棋子走動時 players 參照不變則整層不重畫。
+const HouseOverlay = memo(function HouseOverlay({
+  players,
+}: {
+  players: Player[];
+}) {
+  return (
+    <div className="pointer-events-none absolute inset-0 grid grid-cols-[repeat(12,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-1 p-1">
+      {BOARD.map((tile) => {
+        if (!isProperty(tile)) return null;
+        const owner = players.find((p) => p.ownedTiles.includes(tile.index));
+        if (!owner) return null;
+        // 建設等級：0=空地（不放）、1/2=房子、最高一級=旅館（放單棟旅館）
+        const level = owner.houses[tile.index] ?? 0;
+        if (level < 1) return null;
+        const isHotel = level > tile.maxHouses;
+        const houseCount = Math.min(level, tile.maxHouses);
+        const pos = tilePos(tile.index);
+        const edge = innerEdge(tile.index);
+        return (
+          <div
+            key={tile.index}
+            className={`flex ${edge.cell}`}
+            style={{ gridRow: pos.row, gridColumn: pos.col }}
+          >
+            <div className={`flex gap-0.5 ${edge.stack}`}>
+              {isHotel ? (
+                // 旅館：取代房子，單棟放大彈出
+                <motion.span
+                  className="inline-block"
+                  initial={{ scale: 0, y: -8 }}
+                  animate={{ scale: 1, y: 0 }}
+                  transition={{ type: "spring", stiffness: 480, damping: 14 }}
+                >
+                  <HotelMarker color={owner.color} size={38} />
+                </motion.span>
+              ) : (
+                Array.from({ length: houseCount }).map((_, i) => (
+                  // 新蓋的房子從 0 彈跳出現（overshoot），既有的維持不動
+                  <motion.span
+                    key={i}
+                    className="inline-block"
+                    initial={{ scale: 0, y: -8 }}
+                    animate={{ scale: 1, y: 0 }}
+                    transition={{ type: "spring", stiffness: 480, damping: 14 }}
+                  >
+                    <HouseMarker color={owner.color} size={32} />
+                  </motion.span>
+                ))
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+});
 
 export function Board({
   players,
@@ -186,53 +293,7 @@ export function Board({
           </div>
 
           {/* 房子覆蓋層：擁有的土地在靠近中心的內側邊緣放上玩家顏色的房子 */}
-          <div className="pointer-events-none absolute inset-0 grid grid-cols-[repeat(12,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-1 p-1">
-            {BOARD.map((tile) => {
-              if (!isProperty(tile)) return null;
-              const owner = players.find((p) =>
-                p.ownedTiles.includes(tile.index),
-              );
-              if (!owner) return null;
-              // 顯示「實際蓋的房子數」：0 間不放房子（持有以外框＋租金表示），
-              // 蓋 1/2/3 間就放對應數量，每蓋一間就多一棟看得出來
-              const count = Math.min(
-                owner.houses[tile.index] ?? 0,
-                tile.maxHouses,
-              );
-              if (count < 1) return null;
-              const pos = tilePos(tile.index);
-              const edge = innerEdge(tile.index);
-              return (
-                <div
-                  key={tile.index}
-                  className={`flex ${edge.cell}`}
-                  style={{ gridRow: pos.row, gridColumn: pos.col }}
-                >
-                  <div className={`flex gap-0.5 ${edge.stack}`}>
-                    {Array.from({ length: count }).map((_, i) => (
-                      // 新蓋的房子從 0 彈跳出現（overshoot），既有的維持不動
-                      <motion.span
-                        key={i}
-                        className="inline-block"
-                        initial={{ scale: 0, y: -8 }}
-                        animate={{ scale: 1, y: 0 }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 480,
-                          damping: 14,
-                        }}
-                      >
-                        <HouseMarker
-                          color={owner.color}
-                          size={count > 2 ? 24 : 32}
-                        />
-                      </motion.span>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <HouseOverlay players={players} />
 
           {/* 棋子覆蓋層：每位玩家一個固定元素（穩定 key，頭像不會每格重新掛載），
               靠 layout spring 平滑滑到目標格，走路時持續輕微擺動，避免一格一格卡頓 */}

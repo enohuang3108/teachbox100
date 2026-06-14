@@ -2,10 +2,13 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { defaultRng } from "./rng";
 import {
+  answerCardQuiz,
   answerQuestion,
   checkEnd,
   confirmPurchase,
   drawAndApplyCard,
+  resolveCardDice,
+  rollCardDice,
   startGame,
   takeTurn,
 } from "./rules";
@@ -30,6 +33,9 @@ interface MonopolyStore {
   answer: (correct: boolean) => void;
   confirm: (accept: boolean) => void;
   resolveCard: () => void;
+  rollCardDice: () => void;
+  resolveCardDice: () => void;
+  answerCardQuiz: (correct: boolean) => void;
   endIfTimeUp: () => void;
   reset: () => void;
 }
@@ -52,8 +58,10 @@ export const useMonopolyStore = create<MonopolyStore>()(
       begin: () => {
         const { draftSettings, draftQuestions, draftPlayers } = get();
         if (draftQuestions.length === 0 || draftPlayers.length < 2) return;
+        // 起始金額固定 $8,000（不可調整），覆蓋任何舊的 persist 值
+        const settings = { ...draftSettings, startingMoney: 8000 };
         set({
-          game: startGame(draftSettings, draftQuestions, draftPlayers, now()),
+          game: startGame(settings, draftQuestions, draftPlayers, now()),
         });
       },
 
@@ -76,6 +84,21 @@ export const useMonopolyStore = create<MonopolyStore>()(
         const g = get().game;
         if (!g) return;
         set({ game: drawAndApplyCard(g, defaultRng, now()) });
+      },
+      rollCardDice: () => {
+        const g = get().game;
+        if (!g) return;
+        set({ game: rollCardDice(g, defaultRng) });
+      },
+      resolveCardDice: () => {
+        const g = get().game;
+        if (!g) return;
+        set({ game: resolveCardDice(g, defaultRng, now()) });
+      },
+      answerCardQuiz: (correct) => {
+        const g = get().game;
+        if (!g) return;
+        set({ game: answerCardQuiz(g, correct, now()) });
       },
       // 時間到結束條件：由右上角倒數計時器歸零時呼叫，主動把遊戲收尾。
       // （平時結束判定只在擲骰／回合結束觸發，沒人操作時不會自動結束）

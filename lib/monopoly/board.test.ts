@@ -16,9 +16,10 @@ describe("BOARD", () => {
     expect(BOARD[0].type).toBe("start");
   });
 
-  it("每個地產 toll 陣列長度 = maxHouses + 1 且遞增", () => {
+  it("每個地產 toll 長度 = maxHouses + 2（空地＋房子＋旅館）且遞增", () => {
     BOARD.filter(isProperty).forEach((p) => {
-      expect(p.toll).toHaveLength(p.maxHouses + 1);
+      // 等級：0=空地、1..maxHouses=房子、最高一級=旅館
+      expect(p.toll).toHaveLength(p.maxHouses + 2);
       for (let i = 1; i < p.toll.length; i++) {
         expect(p.toll[i]).toBeGreaterThan(p.toll[i - 1]);
       }

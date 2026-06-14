@@ -11,7 +11,7 @@ import type {
   PropertyTile,
   Question,
 } from "./types";
-import { isProperty } from "./types";
+import { buildCostFor, isProperty, maxBuildLevel } from "./types";
 
 const MAX_CHAIN = 10;
 
@@ -100,8 +100,10 @@ function nextPlayerIndex(state: GameState, from: number): number {
 export function assetValue(state: GameState, player: Player): number {
   return player.ownedTiles.reduce((sum, ti) => {
     const tile = BOARD[ti] as PropertyTile;
-    const houses = player.houses[ti] ?? 0;
-    return sum + tile.price + houses * tile.houseCost;
+    const level = player.houses[ti] ?? 0;
+    const houseCount = Math.min(level, tile.maxHouses);
+    const hotel = level > tile.maxHouses ? tile.hotelCost : 0;
+    return sum + tile.price + houseCount * tile.houseCost + hotel;
   }, 0);
 }
 
@@ -206,9 +208,9 @@ function payToll(
   prop: PropertyTile,
   now: number,
 ): GameState {
-  const houses =
+  const level =
     state.players.find((p) => p.id === ownerId)!.houses[prop.index] ?? 0;
-  const toll = prop.toll[houses];
+  const toll = prop.toll[Math.min(level, prop.toll.length - 1)];
   const payerId = state.players[payerIdx].id;
   const charged = chargeOrBankrupt(state, payerIdx, toll, ownerId);
   return endTurn(
@@ -267,7 +269,7 @@ export function resolveLanding(
         };
       }
       if (owner.id === player.id) {
-        if ((player.houses[prop.index] ?? 0) >= prop.maxHouses)
+        if ((player.houses[prop.index] ?? 0) >= maxBuildLevel(prop))
           return endTurn(state, now);
         return {
           ...state,
@@ -359,19 +361,24 @@ export function confirmPurchase(
     );
   }
 
-  // confirmBuild
+  // confirmBuild：current 為目前建設等級，蓋滿房子後再蓋即升旅館
   const current = player.houses[tile.index] ?? 0;
-  if (current >= tile.maxHouses || player.money < tile.houseCost) {
+  const cost = buildCostFor(tile, current);
+  const toHotel = current + 1 > tile.maxHouses;
+  if (current >= maxBuildLevel(tile) || player.money < cost) {
     return endTurn(
       {
         ...state,
-        log: addLog(state.log, `${player.name} 無法蓋房`),
+        log: addLog(
+          state.log,
+          `${player.name} 無法${toHotel ? "蓋旅館" : "蓋房"}`,
+        ),
       },
       now,
     );
   }
   const players = replacePlayer(state.players, idx, {
-    money: player.money - tile.houseCost,
+    money: player.money - cost,
     houses: { ...player.houses, [tile.index]: current + 1 },
   });
   return endTurn(
@@ -379,12 +386,15 @@ export function confirmPurchase(
       {
         ...state,
         players,
-        log: addLog(state.log, `${player.name} 在 ${tile.name} 蓋了一棟房子`),
+        log: addLog(
+          state.log,
+          `${player.name} 在 ${tile.name} ${toHotel ? "蓋了旅館" : "蓋了一棟房子"}`,
+        ),
       },
       {
         kind: "build",
         playerId: player.id,
-        amount: tile.houseCost,
+        amount: cost,
         tileName: tile.name,
       },
     ),
@@ -463,6 +473,25 @@ function applyCardEffect(
   const log0 = addLog(state.log, `${player.name} 抽到「${card.text}」`);
 
   switch (card.effect.kind) {
+    // 互動式卡片：先把舞台交給玩家（擲骰／答題），結算延後到玩家操作完成
+    case "diceReward":
+    case "diceMove":
+    case "diceBet":
+      return {
+        ...state,
+        log: log0,
+        pendingAction: { kind: "cardDice", card, rolled: null },
+      };
+    case "quiz":
+      return {
+        ...state,
+        log: log0,
+        pendingAction: {
+          kind: "cardQuiz",
+          card,
+          question: drawQuestion(state, rng),
+        },
+      };
     case "money": {
       const amt = card.effect.amount;
       const cardEv = {
@@ -574,4 +603,191 @@ export function drawAndApplyCard(
     chain++;
   }
   return s;
+}
+
+// === 互動擲骰卡 ===
+// 玩家按下「擲骰子」：擲一顆骰並記錄點數供 UI 顯示（先不套用效果，讓玩家看到結果）。
+export function rollCardDice(state: GameState, rng: Rng): GameState {
+  const pa = state.pendingAction;
+  if (pa?.kind !== "cardDice" || pa.rolled !== null) return state;
+  const rolled = rollOne(rng);
+  return { ...state, pendingAction: { ...pa, rolled } };
+}
+
+// 擲完後按「確定」：依骰出的點數套用卡片效果。
+export function resolveCardDice(
+  state: GameState,
+  rng: Rng,
+  now: number,
+): GameState {
+  const pa = state.pendingAction;
+  if (pa?.kind !== "cardDice" || pa.rolled === null) return state;
+  const idx = state.currentPlayerIndex;
+  const player = state.players[idx];
+  const v = pa.rolled;
+  const { card } = pa;
+  const base = { ...state, pendingAction: null };
+
+  const cardEvent = (amount: number, text: string) => ({
+    kind: "card" as const,
+    playerId: player.id,
+    amount,
+    deck: card.deck,
+    text,
+  });
+
+  switch (card.effect.kind) {
+    case "diceReward": {
+      const amount = v * card.effect.perPip;
+      const log = addLog(
+        base.log,
+        `${player.name} 擲出 ${v}，${amount >= 0 ? `獲得 $${amount}` : `罰款 $${-amount}`}`,
+      );
+      if (amount >= 0) {
+        const players = replacePlayer(base.players, idx, {
+          money: player.money + amount,
+        });
+        return endTurn(
+          withCutsceneEvent(
+            { ...base, players, log },
+            cardEvent(amount, `擲出 ${v}，獲得 $${amount}`),
+          ),
+          now,
+        );
+      }
+      return endTurn(
+        withCutsceneEvent(
+          chargeOrBankrupt({ ...base, log }, idx, -amount, null),
+          cardEvent(amount, `擲出 ${v}，罰款 $${-amount}`),
+        ),
+        now,
+      );
+    }
+    case "diceBet": {
+      const win = v % 2 === 1; // 單數贏、雙數輸
+      const amount = card.effect.amount;
+      const log = addLog(
+        base.log,
+        `${player.name} 擲出 ${v}（${win ? "單數" : "雙數"}），${win ? `贏得 $${amount}` : `賠了 $${amount}`}`,
+      );
+      if (win) {
+        const players = replacePlayer(base.players, idx, {
+          money: player.money + amount,
+        });
+        return endTurn(
+          withCutsceneEvent(
+            { ...base, players, log },
+            cardEvent(amount, `擲出 ${v}，單數贏得 $${amount}`),
+          ),
+          now,
+        );
+      }
+      return endTurn(
+        withCutsceneEvent(
+          chargeOrBankrupt({ ...base, log }, idx, amount, null),
+          cardEvent(-amount, `擲出 ${v}，雙數賠了 $${amount}`),
+        ),
+        now,
+      );
+    }
+    case "diceMove": {
+      const newPos = (player.position + v) % BOARD_SIZE;
+      const passedStart = player.position + v >= BOARD_SIZE;
+      let players = replacePlayer(base.players, idx, { position: newPos });
+      let lapsByPlayer = base.lapsByPlayer;
+      let log = addLog(base.log, `${player.name} 擲出 ${v}，前進 ${v} 格`);
+      if (passedStart) {
+        players = replacePlayer(players, idx, {
+          money: players[idx].money + base.settings.passStartBonus,
+        });
+        lapsByPlayer = {
+          ...lapsByPlayer,
+          [player.id]: (lapsByPlayer[player.id] ?? 0) + 1,
+        };
+        log = addLog(
+          log,
+          `${player.name} 經過起點 +$${base.settings.passStartBonus}`,
+        );
+      }
+      return resolveLanding({ ...base, players, lapsByPlayer, log }, rng, now);
+    }
+    default:
+      return endTurn(base, now);
+  }
+}
+
+// === 互動答題卡 ===
+// 玩家作答後結算：答對得獎金；答錯依 onWrong 罰款或進監獄。
+export function answerCardQuiz(
+  state: GameState,
+  correct: boolean,
+  now: number,
+): GameState {
+  const pa = state.pendingAction;
+  if (pa?.kind !== "cardQuiz") return state;
+  const idx = state.currentPlayerIndex;
+  const player = state.players[idx];
+  const { card } = pa;
+  const base = { ...state, pendingAction: null };
+  if (card.effect.kind !== "quiz") return endTurn(base, now);
+
+  const cardEvent = (amount: number, text: string) => ({
+    kind: "card" as const,
+    playerId: player.id,
+    amount,
+    deck: card.deck,
+    text,
+  });
+
+  if (correct) {
+    const reward = card.effect.reward;
+    const log = addLog(
+      base.log,
+      reward > 0
+        ? `${player.name} 答對，獲得 $${reward}`
+        : `${player.name} 答對，安全過關`,
+    );
+    if (reward <= 0) return endTurn({ ...base, log }, now);
+    const players = replacePlayer(base.players, idx, {
+      money: player.money + reward,
+    });
+    return endTurn(
+      withCutsceneEvent(
+        { ...base, players, log },
+        cardEvent(reward, `答對了！獲得 $${reward}`),
+      ),
+      now,
+    );
+  }
+
+  // 答錯
+  const onWrong = card.effect.onWrong;
+  if (onWrong.kind === "jail") {
+    const players = replacePlayer(base.players, idx, {
+      position: JAIL_INDEX,
+      skipTurns: 1,
+    });
+    return endTurn(
+      {
+        ...base,
+        players,
+        log: addLog(base.log, `${player.name} 答錯，被關進監獄`),
+      },
+      now,
+    );
+  }
+  if (onWrong.amount <= 0) {
+    return endTurn(
+      { ...base, log: addLog(base.log, `${player.name} 答錯，但無須受罰`) },
+      now,
+    );
+  }
+  const log = addLog(base.log, `${player.name} 答錯，罰款 $${onWrong.amount}`);
+  return endTurn(
+    withCutsceneEvent(
+      chargeOrBankrupt({ ...base, log }, idx, onWrong.amount, null),
+      cardEvent(-onWrong.amount, `答錯了…罰款 $${onWrong.amount}`),
+    ),
+    now,
+  );
 }

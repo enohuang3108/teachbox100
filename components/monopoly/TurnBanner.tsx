@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import type { Player } from "@/lib/monopoly/types";
-import { PlayerAvatar } from "./Avatar";
+import { SpotlightAvatar } from "./SpotlightAvatar";
 
 // 回合轉場：暗場聚光燈。背景變暗、頭像帶代表色放射光暈彈入，白字置中，無卡片。
 export function TurnBanner({ player }: { player: Player | null }) {
@@ -28,38 +28,7 @@ export function TurnBanner({ player }: { player: Player | null }) {
           transition={{ type: "spring", stiffness: 320, damping: 24 }}
         >
           {/* 頭像 ＋ 後方放射光暈 */}
-          <div className="relative flex items-center justify-center">
-            <motion.span
-              className="pointer-events-none absolute rounded-full"
-              style={{
-                width: 260,
-                height: 260,
-                background: `radial-gradient(circle, ${player.color}b3 0%, ${player.color}40 38%, ${player.color}00 70%)`,
-                filter: "blur(6px)",
-              }}
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: [0.85, 1.08, 1], opacity: 1 }}
-              transition={{ duration: 0.6, ease: "easeOut", delay: 0.04 }}
-            />
-            <motion.div
-              className="relative"
-              initial={{ scale: 0, rotate: -25 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{
-                type: "spring",
-                stiffness: 360,
-                damping: 16,
-                delay: 0.08,
-              }}
-            >
-              <PlayerAvatar
-                character={player.character}
-                color={player.color}
-                size={96}
-                ringWidth={5}
-              />
-            </motion.div>
-          </div>
+          <SpotlightAvatar player={player} size={96} haloSize={260} />
 
           {/* 文字置中、白色、加陰影確保暗場可讀 */}
           <div

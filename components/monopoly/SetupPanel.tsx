@@ -187,13 +187,8 @@ export function SetupPanel() {
       <section className="grid grid-cols-2 gap-4 rounded-lg border p-4">
         <div>
           <Label>起始金額</Label>
-          <Input
-            type="number"
-            value={draftSettings.startingMoney}
-            onChange={(e) =>
-              updateSettings({ startingMoney: Number(e.target.value) || 0 })
-            }
-          />
+          {/* 起始金額固定 $8,000，不可調整 */}
+          <Input type="number" value={8000} disabled readOnly />
         </div>
         <div>
           <Label>骰子數量</Label>
@@ -262,6 +257,25 @@ export function SetupPanel() {
                     Math.max(1, Number(e.target.value) || 1),
                   );
                   updateSettings({ endCondition: { type: "time", minutes } });
+                }}
+              />
+            </div>
+          )}
+          {draftSettings.endCondition.type === "moneyGoal" && (
+            <div className="mt-2">
+              <Label className="text-sm text-muted-foreground">
+                目標金額（$）
+              </Label>
+              <Input
+                type="number"
+                min={1000}
+                step={1000}
+                value={draftSettings.endCondition.amount}
+                onChange={(e) => {
+                  const amount = Math.max(1000, Number(e.target.value) || 1000);
+                  updateSettings({
+                    endCondition: { type: "moneyGoal", amount },
+                  });
                 }}
               />
             </div>

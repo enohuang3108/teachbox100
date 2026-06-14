@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  answerCardQuiz,
   answerQuestion,
   confirmPurchase,
   drawAndApplyCard,
   ranking,
+  resolveCardDice,
   resolveLanding,
+  rollCardDice,
   startGame,
   takeTurn,
 } from "./rules";
@@ -40,7 +43,7 @@ describe("startGame", () => {
     expect(s.players).toHaveLength(2);
     expect(s.players[0]).toMatchObject({
       name: "小明",
-      money: 15000,
+      money: 8000,
       position: 0,
       bankrupt: false,
       skipTurns: 0,
@@ -126,14 +129,18 @@ describe("resolveLanding 各格", () => {
 
 function landedOnUnowned() {
   let s = game();
-  s = { ...s, players: replaceForTest(s.players, 0, { position: 1 }) };
-  return resolveLanding(s, seqRng([0]), 0); // pendingAction = buyQuestion(tile 1)
+  // tile 32 = 台北101（售價 4000），方便驗證金額
+  s = { ...s, players: replaceForTest(s.players, 0, { position: 32 }) };
+  return resolveLanding(s, seqRng([0]), 0); // pendingAction = buyQuestion(tile 32)
 }
 
 describe("answerQuestion / confirmPurchase 買地", () => {
   it("答對 → confirmBuy", () => {
     const s = answerQuestion(landedOnUnowned(), true, 0);
-    expect(s.pendingAction).toMatchObject({ kind: "confirmBuy", tileIndex: 1 });
+    expect(s.pendingAction).toMatchObject({
+      kind: "confirmBuy",
+      tileIndex: 32,
+    });
   });
 
   it("答錯 → 不能買、結束回合、換人", () => {
@@ -146,8 +153,8 @@ describe("answerQuestion / confirmPurchase 買地", () => {
   it("confirm 買 → 扣地價、取得地、換人", () => {
     let s = answerQuestion(landedOnUnowned(), true, 0);
     s = confirmPurchase(s, true, 0);
-    expect(s.players[0].ownedTiles).toEqual([1]);
-    expect(s.players[0].money).toBe(15000 - 2000);
+    expect(s.players[0].ownedTiles).toEqual([32]);
+    expect(s.players[0].money).toBe(8000 - 4000); // 台北101 售價 4000
     expect(s.currentPlayerIndex).toBe(1);
   });
 
@@ -155,7 +162,7 @@ describe("answerQuestion / confirmPurchase 買地", () => {
     let s = answerQuestion(landedOnUnowned(), true, 0);
     s = confirmPurchase(s, false, 0);
     expect(s.players[0].ownedTiles).toEqual([]);
-    expect(s.players[0].money).toBe(15000);
+    expect(s.players[0].money).toBe(8000);
   });
 
   it("錢不足無法買", () => {
@@ -171,9 +178,10 @@ describe("answerQuestion / confirmPurchase 買地", () => {
 describe("蓋房", () => {
   function ownAndLand() {
     let s = game();
+    // tile 32 = 台北101（蛋黃地，houseCost 1400 / hotelCost 2200）
     s = {
       ...s,
-      players: replaceForTest(s.players, 0, { position: 1, ownedTiles: [1] }),
+      players: replaceForTest(s.players, 0, { position: 32, ownedTiles: [32] }),
     };
     return resolveLanding(s, seqRng([0]), 0); // buildQuestion
   }
@@ -181,36 +189,55 @@ describe("蓋房", () => {
     let s = answerQuestion(ownAndLand(), true, 0);
     expect(s.pendingAction).toMatchObject({
       kind: "confirmBuild",
-      tileIndex: 1,
+      tileIndex: 32,
     });
     s = confirmPurchase(s, true, 0);
-    expect(s.players[0].houses[1]).toBe(1);
-    expect(s.players[0].money).toBe(15000 - 1000); // houseCost = price/2 = 1000
+    expect(s.players[0].houses[32]).toBe(1);
+    expect(s.players[0].money).toBe(8000 - 1400); // 台北101(蛋黃地) houseCost = 4000×0.35
+  });
+
+  it("蓋滿房子後再蓋 → 升級旅館（等級 3）、扣 hotelCost", () => {
+    let s = game();
+    // 已蓋滿 2 棟房子，停在自己的地 → buildQuestion（這次蓋的是旅館）
+    s = {
+      ...s,
+      players: replaceForTest(s.players, 0, {
+        position: 32,
+        ownedTiles: [32],
+        houses: { 32: 2 },
+      }),
+    };
+    s = resolveLanding(s, seqRng([0]), 0);
+    expect(s.pendingAction?.kind).toBe("buildQuestion");
+    s = answerQuestion(s, true, 0);
+    s = confirmPurchase(s, true, 0);
+    expect(s.players[0].houses[32]).toBe(3); // 等級 3 = 旅館
+    expect(s.players[0].money).toBe(8000 - 2200); // 台北101 hotelCost = 4000×0.55
   });
 });
 
 describe("破產", () => {
   it("付不出過路費 → 破產、釋地、後續被跳過", () => {
     let s = game();
-    // p1 擁有 tile 1 並蓋滿房子（高額過路費）
+    // p1 擁有 tile 32（台北101）並蓋旅館（高額過路費）
     s = {
       ...s,
       players: replaceForTest(s.players, 1, {
-        ownedTiles: [1],
-        houses: { 1: 3 },
+        ownedTiles: [32],
+        houses: { 32: 3 },
       }),
     };
-    // p0 錢只剩 100，停在 tile 1
+    // p0 錢只剩 100，停在 tile 32
     s = {
       ...s,
-      players: replaceForTest(s.players, 0, { position: 1, money: 100 }),
+      players: replaceForTest(s.players, 0, { position: 32, money: 100 }),
     };
     s = resolveLanding(s, seqRng([0]), 0); // 觸發 payToll
     expect(s.players[0].bankrupt).toBe(true);
     expect(s.players[0].money).toBe(0);
     expect(s.players[0].ownedTiles).toEqual([]);
     // 地主收到 p0 能付的 100
-    expect(s.players[1].money).toBe(15000 + 100);
+    expect(s.players[1].money).toBe(8000 + 100);
   });
 });
 
@@ -226,22 +253,22 @@ describe("drawAndApplyCard", () => {
     let s = landOnCard("chance", 3);
     s = resolveLanding(s, seqRng([0]), 0); // pendingAction drawCard chance, card index 0 = c1 +2000
     s = drawAndApplyCard(s, seqRng([0]), 0);
-    expect(s.players[0].money).toBe(15000 + 2000);
+    expect(s.players[0].money).toBe(8000 + 2000);
     expect(s.currentPlayerIndex).toBe(1);
   });
 
   it("moveTo 起點(0) → 移動後落點結算（起點無事、結束回合）", () => {
     let s = landOnCard("chance", 3);
-    // 強制抽到 c5 (moveTo 0)：CHANCE_CARDS index 4 → rng 0.7*6=4
-    s = resolveLanding(s, seqRng([4 / 6 + 0.001]), 0);
+    // 強制抽到 c10 (moveTo 0)：CHANCE_CARDS index 9（共 10 張）→ rng 9/10+eps
+    s = resolveLanding(s, seqRng([9 / 10 + 0.001]), 0);
     s = drawAndApplyCard(s, seqRng([0]), 0);
     expect(s.players[0].position).toBe(0);
   });
 
   it("jail 卡 → skipTurns=1", () => {
     let s = landOnCard("fate", 6);
-    // FATE_CARDS index 3 = f4 jail → rng 3/6+eps
-    s = resolveLanding(s, seqRng([3 / 6 + 0.001]), 0);
+    // FATE_CARDS index 3 = f4 jail（共 10 張）→ rng 3/10+eps
+    s = resolveLanding(s, seqRng([3 / 10 + 0.001]), 0);
     s = drawAndApplyCard(s, seqRng([0]), 0);
     expect(s.players[0].skipTurns).toBe(1);
   });
@@ -256,19 +283,96 @@ describe("drawAndApplyCard", () => {
   });
 });
 
+describe("互動式卡片", () => {
+  // 抽到第 index 張互動卡（共 10 張）後停在等待玩家操作的 pendingAction
+  function drawInteractive(
+    deck: "chance" | "fate",
+    pos: number,
+    index: number,
+  ) {
+    let s = landOnCard(deck, pos);
+    s = resolveLanding(s, seqRng([index / 10 + 0.001]), 0);
+    return drawAndApplyCard(s, seqRng([0]), 0);
+  }
+
+  it("擲骰卡抽到後進入 cardDice、擲骰只記點數不套用", () => {
+    const s = drawInteractive("chance", 3, 4); // c5 diceReward perPip 500
+    expect(s.pendingAction?.kind).toBe("cardDice");
+    const rolled = rollCardDice(s, seqRng([5 / 6 + 0.001])); // 擲出 6
+    expect(rolled.pendingAction).toMatchObject({ kind: "cardDice", rolled: 6 });
+    expect(rolled.players[0].money).toBe(8000); // 尚未套用
+  });
+
+  it("diceReward：點數 × perPip 入袋並結束回合", () => {
+    let s = drawInteractive("chance", 3, 4); // c5 perPip 500
+    s = rollCardDice(s, seqRng([5 / 6 + 0.001])); // 6
+    s = resolveCardDice(s, seqRng([0]), 0);
+    expect(s.players[0].money).toBe(8000 + 6 * 500);
+    expect(s.currentPlayerIndex).toBe(1);
+  });
+
+  it("diceReward 負 perPip：依點數罰款", () => {
+    let s = drawInteractive("fate", 6, 7); // f8 perPip -300
+    s = rollCardDice(s, seqRng([3 / 6 + 0.001])); // 4
+    s = resolveCardDice(s, seqRng([0]), 0);
+    expect(s.players[0].money).toBe(8000 - 4 * 300);
+  });
+
+  it("diceBet：雙數賠錢、單數贏錢", () => {
+    let lose = drawInteractive("chance", 3, 7); // c8 amount 2000
+    lose = rollCardDice(lose, seqRng([1 / 6 + 0.001])); // 2（雙數）
+    lose = resolveCardDice(lose, seqRng([0]), 0);
+    expect(lose.players[0].money).toBe(8000 - 2000);
+
+    let win = drawInteractive("chance", 3, 7);
+    win = rollCardDice(win, seqRng([0])); // 1（單數）
+    win = resolveCardDice(win, seqRng([0]), 0);
+    expect(win.players[0].money).toBe(8000 + 2000);
+  });
+
+  it("diceMove：點數即前進步數，經過起點加獎勵", () => {
+    let s = drawInteractive("chance", 3, 5); // c6 diceMove
+    s = { ...s, players: replaceForTest(s.players, 0, { position: 30 }) };
+    s = rollCardDice(s, seqRng([3 / 6 + 0.001])); // 4 → 30+4=34 → 起點
+    s = resolveCardDice(s, seqRng([0]), 0);
+    expect(s.players[0].position).toBe(0);
+    expect(s.players[0].money).toBe(8000 + DEFAULT_SETTINGS.passStartBonus);
+  });
+
+  it("quiz 答對：得獎金（機會 c7 +2000）", () => {
+    const s = drawInteractive("chance", 3, 6); // c7 reward 2000
+    expect(s.pendingAction?.kind).toBe("cardQuiz");
+    const after = answerCardQuiz(s, true, 0);
+    expect(after.players[0].money).toBe(8000 + 2000);
+    expect(after.currentPlayerIndex).toBe(1);
+  });
+
+  it("quiz 答錯 money：罰款（命運 f6 −1000）", () => {
+    const s = drawInteractive("fate", 6, 5); // f6 onWrong money 1000
+    const after = answerCardQuiz(s, false, 0);
+    expect(after.players[0].money).toBe(8000 - 1000);
+  });
+
+  it("quiz 答錯 jail：進監獄並暫停一回合（命運 f7）", () => {
+    const s = drawInteractive("fate", 6, 6); // f7 onWrong jail
+    const after = answerCardQuiz(s, false, 0);
+    expect(after.players[0].skipTurns).toBe(1);
+  });
+});
+
 describe("結束條件", () => {
   it("moneyGoal 達標立即結束、該玩家第一", () => {
     let s = startGame(
       {
         ...DEFAULT_SETTINGS,
-        endCondition: { type: "moneyGoal", amount: 16000 },
+        endCondition: { type: "moneyGoal", amount: 10000 },
       },
       Q,
       PLAYERS,
       0,
     );
     s = { ...s, players: replaceForTest(s.players, 0, { position: 3 }) };
-    // 機會格抽 c1 +2000 → 17000 >= 16000
+    // 機會格抽 c1 +2000 → 8000+2000=10000 >= 10000
     s = resolveLanding(s, seqRng([0]), 0);
     s = drawAndApplyCard(s, seqRng([0]), 0);
     expect(s.phase).toBe("gameover");

@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
 import type { CutsceneEvent, Player } from "@/lib/monopoly/types";
 import { useSound } from "@/lib/hooks/useSound";
-import { PlayerAvatar } from "./Avatar";
+import { SpotlightAvatar } from "./SpotlightAvatar";
 
 function fmt(n: number): string {
   const s = Math.abs(n).toLocaleString();
@@ -24,44 +24,7 @@ function Party({
   const gain = amount >= 0;
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="relative flex items-center justify-center">
-        <motion.span
-          className="pointer-events-none absolute rounded-full"
-          style={{
-            width: size * 2.5,
-            height: size * 2.5,
-            background: `radial-gradient(circle, ${player.color}99 0%, ${player.color}33 40%, ${player.color}00 70%)`,
-            filter: "blur(6px)",
-          }}
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: [0.85, 1.08, 1], opacity: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.04 }}
-        />
-        <motion.div
-          className="relative"
-          initial={{ scale: 0, rotate: -20 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 360,
-            damping: 16,
-            delay: 0.06,
-          }}
-        >
-          <PlayerAvatar
-            character={player.character}
-            color={player.color}
-            size={size}
-            ringWidth={5}
-          />
-        </motion.div>
-      </div>
-      <div
-        className="max-w-[8rem] truncate text-base font-bold text-white/85"
-        style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
-      >
-        {player.name}
-      </div>
+      <SpotlightAvatar player={player} size={size} name />
       <motion.div
         className="text-3xl font-extrabold tabular-nums"
         style={{
@@ -112,44 +75,7 @@ export function MoneyCutscene({
       label = "監獄 🚔";
       body = p ? (
         <div className="flex flex-col items-center gap-2">
-          <div className="relative flex items-center justify-center">
-            <motion.span
-              className="pointer-events-none absolute rounded-full"
-              style={{
-                width: 240,
-                height: 240,
-                background: `radial-gradient(circle, ${p.color}99 0%, ${p.color}33 40%, ${p.color}00 70%)`,
-                filter: "blur(6px)",
-              }}
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: [0.85, 1.08, 1], opacity: 1 }}
-              transition={{ duration: 0.6, ease: "easeOut", delay: 0.04 }}
-            />
-            <motion.div
-              className="relative grayscale"
-              initial={{ scale: 0, rotate: -20 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{
-                type: "spring",
-                stiffness: 360,
-                damping: 16,
-                delay: 0.06,
-              }}
-            >
-              <PlayerAvatar
-                character={p.character}
-                color={p.color}
-                size={96}
-                ringWidth={5}
-              />
-            </motion.div>
-          </div>
-          <div
-            className="max-w-[8rem] truncate text-base font-bold text-white/85"
-            style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
-          >
-            {p.name}
-          </div>
+          <SpotlightAvatar player={p} haloSize={240} grayscale name />
           <motion.div
             className="text-3xl font-extrabold text-amber-300"
             style={{ textShadow: "0 2px 10px rgba(0,0,0,0.55)" }}

@@ -3,7 +3,7 @@
 import type { PendingAction, Player } from "@/lib/monopoly/types";
 import { motion } from "motion/react";
 import NextImage from "next/image";
-import { PlayerAvatar } from "./Avatar";
+import { SpotlightAvatar } from "./SpotlightAvatar";
 
 const DECK_IMG: Record<"chance" | "fate", string> = {
   chance: "/images/monopoly/chance.webp",
@@ -27,46 +27,7 @@ export function CardDialog({
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-stone-950/55 px-4 backdrop-blur-sm">
       {/* 玩家頭像 ＋ 光暈（沿用過場聚光燈風格） */}
-      <div className="flex flex-col items-center gap-2">
-        <div className="relative flex items-center justify-center">
-          <motion.span
-            className="pointer-events-none absolute rounded-full"
-            style={{
-              width: size * 2.5,
-              height: size * 2.5,
-              background: `radial-gradient(circle, ${player.color}99 0%, ${player.color}33 40%, ${player.color}00 70%)`,
-              filter: "blur(6px)",
-            }}
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: [0.85, 1.08, 1], opacity: 1 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.04 }}
-          />
-          <motion.div
-            className="relative"
-            initial={{ scale: 0, rotate: -20 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 360,
-              damping: 16,
-              delay: 0.06,
-            }}
-          >
-            <PlayerAvatar
-              character={player.character}
-              color={player.color}
-              size={size}
-              ringWidth={5}
-            />
-          </motion.div>
-        </div>
-        <div
-          className="max-w-[8rem] truncate text-base font-bold text-white/85"
-          style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
-        >
-          {player.name}
-        </div>
-      </div>
+      <SpotlightAvatar player={player} size={size} name />
 
       <motion.div
         className="text-base font-bold tracking-wide text-white/85"
