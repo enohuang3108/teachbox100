@@ -2,6 +2,8 @@ import type { PropertyTile, Tile } from "./types";
 
 const CHANCE_IMG = "/images/monopoly/chance.webp";
 const FATE_IMG = "/images/monopoly/fate.webp";
+const START_IMG = "/images/monopoly/start.webp";
+const JAIL_IMG = "/images/monopoly/jail.webp";
 
 function prop(
   index: number,
@@ -30,7 +32,7 @@ function landmark(n: number): string {
 // 34 格沿 12×7 方框邊緣排列，順時針。四角皆為特殊格（起點/監獄/機會/命運）。
 // 22 個地產，台北固定在 index 1（命運卡 moveTo 會用到）。
 export const BOARD: Tile[] = [
-  { index: 0, type: "start", name: "起點" },
+  { index: 0, type: "start", name: "起點", image: START_IMG },
   prop(1, "台北101", 2000, landmark(1)),
   prop(2, "新北野柳", 1800, landmark(2)),
   { index: 3, type: "chance", name: "機會", image: CHANCE_IMG },
@@ -41,7 +43,7 @@ export const BOARD: Tile[] = [
   prop(8, "台中歌劇院", 1900, landmark(6)),
   { index: 9, type: "chance", name: "機會", image: CHANCE_IMG },
   prop(10, "彰化扇形車庫", 1300, landmark(7)),
-  { index: 11, type: "jail", name: "監獄" },
+  { index: 11, type: "jail", name: "監獄", image: JAIL_IMG },
   prop(12, "南投日月潭", 1100, landmark(8)),
   prop(13, "雲林太平雲梯", 1000, landmark(9)),
   { index: 14, type: "fate", name: "命運", image: FATE_IMG },

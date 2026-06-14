@@ -70,8 +70,8 @@ function innerEdge(i: number): { cell: string; stack: string } {
 }
 
 const SPECIAL: Record<string, { bg: string; emoji?: string }> = {
-  start: { bg: "bg-emerald-100", emoji: "🏁" },
-  jail: { bg: "bg-stone-200", emoji: "🚔" },
+  start: { bg: "bg-white" }, // 起點：白底、僅顯示 start.webp 圖檔
+  jail: { bg: "bg-white" }, // 監獄：白底、用 jail.webp 圖檔
   chance: { bg: "bg-amber-50", emoji: "❓" },
   fate: { bg: "bg-violet-50", emoji: "✨" },
 };
@@ -102,11 +102,13 @@ function TileCard({ tile, players }: { tile: Tile; players: Player[] }) {
           : undefined
       }
     >
-      <div className="px-1 pt-0.5">
-        <span className="block truncate text-[10px] font-bold text-stone-700">
-          {tile.name}
-        </span>
-      </div>
+      {tile.type !== "start" && (
+        <div className="px-1 pt-0.5">
+          <span className="block truncate text-[10px] font-bold text-stone-700">
+            {tile.name}
+          </span>
+        </div>
+      )}
       <div className="relative min-h-0 flex-1">
         {tile.image ? (
           <NextImage
