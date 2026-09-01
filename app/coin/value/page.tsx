@@ -3,7 +3,7 @@
 import { AnswerMethod } from "@/components/molecules/setting/AnswerMethod";
 import { AvailableCoins } from "@/components/molecules/setting/AvailableCoins";
 import { CoinsOrder } from "@/components/molecules/setting/CoinsOrder";
-import { useMaxAmount } from "@/components/molecules/setting/MaxAmount";
+import { MoneyRange, useMoneyRange } from "@/components/molecules/setting/MoneyRange";
 import CoinDisplayArea from "@/components/molecules/CoinDisplayArea";
 import GameAnswerSection from "@/components/organisms/CoinGameAnswerSection";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
@@ -14,16 +14,13 @@ import { useEffect, useState } from "react";
 interface GameSettings {
   minCoins: number;
   maxCoins: number;
-  maxAmount?: number;
-  maxPossibleAmount?: number;
   choiceRange: number;
 }
 
 // 遊戲設定
-export const GAME_SETTINGS: GameSettings = {
+const GAME_SETTINGS: GameSettings = {
   minCoins: 3,
   maxCoins: 20,
-  maxPossibleAmount: 3000,
   choiceRange: 300,
 };
 
@@ -31,6 +28,7 @@ export const GAME_SETTINGS: GameSettings = {
 const generateRandomCoins = (
   enabledCoinValues: number[],
   isOrdered: boolean,
+  minAmount: number,
   maxAmount: number,
 ): CoinType[] => {
   // 1. 準備可用的硬幣集合
@@ -41,26 +39,24 @@ const generateRandomCoins = (
   // 如果沒有啟用的硬幣，直接返回空陣列
   if (availableCoins.length === 0) return [];
 
-  // 2. 初始化結果和追蹤變數
-  const result: CoinType[] = [];
-  let totalAmount = 0;
-  let coinCount = 0;
+  // 2. 嘗試產生落在金錢區間內的題目。
+  //    由於硬幣面額是離散值，設定過窄時不一定每次都能剛好湊到下限，
+  //    所以重試幾次後回傳最接近且不超過上限的結果。
+  let fallback: CoinType[] = [];
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const result: CoinType[] = [];
+    let totalAmount = 0;
+    let coinCount = 0;
 
-  // 3. 生成最小數量的硬幣
-  generateMinimumCoins();
+    const getEligibleCoin = (): CoinType | null => {
+      const eligibleCoins = availableCoins.filter(
+        (coin) => totalAmount + coin.value <= maxAmount,
+      );
+      if (eligibleCoins.length === 0) return null;
 
-  // 4. 繼續添加硬幣直到達到條件
-  addAdditionalCoins();
+      return eligibleCoins[Math.floor(Math.random() * eligibleCoins.length)];
+    };
 
-  // 5. 如果需要排序，則按面值排序
-  if (isOrdered) {
-    result.sort((a, b) => a.value - b.value);
-  }
-
-  return result;
-
-  // 輔助函數: 生成最小數量的硬幣
-  function generateMinimumCoins() {
     for (let i = 0; i < GAME_SETTINGS.minCoins; i++) {
       const eligibleCoin = getEligibleCoin();
       if (!eligibleCoin) break;
@@ -69,20 +65,11 @@ const generateRandomCoins = (
       totalAmount += eligibleCoin.value;
       coinCount++;
     }
-  }
 
-  // 輔助函數: 添加額外的硬幣直到達到條件
-  function addAdditionalCoins() {
-    // 隨機決定目標金額，為最大金額的50%到100%之間
-    const targetPercentage = 50 + Math.floor(Math.random() * 51);
-    const targetAmount = Math.floor((maxAmount * targetPercentage) / 100);
-
-    // 有機率提前結束添加硬幣的過程
+    const targetAmount =
+      minAmount + Math.floor(Math.random() * (maxAmount - minAmount + 1));
     while (totalAmount < targetAmount && coinCount < GAME_SETTINGS.maxCoins) {
-      // 每次添加硬幣時有15%機率提前結束
-      if (coinCount >= GAME_SETTINGS.minCoins && Math.random() < 0.15) {
-        break;
-      }
+      if (coinCount >= GAME_SETTINGS.minCoins && Math.random() < 0.15) break;
 
       const eligibleCoin = getEligibleCoin();
       if (!eligibleCoin) break;
@@ -91,22 +78,13 @@ const generateRandomCoins = (
       totalAmount += eligibleCoin.value;
       coinCount++;
     }
+
+    if (isOrdered) result.sort((a, b) => a.value - b.value);
+    if (totalAmount >= minAmount) return result;
+    if (totalAmount > calculateTotal(fallback)) fallback = result;
   }
 
-  // 輔助函數: 獲取符合條件的隨機硬幣
-  function getEligibleCoin(): CoinType | null {
-    // 篩選出不會導致總額超過上限的硬幣
-    const eligibleCoins = availableCoins.filter(
-      (coin) => totalAmount + coin.value <= maxAmount,
-    );
-
-    // 如果沒有符合條件的硬幣，返回 null
-    if (eligibleCoins.length === 0) return null;
-
-    // 隨機選擇一個符合條件的硬幣
-    const randomIndex = Math.floor(Math.random() * eligibleCoins.length);
-    return eligibleCoins[randomIndex];
-  }
+  return fallback;
 };
 
 // 計算硬幣總值
@@ -149,14 +127,21 @@ export default function CoinGamePage() {
   const [isOrdered, setIsOrdered] = useState<boolean>(true);
   const [isGeneratingNewCoins, setIsGeneratingNewCoins] = useState(false);
   const [coinsKey, setCoinsKey] = useState(Date.now()); // 用於強制重新渲染硬幣動畫
-  const { maxAmount, MaxAmountComponent } = useMaxAmount();
+  const { minAmount, maxAmount, setMoneyRange } = useMoneyRange();
 
   // 重置遊戲的核心邏輯
-  const setupNewQuestion = () => {
+  const setupNewQuestion = (
+    amountRange = { minAmount, maxAmount },
+  ) => {
     setIsGeneratingNewCoins(true);
     
     // 使用 React 的狀態批次更新機制來優化渲染
-    const newCoins = generateRandomCoins(enabledCoins, isOrdered, maxAmount);
+    const newCoins = generateRandomCoins(
+      enabledCoins,
+      isOrdered,
+      amountRange.minAmount,
+      amountRange.maxAmount,
+    );
     const newTotal = calculateTotal(newCoins);
     
     // 批次更新所有相關狀態
@@ -181,11 +166,11 @@ export default function CoinGamePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabledCoins]);
 
-  // 當硬幣排序設定或最大金錢上限變更時重置遊戲
+  // 當硬幣排序設定變更時重置遊戲
   useEffect(() => {
     resetGame();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOrdered, maxAmount]);
+  }, [isOrdered]);
 
   // 初始化遊戲
   useEffect(() => {
@@ -207,9 +192,23 @@ export default function CoinGamePage() {
     setupNewQuestion(); // 立即重置題目狀態，讓 CSS 動畫處理視覺效果
   };
 
+  const handleMoneyRangeCommit = (amountRange: {
+    minAmount: number;
+    maxAmount: number;
+  }) => {
+    setShowFeedback(false);
+    setupNewQuestion(amountRange);
+  };
+
   const settings = [
     <AvailableCoins key="availableCoins" enabledCoins={enabledCoins} setEnabledCoins={setEnabledCoins}/>,
-    <MaxAmountComponent key="maxAmount" />,
+    <MoneyRange
+      key="moneyRange"
+      minAmount={minAmount}
+      maxAmount={maxAmount}
+      onChange={setMoneyRange}
+      onCommit={handleMoneyRangeCommit}
+    />,
     <AnswerMethod key="answerMethod" answerMethod={answerMethod} setAnswerMethod={setAnswerMethod}/>,
     <CoinsOrder key="coinsOrder" isOrdered={isOrdered} setIsOrdered={setIsOrdered}/>
   ];

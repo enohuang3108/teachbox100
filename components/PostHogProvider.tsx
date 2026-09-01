@@ -5,9 +5,12 @@ import posthog from "posthog-js";
 import { PostHogProvider as PHProvider, usePostHog } from "posthog-js/react";
 import { Suspense, useEffect } from "react";
 
+const isPostHogEnabled =
+  process.env.NODE_ENV === "production" && Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
+
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+    if (isPostHogEnabled && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
       posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
         api_host: "/ingest",
         ui_host: process.env.NEXT_PUBLIC_POSTHOG_UI_HOST || "https://us.posthog.com",
@@ -32,7 +35,7 @@ function PostHogPageView() {
   const posthog = usePostHog();
 
   useEffect(() => {
-    if (pathname && posthog) {
+    if (isPostHogEnabled && pathname && posthog) {
       let url = window.origin + pathname;
       const search = searchParams.toString();
       if (search) {
