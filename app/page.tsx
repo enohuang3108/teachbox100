@@ -1,4 +1,5 @@
 import { pages } from "@/app/pages.config";
+import { BarkleyEyes } from "@/components/atoms/BarkleyEyes";
 import {
   FACT_BADGE,
   OfflineGuideDialog,
@@ -95,6 +96,7 @@ export default function Home() {
                   sizes="(max-width: 1024px) 80vw, 440px"
                   className="relative object-contain"
                 />
+                <BarkleyEyes />
               </div>
             </div>
           </div>
