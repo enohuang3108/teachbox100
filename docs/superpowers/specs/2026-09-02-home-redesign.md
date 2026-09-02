@@ -297,7 +297,41 @@ blur = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 - **無損 webp 不要用在 AI 生成圖**：邊緣抗鋸齒和雜訊會讓檔案大好幾倍
 - `blurDataURL` 一定要跟著換，不然載入時會閃前一張圖的顏色
 
-### 5.7 換圖必須換檔名
+### 5.7 封面紙底必須對齊 `--paper-warm`
+
+**封面的紙底一律重上色成 `#F8F0E3`，也就是卡片的 `--paper-warm`。**
+
+生圖的紙底大約落在 `#FBF4E8`，比卡片亮一階。差距很小，但圖片邊界會透出一圈淡淡的面板痕跡，看起來像貼上去的貼紙而不是印在卡片上。對齊之後接縫完全消失。
+
+注意目標色是**卡片**的 `--paper-warm`，不是頁面的 `--paper #FDFCF8` —— 封面是貼在卡片上，不是貼在頁面上。用 `--paper` 一樣會留下面板痕跡。
+
+```python
+from PIL import Image
+import numpy as np
+
+TARGET = np.array([0xF8, 0xF0, 0xE3], dtype=np.float32)   # --paper-warm
+NEAR, FAR = 45.0, 115.0     # 距紙色 <NEAR 全量平移、>FAR 完全不動
+
+a = np.asarray(Image.open(src).convert("RGB")).astype(np.float32)
+
+# 紙的基準色：四角第 90 百分位。格線比紙暗，會被百分位排除掉
+corners = np.concatenate([
+    a[:60, :60].reshape(-1, 3), a[:60, -60:].reshape(-1, 3),
+    a[-60:, :60].reshape(-1, 3), a[-60:, -60:].reshape(-1, 3)])
+paper = np.percentile(corners, 90, axis=0)
+
+d = np.linalg.norm(a - paper, axis=-1)
+w = np.clip((FAR - d) / (FAR - NEAR), 0.0, 1.0)[..., None]   # 平滑衰減，邊緣不留硬環
+out = np.clip(a + w * (TARGET - paper), 0, 255).astype(np.uint8)
+```
+
+**不能整張拉 levels。** 那會把金色 `#F8B003` 一起推亮成 `#FFBB03`。遮罩式平移讓品牌四色（距紙色都超過 200）權重為 0，完全不受影響。
+
+格線與 risograph 顆粒距紙色很近，權重為 1，跟著等量平移，相對深度不變 —— 質感會完整保留。挖空的米白細節（硬幣數字、眼睛）也會一起平移，這是對的。
+
+原始未重上色的版本留在 `public/images/covers/*.webp` 當來源，實際使用的是 `covers/warm/*.webp`。
+
+### 5.8 換圖必須換檔名
 
 覆蓋同名 webp 之後畫面不會更新 —— Next 的圖片最佳化快取還吃著同一個 URL。**改檔名破快取**（例：`coin-introduction-v2.webp`），不要砍 `.next`（dev server 跑著的時候砍 `.next` 會白畫面）。
 
@@ -314,7 +348,8 @@ components/atoms/Background.tsx           全站底層紙 + 格線（fixed）
 components/atoms/PageDecor.tsx            色塊 + 浮水印，資料驅動（server component）
 components/atoms/ParallaxFallback.tsx     Firefox 視差 fallback（client，無 markup）
 components/molecules/ImageCard.tsx        卡片
-public/images/covers/*.webp               八張單元封面
+public/images/covers/*.webp               八張單元封面（生圖原始版，重上色的來源）
+public/images/covers/warm/*.webp          重上色成 --paper-warm 的版本，實際使用的是這組
 public/images/decor/blob-*.webp           四塊背景色塊（品牌四色的取樣來源）
 public/images/mascot/barkley*.webp        吉祥物姿勢
 public/icons/logo-tile.webp              白底圓角磚 logo（favicon / OG / JSON-LD）
