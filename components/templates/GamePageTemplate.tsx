@@ -1,4 +1,4 @@
-import { pages, type PageWithKey } from "@/app/pages.config";
+import { pages, type PageKey, type PageWithKey } from "@/app/pages.config";
 import { CircleHelpIcon } from "../atoms/ani-icons/CircleHelpIcon";
 import { RefreshCWIcon } from "../atoms/ani-icons/refresh-cw";
 import { SettingsGearIcon } from "../atoms/ani-icons/settings-gear";
@@ -25,7 +25,7 @@ export const GamePageTemplate = ({
   resetGame,
   tips,
 }: {
-  page: keyof typeof pages;
+  page: PageKey;
   children: React.ReactNode;
   settings: React.ReactNode[];
   resetGame: () => void;
@@ -33,15 +33,21 @@ export const GamePageTemplate = ({
 }) => {
   const pageInfo: PageWithKey = { ...pages[page], key: page };
 
-  return (
-    <PageTemplate page={pageInfo}>
+  // 透明列上的 ghost 圓鈕：hover 只有一層極淡的 ink，按下縮 0.97 給即時回饋
+  const btn =
+    "h-9 w-9 rounded-full p-0 hover:bg-ink/[0.06] transition-[background-color,transform] duration-150 ease-out active:scale-[0.97]";
+
+  const actions = (
+    <>
       <RefreshCWIcon
-        className="fixed top-4 right-4 h-10 w-10 bg-zinc-100 sm:bg-transparent sm:hover:bg-transparent"
+        className={btn}
+        size={20}
+        aria-label="重新出題"
         onClick={resetGame}
       />
       <Sheet>
-        <SheetTrigger>
-          <SettingsGearIcon className="fixed top-16 right-4 h-10 w-10 bg-zinc-100 sm:bg-transparent sm:hover:bg-transparent" />
+        <SheetTrigger aria-label="設定" className="rounded-full">
+          <SettingsGearIcon className={btn} size={20} />
         </SheetTrigger>
         <SheetContent className="overflow-y-auto">
           <SheetHeader className="text-left">
@@ -52,8 +58,8 @@ export const GamePageTemplate = ({
       </Sheet>
       {tips && (
         <Dialog>
-          <DialogTrigger>
-            <CircleHelpIcon className="fixed top-28 right-4 h-10 w-10 bg-zinc-100 sm:bg-transparent sm:hover:bg-transparent" />
+          <DialogTrigger aria-label="提示" className="rounded-full">
+            <CircleHelpIcon className={btn} size={20} />
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -63,6 +69,11 @@ export const GamePageTemplate = ({
           </DialogContent>
         </Dialog>
       )}
+    </>
+  );
+
+  return (
+    <PageTemplate page={pageInfo} actions={actions}>
       {children}
     </PageTemplate>
   );

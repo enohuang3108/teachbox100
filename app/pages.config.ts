@@ -8,7 +8,7 @@ export interface Page {
 }
 
 export interface PageWithKey extends Page {
-  key: keyof typeof pages;
+  key: PageKey;
 }
 
 export const appInfo = {
@@ -21,7 +21,7 @@ export const appInfo = {
     "專為台灣學童設計的互動式學習平台，提供時鐘辨識、金錢計算與實用生活技能遊戲，讓孩子在趣味中學習實用知識，適合學齡前至國小學生或特教生使用。",
 };
 
-export const pages: { [key: string]: Page } = {
+const pagesConfig = {
   "coin-introduction": {
     path: "/coin/introduction",
     imageSrc: "/images/covers/warm/coin-introduction-v2.webp",
@@ -90,7 +90,12 @@ export const pages: { [key: string]: Page } = {
     description: "匯入自訂題庫，答對才能買地蓋房，最多 20 人同樂的教學大富翁。",
     guide: "老師先匯入 Excel 題庫並設定規則，再開始遊戲。",
   },
-};
+} satisfies Record<string, Page>;
+
+export type PageKey = keyof typeof pagesConfig;
+
+/** 用 string 查表的地方（jsonld、og-image、seo）走這個；要編譯期擋錯的 key 用 PageKey */
+export const pages: { [key: string]: Page } = pagesConfig;
 
 export interface Hub {
   path: string;
@@ -121,4 +126,13 @@ export const hubs: Record<string, Hub> = {
 /** 找出某個教材頁所屬的 hub，沒有就回傳 undefined */
 export function hubOf(pageKey: string): Hub | undefined {
   return Object.values(hubs).find((hub) => hub.children.includes(pageKey));
+}
+
+/** 同一個 hub 底下的所有單元（含自己），麵包屑下拉切換用。沒掛 hub 就回空陣列 */
+export function siblingsOf(pageKey: string): { path: string; title: string }[] {
+  const hub = hubOf(pageKey);
+  if (!hub) return [];
+  return hub.children
+    .filter((k) => pages[k])
+    .map((k) => ({ path: pages[k].path, title: pages[k].title }));
 }

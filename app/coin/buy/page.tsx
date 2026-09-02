@@ -167,7 +167,7 @@ export default function SelectCoinsPage() {
 
   return (
     <GamePageTemplate
-      page="coin-transaction"
+      page="coin-buy"
       resetGame={resetGame}
       settings={settings}
     >

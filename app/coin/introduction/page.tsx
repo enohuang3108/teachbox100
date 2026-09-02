@@ -1,6 +1,6 @@
 "use client";
 
-import { pages } from "@/app/pages.config";
+import { pages, type PageWithKey } from "@/app/pages.config";
 import ThreeDCoin from "@/components/atoms/3DCoin";
 import Coin from "@/components/atoms/Coin";
 import { Badge } from "@/components/atoms/shadcn/badge";
@@ -126,7 +126,10 @@ export default function CoinIntroductionPage() {
   const getCoinSide = (coinValue: number) => {
     return coinSideMap[coinValue] !== false; // 預設為正面（true）
   };
-  const page = { ...pages["coin-introduction"], key: "coin-introduction" };
+  const page: PageWithKey = {
+    ...pages["coin-introduction"],
+    key: "coin-introduction",
+  };
 
   return (
     <PageTemplate page={page}>

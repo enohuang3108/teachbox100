@@ -1,4 +1,4 @@
-import { pages, type PageWithKey } from "@/app/pages.config";
+import { pages, siblingsOf, type PageWithKey } from "@/app/pages.config";
 import {
   getBreadcrumbSchema,
   getBreadcrumbTrail,
@@ -7,13 +7,16 @@ import {
 } from "@/lib/jsonld";
 import { pageSeo } from "@/lib/seo-content";
 import { Link } from "next-view-transitions";
+import { PageTitleBar } from "../molecules/PageTitleBar";
 
 export const PageTemplate = ({
   page,
   children,
+  actions,
 }: {
   page: PageWithKey;
   children: React.ReactNode;
+  actions?: React.ReactNode;
 }) => {
   const key = String(page.key);
   const learningResourceSchema = getLearningResourceSchema(key);
@@ -21,6 +24,7 @@ export const PageTemplate = ({
   const faqSchema = getFaqSchema(key);
   const seo = pageSeo[key];
   const trail = getBreadcrumbTrail(key);
+  const siblings = siblingsOf(key);
   // 遊戲本體是 client component，爬蟲拿到的 HTML 只有這段文字，
   // 所以 intro / FAQ 必須留在 server 端渲染，不能包成互動元件。
   const others = Object.entries(pages).filter(([k]) => k !== key);
@@ -45,48 +49,16 @@ export const PageTemplate = ({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
-      <main className="flex min-h-screen flex-col items-center justify-center p-4 pt-16 md:p-8 md:pt-16">
-        {/* 麵包屑：對應 BreadcrumbList 結構化資料，Google 要求兩者一致，
-            所以連結與文字都從 getBreadcrumbTrail 同一份資料來 */}
-        <nav aria-label="麵包屑" className="mx-auto w-full max-w-4xl">
-          <ol className="text-muted-foreground flex flex-wrap gap-2 text-sm">
-            <li>
-              <Link
-                href="/"
-                className="hover:text-ink underline-offset-4 hover:underline"
-              >
-                首頁
-              </Link>
-            </li>
-            {trail.map((crumb, i) => (
-              <li key={crumb.path} className="flex gap-2">
-                <span aria-hidden>/</span>
-                {i === trail.length - 1 ? (
-                  <span aria-current="page">{crumb.title}</span>
-                ) : (
-                  <Link
-                    href={crumb.path}
-                    className="hover:text-ink underline-offset-4 hover:underline"
-                  >
-                    {crumb.title}
-                  </Link>
-                )}
-              </li>
-            ))}
-          </ol>
-        </nav>
-        <div className="mx-auto w-full max-w-4xl">
-          <div className="w-full">
-            <h1 className={"mb-8 text-4xl font-bold md:text-5xl lg:text-6xl"}>
-              {page.title}
-            </h1>
-            {page.guide && (
-              <p className="text-muted-foreground text-lg">
-                <span>{page.guide}</span>
-              </p>
-            )}
+      <PageTitleBar trail={trail} siblings={siblings} actions={actions} />
+      {/* 扣掉 PageTitleBar 的 h-16，短頁面才不會多出一截捲動 */}
+      <main className="flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center p-4 md:p-8">
+        {page.guide && (
+          <div className="mx-auto w-full max-w-4xl">
+            <p className="text-muted-foreground mt-2 mb-6 text-lg">
+              {page.guide}
+            </p>
           </div>
-        </div>
+        )}
         <div className="mx-auto w-full max-w-4xl">
           <div className="w-full">{children}</div>
         </div>
