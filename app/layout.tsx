@@ -2,6 +2,7 @@ import { appInfo } from "@/app/pages.config";
 import { SITE_URL } from "@/lib/seo";
 import { Background } from "@/components/atoms/Background";
 import { FaviconButton } from "@/components/atoms/FaviconButton";
+import { FeedbackButton } from "@/components/atoms/FeedbackButton";
 import { WarningIcon } from "@/components/atoms/icons/warning";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import "@/styles/globals.css";
@@ -108,6 +109,7 @@ export default function RootLayout({
           <div className="block noscript:hidden">
             <PostHogProvider>
               <FaviconButton />
+              <FeedbackButton />
               <Background />
               {children}
             </PostHogProvider>
