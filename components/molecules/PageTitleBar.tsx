@@ -1,6 +1,15 @@
+import { FeedbackButton } from "@/components/atoms/FeedbackButton";
 import { Link } from "next-view-transitions";
 import Image from "next/image";
 import { UnitSwitcher, type Sibling } from "./UnitSwitcher";
+
+// 用 CSS 切換而不是判斷寬度：不會有 hydration 前後不一致的閃動
+const FEEDBACK_LABEL = (
+  <>
+    <span className="sm:hidden">回饋</span>
+    <span className="hidden sm:inline">使用回饋</span>
+  </>
+);
 
 export interface Crumb {
   path: string;
@@ -8,8 +17,10 @@ export interface Crumb {
 }
 
 /**
- * 教材頁頂端的列：透明無底、logo 貼左、麵包屑接在後面、操作鈕靠右。
+ * 教材頁頂端的列：logo 貼左、麵包屑接在後面、操作鈕靠右。
  * 麵包屑最後一節就是本頁的 h1，所以內文不再另外放大標題。
+ * 手機實心白底（小螢幕內容會從透明頂列後面透出來，糊成一團），桌機維持透明比較輕。
+ * min-h 而不是 h：讓 iOS 主畫面 App 的瀏海高度加得進去，不會把內容壓扁。
  */
 export const PageTitleBar = ({
   trail,
@@ -20,7 +31,7 @@ export const PageTitleBar = ({
   siblings: Sibling[];
   actions?: React.ReactNode;
 }) => (
-  <header className="sticky top-0 z-40 flex h-16 w-full items-center gap-3 px-3 sm:px-5">
+  <header className="border-ink/8 bg-paper sticky top-0 z-40 flex min-h-16 w-full items-center gap-3 border-b px-3 pt-[env(safe-area-inset-top)] sm:px-5 md:border-0 md:bg-transparent">
     <Link
       href="/"
       prefetch={true}
@@ -74,8 +85,14 @@ export const PageTitleBar = ({
       </ol>
     </nav>
 
-    {actions && (
-      <div className="ml-auto flex shrink-0 items-center gap-0.5">{actions}</div>
-    )}
+    <div className="ml-auto flex shrink-0 items-center gap-0.5">
+      {/* 跟旁邊那排圓鈕同一套 ghost 樣式，不用實心藥丸搶走麵包屑的注意力。
+          手機只剩「回饋」：這條列上已經有 logo、麵包屑和最多四顆操作鈕 */}
+      <FeedbackButton
+        label={FEEDBACK_LABEL}
+        className="text-ink-soft hover:text-ink hover:bg-ink/[0.06] h-9 cursor-pointer rounded-full px-3 text-[13px] font-bold transition-[background-color,color,transform] duration-150 ease-out active:scale-[0.97]"
+      />
+      {actions}
+    </div>
   </header>
 );

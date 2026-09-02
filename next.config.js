@@ -1,6 +1,39 @@
 /** @type {import('next').NextConfig} */
 import withSerwistInit from "@serwist/next";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
+import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+
+// 所有 app router 頁面路徑 —— 拿來 precache，讓老師裝了 PWA（或只是逛過首頁）
+// 之後，離線也能直接開任何一個單元，不必事先逐頁點過。
+const pageUrls = readdirSync("app", { recursive: true })
+  .filter((f) => /(^|\/)page\.tsx$/.test(f))
+  .map((f) => "/" + f.replace(/\/?page\.tsx$/, ""));
+
+// service worker 自己、next-pwa 時代留下的殘骸、macOS 垃圾檔，都不要進 precache。
+// precache 是全有全無：清單裡只要有一個抓不到，整包都不會存。
+const PUBLIC_SKIP =
+  /(^|\/)(sw\.js|workbox-.*\.js|fallback-.*\.js|offline-assets\.json|\..*)$/;
+
+// public/ 底下的教材素材（3D 模型、硬幣圖、音效、Lottie）約 20MB。
+//
+// 這些「不」放進 precache：precache 是 service worker 一裝好就全部抓，
+// 只是來看一眼的訪客會替一個他不會用到的離線功能付掉整包頻寬。
+// 改成寫一份清單出來，裝成 App 的裝置才由 OfflineReadyToast 主動抓（見 app/sw.ts 的
+// offline-assets 快取）。一般瀏覽的人則是開到哪抓到哪，走同一個快取。
+const publicAssets = readdirSync("public", { recursive: true })
+  .filter((f) => !PUBLIC_SKIP.test(f) && statSync(`public/${f}`).isFile())
+  .map((f) => `/${f}`);
+
+// version 用全部檔案的 hash 再 hash 一次：素材沒動就不會叫裝置重抓一次 20MB
+const assetsVersion = createHash("md5")
+  .update(publicAssets.map((u) => readFileSync(`public${u}`)).join(""))
+  .digest("hex")
+  .slice(0, 12);
+
+writeFileSync(
+  "public/offline-assets.json",
+  JSON.stringify({ version: assetsVersion, urls: publicAssets }),
+);
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -10,8 +43,14 @@ const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
   disable: isDev,
-  // 離線時 fallback 用的頁面先 precache（沿用既有 /offline 頁）
-  additionalPrecacheEntries: [{ url: "/offline", revision: randomUUID() }],
+  // 全站頁面 + 離線 fallback 頁一起 precache。revision 每次 build 換一次，
+  // 部署後 service worker 會重抓，不會卡在舊 HTML。
+  // 注意：這個參數是「取代」public/ 的預設 glob，不是附加（見 @serwist/next 的 index.mjs）。
+  // 這裡只放頁面 HTML —— 素材刻意留在外面，見上面 publicAssets 的說明。
+  additionalPrecacheEntries: pageUrls.map((url) => ({
+    url,
+    revision: randomUUID(),
+  })),
 });
 
 const nextConfig = {
@@ -27,6 +66,12 @@ const nextConfig = {
   },
   compress: true,
   poweredByHeader: false,
+  images: {
+    // 素材本來就是手工壓好的 webp，再過一手 /_next/image 只會讓網址帶上寬度參數，
+    // 沒辦法 precache（precache 認的是 /images/xxx.webp 這種固定路徑）。
+    // 關掉最佳化換來「圖片能離線」，對教室情境划算。
+    unoptimized: true,
+  },
   async rewrites() {
     // Only enable PostHog rewrites if we have a PostHog key
     if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) {

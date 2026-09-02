@@ -45,3 +45,6 @@ __pycache__/
 **/public/sw.js
 **/public/sw.js.map
 **/public/swe-worker-*.js
+
+# 建置時產生的離線素材清單（見 next.config.js）
+public/offline-assets.json

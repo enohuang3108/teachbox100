@@ -1,4 +1,8 @@
 import { pages } from "@/app/pages.config";
+import {
+  FACT_BADGE,
+  OfflineGuideDialog,
+} from "@/components/atoms/OfflineGuideDialog";
 import { PageDecor } from "@/components/atoms/PageDecor";
 import { ParallaxFallback } from "@/components/atoms/ParallaxFallback";
 import { ImageCard } from "@/components/molecules/ImageCard";
@@ -7,8 +11,6 @@ import { Link } from "next-view-transitions";
 import Image from "next/image";
 
 const CONTAINER = "mx-auto w-full max-w-[1200px] px-5 md:px-8";
-
-const FACTS = ["適合 4–12 歲", "免安裝、可離線使用", "完全免費"];
 
 export default function Home() {
   const websiteSchema = getWebsiteSchema();
@@ -34,8 +36,8 @@ export default function Home() {
         <ParallaxFallback />
 
         {/* Hero */}
-        {/* pt-24：讓出左上角固定 logo 的高度，手機上狗頭才不會被壓到 */}
-        <section className={`${CONTAINER} pt-24 pb-14 md:pt-28 md:pb-20`}>
+        {/* 手機有 header 佔位，桌機才需要讓出左上角浮動 logo 的高度 */}
+        <section className={`${CONTAINER} pt-8 pb-14 md:pt-28 md:pb-20`}>
           <div className="grid items-center gap-10 lg:grid-cols-[7fr_5fr] lg:gap-12">
             <div className="order-2 text-center lg:order-1 lg:text-left">
               <h1 className="font-display text-ink">
@@ -142,14 +144,12 @@ export default function Home() {
             </div>
 
             <ul className="flex flex-wrap justify-center gap-2.5">
-              {FACTS.map((fact) => (
-                <li
-                  key={fact}
-                  className="rounded-full bg-sand px-4 py-2 text-sm font-semibold text-ink-soft"
-                >
-                  {fact}
-                </li>
-              ))}
+              <li className={FACT_BADGE}>適合 4–12 歲</li>
+              {/* 中間這顆點得下去，會開安裝說明 */}
+              <li>
+                <OfflineGuideDialog />
+              </li>
+              <li className={FACT_BADGE}>完全免費</li>
             </ul>
           </div>
         </footer>

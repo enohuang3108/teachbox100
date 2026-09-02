@@ -42,7 +42,7 @@ export default function CoinHubPage() {
       <main className="relative min-h-screen">
         <PageDecor />
 
-        <div className="mx-auto w-full max-w-4xl px-5 pt-24 pb-20 md:px-8 md:pt-28">
+        <div className="mx-auto w-full max-w-4xl px-5 pt-8 pb-20 md:px-8 md:pt-28">
           <nav aria-label="麵包屑">
             <ol className="text-muted-foreground flex gap-2 text-sm">
               <li>
