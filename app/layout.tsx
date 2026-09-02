@@ -6,17 +6,35 @@ import { PostHogProvider } from "@/components/PostHogProvider";
 import "@/styles/globals.css";
 import type { Metadata, Viewport } from "next";
 import { ViewTransitions } from "next-view-transitions";
-import { Inter } from "next/font/google";
-import Head from "next/head";
+import { Noto_Sans_TC, Nunito } from "next/font/google";
 import Script from "next/script";
 import type React from "react";
 
-const inter = Inter({ subsets: ["latin"] });
+// Nunito 負責拉丁字母與數字（圓潤幾何），Noto Sans TC 補中文字重
+const nunito = Nunito({
+  subsets: ["latin"],
+  variable: "--font-nunito",
+  display: "swap",
+});
+
+// 中文字檔大，不預載，交給 swap 後補
+const notoSansTC = Noto_Sans_TC({
+  subsets: ["latin"],
+  variable: "--font-noto-tc",
+  display: "swap",
+  preload: false,
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://teachbox100.com"),
+  manifest: "/manifest.json",
+  // 分頁列用白底圓角磚：透明背景的 icon 在深色瀏覽器介面上會整個消失
   icons: {
-    icon: appInfo.imageSrc,
+    icon: [
+      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/favicon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/icons/favicon-180.png",
   },
   title: appInfo.title,
   description: appInfo.description,
@@ -28,6 +46,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#FDFCF8",
 };
 
 export default function RootLayout({
@@ -36,11 +55,6 @@ export default function RootLayout({
   return (
     <ViewTransitions>
       <html lang="zh-TW">
-        <Head>
-          <link rel="manifest" href="/manifest.json" />
-          <meta name="theme-color" content="#ffffff" />
-          <link rel="icon" href="/icons/favicon.png" />
-        </Head>
         {process.env.NEXT_PUBLIC_UMAMI_URL && process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
           <Script
             src={process.env.NEXT_PUBLIC_UMAMI_URL}
@@ -48,7 +62,10 @@ export default function RootLayout({
             strategy="afterInteractive"
           />
         )}
-        <body className={inter.className + " m-0 overflow-scroll p-0"}>
+        {/* overflow-x-hidden：背景色球會刻意出血到畫面外，不能讓它撐出橫向捲軸 */}
+        <body
+          className={`${nunito.variable} ${notoSansTC.variable} font-sans m-0 overflow-x-hidden p-0`}
+        >
           <div className="hidden noscript:block">
             <div className="fixed inset-0 bg-yellow-50 z-50 flex items-center justify-center p-4">
               <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6 text-center">

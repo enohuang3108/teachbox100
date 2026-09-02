@@ -49,8 +49,21 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  /* Brand & Paper Tokens */
+  --color-paper: var(--paper);
+  --color-paper-warm: var(--paper-warm);
+  --color-sand: var(--sand);
+  --color-stone: var(--stone);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-red: var(--brand-red);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-green: var(--brand-green);
+
   /* Typography Tokens */
-  --font-sans: Inter, sans-serif;
+  --font-sans: var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui, sans-serif;
   --font-mono: JetBrains Mono, monospace;
   --font-serif: Source Serif 4, serif;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
@@ -67,12 +80,18 @@
   --duration-normal: 0.3s;
   --duration-slow: 0.5s;
   --duration-flip: 0.6s;
+  --duration-press: 0.14s;
+  --duration-hover: 0.2s;
+  --duration-enter: 0.26s;
 
   /* Animation Easings */
   --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
   --ease-in-out-cubic: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-spring: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  --radius: 0.375rem;
+  /* 內建 ease-out/ease-in-out 太軟，換成有力道的曲線 */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --radius: 0.75rem;
   --tracking-normal: var(--tracking-normal);
   --shadow-2xl: var(--shadow-2xl);
   --shadow-xl: var(--shadow-xl);
@@ -93,13 +112,28 @@
 
 :root {
   /* Layout Tokens */
-  --radius: 0.375rem;
+  --radius: 0.75rem;
+  --radius-card: 1.25rem;
   --spacing: 0.25rem;
   --letter-spacing: 0em;
   --tracking-normal: 0em;
 
+  /* Brand Palette - 取自 public/images/decor 的球球實色，保證 CSS 與圖一致 */
+  --paper: #FDFCF8;
+  --paper-warm: #F8F0E3;
+  --sand: #EDE6D8;
+  --stone: #BEB9B1;
+  --ink: #020D15;
+  --ink-soft: #4A5560;
+  --brand-yellow: #F8B003;
+  --brand-red: #CB2108;
+  --brand-blue: #02569B;
+  --brand-green: #2C5427;
+  --grid-line: rgb(2 13 21 / 0.045);
+  --ghost: rgb(2 13 21 / 0.04);
+
   /* Typography Tokens */
-  --font-sans: Inter, sans-serif;
+  --font-sans: var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui, sans-serif;
   --font-serif: Source Serif 4, serif;
   --font-mono: JetBrains Mono, monospace;
 
@@ -119,26 +153,26 @@
   --shadow-xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 8px 10px -2px hsl(0 0% 0% / 0.10);
   --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
 
-  /* Light Theme Colors - OKLCH optimized */
-  --background: oklch(1.0000 0 0);
-  --foreground: oklch(0.2686 0 0);
-  --card: oklch(1.0000 0 0);
-  --card-foreground: oklch(0.2686 0 0);
-  --popover: oklch(1.0000 0 0);
-  --popover-foreground: oklch(0.2686 0 0);
-  --primary: oklch(0.7945 0.1709 71.1881);
-  --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.9670 0.0029 264.5419);
-  --secondary-foreground: oklch(0.4461 0.0263 256.8018);
-  --muted: oklch(0.9846 0.0017 247.8389);
-  --muted-foreground: oklch(0.5510 0.0234 264.3637);
-  --accent: oklch(0.9869 0.0214 95.2774);
-  --accent-foreground: oklch(0.2686 0 0);
-  --destructive: oklch(0.6368 0.2078 25.3313);
-  --destructive-foreground: oklch(1.0000 0 0);
-  --border: oklch(0.9276 0.0058 264.5313);
-  --input: oklch(0.9276 0.0058 264.5313);
-  --ring: oklch(0.7686 0.1647 70.0804);
+  /* Light Theme Colors - 全部接到上面的紙感色票 */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--paper-warm);
+  --card-foreground: var(--ink);
+  --popover: #FFFDF9;
+  --popover-foreground: var(--ink);
+  --primary: var(--brand-yellow);
+  --primary-foreground: var(--ink);
+  --secondary: var(--sand);
+  --secondary-foreground: var(--ink);
+  --muted: var(--paper-warm);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--sand);
+  --accent-foreground: var(--ink);
+  --destructive: var(--brand-red);
+  --destructive-foreground: var(--paper);
+  --border: rgb(2 13 21 / 0.10);
+  --input: rgb(2 13 21 / 0.10);
+  --ring: var(--brand-yellow);
 
   /* Chart Colors */
   --chart-1: oklch(0.7686 0.1647 70.0804);
@@ -159,26 +193,39 @@
 }
 
 .dark {
-  /* Dark Theme Colors - OKLCH optimized */
-  --background: oklch(0.2046 0 0);
-  --foreground: oklch(0.9219 0 0);
-  --card: oklch(0.2686 0 0);
-  --card-foreground: oklch(0.9219 0 0);
-  --popover: oklch(0.2686 0 0);
-  --popover-foreground: oklch(0.9219 0 0);
-  --primary: oklch(0.7686 0.1647 70.0804);
-  --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.2686 0 0);
-  --secondary-foreground: oklch(0.9219 0 0);
-  --muted: oklch(0.2686 0 0);
-  --muted-foreground: oklch(0.7155 0 0);
-  --accent: oklch(0.4732 0.1247 46.2007);
-  --accent-foreground: oklch(0.9243 0.1151 95.7459);
-  --destructive: oklch(0.6368 0.2078 25.3313);
-  --destructive-foreground: oklch(1.0000 0 0);
-  --border: oklch(0.3715 0 0);
-  --input: oklch(0.3715 0 0);
-  --ring: oklch(0.7686 0.1647 70.0804);
+  /* Dark Theme - 暖色調的暗紙，不要中性灰，才跟亮色是同一個品牌 */
+  --paper: #14120E;
+  --paper-warm: #1E1B16;
+  --sand: #2A251E;
+  --stone: #6B655C;
+  --ink: #F2EDE4;
+  --ink-soft: #A8A196;
+  --brand-yellow: #F8B003;
+  --brand-red: #E4522F;
+  --brand-blue: #3E92D6;
+  --brand-green: #6FA24E;
+  --grid-line: rgb(255 255 255 / 0.04);
+  --ghost: rgb(255 255 255 / 0.035);
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--paper-warm);
+  --card-foreground: var(--ink);
+  --popover: var(--paper-warm);
+  --popover-foreground: var(--ink);
+  --primary: var(--brand-yellow);
+  --primary-foreground: #14120E;
+  --secondary: var(--sand);
+  --secondary-foreground: var(--ink);
+  --muted: var(--paper-warm);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--sand);
+  --accent-foreground: var(--ink);
+  --destructive: var(--brand-red);
+  --destructive-foreground: #14120E;
+  --border: rgb(255 255 255 / 0.12);
+  --input: rgb(255 255 255 / 0.12);
+  --ring: var(--brand-yellow);
 
   /* Chart Colors for Dark Theme */
   --chart-1: oklch(0.8369 0.1644 84.4286);
@@ -196,8 +243,9 @@
   --sidebar-accent-foreground: oklch(0.9243 0.1151 95.7459);
   --sidebar-border: oklch(0.3715 0 0);
   --sidebar-ring: oklch(0.7686 0.1647 70.0804);
-  --radius: 0.375rem;
-  --font-sans: Inter, sans-serif;
+  --radius: 0.75rem;
+  --radius-card: 1.25rem;
+  --font-sans: var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui, sans-serif;
   --font-serif: Source Serif 4, serif;
   --font-mono: JetBrains Mono, monospace;
   --shadow-color: hsl(0 0% 0%);
@@ -305,6 +353,75 @@
     animation: slideInDown var(--duration-fast) var(--ease-spring) forwards;
   }
 
+  /*
+   * 背景色塊的環境浮動。純裝飾、使用者會一直看到，所以要慢到幾乎察覺不到：
+   * 只動 transform（不上主執行緒）、每顆給不同 duration 與負的 delay，
+   * 一載入就處在週期的不同位置，才不會整片一起呼吸。
+   *
+   * 刻意不做旋轉：旋轉是前庭不適最典型的觸發因子，捲動時背景又在轉會加乘。
+   * 位移也壓到 8px —— 環境動畫的目標是「感覺得到但注意不到」。
+   */
+  @keyframes blob-float {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(0, -8px, 0);
+    }
+  }
+
+  .blob-float {
+    animation: blob-float 20s var(--ease-in-out) infinite alternate;
+  }
+
+  /*
+   * 捲動視差。用 CSS scroll-driven animation 而不是 scroll 事件監聽：
+   * 完全不上主執行緒，圖片載入或切頁時也不會掉幀。
+   *
+   * 時間軸用 view() 不是 scroll()：scroll() 把整份文件的捲動長度當時間軸，
+   * 靠頂端的元素在離開畫面前只跑完三成位移，肉眼看不出來。view() 讓每個元素
+   * 在自己通過畫面的那段期間跑完整段，位移才有感。
+   *
+   * 位移從 -shift/2 走到 +shift/2，元素在畫面正中時剛好回到原位，
+   * 不會整體偏移構圖。正值往下漂（看起來遠）、負值往上跑（看起來近）。
+   *
+   * @supports 不能拿掉：不支援 animation-timeline 的瀏覽器會把它當成一般動畫，
+   * 元素會直接跳到終點位置卡在那裡。
+   */
+  @keyframes decor-parallax {
+    from {
+      transform: translate3d(0, calc(var(--parallax-shift, 0px) * -0.5), 0);
+    }
+    to {
+      transform: translate3d(0, calc(var(--parallax-shift, 0px) * 0.5), 0);
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    .decor-parallax {
+      animation: decor-parallax linear both;
+      animation-timeline: view(block);
+      animation-range: cover 0% cover 100%;
+    }
+  }
+
+  /* 首頁卡片 stagger 進場，延遲由 inline 的 animation-delay 控制 */
+  @keyframes card-enter {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .card-enter {
+    opacity: 0;
+    animation: card-enter var(--duration-enter) var(--ease-out) forwards;
+  }
+
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
     .slide-out-up,
@@ -312,6 +429,16 @@
     .slide-out-down,
     .slide-in-down {
       animation-duration: 0.01s;
+    }
+
+    .card-enter {
+      animation: none;
+      opacity: 1;
+    }
+
+    .blob-float,
+    .decor-parallax {
+      animation: none;
     }
   }
 }

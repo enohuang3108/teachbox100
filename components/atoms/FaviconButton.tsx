@@ -15,7 +15,7 @@ export const FaviconButton = () => {
     <Link href="/" passHref prefetch={true}>
       <div className="fixed top-3 left-3 cursor-pointer">
         <Image
-          src="/icons/favicon_transparent.webp"
+          src="/icons/logo-transparent.webp"
           alt="TeachBox100"
           width={64}
           height={64}

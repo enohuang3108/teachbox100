@@ -1,145 +1,53 @@
 # UI 設計語言規範
 
-## 整體設計風格
+> **完整規範在 [`docs/superpowers/specs/2026-09-02-home-redesign.md`](../../docs/superpowers/specs/2026-09-02-home-redesign.md)**
+> —— design token、字級、版型、動效原則、生圖 prompt 與後製流程都在那裡。
+> 這份只留「動手前必須知道的」和「已廢止的舊寫法」。
+>
+> 2026-09-02 改版。此檔先前記錄的是漸層底 + `hover:scale` 的舊語言，已全數作廢。
 
-### 色彩系統
-- **主色調**: primary/secondary 色彩系統
-- **背景**: 
-  - 主背景: `bg-gradient-to-br from-background via-muted/30 to-accent/20`
-  - 卡片背景: `bg-card/80 backdrop-blur`
-  - 區塊背景: `bg-muted/50`, `bg-muted/30`
-- **邊框**: `border-border/50`, `border-primary/20`
+## 動手前必須知道的
 
-### 間距系統
-- **容器間距**: `gap-6`, `gap-8`
-- **內容間距**: `space-y-4`, `space-y-6`
-- **卡片內距**: `p-4`, `p-6`, `p-8`
-- **響應式間距**: `sm:p-6 lg:p-8`
+### 顏色一律用 token，不寫死
 
-## 組件設計模式
+品牌色票定義在 `styles/globals.css` 的 `:root`，shadcn 的語意 token（`--background`、`--card`、`--primary`…）都接到它上面。
 
-### Badge 組件
-```tsx
-<Badge variant="outline" className="inline-flex items-center gap-2 px-4 py-2 text-primary border-primary/20 bg-primary/10">
-  <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-  內容文字
-</Badge>
+```
+--paper #FDFCF8   --paper-warm #F8F0E3   --sand #EDE6D8
+--ink #020D15     --ink-soft #4A5560     --stone #BEB9B1
+--brand-yellow #F8B003   --brand-red #CB2108
+--brand-blue #02569B     --brand-green #2C5427
 ```
 
-### Card 組件
-```tsx
-<Card className="transition-all duration-300 hover:scale-105 hover:shadow-xl">
-  <CardHeader className="pb-3">
-    <CardTitle className="text-xl">標題</CardTitle>
-  </CardHeader>
-  <CardContent className="flex flex-col items-center gap-3">
-    內容區域
-  </CardContent>
-</Card>
-```
+品牌四色是從 `public/images/decor/blob-*.webp` **實際取樣**出來的。重生色塊時要重新取樣並同步這裡，否則卡片分類點跟背景色塊會差一階。
 
-### 光暈效果
-```tsx
-<div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
-```
+### 中文行高 ≥ 1.7
 
-## 佈局系統
+`leading-5`（1.25）套在中文上會完全擠在一起。描述文字用 `leading-[1.75]`。
 
-### 響應式網格
-```tsx
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-```
+### 顏色只出現在插圖和分類點
 
-### Flexbox 佈局
-```tsx
-<div className="flex flex-col lg:flex-row">
-  <div className="flex-1">左側內容</div>
-  <div className="flex-1">右側內容</div>
-</div>
-```
+卡片本身統一 `bg-card`（紙色）。八張卡各有各的底色會讓整頁變雜貨店。
 
-## 互動效果
+### 動效四條
 
-### Hover 效果
-- 卡片縮放: `hover:scale-105`
-- 陰影變化: `hover:shadow-xl`
-- 背景變化: `hover:bg-muted/50`
-- 光暈效果: `group-hover:opacity-100`
+1. hover 位移用 `-translate-y-[3px]`，**不要 `scale`** —— 會讓 `next/image` 的圖糊掉
+2. `transition` 一律列舉屬性（`transition-[transform,box-shadow]`），不要 `transition-all`
+3. 可按的東西一定要有 `active:scale-[0.97]`，觸控裝置需要按下的回饋
+4. 環境動畫（背景浮動、視差）要慢、幅度小、**不旋轉**，並接 `prefers-reduced-motion`
 
-### 過渡動畫
-- 通用過渡: `transition-all duration-300`
-- 特定過渡: `transition-colors`, `transition-shadow`
+Tailwind v4 的 `hover:` 已內建包在 `@media (hover: hover)`，不必手動加。
 
-## 狀態指示器
+## 已廢止（看到就改掉）
 
-### 圓點指示器
-```tsx
-<span className="w-2 h-2 bg-primary rounded-full"></span>
-<span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-```
-
-### 狀態徽章
-```tsx
-<Badge variant="secondary" className="text-xs sm:text-sm">
-  內容
-</Badge>
-```
-
-## 文字系統
-
-### 標題階層
-- H1: `text-4xl md:text-6xl font-bold`
-- H2: `text-xl sm:text-2xl`
-- H3: `text-base sm:text-lg font-semibold`
-
-### 描述文字
-- 主描述: `text-xl md:text-2xl text-muted-foreground`
-- 次要描述: `text-sm text-muted-foreground`
-
-## 特殊組件模式
-
-### 圓形標識
-```tsx
-<div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-primary/10">
-  <span className="text-xs sm:text-sm font-bold text-primary">正</span>
-</div>
-```
-
-### 分隔線使用
-```tsx
-<Separator className="mb-3 sm:mb-4" />
-<Separator className="max-w-xs mx-auto" />
-```
-
-## 無障礙設計
-
-### 螢幕閱讀器支援
-```tsx
-<DialogTitle className="sr-only">
-  對話框標題
-</DialogTitle>
-```
-
-### 語義化結構
-- 使用適當的 HTML 語義標籤
-- 提供必要的 aria 屬性
-- 確保鍵盤導航支援
-
-## 響應式設計原則
-
-### 斷點系統
-- sm: 640px+
-- lg: 1024px+
-- xl: 1280px+
-
-### 文字響應式
-```tsx
-className="text-sm sm:text-base"
-className="text-base sm:text-lg"
-```
-
-### 間距響應式
-```tsx
-className="gap-2 sm:gap-3"
-className="p-3 sm:p-4"
-```
+| 舊寫法 | 現在 | 為什麼 |
+|---|---|---|
+| `bg-gradient-to-br from-background via-muted/30 to-accent/20` | `bg-paper` + 格線（`Background.tsx`） | 漸層底跟紙感衝突 |
+| `hover:scale-105` / `hover:scale-[1.02]` | `hover:-translate-y-[3px]` | scale 讓圖片糊 |
+| `transition-all duration-300` | 列舉屬性 + `duration-200` | `all` 連 layout 都動；300ms 對 hover 太慢 |
+| `<span className="... animate-pulse">` 狀態圓點 | 刪掉 | 常駐動畫不傳達任何狀態，只是噪音 |
+| `backdrop-blur` 卡片 | 實色 `bg-card` | 紙感語言不用玻璃 |
+| 光暈 `blur-xl` group-hover 效果 | 刪掉 | 同上 |
+| Badge + `animate-pulse` 的 hero chip | 刪掉整個 chip | 資訊量為零的裝飾 |
+| 卡片寫死 `style={{ width: 300 }}` | `w-full` | 在 grid 裡不 responsive |
+| `text-4xl md:text-6xl` 之類的手寫階層 | `clamp()` | 見 spec 的字級表 |
