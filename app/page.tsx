@@ -43,7 +43,7 @@ export default function Home() {
                   TeachBox100
                 </span>
                 <span className="mt-3 block text-[clamp(1.5rem,3.2vw,2.25rem)] leading-[1.3] font-bold text-ink-soft">
-                  從玩開始，把知識留下
+                  從遊戲開始，把知識留下
                 </span>
               </h1>
 
