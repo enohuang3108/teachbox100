@@ -1,40 +1,16 @@
 import { getBreadcrumbSchema, getLearningResourceSchema } from "@/lib/jsonld";
-import type { Metadata, Viewport } from "next";
+import { buildMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "教學大富翁 | 題庫桌遊 | TeachBox100 台灣互動學習平台",
-  description:
-    "可匯入自訂題庫的教學大富翁，答對才能買地、蓋房，搭配機會命運卡、擲骰問答與互動關卡，最多 20 人同樂，讓學生在遊戲中複習各科知識。",
-  openGraph: {
-    title: "教學大富翁 | 題庫桌遊 | TeachBox100",
-    description:
-      "匯入自訂題庫、答對才能買地蓋房的教學大富翁，最多 20 人同樂的課堂互動遊戲。",
-    url: "/monopoly",
-    type: "website",
-    locale: "zh_TW",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "教學大富翁 | TeachBox100",
-    description:
-      "匯入自訂題庫、答對才能買地蓋房的教學大富翁，最多 20 人同樂的課堂互動遊戲。",
-  },
-  alternates: {
-    canonical: "/monopoly",
-  },
-};
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-};
+export const metadata: Metadata = buildMetadata("monopoly");
 
 export default function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // 大富翁為滿版互動遊戲，無法套用 PageTemplate，故在 layout 直接注入結構化資料
+  // 大富翁為滿版互動遊戲，無法套用 PageTemplate，故在 layout 直接注入結構化資料。
+  // 沒有可見的問答區塊，所以刻意不掛 FAQPage schema。
   const learningResourceSchema = getLearningResourceSchema("monopoly");
   const breadcrumbSchema = getBreadcrumbSchema("monopoly");
 

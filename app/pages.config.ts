@@ -91,3 +91,34 @@ export const pages: { [key: string]: Page } = {
     guide: "老師先匯入 Excel 題庫並設定規則，再開始遊戲。",
   },
 };
+
+export interface Hub {
+  path: string;
+  title: string;
+  /** 屬於這個 hub 的 pages key，陣列順序即建議的學習順序 */
+  children: string[];
+}
+
+/**
+ * 分類頁。刻意不放進 pages —— pages 會被首頁卡片牆與各頁的「其他教材」
+ * 直接展開，hub 混進去會跟教材卡片長得一樣，語意也不對。
+ */
+export const hubs: Record<string, Hub> = {
+  coin: {
+    path: "/coin",
+    title: "認識金錢",
+    children: [
+      "coin-introduction",
+      "coin-equivalent",
+      "coin-value",
+      "coin-pay",
+      "coin-buy",
+      "coin-change",
+    ],
+  },
+};
+
+/** 找出某個教材頁所屬的 hub，沒有就回傳 undefined */
+export function hubOf(pageKey: string): Hub | undefined {
+  return Object.values(hubs).find((hub) => hub.children.includes(pageKey));
+}

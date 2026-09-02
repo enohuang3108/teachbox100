@@ -43,7 +43,7 @@ export default function Home() {
                   TeachBox100
                 </span>
                 <span className="mt-3 block text-[clamp(1.5rem,3.2vw,2.25rem)] leading-[1.3] font-bold text-ink-soft">
-                  玩中學，學得住
+                  從玩開始，把知識留下
                 </span>
               </h1>
 
@@ -51,7 +51,7 @@ export default function Home() {
                 {/* 中文沒有斷詞，靠 br 讓桌機版斷在句號而不是把「能力」拆開 */}
                 認識新臺幣、看懂時鐘、算出找零。
                 <br className="hidden lg:inline" />
-                把生活裡真的用得到的能力，做成孩子按得下去、老師改得動的小遊戲。
+                把生活裡真的用得到的能力，變成孩子玩得下去、能夠學習的小遊戲。
               </p>
 
               <div className="mt-9 flex flex-wrap justify-center gap-3 lg:justify-start">
@@ -102,11 +102,8 @@ export default function Home() {
         <section id="games" className={`${CONTAINER} scroll-mt-8 pb-20 md:pb-28`}>
           <div className="max-w-2xl">
             <h2 className="font-display text-[clamp(1.5rem,3vw,2rem)] leading-tight font-extrabold tracking-[-0.01em] text-ink">
-              選一個開始玩
+              選一個有興趣的開始吧！
             </h2>
-            <p className="mt-2 text-base leading-[1.75] text-muted-foreground">
-              每個都能直接開始，不用註冊、不用安裝。
-            </p>
           </div>
 
           <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-8 lg:grid-cols-3 xl:grid-cols-4">
@@ -140,7 +137,7 @@ export default function Home() {
                 className="size-20 shrink-0 object-contain"
               />
               <p className="max-w-sm text-base leading-[1.75] text-muted-foreground">
-                適合學齡前至國小學生，以及特教班的日常生活技能練習。
+                如果有人想知道的話，這隻狗狗叫做阿黃。
               </p>
             </div>
 

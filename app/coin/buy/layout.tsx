@@ -1,20 +1,8 @@
-import { pages } from "@/app/pages.config";
 import { PRODUCTS } from "@/lib/constants/products";
-import type { Metadata, Viewport } from "next";
+import { buildMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "學習購物 | 認識金錢 | TeachBox100 台灣互動學習平台",
-  description:
-    "台灣互動式購物模擬遊戲，幫助孩子學習如何使用硬幣正確付款，培養實際生活中的金錢使用能力，透過互動練習提升計算與決策能力。",
-  alternates: {
-    canonical: (process.env.NEXT_PUBLIC_SITE_URL || "https://teachbox100.com") + pages["coin-buy"].path,
-  },
-};
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-};
+export const metadata: Metadata = buildMetadata("coin-buy");
 
 export default function Layout({
   children,

@@ -1,24 +1,30 @@
-import { pages } from "@/app/pages.config";
+import { hubs, pages } from "@/app/pages.config";
+import { SITE_URL } from "@/lib/seo";
 import { MetadataRoute } from "next";
 
+// 內容實際更動時再改這個日期。用 new Date() 會讓每次爬取都宣稱「剛更新」，
+// 是假訊號，反而降低 lastmod 的可信度。
+const LAST_MODIFIED = new Date("2026-09-02");
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://teachbox100.com";
-  
-  const defaultPages = [
+  return [
     {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: 1
-    }
+      url: SITE_URL,
+      lastModified: LAST_MODIFIED,
+      changeFrequency: "monthly",
+      priority: 1,
+    },
+    ...Object.values(hubs).map((hub) => ({
+      url: `${SITE_URL}${hub.path}`,
+      lastModified: LAST_MODIFIED,
+      changeFrequency: "monthly" as const,
+      priority: 0.9,
+    })),
+    ...Object.values(pages).map((page) => ({
+      url: `${SITE_URL}${page.path}`,
+      lastModified: LAST_MODIFIED,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })),
   ];
-
-  const gamePages = Object.values(pages).map((page) => ({
-    url: `${baseUrl}${page.path}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: 0.8
-  }));
-
-  return [...defaultPages, ...gamePages];
 }

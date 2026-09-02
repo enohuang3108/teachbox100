@@ -168,7 +168,7 @@ export default function CoinIntroductionPage() {
                       <div className="flex flex-1 items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4 sm:p-6 lg:p-8">
                         <Card className="flex flex-col w-full max-w-[350px] bg-card/80 backdrop-blur">
                           <CardHeader className="text-center pb-3 sm:pb-6">
-                            <CardTitle className="text-xl sm:text-2xl">新台幣 {item} 元</CardTitle>
+                            <CardTitle className="text-xl sm:text-2xl">新臺幣 {item} 元</CardTitle>
                           </CardHeader>
                           <CardContent className="flex flex-col items-center gap-3 sm:gap-6">
                             <div className="flex w-full max-w-[200px] sm:max-w-[280px] items-center justify-center">

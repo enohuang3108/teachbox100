@@ -1,18 +1,7 @@
-import { pages } from "@/app/pages.config";
-import type { Metadata, Viewport } from "next";
+import { buildMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "等值換算 | 認識金錢 | TeachBox100 台灣互動學習平台",
-  description: "學習不同幣值的等值換算，培養生活中的金錢運用能力。",
-  alternates: {
-    canonical: (process.env.NEXT_PUBLIC_SITE_URL || "https://teachbox100.com") + pages["coin-equivalent"].path,
-  },
-};
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-};
+export const metadata: Metadata = buildMetadata("coin-equivalent");
 
 export default function Layout({
   children,

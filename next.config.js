@@ -15,6 +15,8 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig = {
+  // 讓驗證用的 build 可以輸出到別的目錄，不會蓋掉正在跑的 next dev 的 .next
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   typescript: {
     ignoreBuildErrors: true,
   },

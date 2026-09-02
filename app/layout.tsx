@@ -1,4 +1,5 @@
 import { appInfo } from "@/app/pages.config";
+import { SITE_URL } from "@/lib/seo";
 import { Background } from "@/components/atoms/Background";
 import { FaviconButton } from "@/components/atoms/FaviconButton";
 import { WarningIcon } from "@/components/atoms/icons/warning";
@@ -26,7 +27,7 @@ const notoSansTC = Noto_Sans_TC({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://teachbox100.com"),
+  metadataBase: new URL(SITE_URL),
   manifest: "/manifest.json",
   // 分頁列用白底圓角磚：透明背景的 icon 在深色瀏覽器介面上會整個消失
   icons: {
@@ -36,10 +37,28 @@ export const metadata: Metadata = {
     ],
     apple: "/icons/favicon-180.png",
   },
-  title: appInfo.title,
+  // template 讓各教材頁只需寫自己的標題，站名後綴集中在這裡維護
+  title: {
+    default: appInfo.title,
+    template: "%s | TeachBox100 台灣互動學習平台",
+  },
   description: appInfo.description,
+  applicationName: "TeachBox100",
   alternates: {
-    canonical: process.env.NEXT_PUBLIC_SITE_URL || "https://teachbox100.com",
+    canonical: "/",
+  },
+  openGraph: {
+    title: appInfo.title,
+    description: appInfo.description,
+    url: "/",
+    siteName: "TeachBox100",
+    type: "website",
+    locale: "zh_TW",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: appInfo.title,
+    description: appInfo.description,
   },
 }
 
