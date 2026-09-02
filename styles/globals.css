@@ -442,3 +442,57 @@
     }
   }
 }
+/*
+ * 上課用全螢幕。刻意不放進 @layer：unlayered 規則優先權高於 Tailwind 的
+ * utilities layer，才蓋得掉元素上的 max-w-4xl。
+ *
+ * y 軸鎖死（overflow: hidden）—— 投影時老師不會不小心把遊戲捲走。
+ * 塞不下的部分靠 --fs-scale 等比縮，比例由 FullscreenButton 量出來寫進來。
+ */
+#game-stage:fullscreen {
+  max-width: none;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  padding: clamp(0.5rem, 2vh, 1.5rem) clamp(1rem, 5vw, 4rem);
+  background: var(--background);
+}
+
+#game-stage:fullscreen > [data-stage-inner] {
+  width: 100%;
+  max-width: 64rem;
+  margin-inline: auto;
+  transform: scale(var(--fs-scale, 1));
+  /* 內容變高變矮（選商品、加硬幣）時縮放比例會跟著變，補一段轉場才不會跳 */
+  transition: transform 200ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #game-stage:fullscreen > [data-stage-inner] {
+    transition: none;
+  }
+}
+
+/*
+ * 購物頁比其他遊戲高一截（商品架 + 購物車 + 付款區），單欄在 1366x768
+ * 只能縮到 0.49，硬幣小到看不清楚。全螢幕的橫向空間本來就用不完，
+ * 橫向螢幕就改成左右兩欄：左邊挑商品、右邊付錢，剛好照操作順序。
+ */
+@media (min-aspect-ratio: 1 / 1) {
+  #game-stage[data-unit="coin-buy"]:fullscreen > [data-stage-inner] {
+    max-width: 88rem;
+  }
+
+  #game-stage[data-unit="coin-buy"]:fullscreen [data-stage-inner] > div:last-child {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  #game-stage[data-unit="coin-buy"]:fullscreen [data-stage-inner] > div:last-child > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}

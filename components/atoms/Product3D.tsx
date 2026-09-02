@@ -63,28 +63,24 @@ export const Product3D = ({
     };
   }, [modelPath]);
 
-  // 根據尺寸設定不同的大小和攝影機參數
+  // 根據尺寸設定不同的大小和攝影機參數。
+  // size 是「上限」不是固定值：容器窄的時候（商品架被擠成一半寬、全螢幕分欄）
+  // 模型跟著縮，不會溢出格子。
   const sizeConfig = {
     small: {
-      containerClass: "h-24 w-24",
-      modelClass: "h-24 w-24",
-      dimensions: { width: "96px", height: "96px" },
+      containerClass: "aspect-square w-full max-w-24",
       cameraOrbit: "0deg 75deg 1m",
       fieldOfView: "35deg",
       progressBarWidth: "w-16",
     },
     medium: {
-      containerClass: "h-32 w-32",
-      modelClass: "h-32 w-32",
-      dimensions: { width: "128px", height: "128px" },
+      containerClass: "aspect-square w-full max-w-32",
       cameraOrbit: "0deg 75deg 1.2m",
       fieldOfView: "32deg",
       progressBarWidth: "w-20",
     },
     large: {
-      containerClass: "h-64 w-64",
-      modelClass: "h-64 w-64",
-      dimensions: { width: "256px", height: "256px" },
+      containerClass: "aspect-square w-full max-w-64",
       cameraOrbit: "0deg 75deg 1.5m",
       fieldOfView: "30deg",
       progressBarWidth: "w-32",
@@ -94,7 +90,7 @@ export const Product3D = ({
   const config = sizeConfig[size];
 
   return (
-    <div className={`flex flex-col items-center ${className}`}>
+    <div className={`flex w-full flex-col items-center ${className}`}>
       <div className={`relative ${config.containerClass}`}>
         {/* 載入進度指示器 */}
         {!isModelLoaded && (
@@ -125,11 +121,11 @@ export const Product3D = ({
           environment-image="neutral"
           loading="auto"
           reveal="auto"
-          className={`${config.modelClass} rounded-lg`}
+          className="h-full w-full rounded-lg"
           style={
             {
-              width: config.dimensions.width,
-              height: config.dimensions.height,
+              width: "100%",
+              height: "100%",
               "--progress-bar-color": "transparent",
               "--progress-bar-height": "0px",
             } as React.CSSProperties

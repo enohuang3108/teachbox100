@@ -16,7 +16,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../molecules/sheet";
-import { PageTemplate } from "./PageTemplate";
+import { FullscreenButton } from "../atoms/FullscreenButton";
+import { GAME_STAGE_ID, PageTemplate } from "./PageTemplate";
 
 export const GamePageTemplate = ({
   page,
@@ -69,6 +70,8 @@ export const GamePageTemplate = ({
           </DialogContent>
         </Dialog>
       )}
+      {/* 放最後一顆：視訊播放器、編輯器都把全螢幕放在最右邊 */}
+      <FullscreenButton targetId={GAME_STAGE_ID} className={btn} />
     </>
   );
 

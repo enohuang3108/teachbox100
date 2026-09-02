@@ -171,42 +171,47 @@ export default function SelectCoinsPage() {
       resetGame={resetGame}
       settings={settings}
     >
-      {/* 商品架 - 只在客戶端渲染 */}
-      {isClient ? (
-        <ProductShelf
-          products={shelfProducts}
-          onProductSelect={handleProductSelect}
-        />
-      ) : (
-        <div className="w-full mb-8 flex items-center justify-center h-64 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 rounded-2xl">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 mb-4"></div>
-            <p className="text-gray-800 font-medium">正在載入...</p>
-          </div>
-        </div>
-      )}
-
-      {/* 購物車和總金額 - 只在客戶端渲染 */}
-      {isClient && (
-        <>
-          <ShoppingCart
-            selectedProducts={selectedProducts}
-            onProductRemove={handleProductRemove}
-            onProductDrop={handleProductSelect}
+      {/* 挑商品：全螢幕橫向時整組移到左欄，見 globals.css 的 coin-buy 規則 */}
+      <div>
+        {/* 商品架 - 只在客戶端渲染 */}
+        {isClient ? (
+          <ProductShelf
+            products={shelfProducts}
+            onProductSelect={handleProductSelect}
           />
-
-          {targetAmount > 0 && (
-            <div className="mb-4 flex justify-center">
-              <AmountDisplay
-                label="總金額"
-                amount={targetAmount}
-                amountColor="text-green-600"
-              />
+        ) : (
+          <div className="w-full mb-8 flex items-center justify-center h-64 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 rounded-2xl">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 mb-4"></div>
+              <p className="text-gray-800 font-medium">正在載入...</p>
             </div>
-          )}
-        </>
-      )}
-      {targetAmount > 0 && (
+          </div>
+        )}
+
+        {/* 購物車和總金額 - 只在客戶端渲染 */}
+        {isClient && (
+          <>
+            <ShoppingCart
+              selectedProducts={selectedProducts}
+              onProductRemove={handleProductRemove}
+              onProductDrop={handleProductSelect}
+            />
+
+            {targetAmount > 0 && (
+              <div className="mb-4 flex justify-center">
+                <AmountDisplay
+                  label="總金額"
+                  amount={targetAmount}
+                  amountColor="text-green-600"
+                />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* 付錢：全螢幕橫向時整組移到右欄 */}
+      <div>
         <GameAnswerSection
           question="請選擇正確的金額來付款"
           hasAnswer={hasAnswer}
@@ -257,7 +262,7 @@ export default function SelectCoinsPage() {
             </div>
           </div>
         </GameAnswerSection>
-      )}
+      </div>
     </GamePageTemplate>
   );
 }

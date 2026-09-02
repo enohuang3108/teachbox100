@@ -33,11 +33,12 @@ const DraggableProduct = ({
 
   return (
     <div className="relative group">
+      {/* w-full 不能拿掉：button 預設 shrink-to-fit，Product3D 的 w-full 會沒有寬度可解析 */}
       <button
         draggable
         onDragStart={handleDragStart}
         onClick={handleClick}
-        className="relative bottom-2 cursor-pointer transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95 p-4 pb-0"
+        className="relative bottom-2 w-full cursor-pointer transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95 p-4 pb-0"
         aria-label={`選擇商品：${product.name}，價格 ${product.currentPrice} 元`}
         type="button"
       >
