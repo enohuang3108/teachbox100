@@ -277,6 +277,16 @@
 }
 
 @layer utilities {
+  /*
+   * 首頁／分類頁的 logo（44 或 64px）與教材頁頂列的 logo（36px）是同一顆，
+   * 給同一個 view-transition-name，換頁時就會自己從舊的位置與大小長到新的，
+   * 不會兩邊各自淡入淡出。同一時間只會有一顆被畫出來（AppChrome 在教材頁回傳
+   * null，手機／桌機那兩顆用 display:none 互斥），名字才不會撞。
+   */
+  .site-logo {
+    view-transition-name: site-logo;
+  }
+
   /* 3D Utilities */
   .preserve-3d {
     transform-style: preserve-3d;
@@ -422,6 +432,16 @@
     animation: card-enter var(--duration-enter) var(--ease-out) forwards;
   }
 
+  /*
+   * 上一頁／下一頁回到已經捲到卡片區的首頁時，卡片會整排重新一張張淡入，
+   * 疊在換頁的交叉淡出上看起來像壞掉。回上一頁本來就該看到原本的畫面。
+   * 旗標由 lib/back-navigation.ts 掛在 <html> 上。
+   */
+  [data-restored] .card-enter {
+    opacity: 1;
+    animation: none;
+  }
+
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
     .slide-out-up,
@@ -494,5 +514,12 @@
   #game-stage[data-unit="coin-buy"]:fullscreen [data-stage-inner] > div:last-child > * {
     flex: 1 1 0;
     min-width: 0;
+  }
+}
+
+/* 關掉動態效果時就別讓 logo 飛，直接跟著頁面換掉 */
+@media (prefers-reduced-motion: reduce) {
+  .site-logo {
+    view-transition-name: none;
   }
 }

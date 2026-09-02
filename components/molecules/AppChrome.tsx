@@ -17,7 +17,7 @@ const Logo = ({ size }: { size: number }) => (
       alt="TeachBox100"
       width={size}
       height={size}
-      className="cursor-pointer"
+      className="site-logo cursor-pointer"
     />
   </Link>
 );

@@ -43,6 +43,7 @@ export const PageTitleBar = ({
         alt="TeachBox100"
         width={36}
         height={36}
+        className="site-logo"
         priority
       />
     </Link>

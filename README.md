@@ -78,4 +78,5 @@ Teachbox100 是一個互動式學習平台，旨在透過遊戲化的方式幫�
 | [`CONTEXT.md`](CONTEXT.md) | 領域詞彙 glossary（繁中／English／定義），含已知的命名踩雷點 |
 | [`docs/superpowers/specs/2026-09-02-home-redesign.md`](docs/superpowers/specs/2026-09-02-home-redesign.md) | 設計語言、design token、動效原則、生圖 prompt 與後製流程 |
 | [`docs/superpowers/specs/2026-06-01-monopoly-design.md`](docs/superpowers/specs/2026-06-01-monopoly-design.md) | 大富翁單元的設計決策 |
+| [`docs/superpowers/specs/2026-09-02-page-transitions.md`](docs/superpowers/specs/2026-09-02-page-transitions.md) | 換頁轉場與上一頁行為：view transition 與捲動還原踩過的四個坑 |
 | [`.claude/memo/ui-style-guide.md`](.claude/memo/ui-style-guide.md) | 動手改 UI 前的速查 + 已廢止寫法對照表 |

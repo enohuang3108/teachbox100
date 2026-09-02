@@ -2,6 +2,7 @@ import { appInfo } from "@/app/pages.config";
 import { SITE_URL } from "@/lib/seo";
 import { Background } from "@/components/atoms/Background";
 import { AppChrome } from "@/components/molecules/AppChrome";
+import { BackScrollRestoration } from "@/components/atoms/BackScrollRestoration";
 import { OfflineReadyToast } from "@/components/atoms/OfflineReadyToast";
 import { WarningIcon } from "@/components/atoms/icons/warning";
 import { PostHogProvider } from "@/components/PostHogProvider";
@@ -108,6 +109,7 @@ export default function RootLayout({
           </div>
           <div className="block noscript:hidden">
             <PostHogProvider>
+              <BackScrollRestoration />
               <AppChrome />
               <OfflineReadyToast />
               <Background />
