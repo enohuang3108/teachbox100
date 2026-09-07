@@ -310,7 +310,8 @@ export function LotteryMachine({
     let lidOpen = 0; // 畫的用
     let dark = 0; // 遮黑的淡入淡出
     let open = false; // 物理的用
-    let flying: Flying | null = null;
+    // 蓋子開著時球會接連衝出來，飛行中的球可能不只一顆，漏接的會飛出畫面永遠進不了托盤
+    let flying: Flying[] = [];
     const tray: Meta[] = [];
 
     const engine = Engine.create({ gravity: { x: 0, y: 1 } });
@@ -381,9 +382,8 @@ export function LotteryMachine({
       dark += ((blindRef.current ? 1 : 0) - dark) * 0.12;
 
       // 有球被推到管子頂端就算抓到：它離開物理世界；設定自動關蓋或球抽完了就把蓋子關上
-      if (open && !flying) {
-        const caught = balls().find((b) => b.position.y < L.tube.top + L.ballR * 1.3);
-        if (caught) {
+      if (open) {
+        for (const caught of balls().filter((b) => b.position.y < L.tube.top + L.ballR * 1.3)) {
           const m = meta.get(caught.id)!;
           Composite.remove(engine.world, caught);
           meta.delete(caught.id);
@@ -391,13 +391,14 @@ export function LotteryMachine({
             open = false;
             Composite.add(engine.world, walls.lid);
           }
-          flying = {
+          flying.push({
             meta: m,
             from: { x: caught.position.x, y: caught.position.y },
-            to: traySlot(L, tray.length),
+            to: traySlot(L, tray.length + flying.length),
             angle: caught.angle,
             at: now,
-          };
+          });
+          if (!open) break;
         }
       }
 
@@ -411,24 +412,25 @@ export function LotteryMachine({
         drawBall(ctx, x, y, L.ballR, 0, m);
       });
 
-      if (flying) {
-        const p = easeOut(Math.min(1, (now - flying.at) / FLY_MS));
+      // 同一批飛出來的球依起飛順序落盤，所以完成的一定在陣列最前面
+      for (const f of flying) {
+        const p = easeOut(Math.min(1, (now - f.at) / FLY_MS));
         // 先往上拋再落到托盤，弧線比直線像被彈出來
-        const x = flying.from.x + (flying.to.x - flying.from.x) * p;
-        const y = flying.from.y + (flying.to.y - flying.from.y) * p - Math.sin(p * Math.PI) * 60;
-        drawBall(ctx, x, y, L.ballR, flying.angle * (1 - p), flying.meta);
-        if (p >= 1) {
-          tray.push(flying.meta);
-          onPickRef.current(flying.meta.label);
-          flying = null;
-        }
+        const x = f.from.x + (f.to.x - f.from.x) * p;
+        const y = f.from.y + (f.to.y - f.from.y) * p - Math.sin(p * Math.PI) * 60;
+        drawBall(ctx, x, y, L.ballR, f.angle * (1 - p), f.meta);
+      }
+      while (flying.length && now - flying[0].at >= FLY_MS) {
+        const done = flying.shift()!;
+        tray.push(done.meta);
+        onPickRef.current(done.meta.label);
       }
       raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
 
     const onDown = () => {
-      if (flying || balls().length === 0) return;
+      if (flying.length || balls().length === 0) return;
       if (open) {
         // 自動關蓋模式下開著就等球出來；持續打開模式再點一下是關蓋
         if (autoCloseRef.current) return;
