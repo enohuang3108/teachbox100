@@ -1,7 +1,7 @@
-// 卡背：跟封面同一款——深色牌面、兩顆米白大眼。幾何照 scripts/gen-new-covers.py 的 memory() 量的。
+// 卡背：跟封面同一款——阿黃同色的黑牌面（插畫色板 black）、兩顆 paper-warm 大眼。幾何照封面量的。
 /* oxlint-disable jsx-a11y/prefer-tag-over-role */
-export const CARD_BACK_INK = "#1f2937";
-const CREAM = "#fcfbfc";
+export const CARD_BACK_INK = "#0D0D0D";
+const CREAM = "#F8F0E3";
 
 export function CardBack() {
   return (

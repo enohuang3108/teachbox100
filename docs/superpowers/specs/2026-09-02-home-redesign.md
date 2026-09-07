@@ -184,6 +184,8 @@ Firefox 穩定版還沒開 scroll-driven animations（藏在 `layout.css.scroll-
 ### 5.2 可重用的 prompt 模板
 
 生新圖時，把下面整段貼上，再接場景描述。參考圖用 `style-ref.png`（Barkley + 四塊色塊拼成一張）。
+參考圖要用**姿勢中性**的那張（`mascot/barkley.webp` 坐姿），不要拿別張封面當參考：模型會連姿勢一起抄，
+2026-09-07 抽籤機、轉盤、記憶遊戲三張封面阿黃都在舉手，就是這樣連鎖出來的。
 
 ```
 Generate N card cover images for a Taiwanese children's education website.
@@ -216,6 +218,10 @@ two front paws as HANDS. He is a pure black silhouette with two cream eyes.
 LEGIBILITY: his black paws must read clearly ON TOP of colored props — the color stays visible
 around them. Always keep a clear gap between his arms and his torso. Never let paws, arms and
 body merge into one unreadable black mass.
+
+POSE: both paws are BUSY WITH THE PROPS of the scene (holding, pushing, flipping, pointing).
+A paw goes up ONLY when the scene itself says so (holding a coin overhead, throwing a die).
+Never a free paw raised in greeting, cheering or delight — that is the default pose to avoid.
 
 FRAMING (every image): Barkley fully inside the frame, never cropped at the edge. 5 objects
 maximum, generous empty paper. Shown at ~260px wide, so no fine detail.

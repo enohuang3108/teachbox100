@@ -21,9 +21,9 @@ SIZE = (1024, 768)
 MARGIN = 0.10
 BG_TOL = 20  # 生成圖底色抖動 <1/通道，翻開的米白卡牌距離 >30，取中間
 OUT = pathlib.Path("public/images/covers/warm/memory.webp")
-REF = pathlib.Path("public/images/covers/warm/lottery.webp")
+REF = pathlib.Path("public/images/mascot/barkley.webp")  # 姿勢中性的參考圖，拿別張封面會把姿勢一起抄過來
 
-PROMPT = """Redraw this scene in EXACTLY the same illustration style as the attached reference image (same flat risograph-print look, same black dog mascot Barkley, same cream paper background).
+PROMPT = """Draw this scene in EXACTLY the same illustration style as the attached reference image of the black dog mascot Barkley (same flat risograph-print look, same character, cream paper background). Do NOT copy his pose from the reference; pose him as described below.
 
 THE ONE STYLE RULE: every object is ONE SOLID FLAT SHAPE with details KNOCKED OUT of it in cream. No outlines, no strokes, no gradients, no shadows, no 3D, no highlights. Chunky, slightly hand-drawn edges. Subtle print grain on every filled shape.
 
@@ -32,9 +32,9 @@ Barkley's black and the card backs' black are the SAME #0D0D0D.
 
 SCENE — a memory card matching game:
 Six rounded playing cards laid on the paper in a 3x2 grid, cards fairly large.
-Four cards are FACE DOWN: each is one solid black #0D0D0D rounded rectangle with two big cream eyes knocked out of it (two cream ovals, each with a black round pupil), like Barkley's own eyes — the card back is a little Barkley face.
+Four cards are FACE DOWN: each is one solid black #0D0D0D rounded rectangle with two big cream eyes knocked out of it (two cream ovals, each with a black round pupil sitting DEAD CENTRE in the oval, so the card looks STRAIGHT AT THE VIEWER — not glancing up or sideways), like Barkley's own eyes; the card back is a little Barkley face.
 Two cards are FACE UP: each is a cream #F8F0E3 rounded rectangle showing ONE solid red #CB2108 apple (a chunky round apple shape with a small solid green #2C5427 leaf, a tiny cream highlight dot knocked out is allowed). The two apples are identical: a matched pair.
-Barkley STANDS UPRIGHT on his hind legs at the right side, using his front paws as hands: one paw is flipping over the last face-up card, the other paw is raised in delight. Pure black silhouette with two cream eyes, fully inside the frame, not cropped. Keep a clear gap between his arms and torso; his paws must read clearly on top of the cream card.
+Barkley STANDS UPRIGHT on his hind legs at the right side, using his front paws as hands: his right paw reaches out and is flipping over a card; his left paw is planted ON HIS HIP, elbow bent out to the side, so a clear triangle of cream paper shows between that arm and his torso. No paw is raised above his shoulder. Pure black silhouette with two cream eyes, fully inside the frame, not cropped. Keep a clear gap between his arms and torso; his paws must read clearly on top of the cream card.
 
 CANVAS: landscape, cream #F8F0E3 background edge to edge, generous empty paper around everything. NO TEXT anywhere."""
 
