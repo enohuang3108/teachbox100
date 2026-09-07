@@ -384,6 +384,35 @@
     animation: blob-float 20s var(--ease-in-out) infinite alternate;
   }
 
+  /* 睡覺的 z：往右上飄、邊放大邊淡出，三顆錯開 1.1 秒 */
+  @keyframes barkley-z {
+    from {
+      opacity: 0;
+      transform: translate(0, 0) scale(0.6);
+    }
+    20% {
+      opacity: 0.55;
+    }
+    to {
+      opacity: 0;
+      transform: translate(70px, -150px) scale(1.2);
+    }
+  }
+
+  .barkley-zs {
+    display: none;
+  }
+
+  svg[data-action="sleep"] .barkley-zs {
+    display: block;
+  }
+
+  .barkley-zs text {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: barkley-z 3.3s var(--ease-out) infinite;
+  }
+
   /*
    * 捲動視差。用 CSS scroll-driven animation 而不是 scroll 事件監聽：
    * 完全不上主執行緒，圖片載入或切頁時也不會掉幀。
@@ -457,6 +486,7 @@
     }
 
     .blob-float,
+    .barkley-zs text,
     .decor-parallax {
       animation: none;
     }
@@ -576,4 +606,14 @@
   .memory-card[data-face-up="true"] .memory-face-front {
     opacity: 1;
   }
+}
+
+/* 抽籤轉盤：起步快、尾段拖很長的減速，讓最後幾格慢慢滑過去才有懸念。
+   時間由 inline transition-duration 決定（減少動態時給 0，直接跳到結果） */
+.wheel-disc {
+  transform-origin: center;
+  transform-box: fill-box;
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.17, 0.02, 0.06, 1);
+  will-change: transform;
 }

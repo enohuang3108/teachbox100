@@ -90,6 +90,13 @@ const pagesConfig = {
     description: "老師自訂 2 到 15 組配對卡，孩子翻牌找出一對，練習詞彙與對應關係。",
     guide: "老師先設定配對組再開始，孩子翻兩張牌找出一對。",
   },
+  wheel: {
+    path: "/wheel",
+    imageSrc: "/images/covers/warm/wheel-v2.webp",
+    blurDataURL: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afbv4QEBAf/9/gYSEOng1/n18x8rN/nw8AH58eP9/PwGEBDpo7QC53cFDPP07XAYdW0E8vT1iY2XNjUlQt+L8t3n/A0KAPeD/+42Av39/LK1ut7b2Qsn8QMODf0CEA4sAAH+8wL//gAuKSNMVlzw3Wz+9vIKE+XozFEAFD4B9/Di9vb3AwQDCAoO/+zBAPz0ABNDAAMDerRNsypywywAAAAASUVORK5CYII=",
+    title: "抽籤轉盤",
+    description: "貼上名單或選項，轉一下隨機抽出一個，點名、分組、選題目都好用。",
+  },
   monopoly: {
     path: "/monopoly",
     imageSrc: "/images/covers/warm/monopoly.webp",
