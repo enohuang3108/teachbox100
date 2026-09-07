@@ -35,7 +35,15 @@ const DialogContent = React.forwardRef<
     hideClose?: boolean;
   }
 >(({ className, children, hideClose, ...props }, ref) => (
-  <DialogPortal>
+  // 原生 element fullscreen 只顯示那棵子樹，portal 到 body 的對話框會被蓋住；
+  // 有全螢幕元素時就 portal 進去。fixed 定位不受影響（#game-stage 沒有 transform）
+  <DialogPortal
+    container={
+      typeof document === "undefined"
+        ? undefined
+        : (document.fullscreenElement ?? undefined)
+    }
+  >
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}

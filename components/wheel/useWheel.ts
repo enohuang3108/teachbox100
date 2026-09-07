@@ -18,7 +18,7 @@ export function useWheel(entries: string[], soundOn: boolean) {
   /** 抽中的原始 index；null 表示沒有待處理的結果 */
   const [result, setResult] = useState<number | null>(null);
   const pending = useRef<number | null>(null);
-  const { playCorrectSound } = useSound();
+  const { playSpinLoop, playBonusSound } = useSound();
 
   const active = entries
     .map((label, index) => ({ label, index }))
@@ -29,7 +29,9 @@ export function useWheel(entries: string[], soundOn: boolean) {
     const slot = pickIndex(active.length, defaultRng);
     pending.current = active[slot].index;
     // 減少動態：不轉直接揭曉；transition 時間跟著歸零，指標還是會指對格
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     setSpinMs(reduced ? 0 : SPIN_MS);
     setRotation((r) => rotationFor(slot, active.length, r, defaultRng));
     setSpinning(true);
@@ -37,14 +39,19 @@ export function useWheel(entries: string[], soundOn: boolean) {
 
   useEffect(() => {
     if (!spinning) return;
+    const loop = soundOn ? playSpinLoop() : null;
     const t = window.setTimeout(() => {
+      loop?.stop();
       setSpinning(false);
       setResult(pending.current);
-      if (soundOn) playCorrectSound();
+      if (soundOn) playBonusSound();
       realisticEffect();
     }, spinMs + 60);
-    return () => window.clearTimeout(t);
-  }, [spinning, spinMs, soundOn, playCorrectSound]);
+    return () => {
+      loop?.stop();
+      window.clearTimeout(t);
+    };
+  }, [spinning, spinMs, soundOn, playSpinLoop, playBonusSound]);
 
   /** 收掉結果；removeIt 為 true 就把這個人從盤面拿掉 */
   const dismiss = (removeIt: boolean) => {

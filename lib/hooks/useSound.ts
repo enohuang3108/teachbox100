@@ -1,21 +1,22 @@
 import { Howl } from "howler";
 import { useCallback, useEffect } from "react";
+import { createUISFX } from "uisfx";
 import { useAudioStore } from "@/lib/monopoly/audio";
+
+// 答對／答錯改用 uisfx 合成音（minimal pack），不再抓 mp3。
+// createUISFX 有 typeof window 守衛、AudioContext 延遲建立，模組層級建立在 SSR 下安全。
+const ui = createUISFX({ pack: "minimal", volume: 1 });
 
 // 音檔版本：更換同名音檔後 bump 此值，強制瀏覽器重新抓取（避免吃到舊快取）
 const V = "2";
 const url = (name: string) => `/sounds/${name}.mp3?v=${V}`;
 
 // 各音效的基準音量（實際播放時再乘上使用者設定的音效音量）
-const correctSound = new Howl({ src: [url("correct")], volume: 0.5 });
-const wrongSound = new Howl({ src: [url("wrong")], volume: 0.5 });
 const diceSound = new Howl({ src: [url("dice")], volume: 0.6 });
 const moneySound = new Howl({ src: [url("money")], volume: 0.5 });
 const jailSound = new Howl({ src: [url("jail")], volume: 0.5 });
 
 const BASE_VOLUME = {
-  correct: 0.5,
-  wrong: 0.5,
   dice: 0.6,
   money: 0.5,
   jail: 0.5,
@@ -27,22 +28,20 @@ export const useSound = () => {
   // 在組件卸載時停止所有音效
   useEffect(() => {
     return () => {
-      correctSound.stop();
-      wrongSound.stop();
+      ui.stopAll();
       diceSound.stop();
       moneySound.stop();
       jailSound.stop();
     };
   }, []);
 
+  // uisfx 的 play() 會自行 resume 被暫停的 AudioContext，呼叫點都在點擊事件內即可
   const playCorrectSound = useCallback(() => {
-    correctSound.volume(BASE_VOLUME.correct * sfxVolume);
-    correctSound.play();
+    ui.play("success", { volume: sfxVolume });
   }, [sfxVolume]);
 
   const playWrongSound = useCallback(() => {
-    wrongSound.volume(BASE_VOLUME.wrong * sfxVolume);
-    wrongSound.play();
+    ui.play("stop", { volume: sfxVolume });
   }, [sfxVolume]);
 
   const playDiceSound = useCallback(() => {
@@ -62,9 +61,21 @@ export const useSound = () => {
     jailSound.play();
   }, [sfxVolume]);
 
+  /** 轉盤轉動中的迴圈音，回傳 handle 讓呼叫端在結果出來時 stop() */
+  const playSpinLoop = useCallback(
+    () => ui.play("loading", { volume: sfxVolume }),
+    [sfxVolume],
+  );
+
+  const playBonusSound = useCallback(() => {
+    ui.play("bonus", { volume: sfxVolume });
+  }, [sfxVolume]);
+
   return {
     playCorrectSound,
     playWrongSound,
+    playSpinLoop,
+    playBonusSound,
     playDiceSound,
     playMoneySound,
     playJailSound,

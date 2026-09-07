@@ -108,7 +108,7 @@ export function Wheel({
           fill="var(--ink)"
           className="font-display select-none"
         >
-          {spinning ? "…" : "轉"}
+          轉
         </text>
         <path d={`M${R - 16} -6 L${R + 16} -6 L${R} 30 Z`} fill="var(--ink)" />
       </svg>
