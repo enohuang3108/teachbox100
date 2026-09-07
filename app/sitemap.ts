@@ -4,7 +4,7 @@ import { MetadataRoute } from "next";
 
 // 內容實際更動時再改這個日期。用 new Date() 會讓每次爬取都宣稱「剛更新」，
 // 是假訊號，反而降低 lastmod 的可信度。
-const LAST_MODIFIED = new Date("2026-09-02");
+const LAST_MODIFIED = new Date("2026-09-07");
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

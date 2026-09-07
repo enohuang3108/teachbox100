@@ -30,7 +30,7 @@ import { GAME_STAGE_ID, PageTemplate } from "./PageTemplate";
  * 包一層 span 當觸發器：這幾顆鈕（動畫 icon、FullscreenButton）沒有把 ref 轉出 DOM 節點，
  * asChild 直接掛在它們身上會定位不到。四顆都已經有 aria-label，讀螢幕器不靠 tooltip。
  */
-const Tip = ({
+export const Tip = ({
   label,
   children,
 }: {
@@ -44,6 +44,10 @@ const Tip = ({
     <TooltipContent>{label}</TooltipContent>
   </Tooltip>
 );
+
+// 透明列上的 ghost 圓鈕：hover 只有一層極淡的 ink，按下縮 0.97 給即時回饋
+export const ACTION_BTN =
+  "h-9 w-9 rounded-full p-0 hover:bg-ink/[0.06] transition-[background-color,transform] duration-150 ease-out active:scale-[0.97]";
 
 export const GamePageTemplate = ({
   page,
@@ -60,9 +64,7 @@ export const GamePageTemplate = ({
 }) => {
   const pageInfo: PageWithKey = { ...pages[page], key: page };
 
-  // 透明列上的 ghost 圓鈕：hover 只有一層極淡的 ink，按下縮 0.97 給即時回饋
-  const btn =
-    "h-9 w-9 rounded-full p-0 hover:bg-ink/[0.06] transition-[background-color,transform] duration-150 ease-out active:scale-[0.97]";
+  const btn = ACTION_BTN;
 
   const actions = (
     // delayDuration：第一顆要等一下才跳，避免滑過去就一堆泡泡。

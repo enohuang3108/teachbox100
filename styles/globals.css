@@ -523,3 +523,57 @@
     view-transition-name: none;
   }
 }
+
+/* 翻翻配對的牌：3D 水平翻面；減少動態時改成淡入淡出 */
+.memory-card {
+  perspective: 900px;
+}
+.memory-card-inner {
+  position: relative;
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 360ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.memory-card[data-face-up="true"] .memory-card-inner {
+  transform: rotateY(180deg);
+}
+.memory-card[data-matched="true"] .memory-card-inner {
+  animation: memory-matched 420ms ease-out;
+}
+.memory-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  backface-visibility: hidden;
+}
+.memory-face-front {
+  transform: rotateY(180deg);
+}
+@keyframes memory-matched {
+  40% {
+    transform: rotateY(180deg) scale(1.06);
+  }
+  100% {
+    transform: rotateY(180deg) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .memory-card-inner,
+  .memory-card[data-face-up="true"] .memory-card-inner {
+    transform: none;
+    transition: none;
+    animation: none;
+  }
+  .memory-face {
+    transition: opacity 150ms ease-out;
+  }
+  .memory-face-front {
+    transform: none;
+    opacity: 0;
+  }
+  .memory-card[data-face-up="true"] .memory-face-front {
+    opacity: 1;
+  }
+}
