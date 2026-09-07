@@ -25,7 +25,6 @@ export function GET(): Response {
       .join("\n");
 
     const facts = [
-      `- 適合年齡：${seo.ageRange.replace("-", " 到 ")} 歲`,
       `- 練習重點：${seo.teaches}`,
       ...(seo.curriculum
         ? [`- 108 課綱學習內容：${seo.curriculum.map((c) => `${c} ${CURRICULUM[c]}`).join("；")}`]

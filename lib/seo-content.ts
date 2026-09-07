@@ -30,8 +30,6 @@ export type CurriculumCode = keyof typeof CURRICULUM;
 export interface PageSeo {
   /** 不含站名後綴，站名由 root layout 的 title.template 補上 */
   title: string;
-  /** schema.org typicalAgeRange 格式，例如 "6-9" */
-  ageRange: string;
   /** 一句話說這個單元教什麼，給 schema.org teaches 與 AI 摘要用 */
   teaches: string;
   /** 對應的 108 課綱學習內容；跨科工具類單元沒有 */
@@ -46,7 +44,6 @@ export interface PageSeo {
 
 export const pageSeo: Record<string, PageSeo> = {
   coin: {
-    ageRange: "4-9",
     teaches: "認識新臺幣面額、等值換算、計算總額、付款、購物與找零",
     curriculum: ["N-1-4", "N-2-5"],
     title: "認識金錢 | 新臺幣教學",
@@ -82,10 +79,6 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
     faq: [
       {
-        q: "孩子幾歲可以開始學金錢？",
-        a: "大約 4 到 5 歲就能開始認識硬幣的外觀與名稱，6 到 7 歲進入等值換算與簡單加總，8 歲以後再練付款與找零。重點是先認得錢，再開始算錢。",
-      },
-      {
         q: "六個單元應該照什麼順序玩？",
         a: "建議依序是：認識新臺幣 → 金錢等值換算 → 計算金錢價值 → 付款 → 購物 → 找零。前面兩關建立概念，後面四關才是運算與應用。",
       },
@@ -104,7 +97,6 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   "coin-introduction": {
-    ageRange: "4-8",
     teaches: "辨認新臺幣硬幣與紙鈔的面額、外觀與等值關係",
     curriculum: ["N-1-4"],
     title: "認識新臺幣 | 幣值學習",
@@ -125,14 +117,9 @@ export const pageSeo: Record<string, PageSeo> = {
         q: "怎麼教孩子分辨不同面額的硬幣？",
         a: "先從顏色與大小切入最有效：50 元是金色且最大，10 元次之，5 元再小一點，1 元最小。等孩子熟悉外觀後，再帶入數字與等值換算。",
       },
-      {
-        q: "這個單元適合幾歲的孩子？",
-        a: "適合 4 到 8 歲、或任何剛開始接觸金錢的學習者，包含特教班的生活技能課程。不需註冊、不需安裝，開啟網頁即可使用。",
-      },
     ],
   },
   "coin-equivalent": {
-    ageRange: "6-9",
     teaches: "同一個金額可以用不同面額組合，理解錢幣之間的等值換算",
     curriculum: ["N-1-4"],
     title: "金錢等值換算 | 認識金錢",
@@ -156,7 +143,6 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   "coin-value": {
-    ageRange: "6-9",
     teaches: "把多枚硬幣與紙鈔加總，算出總金額",
     curriculum: ["N-1-4", "N-2-5"],
     title: "計算金錢價值 | 硬幣計算遊戲",
@@ -180,7 +166,6 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   "coin-pay": {
-    ageRange: "6-9",
     teaches: "依照應付金額挑選正確的硬幣與紙鈔付款",
     curriculum: ["N-1-4", "N-2-5"],
     title: "學習付款 | 認識金錢",
@@ -204,7 +189,6 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   "coin-buy": {
-    ageRange: "7-10",
     teaches: "完整的購物流程：挑選商品、計算總價、付款",
     curriculum: ["N-2-3", "N-2-5"],
     title: "學習購物 | 認識金錢",
@@ -228,7 +212,6 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   "coin-change": {
-    ageRange: "7-10",
     teaches: "用減法算出應找的差額，並用硬幣與紙鈔湊出找零",
     curriculum: ["N-2-3", "N-2-5"],
     title: "學習找零 | 認識金錢",
@@ -252,7 +235,6 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   "clock-current-time": {
-    ageRange: "6-9",
     teaches: "看時針與分針的位置，讀出幾時幾分",
     curriculum: ["N-2-13"],
     title: "學習讀時鐘 | 時間遊戲",
@@ -270,17 +252,12 @@ export const pageSeo: Record<string, PageSeo> = {
         a: "因為時針是連續移動的。例如 3 點 30 分時，時針會停在 3 和 4 的正中間，這時候仍然讀作 3 點半，不是 4 點。",
       },
       {
-        q: "幾歲開始學看時鐘比較合適？",
-        a: "一般從 6 到 7 歲、也就是國小一年級開始接觸整點與半點，二年級再學到分鐘的判讀。可以先只練整點，熟了再加入分針。",
-      },
-      {
         q: "這個時鐘可以自由調整時間嗎？",
         a: "可以，直接用手指或滑鼠拖動指針，或使用下方滑桿。適合老師在課堂上示範特定時間點。",
       },
     ],
   },
   memory: {
-    ageRange: "4-12",
     teaches: "翻牌配對，練習詞彙、圖像與概念的對應關係，同時訓練記憶力",
     title: "翻牌配對 | 自訂卡片記憶遊戲",
     description:
@@ -307,7 +284,6 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   wheel: {
-    ageRange: "6-12",
     teaches: "課堂隨機選人、分組與抽題的工具",
     title: "抽籤轉盤 | 隨機選人、分組、抽題",
     description:
@@ -334,7 +310,6 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   draw: {
-    ageRange: "6-12",
     teaches: "課堂隨機選人、分組與抽題的工具",
     title: "抽籤 | 轉盤與抽籤機，課堂隨機選人",
     description:
@@ -357,7 +332,6 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   lottery: {
-    ageRange: "6-12",
     teaches: "課堂隨機選人、分組與抽題的工具，順便看見機率就是物理",
     title: "抽籤機 | 乒乓球隨機選人、分組、抽題",
     description:
@@ -392,7 +366,6 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   monopoly: {
-    ageRange: "8-12",
     teaches: "答題複習各科知識，並在買地與付過路費中練習金錢加減",
     title: "教學大富翁 | 題庫桌遊",
     description:

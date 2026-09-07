@@ -19,7 +19,6 @@ export function UnitSeoSection({
   const seo = pageSeo[pageKey];
   if (!seo) return null;
   const others = Object.entries(pages).filter(([k]) => k !== pageKey);
-  const [ageFrom, ageTo] = seo.ageRange.split("-");
 
   return (
     <section className="border-ink/10 mx-auto mt-20 w-full max-w-4xl border-t pt-12">
@@ -35,12 +34,6 @@ export function UnitSeoSection({
             {seo.intro}
           </p>
           <dl className="text-muted-foreground mt-4 flex flex-col gap-1.5 text-sm leading-[1.8]">
-            <div className="flex gap-2">
-              <dt className="text-ink-soft shrink-0 font-semibold">適合年齡</dt>
-              <dd>
-                {ageFrom} 到 {ageTo} 歲
-              </dd>
-            </div>
             <div className="flex gap-2">
               <dt className="text-ink-soft shrink-0 font-semibold">練習重點</dt>
               <dd>{seo.teaches}</dd>

@@ -91,7 +91,6 @@ export function getLearningResourceSchema(pageKey: string): JsonLdSchema {
     "educationalLevel": "elementary",
     "educationalUse": "instruction",
     "learningResourceType": "interactive game",
-    "typicalAgeRange": seo?.ageRange,
     "teaches": seo?.teaches,
     // 課綱對應：頁面上 UnitSeoSection 有渲染同一份，schema 才不是空口說
     "educationalAlignment": seo?.curriculum?.map((code) => ({
