@@ -6,7 +6,7 @@ import { MAX_ENTRIES, parseEntries, validateEntries } from "@/lib/wheel/game";
 import { useWheelStore } from "@/lib/wheel/store";
 
 export function SetupPanel({ onStart }: { onStart: () => void }) {
-  const { text, setText, removeOnPick, setRemoveOnPick, sound, setSound, restoreStarter } =
+  const { text, setText, removeOnPick, setRemoveOnPick, restoreStarter } =
     useWheelStore();
   const entries = parseEntries(text);
   const error = validateEntries(entries);
@@ -46,13 +46,6 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
             </span>
           </span>
           <Switch id="wheel-remove" checked={removeOnPick} onCheckedChange={setRemoveOnPick} />
-        </label>
-        <label htmlFor="wheel-sound" className="flex items-center justify-between gap-4">
-          <span>
-            <span className="text-ink block font-semibold">音效</span>
-            <span className="text-muted-foreground text-sm">轉盤停下時播放</span>
-          </span>
-          <Switch id="wheel-sound" checked={sound} onCheckedChange={setSound} />
         </label>
       </div>
 

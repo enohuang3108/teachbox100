@@ -4,6 +4,7 @@ import { pages, type PageWithKey } from "@/app/pages.config";
 import { RefreshCWIcon } from "@/components/atoms/ani-icons/refresh-cw";
 import { SettingsGearIcon } from "@/components/atoms/ani-icons/settings-gear";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
+import { SoundToggleButton } from "@/components/atoms/SoundToggleButton";
 import { Button } from "@/components/atoms/shadcn/button";
 import { TooltipProvider } from "@/components/atoms/shadcn/tooltip";
 import { SetupPanel } from "@/components/lottery/SetupPanel";
@@ -35,7 +36,7 @@ export default function LotteryPage() {
   useEffect(() => setHydrated(true), []);
 
   const [mode, setMode] = useState<"setup" | "play">("setup");
-  const { text, sound, autoClose } = useLotteryStore();
+  const { text, sound, setSound, autoClose } = useLotteryStore();
   const [round, setRound] = useState(0);
   const [picked, setPicked] = useState<string[]>([]);
   const [blind, setBlind] = useState(false);
@@ -77,6 +78,7 @@ export default function LotteryPage() {
           <SettingsGearIcon className={ACTION_BTN} size={20} />
         </button>
       </Tip>
+      <SoundToggleButton on={sound} onToggle={setSound} />
       <Tip label="全螢幕">
         <FullscreenButton targetId={GAME_STAGE_ID} className={ACTION_BTN} />
       </Tip>

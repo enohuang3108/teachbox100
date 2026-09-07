@@ -4,6 +4,7 @@ import { pages, type PageWithKey } from "@/app/pages.config";
 import { RefreshCWIcon } from "@/components/atoms/ani-icons/refresh-cw";
 import { SettingsGearIcon } from "@/components/atoms/ani-icons/settings-gear";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
+import { SoundToggleButton } from "@/components/atoms/SoundToggleButton";
 import { Button } from "@/components/atoms/shadcn/button";
 import {
   Dialog,
@@ -30,7 +31,7 @@ export default function WheelPage() {
   useEffect(() => setHydrated(true), []);
 
   const [mode, setMode] = useState<"setup" | "play">("setup");
-  const { text, removeOnPick, sound } = useWheelStore();
+  const { text, removeOnPick, sound, setSound } = useWheelStore();
   const entries = parseEntries(text);
   const wheel = useWheel(entries, sound);
 
@@ -56,6 +57,7 @@ export default function WheelPage() {
           <SettingsGearIcon className={ACTION_BTN} size={20} />
         </button>
       </Tip>
+      <SoundToggleButton on={sound} onToggle={setSound} />
       <Tip label="全螢幕">
         <FullscreenButton targetId={GAME_STAGE_ID} className={ACTION_BTN} />
       </Tip>

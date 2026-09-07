@@ -6,7 +6,7 @@ import { MAX_ENTRIES, parseEntries, validateEntries } from "@/lib/lottery/game";
 import { useLotteryStore } from "@/lib/lottery/store";
 
 export function SetupPanel({ onStart }: { onStart: () => void }) {
-  const { text, setText, sound, setSound, autoClose, setAutoClose, restoreStarter } = useLotteryStore();
+  const { text, setText, autoClose, setAutoClose, restoreStarter } = useLotteryStore();
   const entries = parseEntries(text);
   const error = validateEntries(entries);
 
@@ -41,13 +41,6 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
             </span>
           </span>
           <Switch id="lottery-autoclose" checked={autoClose} onCheckedChange={setAutoClose} />
-        </label>
-        <label htmlFor="lottery-sound" className="flex items-center justify-between gap-4">
-          <span>
-            <span className="text-ink block font-semibold">音效</span>
-            <span className="text-muted-foreground text-sm">球飛出來時播放</span>
-          </span>
-          <Switch id="lottery-sound" checked={sound} onCheckedChange={setSound} />
         </label>
       </div>
 
