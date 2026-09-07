@@ -146,14 +146,16 @@ export default function Home() {
             </div>
 
             <ul className="flex flex-wrap justify-center gap-2.5">
-              <li className={FACT_BADGE}>適合 4–12 歲</li>
-              {/* 中間這顆點得下去，會開安裝說明 */}
+              <li className={FACT_BADGE}>完全免費</li>
+              {/* 這顆點得下去，會開安裝說明 */}
               <li>
                 <OfflineGuideDialog />
               </li>
-              <li className={FACT_BADGE}>完全免費</li>
-              <li>
-                <Link href="/about" className={FACT_BADGE}>
+              <li className={FACT_BADGE}>
+                <Link
+                  href="/about"
+                  className="underline decoration-2 underline-offset-4"
+                >
                   關於我們
                 </Link>
               </li>
