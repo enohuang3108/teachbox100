@@ -4,6 +4,7 @@ import Image from "next/image";
 const CATEGORIES = {
   money: { label: "金錢", color: "var(--brand-yellow)" },
   time: { label: "時間", color: "var(--brand-blue)" },
+  draw: { label: "抽籤", color: "var(--brand-red)" },
   mixed: { label: "綜合", color: "var(--brand-green)" },
 } as const;
 
@@ -11,6 +12,7 @@ const CATEGORIES = {
 const categoryOf = (link: string) => {
   if (link.startsWith("/coin")) return CATEGORIES.money;
   if (link.startsWith("/clock")) return CATEGORIES.time;
+  if (link.startsWith("/draw")) return CATEGORIES.draw;
   return CATEGORIES.mixed;
 };
 

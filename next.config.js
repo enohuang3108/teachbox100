@@ -60,6 +60,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
+    // 帶 "use client" 的 barrel 沒辦法 tree-shake，這個設定會改寫成逐檔匯入
+    optimizePackageImports: ["@animateicons/react"],
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
@@ -71,6 +73,13 @@ const nextConfig = {
     // 沒辦法 precache（precache 認的是 /images/xxx.webp 這種固定路徑）。
     // 關掉最佳化換來「圖片能離線」，對教室情境划算。
     unoptimized: true,
+  },
+  // 轉盤與抽籤機搬進 /draw 底下；舊網址已被收錄，301 過去
+  async redirects() {
+    return [
+      { source: "/wheel", destination: "/draw/wheel", permanent: true },
+      { source: "/lottery", destination: "/draw/lottery", permanent: true },
+    ];
   },
   async rewrites() {
     // Only enable PostHog rewrites if we have a PostHog key

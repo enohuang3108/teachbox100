@@ -91,11 +91,18 @@ const pagesConfig = {
     guide: "老師先設定配對組再開始，孩子翻兩張牌找出一對。",
   },
   wheel: {
-    path: "/wheel",
+    path: "/draw/wheel",
     imageSrc: "/images/covers/warm/wheel-v2.webp",
     blurDataURL: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afbv4QEBAf/9/gYSEOng1/n18x8rN/nw8AH58eP9/PwGEBDpo7QC53cFDPP07XAYdW0E8vT1iY2XNjUlQt+L8t3n/A0KAPeD/+42Av39/LK1ut7b2Qsn8QMODf0CEA4sAAH+8wL//gAuKSNMVlzw3Wz+9vIKE+XozFEAFD4B9/Di9vb3AwQDCAoO/+zBAPz0ABNDAAMDerRNsypywywAAAAASUVORK5CYII=",
     title: "抽籤轉盤",
     description: "貼上名單或選項，轉一下隨機抽出一個，點名、分組、選題目都好用。",
+  },
+  lottery: {
+    path: "/draw/lottery",
+    imageSrc: "/images/covers/warm/lottery.webp",
+    blurDataURL: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Affv4f7+/woJAwAFB/nmywQPJgEFDvr5+AL//gAKDAm0x+ORqMgCDRnn6e3h4uQCAwIEBwkEvs/ne5mn3t8M6Ow01rqWNjg4e3t0AgIHA77T6ggPKSoU9tHg7Pn7/PLy8/8BAQL++P5WNxXu7O3N6+1dRiJOSUULCgkA/f0B+O/jAAD8zs/S/PsALCojAQQHAwMDBwYFp+FHEotb85QAAAAASUVORK5CYII=",
+    title: "抽籤機",
+    description: "名單變成一顆顆乒乓球在玻璃球裡亂飛，被吹出來的那顆就是答案。",
   },
   monopoly: {
     path: "/monopoly",
@@ -125,6 +132,11 @@ export interface Hub {
  * 直接展開，hub 混進去會跟教材卡片長得一樣，語意也不對。
  */
 export const hubs: Record<string, Hub> = {
+  draw: {
+    path: "/draw",
+    title: "抽籤",
+    children: ["wheel", "lottery"],
+  },
   coin: {
     path: "/coin",
     title: "認識金錢",
