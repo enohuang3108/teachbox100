@@ -1,5 +1,6 @@
 "use client";
 
+import { isImageFace } from "@/lib/memory/game";
 import { cn } from "@/lib/utils";
 import { CARD_BACK_INK, CardBack } from "./CardBack";
 
@@ -25,7 +26,7 @@ export function MemoryCard({
       type="button"
       onClick={onSelect}
       disabled={disabled}
-      aria-label={faceUp ? face : "蓋著的牌"}
+      aria-label={faceUp ? (isImageFace(face) ? "圖片牌" : face) : "蓋著的牌"}
       aria-pressed={faceUp}
       data-face-up={faceUp}
       data-matched={matched}
@@ -40,12 +41,18 @@ export function MemoryCard({
         </span>
         <span
           className={cn(
-            "memory-face memory-face-front bg-paper border-ink/10 text-ink font-display flex items-center justify-center border px-2 text-center font-extrabold break-words",
+            "memory-face memory-face-front bg-paper border-ink/10 text-ink font-display flex items-center justify-center overflow-hidden border px-2 text-center font-extrabold break-words",
             face.length > 8 ? "text-base sm:text-lg" : "text-xl sm:text-2xl",
             matched && "border-brand-green/60 border-2",
           )}
         >
-          {face}
+          {isImageFace(face) ? (
+            // 縮圖是 data URL，不走 next/image
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={face} alt="" className="h-full w-full object-contain p-1" />
+          ) : (
+            face
+          )}
         </span>
       </span>
     </button>

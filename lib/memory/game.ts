@@ -42,6 +42,12 @@ export const newGroup = (): PairGroup => ({
   sameFace: false,
 });
 
+/** 卡面可以是文字或圖片；圖片存成 data URL（SetupPanel 已先縮到縮圖大小） */
+export const isImageFace = (face: string): boolean => face.startsWith("data:image/");
+
+/** 錯誤訊息用：圖片的 data URL 不能直接印出來 */
+const faceLabel = (face: string) => (isImageFace(face) ? "同一張圖片" : `「${face}」`);
+
 /** 同卡面的組別第二張永遠跟著第一張 */
 export const effectiveFaces = (g: PairGroup): [string, string] =>
   g.sameFace ? [g.faces[0], g.faces[0]] : g.faces;
@@ -60,13 +66,13 @@ export function validateDeck(deck: PairGroup[]): DeckValidation {
     const own = g.sameFace ? [faces[0]] : faces;
     for (const face of own) {
       if (face === "") return setError(i, "卡面不能空白");
-      if (Array.from(face).length > MAX_FACE_LENGTH)
+      if (!isImageFace(face) && Array.from(face).length > MAX_FACE_LENGTH)
         return setError(i, `卡面最多 ${MAX_FACE_LENGTH} 個字`);
       const at = seen.get(face);
       if (at !== undefined) {
         return setError(
           i,
-          at === i ? "兩張卡面相同，請改成「同卡面」" : `「${face}」已在配對 ${at + 1} 用過`,
+          at === i ? "兩張卡面相同，請改成「同卡面」" : `${faceLabel(face)}已在配對 ${at + 1} 用過`,
         );
       }
       seen.set(face, i);

@@ -9,6 +9,7 @@ import {
   validateDeck,
   type PairGroup,
 } from "./game";
+import { fullscreenColumnsFor } from "./layout";
 
 const group = (i: number, over: Partial<PairGroup> = {}): PairGroup => ({
   id: `g${i}`,
@@ -24,6 +25,14 @@ describe("validateDeck", () => {
     expect(validateDeck(deckOf(MAX_GROUPS)).ok).toBe(true);
     expect(validateDeck(deckOf(MIN_GROUPS - 1)).ok).toBe(false);
     expect(validateDeck(deckOf(MAX_GROUPS + 1)).ok).toBe(false);
+  });
+
+  it("圖片卡面不受字數限制，但同一張圖不能用兩次", () => {
+    const img = "data:image/webp;base64," + "A".repeat(500);
+    expect(validateDeck([group(0, { faces: [img, "乙0"] }), group(1)]).ok).toBe(true);
+    const dup = validateDeck([group(0, { faces: [img, "乙0"] }), group(1, { faces: [img, "乙1"] })]);
+    expect(dup.ok).toBe(false);
+    expect(dup.groups[1]).toContain("同一張圖片");
   });
 
   it("預設牌組合法", () => {
@@ -87,5 +96,17 @@ describe("isMatch", () => {
   });
   it("自己不能跟自己配", () => {
     expect(isMatch(a, a)).toBe(false);
+  });
+});
+
+describe("fullscreenColumnsFor", () => {
+  it("寬螢幕 14 張牌鋪成 7 欄 2 列，牌比 4 欄 4 列大", () => {
+    expect(fullscreenColumnsFor(14, 1920, 1000)).toBe(7);
+  });
+  it("直式螢幕欄數變少", () => {
+    expect(fullscreenColumnsFor(14, 800, 1400)).toBeLessThan(fullscreenColumnsFor(14, 1400, 800));
+  });
+  it("8 張牌在 16:9 一排放完", () => {
+    expect(fullscreenColumnsFor(8, 1920, 1080)).toBe(4);
   });
 });

@@ -14,19 +14,19 @@ import {
   MAX_FACE_LENGTH,
   MAX_GROUPS,
   MIN_GROUPS,
+  isImageFace,
   newGroup,
   validateDeck,
   type PairGroup,
 } from "@/lib/memory/game";
+import { fileToFace } from "@/lib/memory/image";
 import { useMemoryStore } from "@/lib/memory/store";
 import { cn } from "@/lib/utils";
-import { GripVertical, Plus, Trash2 } from "lucide-react";
-import { Reorder, useDragControls } from "motion/react";
+import { ImagePlus, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 
 export function SetupPanel({ onStart }: { onStart: () => void }) {
-  const { deck, setDeck, preview, setPreview, sound, setSound, restoreStarter } =
-    useMemoryStore();
+  const { deck, setDeck, preview, setPreview, restoreStarter } = useMemoryStore();
   const [confirmRestore, setConfirmRestore] = useState(false);
   const validation = validateDeck(deck);
 
@@ -35,12 +35,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <Reorder.Group
-        axis="y"
-        values={deck}
-        onReorder={setDeck}
-        className="flex flex-col gap-3"
-      >
+      <ul className="flex flex-col gap-3">
         {deck.map((g, i) => (
           <GroupRow
             key={g.id}
@@ -52,7 +47,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
             onRemove={() => setDeck(deck.filter((_, j) => j !== i))}
           />
         ))}
-      </Reorder.Group>
+      </ul>
 
       <div className="flex flex-wrap items-center gap-3">
         <Button
@@ -83,13 +78,6 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
             </span>
           </span>
           <Switch id="memory-preview" checked={preview} onCheckedChange={setPreview} />
-        </label>
-        <label htmlFor="memory-sound" className="flex items-center justify-between gap-4">
-          <span>
-            <span className="text-ink block font-semibold">音效</span>
-            <span className="text-muted-foreground text-sm">配對成功或失敗時播放</span>
-          </span>
-          <Switch id="memory-sound" checked={sound} onCheckedChange={setSound} />
         </label>
       </div>
 
@@ -143,8 +131,6 @@ function GroupRow({
   onChange: (p: Partial<PairGroup>) => void;
   onRemove: () => void;
 }) {
-  // 只有把手能拖，不然拖拉會跟輸入框搶指標
-  const controls = useDragControls();
   const setFace = (k: 0 | 1, v: string) => {
     const faces: [string, string] = [...group.faces];
     faces[k] = v;
@@ -152,41 +138,26 @@ function GroupRow({
   };
 
   return (
-    <Reorder.Item
-      value={group}
-      dragListener={false}
-      dragControls={controls}
+    <li
       className={cn(
         "bg-paper-warm border-ink/10 rounded-2xl border p-3",
         error && "border-brand-red/50",
       )}
     >
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          aria-label={`拖曳排序配對 ${index + 1}`}
-          onPointerDown={(e) => controls.start(e)}
-          className="text-ink-soft hover:text-ink cursor-grab touch-none rounded-md p-1 active:cursor-grabbing"
-        >
-          <GripVertical className="size-5" />
-        </button>
         <span className="text-ink w-14 shrink-0 text-sm font-bold">配對 {index + 1}</span>
-        <Input
-          value={group.faces[0]}
-          maxLength={MAX_FACE_LENGTH}
+        <FaceInput
+          label={`配對 ${index + 1} 卡面 1`}
           placeholder="卡面 1"
-          aria-label={`配對 ${index + 1} 卡面 1`}
-          onChange={(e) => setFace(0, e.target.value)}
-          className="bg-paper min-w-0 flex-1"
+          value={group.faces[0]}
+          onChange={(v) => setFace(0, v)}
         />
-        <Input
-          value={group.sameFace ? group.faces[0] : group.faces[1]}
-          maxLength={MAX_FACE_LENGTH}
+        <FaceInput
+          label={`配對 ${index + 1} 卡面 2`}
           placeholder="卡面 2"
-          aria-label={`配對 ${index + 1} 卡面 2`}
+          value={group.sameFace ? group.faces[0] : group.faces[1]}
           disabled={group.sameFace}
-          onChange={(e) => setFace(1, e.target.value)}
-          className="bg-paper min-w-0 flex-1"
+          onChange={(v) => setFace(1, v)}
         />
         <button
           type="button"
@@ -198,7 +169,7 @@ function GroupRow({
           <Trash2 className="size-5" />
         </button>
       </div>
-      <div className="mt-2 flex items-center justify-between gap-3 pl-9">
+      <div className="mt-2 flex items-center justify-between gap-3 pl-16">
         <label htmlFor={`same-${group.id}`} className="text-muted-foreground flex items-center gap-2 text-sm">
           <Switch
             id={`same-${group.id}`}
@@ -210,6 +181,85 @@ function GroupRow({
         </label>
         {error && <span className="text-brand-red text-sm">{error}</span>}
       </div>
-    </Reorder.Item>
+    </li>
+  );
+}
+
+/** 一個卡面：文字輸入框加一顆「換成圖片」；已是圖片就顯示縮圖加一顆「清掉」 */
+function FaceInput({
+  label,
+  placeholder,
+  value,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  placeholder: string;
+  value: string;
+  disabled?: boolean;
+  onChange: (v: string) => void;
+}) {
+  const [failed, setFailed] = useState(false);
+  const pick = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      onChange(await fileToFace(file));
+      setFailed(false);
+    } catch {
+      setFailed(true);
+    }
+  };
+
+  if (isImageFace(value)) {
+    return (
+      <div className="bg-paper border-ink/10 relative flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md border px-2">
+        {/* 縮圖已是 data URL，不走 next/image */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={value} alt={label} className="h-7 w-7 rounded object-cover" />
+        <span className="text-muted-foreground truncate text-sm">圖片</span>
+        {!disabled && (
+          <button
+            type="button"
+            aria-label={`${label} 清除圖片`}
+            onClick={() => onChange("")}
+            className="text-ink-soft hover:text-ink ml-auto rounded-md p-1"
+          >
+            <X className="size-4" />
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-w-0 flex-1 items-center gap-1">
+      <Input
+        value={value}
+        maxLength={MAX_FACE_LENGTH}
+        placeholder={placeholder}
+        aria-label={label}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value)}
+        className={cn("bg-paper min-w-0 flex-1", failed && "border-brand-red/50")}
+      />
+      {!disabled && (
+        <label
+          aria-label={`${label} 改用圖片`}
+          title="改用圖片"
+          className="text-ink-soft hover:text-ink cursor-pointer rounded-md p-1"
+        >
+          <ImagePlus className="size-5" />
+          <input
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            onChange={(e) => {
+              void pick(e.target.files?.[0]);
+              e.target.value = "";
+            }}
+          />
+        </label>
+      )}
+    </div>
   );
 }

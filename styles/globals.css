@@ -618,6 +618,12 @@
   will-change: transform;
 }
 
+/* 翻翻配對全螢幕：牌要鋪滿投影畫面，不吃 64rem 的上限，欄數由頁面依螢幕比例算 */
+#game-stage[data-unit="memory"]:fullscreen > [data-stage-inner] {
+  max-width: none;
+  padding-inline: 2rem;
+}
+
 /* 頁首底色：紙色淡到透明。直線漸層在中段會看到一條折痕，
    這裡用 ease-out 的多段停靠點模擬平滑曲線（scrim gradient）。 */
 .header-scrim {

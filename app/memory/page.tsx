@@ -4,6 +4,7 @@ import { pages, type PageWithKey } from "@/app/pages.config";
 import { RefreshCWIcon } from "@/components/atoms/ani-icons/refresh-cw";
 import { SettingsGearIcon } from "@/components/atoms/ani-icons/settings-gear";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
+import { SoundToggleButton } from "@/components/atoms/SoundToggleButton";
 import { Button } from "@/components/atoms/shadcn/button";
 import {
   Dialog,
@@ -18,13 +19,26 @@ import { SetupPanel } from "@/components/memory/SetupPanel";
 import { useMemoryGame } from "@/components/memory/useMemoryGame";
 import { ACTION_BTN, Tip } from "@/components/templates/GamePageTemplate";
 import { GAME_STAGE_ID, PageTemplate } from "@/components/templates/PageTemplate";
+import { columnsFor, fullscreenColumnsFor } from "@/lib/memory/layout";
 import { useMemoryStore } from "@/lib/memory/store";
 import { useEffect, useState } from "react";
 
-/** 讓盤面盡量排成整齊的矩形：先取 √n，除不盡就再多一欄試試，上限 6 */
-function columnsFor(n: number) {
-  const base = Math.min(6, Math.max(2, Math.ceil(Math.sqrt(n))));
-  return n % base !== 0 && base < 6 && n % (base + 1) === 0 ? base + 1 : base;
+/** 全螢幕時盤面改成鋪滿整個畫面，欄數依螢幕比例重算 */
+function useFullscreenViewport(stageId: string) {
+  const [size, setSize] = useState<{ w: number; h: number } | null>(null);
+  useEffect(() => {
+    const sync = () => {
+      const on = document.fullscreenElement?.id === stageId;
+      setSize(on ? { w: window.innerWidth, h: window.innerHeight } : null);
+    };
+    document.addEventListener("fullscreenchange", sync);
+    window.addEventListener("resize", sync);
+    return () => {
+      document.removeEventListener("fullscreenchange", sync);
+      window.removeEventListener("resize", sync);
+    };
+  }, [stageId]);
+  return size;
 }
 
 const pageInfo: PageWithKey = { ...pages.memory, key: "memory" };
@@ -36,7 +50,7 @@ export default function MemoryPage() {
 
   const [mode, setMode] = useState<"setup" | "play">("setup");
   const [confirmLeave, setConfirmLeave] = useState(false);
-  const { deck, preview, sound } = useMemoryStore();
+  const { deck, preview, sound, setSound } = useMemoryStore();
   const game = useMemoryGame(deck, preview, sound);
 
   const begin = () => {
@@ -48,7 +62,11 @@ export default function MemoryPage() {
     else setMode("setup");
   };
 
-  const cols = columnsFor(game.cards.length);
+  const fs = useFullscreenViewport(GAME_STAGE_ID);
+  // 全螢幕：扣掉上方計數列與邊距後，挑讓牌最大的欄數
+  const cols = fs
+    ? fullscreenColumnsFor(game.cards.length, fs.w - 64, fs.h - 120)
+    : columnsFor(game.cards.length);
 
   const actions = mode === "play" && (
     <TooltipProvider delayDuration={350} skipDelayDuration={600}>
@@ -60,6 +78,7 @@ export default function MemoryPage() {
           <SettingsGearIcon className={ACTION_BTN} size={20} />
         </button>
       </Tip>
+      <SoundToggleButton on={sound} onToggle={setSound} />
       <Tip label="全螢幕">
         <FullscreenButton targetId={GAME_STAGE_ID} className={ACTION_BTN} />
       </Tip>
@@ -67,7 +86,11 @@ export default function MemoryPage() {
   );
 
   return (
-    <PageTemplate page={pageInfo} actions={actions || undefined}>
+    <PageTemplate
+      // 引導語只在設定頁有用，開始玩之後只剩盤面
+      page={{ ...pageInfo, guide: mode === "setup" ? pageInfo.guide : undefined }}
+      actions={actions || undefined}
+    >
       {!hydrated ? null : mode === "setup" ? (
         <SetupPanel onStart={begin} />
       ) : (
@@ -89,13 +112,18 @@ export default function MemoryPage() {
             </div>
           )}
 
-          {/* 2–6 欄：桌機依牌數挑欄數，手機 min(44%) 壓成 2 欄；牌多就往下捲 */}
+          {/* 2–6 欄：桌機依牌數挑欄數，手機 min(44%) 壓成 2 欄；牌多就往下捲。
+              全螢幕則不限寬、欄數固定，讓牌鋪滿投影畫面 */}
           <div
             className="mx-auto grid w-full gap-3 sm:gap-4"
-            style={{
-              maxWidth: `${cols * 12}rem`,
-              gridTemplateColumns: `repeat(auto-fit, minmax(min(44%, max(8.5rem, calc(100% / ${cols} - 1rem))), 1fr))`,
-            }}
+            style={
+              fs
+                ? { gridTemplateColumns: `repeat(${cols}, 1fr)` }
+                : {
+                    maxWidth: `${cols * 12}rem`,
+                    gridTemplateColumns: `repeat(auto-fit, minmax(min(44%, max(8.5rem, calc(100% / ${cols} - 1rem))), 1fr))`,
+                  }
+            }
           >
             {game.cards.map((card) => {
               const matched = game.matched.has(card.groupId);
