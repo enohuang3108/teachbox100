@@ -31,7 +31,8 @@ export const PageTitleBar = ({
   siblings: Sibling[];
   actions?: React.ReactNode;
 }) => (
-  <header className="border-ink/8 bg-paper sticky top-0 z-40 flex min-h-16 w-full items-center gap-3 border-b px-3 pt-[env(safe-area-inset-top)] sm:px-5 md:border-0 md:bg-transparent">
+  // 底色從紙色淡到透明：內容捲到下面時不會被一條硬邊切開
+  <header className="header-scrim sticky top-0 z-40 flex min-h-16 w-full items-center gap-3 px-3 pt-[env(safe-area-inset-top)] sm:px-5">
     <Link
       href="/"
       prefetch={true}

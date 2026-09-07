@@ -617,3 +617,22 @@
   transition-timing-function: cubic-bezier(0.17, 0.02, 0.06, 1);
   will-change: transform;
 }
+
+/* 頁首底色：紙色淡到透明。直線漸層在中段會看到一條折痕，
+   這裡用 ease-out 的多段停靠點模擬平滑曲線（scrim gradient）。 */
+.header-scrim {
+  background: linear-gradient(
+    to bottom,
+    var(--paper) 0%,
+    color-mix(in srgb, var(--paper) 73.8%, transparent) 19%,
+    color-mix(in srgb, var(--paper) 54.1%, transparent) 34%,
+    color-mix(in srgb, var(--paper) 38.2%, transparent) 47%,
+    color-mix(in srgb, var(--paper) 27.8%, transparent) 56.5%,
+    color-mix(in srgb, var(--paper) 19.4%, transparent) 65%,
+    color-mix(in srgb, var(--paper) 12.6%, transparent) 73%,
+    color-mix(in srgb, var(--paper) 7.5%, transparent) 80.2%,
+    color-mix(in srgb, var(--paper) 4.2%, transparent) 86.8%,
+    color-mix(in srgb, var(--paper) 2.1%, transparent) 93%,
+    transparent 100%
+  );
+}
