@@ -152,6 +152,11 @@ export default function Home() {
                 <OfflineGuideDialog />
               </li>
               <li className={FACT_BADGE}>完全免費</li>
+              <li>
+                <Link href="/about" className={FACT_BADGE}>
+                  關於我們
+                </Link>
+              </li>
             </ul>
           </div>
         </footer>

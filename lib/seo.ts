@@ -6,6 +6,14 @@ export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://teachbox100.com";
 
 /**
+ * 只有正式站可以進索引。beta 站與 Vercel preview 內容跟正式站幾乎一樣，
+ * 放著不擋會被當成第二個網站，分掉正式站的排名訊號。
+ */
+export const INDEXABLE =
+  SITE_URL === "https://teachbox100.com" &&
+  process.env.VERCEL_ENV !== "preview";
+
+/**
  * 產生單一教材頁的 metadata。
  * 站名後綴由 root layout 的 title.template 補上，這裡只給頁面自己的標題。
  * og:image 由各路由的 opengraph-image.tsx 自動掛上，不需在此指定。

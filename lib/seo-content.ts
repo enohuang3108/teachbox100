@@ -11,9 +11,31 @@ export interface FaqItem {
   a: string;
 }
 
+/**
+ * 108 課綱數學領域「學習內容」代碼與原文（來源：國教院數學領綱、均一教育平台）。
+ * 老師搜尋會直接打代碼，所以頁面上要看得到，schema 的 educationalAlignment 也對這份。
+ */
+export const CURRICULUM = {
+  "N-1-4":
+    "解題：1元、5元、10元、50元、100元。以操作活動為主。數錢、換錢、找錢。",
+  "N-2-3":
+    "解題：加減應用問題。加數、被加數、減數、被減數未知之應用解題。連結加與減的關係。",
+  "N-2-5": "解題：100元、500元、1000元。以操作活動為主。含已學過的小面額。",
+  "N-2-13":
+    "鐘面的時刻：以操作活動為主。以鐘面時針與分針之位置認識「幾時幾分」。含兩整時時刻之間的整時點數。",
+} as const;
+
+export type CurriculumCode = keyof typeof CURRICULUM;
+
 export interface PageSeo {
   /** 不含站名後綴，站名由 root layout 的 title.template 補上 */
   title: string;
+  /** schema.org typicalAgeRange 格式，例如 "6-9" */
+  ageRange: string;
+  /** 一句話說這個單元教什麼，給 schema.org teaches 與 AI 摘要用 */
+  teaches: string;
+  /** 對應的 108 課綱學習內容；跨科工具類單元沒有 */
+  curriculum?: CurriculumCode[];
   description: string;
   /** 渲染在遊戲下方的說明段落，同時是 AI 引用的主要來源 */
   intro: string;
@@ -24,6 +46,9 @@ export interface PageSeo {
 
 export const pageSeo: Record<string, PageSeo> = {
   coin: {
+    ageRange: "4-9",
+    teaches: "認識新臺幣面額、等值換算、計算總額、付款、購物與找零",
+    curriculum: ["N-1-4", "N-2-5"],
     title: "認識金錢 | 新臺幣教學",
     description:
       "六個免費的新臺幣互動教材，從認識面額、等值換算、計算價值到付款、購物與找零，依照建議順序循序練習，適合國小學童、家長與特教班生活數學課程。",
@@ -79,6 +104,9 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   "coin-introduction": {
+    ageRange: "4-8",
+    teaches: "辨認新臺幣硬幣與紙鈔的面額、外觀與等值關係",
+    curriculum: ["N-1-4"],
     title: "認識新臺幣 | 幣值學習",
     description:
       "認識新臺幣的各種面額、外觀特徵與等值換算，透過互動式介面輕鬆學習 1 元、5 元、10 元、50 元硬幣與 100 元至 2000 元紙鈔的特色與使用方式。",
@@ -104,6 +132,9 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   "coin-equivalent": {
+    ageRange: "6-9",
+    teaches: "同一個金額可以用不同面額組合，理解錢幣之間的等值換算",
+    curriculum: ["N-1-4"],
     title: "金錢等值換算 | 認識金錢",
     description:
       "台灣互動式金錢等值換算練習，用硬幣與鈔票實際操作「一個 10 元等於兩個 5 元」的關係，建立換算概念，為找零與付款打好基礎。",
@@ -125,6 +156,9 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   "coin-value": {
+    ageRange: "6-9",
+    teaches: "把多枚硬幣與紙鈔加總，算出總金額",
+    curriculum: ["N-1-4", "N-2-5"],
     title: "計算金錢價值 | 硬幣計算遊戲",
     description:
       "台灣互動式硬幣計算遊戲，幫助學童學習計算不同幣值總和，提供多種答題模式與難度設定，透過趣味遊戲培養金錢數學能力與計算思維。",
@@ -146,6 +180,9 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   "coin-pay": {
+    ageRange: "6-9",
+    teaches: "依照應付金額挑選正確的硬幣與紙鈔付款",
+    curriculum: ["N-1-4", "N-2-5"],
     title: "學習付款 | 認識金錢",
     description:
       "台灣互動式付款模擬遊戲，幫助孩子學習如何使用硬幣正確付款，培養實際生活中的金錢使用能力，透過互動練習提升計算與決策能力。",
@@ -167,6 +204,9 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   "coin-buy": {
+    ageRange: "7-10",
+    teaches: "完整的購物流程：挑選商品、計算總價、付款",
+    curriculum: ["N-2-3", "N-2-5"],
     title: "學習購物 | 認識金錢",
     description:
       "台灣互動式購物模擬遊戲，讓孩子挑選商品、計算總金額並完成付款，一次串起加總、比價與金錢決策，培養真實生活中的購物能力。",
@@ -188,6 +228,9 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   "coin-change": {
+    ageRange: "7-10",
+    teaches: "用減法算出應找的差額，並用硬幣與紙鈔湊出找零",
+    curriculum: ["N-2-3", "N-2-5"],
     title: "學習找零 | 認識金錢",
     description:
       "台灣互動式找零遊戲，模擬商店找零情境，培養兒童正確計算與找零能力，透過實用趣味的方式學習基礎數學與金錢運用，提升生活中的實用技能。",
@@ -209,6 +252,9 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   "clock-current-time": {
+    ageRange: "6-9",
+    teaches: "看時針與分針的位置，讀出幾時幾分",
+    curriculum: ["N-2-13"],
     title: "學習讀時鐘 | 時間遊戲",
     description:
       "台灣互動式時鐘學習遊戲，幫助孩子輕鬆學會看時間、認識時針與分針，透過趣味互動練習正確判讀時間，適合學齡前、低年級學童或特教生。",
@@ -234,6 +280,8 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   memory: {
+    ageRange: "4-12",
+    teaches: "翻牌配對，練習詞彙、圖像與概念的對應關係，同時訓練記憶力",
     title: "翻翻配對 | 自訂卡片記憶遊戲",
     description:
       "免費的翻翻配對互動教材，老師自訂 2 到 15 組配對卡片，中英對照或同圖辨識都可以，孩子翻牌找出一對，適合國小低年級、英語啟蒙與特教班詞彙練習。",
@@ -259,6 +307,8 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   wheel: {
+    ageRange: "6-12",
+    teaches: "課堂隨機選人、分組與抽題的工具",
     title: "抽籤轉盤 | 隨機選人、分組、抽題",
     description:
       "免費的課堂抽籤轉盤，貼上班級名單或任何選項，一鍵轉出隨機結果，可設定抽過的自動移除，適合國小點名、分組、抽題與獎勵活動，免註冊、可離線使用。",
@@ -284,6 +334,8 @@ export const pageSeo: Record<string, PageSeo> = {
     ],
   },
   monopoly: {
+    ageRange: "8-12",
+    teaches: "答題複習各科知識，並在買地與付過路費中練習金錢加減",
     title: "教學大富翁 | 題庫桌遊",
     description:
       "可匯入自訂題庫的教學大富翁，答對才能買地、蓋房，搭配機會命運卡、擲骰問答與互動關卡，最多 20 人同樂，讓學生在遊戲中複習各科知識。",

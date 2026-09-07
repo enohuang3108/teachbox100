@@ -1,5 +1,5 @@
 import { appInfo } from "@/app/pages.config";
-import { SITE_URL } from "@/lib/seo";
+import { INDEXABLE, SITE_URL } from "@/lib/seo";
 import { Background } from "@/components/atoms/Background";
 import { AppChrome } from "@/components/molecules/AppChrome";
 import { BackScrollRestoration } from "@/components/atoms/BackScrollRestoration";
@@ -30,6 +30,15 @@ const notoSansTC = Noto_Sans_TC({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  // robots.txt 只擋爬取，已經進索引的頁要靠 noindex 才會被移除
+  robots: INDEXABLE ? undefined : { index: false, follow: false },
+  // Search Console 與 Bing Webmaster 的 meta 驗證碼，沒設就不輸出
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    other: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+      ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION }
+      : undefined,
+  },
   manifest: "/manifest.json",
   // 分頁列用白底圓角磚：透明背景的 icon 在深色瀏覽器介面上會整個消失
   icons: {

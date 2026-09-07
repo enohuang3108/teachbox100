@@ -1,6 +1,6 @@
 import { appInfo, hubs, pages } from "@/app/pages.config";
 import { SITE_URL } from "@/lib/seo";
-import { pageSeo } from "@/lib/seo-content";
+import { CURRICULUM, pageSeo } from "@/lib/seo-content";
 
 /**
  * /llms.txt — 給 AI 檢索爬蟲的純文字站點摘要。
@@ -24,11 +24,21 @@ export function GET(): Response {
       ?.map((step, i) => `${i + 1}. ${pages[step.pageKey].title} — ${step.note}`)
       .join("\n");
 
+    const facts = [
+      `- 適合年齡：${seo.ageRange.replace("-", " 到 ")} 歲`,
+      `- 練習重點：${seo.teaches}`,
+      ...(seo.curriculum
+        ? [`- 108 課綱學習內容：${seo.curriculum.map((c) => `${c} ${CURRICULUM[c]}`).join("；")}`]
+        : []),
+    ].join("\n");
+
     return [
       `## ${page.title}`,
       `URL: ${SITE_URL}${page.path}`,
       "",
       seo.intro,
+      "",
+      facts,
       ...(steps ? ["", "### 建議的學習順序", steps] : []),
       "",
       "### 常見問題",
@@ -45,6 +55,10 @@ export function GET(): Response {
     "內容以繁體中文（台灣）撰寫，面向學齡前至國小學生、家長與教師，也適用於特教班的生活技能課程。",
     "",
     ...sections,
+    "",
+    "## 關於",
+    `URL: ${SITE_URL}/about`,
+    "由 Eno Huang 獨立開發與維護，2025 年 4 月上線，原始碼公開於 GitHub。",
     "",
     "## 授權",
     "內容可自由引用，引用時請標註來源網址。",

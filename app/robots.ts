@@ -1,7 +1,11 @@
-import { SITE_URL } from "@/lib/seo";
+import { INDEXABLE, SITE_URL } from "@/lib/seo";
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
+  if (!INDEXABLE) {
+    return { rules: [{ userAgent: "*", disallow: "/" }] };
+  }
+
   return {
     rules: [
       {

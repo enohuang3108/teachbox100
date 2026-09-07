@@ -3,7 +3,7 @@
  */
 
 import { appInfo, hubOf, hubs, pages } from "@/app/pages.config";
-import { pageSeo } from "@/lib/seo-content";
+import { CURRICULUM, pageSeo } from "@/lib/seo-content";
 
 export interface JsonLdSchema {
   "@context": string;
@@ -12,6 +12,12 @@ export interface JsonLdSchema {
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://teachbox100.com";
+
+export const AUTHOR = {
+  name: "Eno Huang",
+  github: "https://github.com/enohuang3108",
+};
+export const REPO_URL = "https://github.com/enohuang3108/teachbox100";
 
 const COMMON_AUDIENCE = [
   {
@@ -57,7 +63,10 @@ export function getOrganizationSchema(): JsonLdSchema {
     "url": BASE_URL,
     "logo": `${BASE_URL}${appInfo.imageSrc}`,
     "inLanguage": "zh-TW",
-    "audience": COMMON_AUDIENCE
+    "audience": COMMON_AUDIENCE,
+    "foundingDate": "2025-04",
+    "founder": { "@type": "Person", "name": AUTHOR.name, "url": AUTHOR.github },
+    "sameAs": [REPO_URL],
   };
 }
 
@@ -66,6 +75,7 @@ export function getOrganizationSchema(): JsonLdSchema {
  */
 export function getLearningResourceSchema(pageKey: string): JsonLdSchema {
   const page = pages[pageKey];
+  const seo = pageSeo[pageKey];
   if (!page) return {} as JsonLdSchema;
 
   return {
@@ -76,10 +86,23 @@ export function getLearningResourceSchema(pageKey: string): JsonLdSchema {
     "url": `${BASE_URL}${page.path}`,
     "image": `${BASE_URL}${page.imageSrc}`,
     "inLanguage": "zh-TW",
+    "isAccessibleForFree": true,
+    "interactivityType": "active",
     "educationalLevel": "elementary",
     "educationalUse": "instruction",
     "learningResourceType": "interactive game",
+    "typicalAgeRange": seo?.ageRange,
+    "teaches": seo?.teaches,
+    // 課綱對應：頁面上 UnitSeoSection 有渲染同一份，schema 才不是空口說
+    "educationalAlignment": seo?.curriculum?.map((code) => ({
+      "@type": "AlignmentObject",
+      "alignmentType": "educationalSubject",
+      "educationalFramework": "十二年國民基本教育課程綱要 數學領域（108 課綱）",
+      "targetName": code,
+      "targetDescription": CURRICULUM[code],
+    })),
     "audience": COMMON_AUDIENCE,
+    "publisher": { "@type": "EducationalOrganization", "name": "TeachBox100", "url": BASE_URL },
     "isPartOf": {
       "@type": "WebSite",
       "name": appInfo.title,
