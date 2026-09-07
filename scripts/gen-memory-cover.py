@@ -31,10 +31,14 @@ COLORS, flat, exactly these: cream #F8F0E3 · black #0D0D0D · red #CB2108 · gr
 Barkley's black and the card backs' black are the SAME #0D0D0D.
 
 SCENE — a memory card matching game:
-Six rounded playing cards laid on the paper in a 3x2 grid, cards fairly large.
-Four cards are FACE DOWN: each is one solid black #0D0D0D rounded rectangle with two big cream eyes knocked out of it (two cream ovals, each with a black round pupil sitting DEAD CENTRE in the oval, so the card looks STRAIGHT AT THE VIEWER — not glancing up or sideways), like Barkley's own eyes; the card back is a little Barkley face.
-Two cards are FACE UP: each is a cream #F8F0E3 rounded rectangle showing ONE solid red #CB2108 apple (a chunky round apple shape with a small solid green #2C5427 leaf, a tiny cream highlight dot knocked out is allowed). The two apples are identical: a matched pair.
-Barkley STANDS UPRIGHT on his hind legs at the right side, using his front paws as hands: his right paw reaches out and is flipping over a card; his left paw is planted ON HIS HIP, elbow bent out to the side, so a clear triangle of cream paper shows between that arm and his torso. No paw is raised above his shoulder. Pure black silhouette with two cream eyes, fully inside the frame, not cropped. Keep a clear gap between his arms and torso; his paws must read clearly on top of the cream card.
+A 3x2 grid of rounded playing cards on the paper, cards fairly large. Barkley has LIFTED one card
+out of the grid and holds it in his paw, so the grid has FIVE cards and ONE EMPTY GAP: the slot the
+held card came from shows nothing but bare cream paper. There is NO card behind or underneath the
+held card — plain cream paper is visible through that gap.
+Of the five cards still lying in the grid, four are FACE DOWN and one is FACE UP.
+The FACE DOWN cards: each is one solid black #0D0D0D rounded rectangle with two big cream eyes knocked out of it (two cream ovals, each with a black round pupil sitting DEAD CENTRE in the oval, so the card looks STRAIGHT AT THE VIEWER — not glancing up or sideways), like Barkley's own eyes; the card back is a little Barkley face.
+The FACE UP cards — the one lying in the grid and the one Barkley holds — are each a cream #F8F0E3 rounded rectangle showing ONE solid red #CB2108 apple (a chunky round apple shape with a small solid green #2C5427 leaf, a tiny cream highlight dot knocked out is allowed). The two apples are identical: he has just found the matching pair.
+Barkley STANDS UPRIGHT on his hind legs at the right side, using his front paws as hands: his right paw holds up the lifted apple card clear of the table; his left paw is planted ON HIS HIP, elbow bent out to the side, so a clear triangle of cream paper shows between that arm and his torso. No paw is raised above his shoulder. Pure black silhouette with two cream eyes, fully inside the frame, not cropped. Keep a clear gap between his arms and torso; his paws must read clearly on top of the cream card.
 
 CANVAS: landscape, cream #F8F0E3 background edge to edge, generous empty paper around everything. NO TEXT anywhere."""
 
