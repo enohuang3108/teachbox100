@@ -61,7 +61,7 @@ export default function CoinGameAnswerSection({
 
   return (
     <GameAnswerSection
-      question={"硬幣總共有多少元?"}
+      question={"硬幣總共是多少元？"}
       hasAnswer={userAnswer !== ""}
       isCorrect={isCorrect}
       correctFeedback={getRandomFeedback("coingameCorrect", totalValue)}

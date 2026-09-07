@@ -112,7 +112,7 @@ export default function CoinEquivalentPage() {
             {/* 選擇硬幣區 */}
             <div className="mb-4">
               <h2 className="mb-2 text-center text-lg font-semibold">
-                點選硬幣或鈔票:
+                點選硬幣或鈔票：
               </h2>
               <div className="flex flex-wrap justify-center gap-4">
                 {gameCoins.map((coin) => (

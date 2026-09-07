@@ -47,8 +47,8 @@ export default function OfflinePage() {
 
         <p className="text-gray-600 mb-6">
           {isOnline
-            ? "偵測到網路連線，點選下方按鈕返回首頁"
-            : "無法連接到網路，請檢查您的連線設定"
+            ? "網路回來了，按下面的按鈕回首頁。"
+            : "現在連不上網路，檢查一下 Wi-Fi 或行動網路。"
           }
         </p>
 
@@ -67,8 +67,8 @@ export default function OfflinePage() {
           </button>
         }
         <div className="text-sm text-gray-500 mt-8">
-          <p>部分內容可能來自快取</p>
-          <p>連線恢復後將自動更新</p>
+          <p>看到的內容可能是之前存下來的</p>
+          <p>網路恢復後會自動更新</p>
         </div>
       </div>
     </div>

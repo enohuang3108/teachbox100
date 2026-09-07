@@ -159,7 +159,7 @@ export default function CoinIntroductionPage() {
                       </DialogTrigger>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>點擊查看 {item} 元硬幣詳細資訊</p>
+                      <p>點一下看 {item} 元的介紹</p>
                     </TooltipContent>
                   </Tooltip>
                   <DialogContent className="max-h-[95vh] overflow-hidden p-0 sm:max-w-[1000px] w-[95vw]">
@@ -246,8 +246,8 @@ export default function CoinIntroductionPage() {
                                 <CardContent className="flex items-center justify-center p-4 sm:p-8">
                                   <div className="text-center text-muted-foreground">
                                     <div className="text-2xl sm:text-4xl mb-2">💰</div>
-                                    <p className="text-sm sm:text-base">此面額為最小單位</p>
-                                    <p className="text-xs sm:text-sm">無其他硬幣可等值換算</p>
+                                    <p className="text-sm sm:text-base">這是最小的面額</p>
+                                    <p className="text-xs sm:text-sm">沒有更小的硬幣可以換</p>
                                   </div>
                                 </CardContent>
                               </Card>

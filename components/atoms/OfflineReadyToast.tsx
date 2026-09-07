@@ -93,7 +93,7 @@ export const OfflineReadyToast = () => {
       ].join(" ")}
     >
       <span className="text-paper text-sm font-semibold whitespace-nowrap">
-        資料下載完成，可供離線使用
+        教材存好了，沒網路也能用
       </span>
       <button
         type="button"

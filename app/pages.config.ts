@@ -18,7 +18,7 @@ export const appInfo = {
   imageSrc: "/icons/logo-tile.webp",
   title: "TeachBox100 | 台灣互動式教學平台",
   description:
-    "專為台灣學童設計的互動式學習平台，提供時鐘辨識、金錢計算與實用生活技能遊戲，讓孩子在趣味中學習實用知識，適合學齡前至國小學生或特教生使用。",
+    "給台灣學童的免費互動教材：認識新臺幣、看懂時鐘、算找零，還有老師上課用得到的小遊戲。學齡前到國小、特教班都適合。",
 };
 
 const pagesConfig = {
@@ -28,8 +28,8 @@ const pagesConfig = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afry5v/++gEBAwAEC//otf304Qkmafz7+gL//voB6LAAAwn/+OkB6bIJAtvk17j9AQcEBgYK9hhdCPjf9/sAydkL7+bOoMLea2sGAeXgz9Tj6jEQ4g8SHvYLN0hGRgECArGtowLZ496+xayTv9v4+BoQDwI3NTAGBAEICAgB/vXq+/z78PPvEQoOAQgH2tnc+fn5LzEvbK1MgAx6lX0AAAAASUVORK5CYII=",
     title: "認識新臺幣",
-    description: "認識台灣新臺幣的各種面額、外觀特徵與相等值的硬幣、鈔票。",
-    guide: "點擊任一硬幣或鈔票，了解特色與相等值的金錢。",
+    description: "認識新臺幣每一種硬幣和鈔票長什麼樣子，還有哪些組合價值一樣。",
+    guide: "點一下硬幣或鈔票，看它的特色和可以換成哪些錢。",
   },
   "coin-equivalent": {
     path: "/coin/equivalent",
@@ -37,7 +37,7 @@ const pagesConfig = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afvz5v8A/wQICMnHywMDAisrKAYFBf/+/gIAAQH6+vv/AAKvsbaHi5P9/wAAAP///wACAgQE8fP1uLe92dvb/v37x8rU5ujwBAYFAv3+Bv/twS8X3wQFDOrt9hgAyRUBz/z9BgIBAf3e6gnh8xYMCgQREQ/u8fbJys7/AAAE//z3PURRAAQF0dbpAAD/N0lk/Pv7A//1HVJMKd1FXYIAAAAASUVORK5CYII=",
     title: "金錢等值換算",
-    description: "練習硬幣、鈔票的等值換算。",
+    description: "練習用不同的硬幣、鈔票湊出一樣的金額。",
   },
   "coin-value": {
     path: "/coin/value",
@@ -45,7 +45,7 @@ const pagesConfig = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Af726gAAAAABAfDv8AkJCQQEBAMEAwD//wIAAAD9/f0BBwqlqq9gZm7i4+MBBAb+/v4E////BAUEAPv2tre53+PpFBcZAP79AQEBAv8A//j9Aoyevujt9PDo19bPw/4CAv7+/wQDCgy/uLz69u8xLSgYDffHyMgABA84PD0B/vrt7+vtEhAL1tnf7e/0JCMhCQgEDxEQOfRHae+m0N4AAAAASUVORK5CYII=",
     title: "計算金錢價值",
-    description: "練習計算硬幣、鈔票相加後的總價值。",
+    description: "把一堆硬幣、鈔票加起來，算出總共多少元。",
   },
   "coin-pay": {
     path: "/coin/pay",
@@ -53,7 +53,7 @@ const pagesConfig = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Af3y5QIFBQAIB//19v7+/v///wICAgAAAAIBBgfg4OKHgova3N4DCAkEAwjj7vsBAQACAQEACggIk5me3N3hAAQCgqeP7/PfAQYJBAAEBbC1uPX19svJxczXv4OspxoGEzApMwQA//8uKyk+OzdQUVELDAxhUWgEBgT+9/QB/fTn//7+9PT1Dw8PAAgHAP39AP///vn64LdDPhyNjO4AAAAASUVORK5CYII=",
     title: "付款",
-    description: "模擬商店付款情境，練習如何挑選正確的硬幣進行付款。",
+    description: "看商品價格，從錢包裡挑出剛好的錢付款。",
   },
   "coin-buy": {
     path: "/coin/buy",
@@ -62,7 +62,7 @@ const pagesConfig = {
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afzv4wMGBQADBAD7+wD//wAHBgD8/f37+wQBCAjY19mfp602IR0VBQMDJSYTDAsmJyUA//To7eLXFRUVgn14///19evi8+jd/PDkAgAHB8vO0Pf39iYmJquFe3iHke30/gMFAgIA/v4YFhYxLy4wKyaszd3VzskD/PIAAQMB/PDkAAAA7e7vDAwLCgwMAAAA/fr6AAAAKC5DHUTkuowAAAAASUVORK5CYII=",
     title: "購物",
     description:
-      "模擬商店購物情境，練習如何挑選商品、計算總金額、以及付款的能力。",
+      "自己挑商品、算總價、再付款，把買東西的流程走一遍。",
   },
   "coin-change": {
     path: "/coin/change",
@@ -70,7 +70,7 @@ const pagesConfig = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afry4////wUFA/3/CP3wyQEB/gANNwH+9gL+/v8BBATm5+r49u8G/twBBBEDAf4AAAECBwsL1NLTZWx5rayn8/P0+gUh9fj2AAEBAufq7wwZIw8MCJujsNrqHOnx9bzT6wMGAwQAAAH3+frl5eVZVlY0P1337+AfNBr9+v0B/PPjAwwKtK+3HBoYLC8r/fn6AQECAQEAkqhI3D5W4b8AAAAASUVORK5CYII=",
     title: "找零",
-    description: "模擬商店找零情境，練習計算出正確應該找零的金額。",
+    description: "客人付了錢，算出該找多少，再把零錢湊出來。",
   },
   "clock-current-time": {
     path: "/clock/current-time",
@@ -78,8 +78,8 @@ const pagesConfig = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afzt3fz08wcZHebl5MPEyOvr7CoqJ0FAPQH769r+8vH3DxW7ubr6+/o9OjXf3+L9AAICBBESqMPMZGZu3d/hJyQh2tzfJyYi3NzeAv39AdnV2MPGyxUUEjM7NSgmIwICAgEBAQLKxsawtbqPiX4aGBfTy9AFBQPNz9MpKCYB29PFDAwLCgoJ+/3+ubm98/T1LCsoOzs4ADhLCbN8cRcAAAAASUVORK5CYII=",
     title: "學習讀時鐘",
-    description: "練習辨認時針、分針，並且判讀出正確時間。",
-    guide: "拖動時針或是下方滑桿來調整時間。",
+    description: "分清楚時針和分針，讀出現在幾點幾分。",
+    guide: "拖動指針或下方的滑桿來調整時間。",
   },
   memory: {
     path: "/memory",

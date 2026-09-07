@@ -23,13 +23,13 @@ export default function Home() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(websiteSchema)
+          __html: JSON.stringify(websiteSchema),
         }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(organizationSchema)
+          __html: JSON.stringify(organizationSchema),
         }}
       />
       <main className="relative min-h-screen">
@@ -103,7 +103,10 @@ export default function Home() {
         </section>
 
         {/* 教材 */}
-        <section id="games" className={`${CONTAINER} scroll-mt-8 pb-20 md:pb-28`}>
+        <section
+          id="games"
+          className={`${CONTAINER} scroll-mt-8 pb-20 md:pb-28`}
+        >
           <div className="max-w-2xl">
             <h2 className="font-display text-[clamp(1.5rem,3vw,2rem)] leading-tight font-extrabold tracking-[-0.01em] text-ink">
               選一個有興趣的開始吧！

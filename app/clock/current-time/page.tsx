@@ -107,7 +107,7 @@ export default function CurrentTimePage() {
         checked={is24HourClock}
         onCheckedChange={setIs24HourClock}
       />
-      <Label htmlFor="display-am-pm-clock"> 隨機上下午 (24 小時制)</Label>
+      <Label htmlFor="display-am-pm-clock">隨機上下午（24 小時制）</Label>
     </div>,
     <div key="showMinuteSlider" className="flex items-center space-x-2">
       <Switch
@@ -115,7 +115,7 @@ export default function CurrentTimePage() {
         checked={showMinuteSlider}
         onCheckedChange={setShowMinuteSlider}
       />
-      <Label htmlFor="display-minute-slider">顯示調整時間拉桿</Label>
+      <Label htmlFor="display-minute-slider">顯示時間滑桿</Label>
     </div>
   ]
 

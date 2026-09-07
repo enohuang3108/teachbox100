@@ -106,8 +106,7 @@ export default function RootLayout({
                   需要啟用 JavaScript
                 </h2>
                 <p className="text-gray-600 mb-4">
-                  此應用程式需要 JavaScript
-                  才能正常運作。請在您的瀏覽器設定中啟用 JavaScript。
+                  這個網站需要 JavaScript 才能運作，請到瀏覽器設定裡開啟。
                 </p>
                 <p className="text-sm text-gray-500">
                   This application requires JavaScript to function properly.

@@ -66,7 +66,7 @@ export const ShoppingCart = ({
           <div className="flex flex-col items-center justify-center h-full min-h-[180px] text-gray-500">
             <ShoppingCartIcon className="w-18 h-18 mb-4" />
             <p className="text-center text-sm leading-relaxed max-w-xs">
-              拖拉商品到這裡或點擊商品添加到購物車
+              把商品拖到這裡，或點一下商品放進購物車
             </p>
           </div>
         ) : (

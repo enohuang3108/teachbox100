@@ -113,7 +113,7 @@ export default function CoinChangePage() {
       </div>
 
       <GameAnswerSection
-        question={"請挑選應找零的金額"}
+        question={"請挑出要找給客人的錢"}
         hasAnswer={hasAnswer}
         isCorrect={isCorrect}
         correctFeedback={getRandomFeedback("correctchange")}
@@ -137,7 +137,7 @@ export default function CoinChangePage() {
         <div>
           <div className="mb-6 flex min-h-[80px] w-full flex-col items-center rounded-md border bg-gray-100 p-4">
             <h2 className="mb-2 self-start text-lg font-semibold">
-              已選找零硬幣:
+              已選找零硬幣：
             </h2>
             <SelectedCoinsList
               selectedCoins={selectedCoins}
@@ -148,7 +148,7 @@ export default function CoinChangePage() {
           {/* 選擇硬幣區 */}
           <div className="mb-4">
             <h2 className="mb-2 text-center text-lg font-semibold">
-              選擇找零硬幣:
+              選擇找零硬幣：
             </h2>
             <div className="flex flex-wrap justify-center gap-4">
               {GAME_COINS.map((coin) => {

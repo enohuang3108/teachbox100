@@ -213,7 +213,7 @@ export default function SelectCoinsPage() {
       {/* 付錢：全螢幕橫向時整組移到右欄 */}
       <div>
         <GameAnswerSection
-          question="請選擇正確的金額來付款"
+          question="請挑選正確的金額來付款"
           hasAnswer={hasAnswer}
           isCorrect={isCorrect}
           correctFeedback={getRandomFeedback("correctpay")}

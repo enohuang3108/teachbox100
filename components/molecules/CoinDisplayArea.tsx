@@ -41,7 +41,7 @@ export default function CoinDisplayArea({
               <div className="w-4 h-4 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '150ms' }}></div>
               <div className="w-4 h-4 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '300ms' }}></div>
             </div>
-            <p className="text-sm font-medium">{isGeneratingNewCoins ? '準備硬幣中...' : '沒有硬幣可顯示'}</p>
+            <p className="text-sm font-medium">{isGeneratingNewCoins ? '準備硬幣中…' : '沒有硬幣可顯示'}</p>
             {!isGeneratingNewCoins && <p className="text-xs text-slate-400 mt-1">請檢查遊戲設定</p>}
           </div>
         ) : (

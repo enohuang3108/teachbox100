@@ -151,8 +151,7 @@ export function SetupPanel() {
           </ul>
         )}
         <p className="text-sm text-muted-foreground">
-          想用 AI 快速出題？點「下載範本」後會提供可貼給 ChatGPT／Claude
-          的提示詞。
+          想用 AI 出題？點「下載範本」會附一段提示詞，貼給 ChatGPT 或 Claude 就行。
         </p>
       </section>
 
@@ -162,9 +161,7 @@ export function SetupPanel() {
           <DialogHeader>
             <DialogTitle>用 AI 快速產生題庫</DialogTitle>
             <DialogDescription>
-              已下載 Excel 範本。複製下方提示詞貼給
-              ChatGPT／Claude，並補上你要的主題與題數；AI 會產生 Excel
-              檔，下載後用上方「選擇檔案」匯入即可。
+              範本已經下載。把下面的提示詞複製給 ChatGPT 或 Claude，補上你要的主題和題數，它會做出一份 Excel。下載後用上方「選擇檔案」匯入就好。
             </DialogDescription>
           </DialogHeader>
           <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap rounded-md bg-muted p-3 text-sm">
@@ -191,7 +188,7 @@ export function SetupPanel() {
           }}
         />
         <p className="text-sm text-muted-foreground">
-          點擊頭像可更換角色、點擊色塊可更換代表色
+          點頭像換角色，點色塊換顏色
         </p>
         <div className="grid grid-cols-2 gap-2">
           {Array.from({ length: playerCount }, (_, i) => {
@@ -333,7 +330,7 @@ export function SetupPanel() {
       </Button>
       {!canStart && (
         <p className="text-center text-sm text-muted-foreground">
-          需先匯入題庫並設定至少 2 位玩家
+          先匯入題庫，玩家至少要 2 位
         </p>
       )}
     </div>

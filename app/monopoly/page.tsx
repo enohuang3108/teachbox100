@@ -688,7 +688,7 @@ function ResetConfirm({
         <div className="space-y-1.5 text-center">
           <p className="text-lg font-bold text-stone-800">重新開始遊戲？</p>
           <p className="text-sm text-stone-500">
-            目前的進度將會清除，回到遊戲設定畫面。
+            目前的進度會清掉，回到設定畫面。
           </p>
         </div>
         <div className="flex gap-3">
