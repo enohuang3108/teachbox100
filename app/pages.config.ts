@@ -86,7 +86,7 @@ const pagesConfig = {
     imageSrc: "/images/covers/warm/memory.webp",
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afny57K4wvr6+U5NTf//ALO0swcHB05IPgT8/Pyor7nz+whGIuf/AAGfrt4PB/lKRDsEBgYFDAsJAfn+Ahg8/v79Eg/pDQoNBQQDBP39/hISEQj39nyTtwIECZh8TwEDB/v+AwT///7Z3OHy9PUDAP0DChb+6QEDBg3/FCsEAwMEXVRI/f79AgEC/f79CCxQ/f38Afvv/UdFcv1UWGwAAAAASUVORK5CYII=",
-    title: "翻翻配對",
+    title: "翻牌配對",
     description: "老師自訂 2 到 15 組配對卡，孩子翻牌找出一對，練習詞彙與對應關係。",
     guide: "老師先設定配對組再開始，孩子翻兩張牌找出一對。",
   },

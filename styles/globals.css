@@ -554,7 +554,7 @@
   }
 }
 
-/* 翻翻配對的牌：3D 水平翻面；減少動態時改成淡入淡出 */
+/* 翻牌配對的牌：3D 水平翻面；減少動態時改成淡入淡出 */
 .memory-card {
   perspective: 900px;
 }
@@ -618,7 +618,7 @@
   will-change: transform;
 }
 
-/* 翻翻配對全螢幕：牌要鋪滿投影畫面，不吃 64rem 的上限，欄數由頁面依螢幕比例算 */
+/* 翻牌配對全螢幕：牌要鋪滿投影畫面，不吃 64rem 的上限，欄數由頁面依螢幕比例算 */
 #game-stage[data-unit="memory"]:fullscreen > [data-stage-inner] {
   max-width: none;
   padding-inline: 2rem;

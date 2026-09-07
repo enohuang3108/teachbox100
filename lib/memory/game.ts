@@ -1,4 +1,4 @@
-// 翻翻配對的規則：牌組驗證、洗牌建盤、配對判定。UI 只負責畫與計時。
+// 翻牌配對的規則：牌組驗證、洗牌建盤、配對判定。UI 只負責畫與計時。
 import type { Rng } from "@/lib/monopoly/rng";
 
 export const MIN_GROUPS = 2;
