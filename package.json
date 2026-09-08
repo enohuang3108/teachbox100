@@ -8,6 +8,7 @@
     "build": "next build",
     "seo:snapshot": "node scripts/seo-snapshot.mjs",
     "seo:indexnow": "node scripts/indexnow.mjs",
+    "seo:rank": "python3 scripts/gsc-rank.py --record",
     "start": "next start",
     "lint": "oxlint --type-aware",
     "test": "vitest run",
