@@ -3,6 +3,7 @@
 import { Bell, Music, Volume2 } from "lucide-react";
 import { useState } from "react";
 import { Slider } from "@/components/atoms/shadcn/slider";
+import { ACTION_BTN } from "@/components/templates/GamePageTemplate";
 import { useAudioStore } from "@/lib/monopoly/audio";
 
 function VolumeRow({
@@ -47,9 +48,8 @@ export function AudioSettings() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        title="音量設定"
         aria-label="音量設定"
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-50 text-stone-600 shadow-md ring-1 ring-stone-900/5 transition hover:bg-stone-100 hover:text-stone-900"
+        className={`${ACTION_BTN} flex items-center justify-center`}
       >
         <Volume2 className="h-5 w-5" />
       </button>

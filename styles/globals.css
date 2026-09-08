@@ -559,6 +559,44 @@
   background: var(--background);
 }
 
+/* 棋盤是固定寬的一大塊，不能套 64rem 上限，讓它用自然寬再交給 --fs-scale 等比縮 */
+#game-stage[data-unit="monopoly"]:fullscreen > [data-stage-inner] {
+  width: auto;
+  max-width: none;
+  align-self: center;
+  /* auto margin 的優先權高於 align-self，盒子比容器寬時會算成 0 而靠左排、右邊溢出 */
+  margin-inline: 0;
+  /* 這層帶著 min-h-screen，不歸零的話量到的高度永遠是一整個視窗高，縮放比會算錯 */
+  min-height: 0;
+}
+
+/* 大富翁的頂列在 stage 子樹裡（時間、事件紀錄全螢幕也要看得到）。
+   stage 是置中的 flex，頂列要釘在上緣，棋盤再往下讓一個頂列的高度。 */
+#game-stage[data-unit="monopoly"]:fullscreen {
+  padding-top: 4rem;
+}
+
+#game-stage[data-unit="monopoly"]:fullscreen > header {
+  position: fixed;
+  inset: 0 0 auto 0;
+}
+
+/* 全螢幕是投影用的，頂列只留時間、事件紀錄、離開全螢幕；
+   logo、麵包屑與標了 data-fs-hide 的鈕（回饋、音量、重新開始）都收起來 */
+#game-stage[data-unit="monopoly"]:fullscreen > header > a,
+#game-stage[data-unit="monopoly"]:fullscreen > header > nav,
+#game-stage[data-unit="monopoly"]:fullscreen [data-fs-hide] {
+  display: none;
+}
+
+/* 大富翁的漸層底是頁面自己畫的，全螢幕接手 background 後要補回來 */
+#game-stage[data-unit="monopoly"]:fullscreen {
+  background:
+    radial-gradient(circle at 22% 12%, oklch(0.95 0.05 85), transparent 55%),
+    radial-gradient(circle at 88% 90%, oklch(0.94 0.04 160), transparent 55%),
+    #fbf6ec;
+}
+
 #game-stage:fullscreen > [data-stage-inner] {
   width: 100%;
   max-width: 64rem;

@@ -3,6 +3,8 @@
 import { motion } from "motion/react";
 import { RotateCcw, ScrollText, Target } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { FullscreenButton } from "@/components/atoms/FullscreenButton";
+import { Button } from "@/components/atoms/shadcn/button";
 import { PlayerAvatar } from "@/components/monopoly/Avatar";
 import { AudioSettings } from "@/components/monopoly/AudioSettings";
 import { BgmController } from "@/components/monopoly/BgmController";
@@ -24,6 +26,12 @@ import { buildCostFor, isProperty } from "@/lib/monopoly/types";
 import { realisticEffect } from "@/lib/helpers/confetti-effects";
 import { useSound } from "@/lib/hooks/useSound";
 import { useMonopolyStore } from "@/lib/monopoly/store";
+import { ACTION_BTN, Tip } from "@/components/templates/GamePageTemplate";
+import { PageTitleBar } from "@/components/molecules/PageTitleBar";
+import { getBreadcrumbTrail } from "@/lib/jsonld";
+import { siblingsOf } from "@/app/pages.config";
+import { GAME_STAGE_ID } from "@/components/templates/PageTemplate";
+import { TooltipProvider } from "@/components/atoms/shadcn/tooltip";
 
 const STEP_MS = 240; // 每走一格的間隔
 const ROLL_MS = 1333; // 擲骰 Lottie 動畫長度（80 幀 @ 60fps）
@@ -348,45 +356,74 @@ export default function MonopolyPage() {
   );
 
   return (
-    <main className="min-h-screen bg-[#fbf6ec] bg-[radial-gradient(circle_at_22%_12%,oklch(0.95_0.05_85),transparent_55%),radial-gradient(circle_at_88%_90%,oklch(0.94_0.04_160),transparent_55%)]">
+    <main
+      id={GAME_STAGE_ID}
+      data-unit="monopoly"
+      className="min-h-screen bg-[#fbf6ec] bg-[radial-gradient(circle_at_22%_12%,oklch(0.95_0.05_85),transparent_55%),radial-gradient(circle_at_88%_90%,oklch(0.94_0.04_160),transparent_55%)]"
+    >
       {/* 右上角控制：事件紀錄 trigger + 重新開始 */}
       <BgmController phase={game.phase} />
 
-      <div className="fixed right-3 top-3 z-40 flex items-center gap-2">
-        {game.phase === "playing" && timeEndsAt !== null && (
-          <Countdown endsAt={timeEndsAt} onExpire={endIfTimeUp} />
-        )}
-        {game.phase === "playing" && ec.type === "moneyGoal" && (
-          <div
-            className="flex h-10 items-center gap-1.5 rounded-full bg-stone-50 px-4 text-sm font-bold tabular-nums text-emerald-700 shadow-md ring-1 ring-stone-900/5"
-            title="目標金額"
-            aria-label="目標金額"
-          >
-            <Target className="h-4 w-4" />${ec.amount.toLocaleString()}
-          </div>
-        )}
-        <AudioSettings />
-        <button
-          type="button"
-          onClick={() => setLogOpen(true)}
-          title="事件紀錄"
-          aria-label="事件紀錄"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-50 text-stone-600 shadow-md ring-1 ring-stone-900/5 transition hover:bg-stone-100 hover:text-stone-900"
-        >
-          <ScrollText className="h-5 w-5" />
-        </button>
-        <button
-          type="button"
-          onClick={() => setResetConfirmOpen(true)}
-          title="重新開始"
-          aria-label="重新開始"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-50 text-stone-600 shadow-md ring-1 ring-stone-900/5 transition hover:bg-stone-100 hover:text-stone-900"
-        >
-          <RotateCcw className="h-5 w-5" />
-        </button>
-      </div>
+      {/* 頂列跟其他教材頁同一份：logo + 麵包屑 + 靠右操作鈕。
+          放在 stage 子樹裡，全螢幕才看得到時間與事件紀錄 */}
+      <PageTitleBar
+        trail={getBreadcrumbTrail("monopoly")}
+        siblings={siblingsOf("monopoly")}
+        actions={
+          <TooltipProvider delayDuration={350} skipDelayDuration={600}>
+            {game.phase === "playing" && timeEndsAt !== null && (
+              <Countdown endsAt={timeEndsAt} onExpire={endIfTimeUp} />
+            )}
+            {game.phase === "playing" && ec.type === "moneyGoal" && (
+              <div
+                className="flex h-9 items-center gap-1.5 rounded-full bg-stone-50 px-3 text-sm font-bold tabular-nums text-emerald-700 ring-1 ring-stone-900/5"
+                title="目標金額"
+                aria-label="目標金額"
+              >
+                <Target className="h-4 w-4" />${ec.amount.toLocaleString()}
+              </div>
+            )}
+            <span data-fs-hide>
+              <AudioSettings />
+            </span>
+            <Tip label="事件紀錄">
+              <button
+                type="button"
+                onClick={() => setLogOpen(true)}
+                aria-label="事件紀錄"
+                className={`${ACTION_BTN} flex items-center justify-center`}
+              >
+                <ScrollText className="h-5 w-5" />
+              </button>
+            </Tip>
+            <Tip label="重新開始">
+              <button
+                type="button"
+                data-fs-hide
+                onClick={() => setResetConfirmOpen(true)}
+                aria-label="重新開始"
+                className={`${ACTION_BTN} flex items-center justify-center`}
+              >
+                <RotateCcw className="h-5 w-5" />
+              </button>
+            </Tip>
+            {/* 放最後一顆：跟其他遊戲頁一樣，全螢幕在最右邊 */}
+            <Tip label="全螢幕">
+              <FullscreenButton
+                targetId={GAME_STAGE_ID}
+                className={ACTION_BTN}
+                hideExitButton
+              />
+            </Tip>
+          </TooltipProvider>
+        }
+      />
 
-      <div className="flex min-h-screen items-center justify-center p-2">
+      {/* 全螢幕時 FullscreenButton 會量這層算縮放比 */}
+      <div
+        data-stage-inner
+        className="flex min-h-[calc(100svh-4rem)] items-center justify-center p-2"
+      >
         <Board
           players={game.players}
           currentIndex={game.currentPlayerIndex}
@@ -565,29 +602,28 @@ function PurchaseConfirm({
       >
         {affordable ? (
           <>
-            <button
-              type="button"
-              className="flex-1 rounded-xl bg-emerald-500 px-4 py-3 font-bold text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-600"
+            <Button
+              className="h-auto flex-1 rounded-xl py-3 text-base font-bold shadow-lg"
               onClick={() => onConfirm(true)}
             >
               {confirmText}
-            </button>
-            <button
-              type="button"
-              className="flex-1 rounded-xl bg-white px-4 py-3 font-medium text-stone-600 shadow-lg transition hover:bg-stone-100"
+            </Button>
+            <Button
+              variant="secondary"
+              className="h-auto flex-1 rounded-xl py-3 text-base shadow-lg"
               onClick={() => onConfirm(false)}
             >
               跳過
-            </button>
+            </Button>
           </>
         ) : (
-          <button
-            type="button"
-            className="flex-1 rounded-xl bg-stone-200 px-4 py-3 font-bold text-stone-500 shadow-lg transition hover:bg-stone-300"
+          <Button
+            variant="secondary"
+            className="h-auto flex-1 rounded-xl py-3 text-base font-bold shadow-lg"
             onClick={() => onConfirm(false)}
           >
             存款不足
-          </button>
+          </Button>
         )}
       </motion.div>
     </div>
@@ -692,20 +728,20 @@ function ResetConfirm({
           </p>
         </div>
         <div className="flex gap-3">
-          <button
-            type="button"
-            className="flex-1 rounded-xl bg-rose-500 px-4 py-2.5 font-bold text-white shadow-md shadow-rose-500/30 transition hover:bg-rose-600"
+          <Button
+            variant="destructive"
+            className="h-auto flex-1 rounded-xl py-2.5 text-base font-bold shadow-md"
             onClick={onConfirm}
           >
             重新開始
-          </button>
-          <button
-            type="button"
-            className="flex-1 rounded-xl border border-stone-200 px-4 py-2.5 font-medium text-stone-500 transition hover:bg-stone-100"
+          </Button>
+          <Button
+            variant="outline"
+            className="h-auto flex-1 rounded-xl py-2.5 text-base"
             onClick={onCancel}
           >
             取消
-          </button>
+          </Button>
         </div>
       </motion.div>
     </div>
@@ -718,14 +754,15 @@ function LogDialog({ log, onClose }: { log: string[]; onClose: () => void }) {
       <div className="flex max-h-[70vh] w-full max-w-md flex-col rounded-2xl bg-stone-50 p-5 shadow-2xl ring-1 ring-stone-900/5">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-base font-bold text-stone-800">事件紀錄</h2>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
             aria-label="關閉"
-            className="rounded-full px-2 text-stone-400 transition hover:text-stone-700"
+            className="text-ink-soft size-8 rounded-full"
           >
             ✕
-          </button>
+          </Button>
         </div>
         <div className="min-h-0 flex-1 space-y-1 overflow-y-auto text-sm leading-snug text-stone-600">
           {log.length === 0 ? (

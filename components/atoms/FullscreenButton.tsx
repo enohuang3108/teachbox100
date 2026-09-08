@@ -18,9 +18,12 @@ import { createPortal } from "react-dom";
 export const FullscreenButton = ({
   targetId,
   className,
+  hideExitButton = false,
 }: {
   targetId: string;
   className?: string;
+  /** stage 子樹裡本來就看得到原本那顆鈕時（大富翁），不用再 portal 一顆離開鈕進去 */
+  hideExitButton?: boolean;
 }) => {
   const [supported, setSupported] = useState(false);
   const [active, setActive] = useState(false);
@@ -29,23 +32,31 @@ export const FullscreenButton = ({
 
   const fit = useCallback(() => {
     const stage = document.getElementById(targetId);
-    const inner = stage?.firstElementChild as HTMLElement | undefined;
+    const inner = stage?.querySelector<HTMLElement>("[data-stage-inner]");
     if (!stage || !inner) return;
     if (document.fullscreenElement !== stage) {
       stage.style.removeProperty("--fs-scale");
       return;
     }
     const cs = getComputedStyle(stage);
-    const avail =
+    const availH =
       stage.clientHeight -
       parseFloat(cs.paddingTop) -
       parseFloat(cs.paddingBottom);
-    // offsetHeight 是版面高度，不受 transform 影響，所以量測不會跟縮放互相追著跑
-    const need = inner.offsetHeight;
-    stage.style.setProperty(
-      "--fs-scale",
-      String(need > 0 ? Math.min(1, avail / need) : 1),
+    const availW =
+      stage.clientWidth -
+      parseFloat(cs.paddingLeft) -
+      parseFloat(cs.paddingRight);
+    // offsetWidth/Height 是版面尺寸，不受 transform 影響，所以量測不會跟縮放互相追著跑。
+    // 寬高各算一個比例取小的：大富翁棋盤是寬度先撐爆，只看高度會被左右裁掉。
+    const needH = inner.offsetHeight;
+    const needW = inner.offsetWidth;
+    const scale = Math.min(
+      1,
+      needH > 0 ? availH / needH : 1,
+      needW > 0 ? availW / needW : 1,
     );
+    stage.style.setProperty("--fs-scale", String(scale));
   }, [targetId]);
 
   useEffect(() => {
@@ -53,7 +64,7 @@ export const FullscreenButton = ({
 
     const stage = document.getElementById(targetId);
     setStageEl(stage);
-    const inner = stage?.firstElementChild;
+    const inner = stage?.querySelector("[data-stage-inner]");
     // 遊戲內容會長高變矮（選了商品、加了硬幣），所以盯著它重算，不是只算一次
     const ro = inner ? new ResizeObserver(fit) : null;
     if (inner) ro?.observe(inner);
@@ -90,6 +101,7 @@ export const FullscreenButton = ({
   return (
     <>
       {active &&
+        !hideExitButton &&
         stageEl &&
         createPortal(
           <button

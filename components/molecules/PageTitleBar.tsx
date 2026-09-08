@@ -90,10 +90,13 @@ export const PageTitleBar = ({
     <div className="ml-auto flex shrink-0 items-center gap-0.5">
       {/* 跟旁邊那排圓鈕同一套 ghost 樣式，不用實心藥丸搶走麵包屑的注意力。
           手機只剩「回饋」：這條列上已經有 logo、麵包屑和最多四顆操作鈕 */}
-      <FeedbackButton
-        label={FEEDBACK_LABEL}
-        className="text-ink-soft hover:text-ink hover:bg-ink/[0.06] h-9 cursor-pointer rounded-full px-3 text-[13px] font-bold transition-[background-color,color,transform] duration-150 ease-out active:scale-[0.97]"
-      />
+      {/* display:contents，只是掛個記號讓大富翁全螢幕時收起來，不影響版面 */}
+      <span data-fs-hide className="contents">
+        <FeedbackButton
+          label={FEEDBACK_LABEL}
+          className="text-ink-soft hover:text-ink hover:bg-ink/[0.06] h-9 cursor-pointer rounded-full px-3 text-[13px] font-bold transition-[background-color,color,transform] duration-150 ease-out active:scale-[0.97]"
+        />
+      </span>
       {actions}
     </div>
   </header>
