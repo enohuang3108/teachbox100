@@ -1,21 +1,6 @@
 import { Link } from "next-view-transitions";
 import Image from "next/image";
 
-const CATEGORIES = {
-  money: { label: "金錢", color: "var(--brand-yellow)" },
-  time: { label: "時間", color: "var(--brand-blue)" },
-  draw: { label: "抽籤", color: "var(--brand-red)" },
-  mixed: { label: "綜合", color: "var(--brand-green)" },
-} as const;
-
-// 從路徑推分類，不必在 pages.config 多養一個欄位
-const categoryOf = (link: string) => {
-  if (link.startsWith("/coin")) return CATEGORIES.money;
-  if (link.startsWith("/clock")) return CATEGORIES.time;
-  if (link.startsWith("/draw")) return CATEGORIES.draw;
-  return CATEGORIES.mixed;
-};
-
 type CardProps = {
   imageSrc: string;
   blurDataURL: string;
@@ -39,8 +24,6 @@ export const ImageCard = ({
   index = 0,
   button,
 }: CardProps) => {
-  const category = categoryOf(link);
-
   return (
     <Link
       href={link}
@@ -67,16 +50,6 @@ export const ImageCard = ({
         <p className="mt-1.5 text-sm leading-[1.75] text-muted-foreground">
           {cardDescription}
         </p>
-
-        <div className="mt-4 flex items-center gap-2 pt-1">
-          <span
-            className="size-2 rounded-full"
-            style={{ backgroundColor: category.color }}
-          />
-          <span className="text-sm font-semibold tracking-wide text-muted-foreground">
-            {category.label}
-          </span>
-        </div>
       </div>
 
       {button && <div className="px-2 pb-2">{button}</div>}
