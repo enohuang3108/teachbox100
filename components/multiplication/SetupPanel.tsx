@@ -33,13 +33,14 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
             </button>
           ))}
         </div>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={setAllTables}
-          className="text-muted-foreground hover:text-ink self-start rounded-md px-2 py-1 text-sm"
+          className="text-muted-foreground hover:text-ink self-start"
         >
           全部選起來
-        </button>
+        </Button>
       </fieldset>
 
       <fieldset className="flex flex-col gap-3">

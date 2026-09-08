@@ -3,6 +3,7 @@
 import { Minus, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/atoms/shadcn/button";
 import { cn } from "@/lib/utils";
 
 export default function NumberFlow() {
@@ -166,22 +167,26 @@ export default function NumberFlow() {
         </div>
 
         <div className="flex flex-col gap-1">
-          <button
+          <Button
+            variant="outline"
+            size="icon"
             onClick={add}
             disabled={value >= max}
             aria-label="Increase number"
-            className="border-light-200 bg-light-50 dark:border-dark-200 dark:bg-dark-50 relative w-auto cursor-pointer overflow-hidden rounded-md border p-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="size-auto p-2 disabled:cursor-not-allowed"
           >
             <Plus className="h-3 w-3" />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
             onClick={subtract}
             disabled={value <= min}
             aria-label="Decrease number"
-            className="border-light-200 bg-light-50 dark:border-dark-200 dark:bg-dark-50 relative w-auto cursor-pointer overflow-hidden rounded-md border p-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="size-auto p-2 disabled:cursor-not-allowed"
           >
             <Minus className="h-3 w-3" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

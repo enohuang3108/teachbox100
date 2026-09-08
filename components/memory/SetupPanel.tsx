@@ -159,15 +159,16 @@ function GroupRow({
           disabled={group.sameFace}
           onChange={(v) => setFace(1, v)}
         />
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon"
           aria-label={`刪除配對 ${index + 1}`}
           disabled={!canRemove}
           onClick={onRemove}
-          className="text-ink-soft hover:text-brand-red rounded-md p-1 disabled:opacity-30"
+          className="text-ink-soft hover:text-brand-red size-9 disabled:opacity-30"
         >
           <Trash2 className="size-5" />
-        </button>
+        </Button>
       </div>
       <div className="mt-2 flex items-center justify-between gap-3 pl-16">
         <label htmlFor={`same-${group.id}`} className="text-muted-foreground flex items-center gap-2 text-sm">
@@ -218,14 +219,15 @@ function FaceInput({
         <img src={value} alt={label} className="h-7 w-7 rounded object-cover" />
         <span className="text-muted-foreground truncate text-sm">圖片</span>
         {!disabled && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             aria-label={`${label} 清除圖片`}
             onClick={() => onChange("")}
-            className="text-ink-soft hover:text-ink ml-auto rounded-md p-1"
+            className="text-ink-soft hover:text-ink ml-auto size-7"
           >
             <X className="size-4" />
-          </button>
+          </Button>
         )}
       </div>
     );

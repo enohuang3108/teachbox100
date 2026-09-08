@@ -2,7 +2,7 @@
 
 import { pages, type PageWithKey } from "@/app/pages.config";
 import { RefreshCWIcon } from "@/components/atoms/ani-icons/refresh-cw";
-import { SettingsGearIcon } from "@/components/atoms/ani-icons/settings-gear";
+import { SettingsButton } from "@/components/atoms/SettingsButton";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
 import { SoundToggleButton } from "@/components/atoms/SoundToggleButton";
 import { Button } from "@/components/atoms/shadcn/button";
@@ -73,11 +73,7 @@ export default function MemoryPage() {
       <Tip label="再玩一次">
         <RefreshCWIcon className={ACTION_BTN} size={20} aria-label="再玩一次" onClick={game.start} />
       </Tip>
-      <Tip label="設定">
-        <button type="button" aria-label="設定" onClick={openSettings} className="rounded-full">
-          <SettingsGearIcon className={ACTION_BTN} size={20} />
-        </button>
-      </Tip>
+      <SettingsButton onClick={openSettings} />
       <SoundToggleButton on={sound} onToggle={setSound} />
       <Tip label="全螢幕">
         <FullscreenButton targetId={GAME_STAGE_ID} className={ACTION_BTN} />

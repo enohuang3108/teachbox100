@@ -1,7 +1,7 @@
 "use client";
 
 import { pages, type PageWithKey } from "@/app/pages.config";
-import { SettingsGearIcon } from "@/components/atoms/ani-icons/settings-gear";
+import { SettingsButton } from "@/components/atoms/SettingsButton";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
 import { TooltipProvider } from "@/components/atoms/shadcn/tooltip";
 import { SoundToggleButton } from "@/components/atoms/SoundToggleButton";
@@ -30,16 +30,7 @@ export default function MultiplicationPage() {
 
   const actions = mode === "play" && (
     <TooltipProvider delayDuration={350} skipDelayDuration={600}>
-      <Tip label="設定">
-        <button
-          type="button"
-          aria-label="設定"
-          onClick={() => setMode("setup")}
-          className="rounded-full"
-        >
-          <SettingsGearIcon className={ACTION_BTN} size={20} />
-        </button>
-      </Tip>
+      <SettingsButton onClick={() => setMode("setup")} />
       <SoundToggleButton on={sound} onToggle={setSound} />
       <Tip label="全螢幕">
         <FullscreenButton targetId={GAME_STAGE_ID} className={ACTION_BTN} />

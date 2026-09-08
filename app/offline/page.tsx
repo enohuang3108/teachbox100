@@ -1,6 +1,8 @@
 "use client"
 import { useEffect, useState } from "react"
 
+import { Button } from "@/components/atoms/shadcn/button"
+
 export default function OfflinePage() {
   const [isOnline, setIsOnline] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
@@ -52,20 +54,15 @@ export default function OfflinePage() {
           }
         </p>
 
-        {isOnline ?
-          <button
-            onClick={() => window.location.href = "/"}
-            className="cursor-pointer bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg transition-colors mb-4"
-          >
-          返回首頁
-          </button> :
-          <button
-            onClick={handleRetry}
-            className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg transition-colors mb-4"
-          >
-          重試 {retryCount > 0 && `(${retryCount})`}
-          </button>
-        }
+        {isOnline ? (
+          <Button className="mb-4" onClick={() => (window.location.href = "/")}>
+            返回首頁
+          </Button>
+        ) : (
+          <Button className="mb-4" onClick={handleRetry}>
+            重試 {retryCount > 0 && `(${retryCount})`}
+          </Button>
+        )}
         <div className="text-sm text-gray-500 mt-8">
           <p>看到的內容可能是之前存下來的</p>
           <p>網路恢復後會自動更新</p>

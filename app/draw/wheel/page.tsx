@@ -2,7 +2,7 @@
 
 import { pages, type PageWithKey } from "@/app/pages.config";
 import { RefreshCWIcon } from "@/components/atoms/ani-icons/refresh-cw";
-import { SettingsGearIcon } from "@/components/atoms/ani-icons/settings-gear";
+import { SettingsButton } from "@/components/atoms/SettingsButton";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
 import { SoundToggleButton } from "@/components/atoms/SoundToggleButton";
 import { Button } from "@/components/atoms/shadcn/button";
@@ -47,16 +47,7 @@ export default function WheelPage() {
           onClick={wheel.restoreAll}
         />
       </Tip>
-      <Tip label="設定">
-        <button
-          type="button"
-          aria-label="設定"
-          onClick={() => setMode("setup")}
-          className="rounded-full"
-        >
-          <SettingsGearIcon className={ACTION_BTN} size={20} />
-        </button>
-      </Tip>
+      <SettingsButton onClick={() => setMode("setup")} />
       <SoundToggleButton on={sound} onToggle={setSound} />
       <Tip label="全螢幕">
         <FullscreenButton targetId={GAME_STAGE_ID} className={ACTION_BTN} />

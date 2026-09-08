@@ -26,9 +26,14 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
           <span>
             {entries.length} / {MAX_ENTRIES} 個
           </span>
-          <button type="button" onClick={restoreStarter} className="hover:text-ink rounded-md px-2 py-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={restoreStarter}
+            className="text-muted-foreground hover:text-ink"
+          >
             恢復預設名單
-          </button>
+          </Button>
         </span>
       </label>
 
