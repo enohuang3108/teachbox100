@@ -28,7 +28,7 @@ function Party({
       <motion.div
         className="text-3xl font-extrabold tabular-nums"
         style={{
-          color: gain ? "#34d399" : "#f87171",
+          color: gain ? "#6fa24e" : "#e4522f",
           textShadow: "0 2px 10px rgba(0,0,0,0.55)",
         }}
         initial={{ y: 10, opacity: 0, scale: 0.8 }}
@@ -78,7 +78,7 @@ export function MoneyCutscene({
         <div className="flex flex-col items-center gap-2">
           <SpotlightAvatar player={p} haloSize={240} grayscale={jail} name />
           <motion.div
-            className="text-3xl font-extrabold text-amber-300"
+            className="text-3xl font-extrabold text-brand-yellow"
             style={{ textShadow: "0 2px 10px rgba(0,0,0,0.55)" }}
             initial={{ y: 10, opacity: 0, scale: 0.8 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -141,7 +141,7 @@ export function MoneyCutscene({
       {event && (
         <motion.div
           key="money-backdrop"
-          className="fixed inset-0 z-40 bg-stone-950/55 backdrop-blur-sm"
+          className="fixed inset-0 z-40 bg-ink/60 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -158,7 +158,7 @@ export function MoneyCutscene({
           transition={{ type: "spring", stiffness: 320, damping: 24 }}
         >
           <div
-            className="mb-6 max-w-[34rem] text-center text-base font-bold tracking-wide text-white/85"
+            className="mb-6 max-w-[34rem] text-center text-base font-bold tracking-wide text-paper/85"
             style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
           >
             {label}

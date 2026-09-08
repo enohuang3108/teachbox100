@@ -30,7 +30,7 @@ export function ColorPicker({
           type="button"
           title="點擊更換顏色"
           aria-label="更換顏色"
-          className="h-7 w-7 shrink-0 rounded-full border-2 border-white shadow ring-1 ring-zinc-300 transition hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+          className="h-7 w-7 shrink-0 rounded-full border-2 border-paper ring-1 ring-ink/15 transition-transform duration-150 ease-out hover:-translate-y-[2px] active:scale-[0.95] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
           style={{ backgroundColor: value }}
         />
       </DialogTrigger>
@@ -53,17 +53,19 @@ export function ColorPicker({
                 }}
                 title={taken ? "已被選走" : color}
                 style={{ backgroundColor: color }}
-                className={`relative h-10 w-10 overflow-hidden rounded-full transition ${
+                className={`relative h-10 w-10 overflow-hidden rounded-full transition-transform duration-150 ease-out ${
                   selected
-                    ? "ring-2 ring-zinc-900 ring-offset-2"
-                    : "ring-1 ring-zinc-200"
+                    ? "ring-2 ring-ink ring-offset-2"
+                    : "ring-1 ring-ink/10"
                 } ${
-                  taken ? "cursor-not-allowed opacity-60" : "hover:scale-110"
+                  taken
+                    ? "cursor-not-allowed opacity-60"
+                    : "hover:-translate-y-[2px] active:scale-[0.95]"
                 }`}
               >
                 {taken && (
                   // 斜線禁用標記：旋轉一條跨對角的細線，由圓形 overflow 裁切
-                  <span className="pointer-events-none absolute left-1/2 top-1/2 h-[2.5px] w-[150%] -translate-x-1/2 -translate-y-1/2 rotate-45 bg-white/90 shadow-[0_0_0_1px_rgba(0,0,0,0.35)]" />
+                  <span className="pointer-events-none absolute left-1/2 top-1/2 h-[2.5px] w-[150%] -translate-x-1/2 -translate-y-1/2 rotate-45 bg-paper/90 shadow-[0_0_0_1px_rgb(2_13_21/0.35)]" />
                 )}
               </button>
             );

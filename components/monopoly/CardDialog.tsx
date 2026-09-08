@@ -25,12 +25,12 @@ export function CardDialog({
   const deckLabel = pending.deck === "chance" ? "機會" : "命運";
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-stone-950/55 px-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-ink/60 px-4 backdrop-blur-sm">
       {/* 玩家頭像 ＋ 光暈（沿用過場聚光燈風格） */}
       <SpotlightAvatar player={player} size={size} name />
 
       <motion.div
-        className="text-base font-bold tracking-wide text-white/85"
+        className="text-base font-bold tracking-wide text-paper/85"
         style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -54,7 +54,7 @@ export function CardDialog({
           className="h-56 w-auto drop-shadow-[0_8px_20px_rgba(0,0,0,0.45)]"
         />
         <p
-          className="max-w-[20rem] text-center text-xl font-extrabold text-white"
+          className="max-w-[20rem] text-center text-xl font-extrabold leading-[1.5] text-paper"
           style={{ textShadow: "0 2px 10px rgba(0,0,0,0.55)" }}
         >
           {pending.card.text}
@@ -63,7 +63,7 @@ export function CardDialog({
 
       <motion.button
         type="button"
-        className="w-full max-w-sm rounded-xl bg-emerald-500 px-4 py-3 font-bold text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-600"
+        className="w-full max-w-sm rounded-full bg-brand-yellow px-4 py-3 font-bold text-ink transition-transform duration-150 ease-out active:scale-[0.97]"
         initial={{ y: 12, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}

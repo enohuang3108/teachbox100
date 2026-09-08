@@ -62,17 +62,17 @@ export function QuestionDialog({
             player={player}
             haloSize={240}
             name
-            nameClassName="max-w-[10rem] text-base font-bold text-white/90"
+            nameClassName="max-w-[10rem] text-base font-bold text-paper/90"
           />
         </div>
 
         <DialogHeader>
-          <DialogTitle className="text-center text-base font-bold text-stone-600">
+          <DialogTitle className="text-center text-base font-bold text-ink-soft">
             {title}
           </DialogTitle>
         </DialogHeader>
 
-        <p className="text-lg">{question.text}</p>
+        <p className="text-lg leading-[1.75] text-ink">{question.text}</p>
 
         {revealed === null && question.type === "choice" && (
           <div className="grid gap-2">
@@ -80,6 +80,9 @@ export function QuestionDialog({
               <Button
                 key={opt}
                 variant="outline"
+                className={
+                  "h-auto rounded-full py-3 text-base font-semibold transition-transform duration-150 ease-out active:scale-[0.97]"
+                }
                 onClick={() => pickChoice(opt)}
               >
                 {opt}
@@ -91,14 +94,14 @@ export function QuestionDialog({
         {revealed === null && question.type === "boolean" && (
           <div className="flex gap-2">
             <Button
-              className="flex-1"
+              className={`flex-1 ${"h-auto rounded-full py-3 text-base font-semibold transition-transform duration-150 ease-out active:scale-[0.97]"}`}
               variant="outline"
               onClick={() => pickChoice("是")}
             >
               是
             </Button>
             <Button
-              className="flex-1"
+              className={`flex-1 ${"h-auto rounded-full py-3 text-base font-semibold transition-transform duration-150 ease-out active:scale-[0.97]"}`}
               variant="outline"
               onClick={() => pickChoice("否")}
             >
@@ -109,15 +112,16 @@ export function QuestionDialog({
 
         {revealed === null && question.type === "short" && (
           <div className="space-y-3">
-            <p className="rounded bg-muted p-2 text-sm">
-              參考答案：{question.answer}
-            </p>
+            {/* 判定前不亮答案：投影出去時學生會直接看到。解析等判完才出現 */}
             <div className="flex gap-2">
-              <Button className="flex-1" onClick={() => judge(true)}>
+              <Button
+                className={`flex-1 ${"h-auto rounded-full py-3 text-base font-semibold transition-transform duration-150 ease-out active:scale-[0.97]"}`}
+                onClick={() => judge(true)}
+              >
                 學生答對
               </Button>
               <Button
-                className="flex-1"
+                className={`flex-1 ${"h-auto rounded-full py-3 text-base font-semibold transition-transform duration-150 ease-out active:scale-[0.97]"}`}
                 variant="destructive"
                 onClick={() => judge(false)}
               >
@@ -129,15 +133,20 @@ export function QuestionDialog({
 
         {revealed !== null && (
           <div className="space-y-3">
-            <p className={revealed ? "text-green-600" : "text-red-600"}>
+            <p
+              className={`font-bold ${revealed ? "text-brand-green" : "text-brand-red"}`}
+            >
               {revealed ? "答對了！" : "答錯了"}
             </p>
-            {question.explanation && (
-              <p className="rounded bg-muted p-2 text-sm">
-                解析：{question.explanation}
+            {(question.explanation ?? question.type === "short") && (
+              <p className="rounded-xl bg-sand p-3 text-sm leading-[1.75] text-ink-soft">
+                解析：{question.explanation ?? question.answer}
               </p>
             )}
-            <Button className="w-full" onClick={() => onAnswered(revealed)}>
+            <Button
+              className={`w-full ${"h-auto rounded-full py-3 text-base font-semibold transition-transform duration-150 ease-out active:scale-[0.97]"}`}
+              onClick={() => onAnswered(revealed)}
+            >
               確定
             </Button>
           </div>

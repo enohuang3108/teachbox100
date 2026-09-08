@@ -25,7 +25,9 @@ export function GameOverDialog({
     <Dialog open={game.phase === "gameover"}>
       <DialogContent hideClose>
         <DialogHeader>
-          <DialogTitle>遊戲結束 — 最終排名</DialogTitle>
+          <DialogTitle className="font-display text-xl font-extrabold">
+            遊戲結束 — 最終排名
+          </DialogTitle>
         </DialogHeader>
         <ol className="space-y-2">
           {order.map((p, i) => {
@@ -33,14 +35,16 @@ export function GameOverDialog({
             return (
               <li
                 key={p.id}
-                className={`flex items-center gap-3 rounded-xl border px-3 py-2 transition ${
+                className={`flex items-center gap-3 rounded-2xl px-3 py-2 ring-1 ${
                   champion
-                    ? "border-amber-300 bg-amber-50 ring-1 ring-amber-200"
-                    : "border-stone-200 bg-stone-50/60"
+                    ? "bg-brand-yellow/15 ring-brand-yellow/50"
+                    : "bg-sand/50 ring-ink/[0.06]"
                 }`}
               >
                 <span className="w-6 shrink-0 text-center text-lg tabular-nums">
-                  {MEDAL[i] ?? <span className="text-stone-400">{i + 1}</span>}
+                  {MEDAL[i] ?? (
+                    <span className="text-ink-soft/60">{i + 1}</span>
+                  )}
                 </span>
                 <PlayerAvatar
                   character={p.character}
@@ -49,19 +53,22 @@ export function GameOverDialog({
                 />
                 <span
                   className={`flex-1 truncate font-bold ${
-                    champion ? "text-stone-900" : "text-stone-600"
+                    champion ? "text-ink" : "text-ink-soft"
                   }`}
                 >
                   {p.name}
                 </span>
-                <span className="shrink-0 font-extrabold tabular-nums text-emerald-700">
+                <span className="shrink-0 font-extrabold tabular-nums text-brand-green">
                   ${p.money.toLocaleString()}
                 </span>
               </li>
             );
           })}
         </ol>
-        <Button className="w-full" onClick={onRestart}>
+        <Button
+          className="w-full rounded-full transition-transform duration-150 ease-out active:scale-[0.97]"
+          onClick={onRestart}
+        >
           回到設定，再玩一局
         </Button>
       </DialogContent>

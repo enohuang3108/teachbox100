@@ -322,9 +322,7 @@ export default function MonopolyPage() {
               <div className="text-center leading-tight">
                 <div
                   className={`max-w-[7rem] truncate font-bold ${
-                    active
-                      ? "text-base text-stone-800"
-                      : "text-sm text-stone-400"
+                    active ? "text-base text-ink" : "text-sm text-ink-soft/60"
                   }`}
                 >
                   {p.name}
@@ -337,7 +335,7 @@ export default function MonopolyPage() {
                 >
                   <MoneyDisplay
                     value={displayMoney[p.id] ?? p.money}
-                    className="text-emerald-700"
+                    className="text-brand-green"
                   />
                 </div>
               </div>
@@ -356,11 +354,7 @@ export default function MonopolyPage() {
   );
 
   return (
-    <main
-      id={GAME_STAGE_ID}
-      data-unit="monopoly"
-      className="min-h-screen bg-[#fbf6ec] bg-[radial-gradient(circle_at_22%_12%,oklch(0.95_0.05_85),transparent_55%),radial-gradient(circle_at_88%_90%,oklch(0.94_0.04_160),transparent_55%)]"
-    >
+    <main id={GAME_STAGE_ID} data-unit="monopoly" className="min-h-screen">
       {/* 右上角控制：事件紀錄 trigger + 重新開始 */}
       <BgmController phase={game.phase} />
 
@@ -376,7 +370,7 @@ export default function MonopolyPage() {
             )}
             {game.phase === "playing" && ec.type === "moneyGoal" && (
               <div
-                className="flex h-9 items-center gap-1.5 rounded-full bg-stone-50 px-3 text-sm font-bold tabular-nums text-emerald-700 ring-1 ring-stone-900/5"
+                className="flex h-9 items-center gap-1.5 rounded-full bg-paper-warm px-3 text-sm font-bold tabular-nums text-brand-green ring-1 ring-ink/[0.06]"
                 title="目標金額"
                 aria-label="目標金額"
               >
@@ -550,7 +544,7 @@ function PurchaseConfirm({
       : `在${tile.name}蓋一棟房子？`;
   const confirmText = isBuy ? "購買" : toHotel ? "蓋旅館" : "蓋房子";
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-stone-950/55 px-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-ink/60 px-4 backdrop-blur-sm">
       {/* 玩家頭像 ＋ 光暈（沿用過場聚光燈風格） */}
       <SpotlightAvatar player={player} size={size} name />
 
@@ -566,19 +560,19 @@ function PurchaseConfirm({
         }}
       >
         <p
-          className="text-2xl font-extrabold text-white"
+          className="text-2xl font-extrabold text-paper"
           style={{ textShadow: "0 2px 10px rgba(0,0,0,0.55)" }}
         >
           {label}
         </p>
         <p
-          className="text-3xl font-extrabold tabular-nums text-amber-300"
+          className="text-3xl font-extrabold tabular-nums text-brand-yellow"
           style={{ textShadow: "0 2px 10px rgba(0,0,0,0.55)" }}
         >
           ${amount.toLocaleString()}
         </p>
         <p
-          className="text-base font-semibold tabular-nums text-white/75"
+          className="text-base font-semibold tabular-nums text-paper/75"
           style={{ textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}
         >
           目前存款 ${player.money.toLocaleString()}
@@ -603,14 +597,14 @@ function PurchaseConfirm({
         {affordable ? (
           <>
             <Button
-              className="h-auto flex-1 rounded-xl py-3 text-base font-bold shadow-lg"
+              className="h-auto flex-1 rounded-full py-3 text-base font-bold transition-transform duration-150 ease-out active:scale-[0.97]"
               onClick={() => onConfirm(true)}
             >
               {confirmText}
             </Button>
             <Button
               variant="secondary"
-              className="h-auto flex-1 rounded-xl py-3 text-base shadow-lg"
+              className="h-auto flex-1 rounded-full py-3 text-base transition-transform duration-150 ease-out active:scale-[0.97]"
               onClick={() => onConfirm(false)}
             >
               跳過
@@ -619,7 +613,7 @@ function PurchaseConfirm({
         ) : (
           <Button
             variant="secondary"
-            className="h-auto flex-1 rounded-xl py-3 text-base font-bold shadow-lg"
+            className="h-auto flex-1 rounded-full py-3 text-base font-bold transition-transform duration-150 ease-out active:scale-[0.97]"
             onClick={() => onConfirm(false)}
           >
             存款不足
@@ -654,7 +648,7 @@ function TollSchedule({
       transition={{ delay: 0.24 }}
     >
       <p
-        className="text-xs font-medium text-white/70"
+        className="text-xs font-medium text-paper/70"
         style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}
       >
         {isBuy
@@ -667,16 +661,16 @@ function TollSchedule({
           const isHotel = level > maxHouses;
           return (
             <div key={level} className="flex items-center gap-1.5">
-              {level > 0 && <span className="text-sm text-white/35">›</span>}
+              {level > 0 && <span className="text-sm text-paper/35">›</span>}
               <div
                 className={`flex min-w-[3.5rem] flex-col items-center gap-0.5 rounded-lg px-2 py-1.5 transition ${
                   on
-                    ? "bg-amber-400/20 ring-2 ring-amber-300"
-                    : "bg-white/5 ring-1 ring-white/10"
+                    ? "bg-brand-yellow/20 ring-2 ring-brand-yellow"
+                    : "bg-paper/5 ring-1 ring-paper/10"
                 }`}
               >
                 {level === 0 ? (
-                  <span className="text-[11px] leading-none text-white/70">
+                  <span className="text-[11px] leading-none text-paper/70">
                     空地
                   </span>
                 ) : isHotel ? (
@@ -692,7 +686,7 @@ function TollSchedule({
                 )}
                 <span
                   className={`text-sm font-extrabold tabular-nums leading-none ${
-                    on ? "text-amber-300" : "text-white/60"
+                    on ? "text-brand-yellow" : "text-paper/60"
                   }`}
                 >
                   ${t.toLocaleString()}
@@ -714,30 +708,32 @@ function ResetConfirm({
   onCancel: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/40 p-4 backdrop-blur-[2px]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/45 p-4 backdrop-blur-[2px]">
       <motion.div
         initial={{ scale: 0.85, opacity: 0, y: 12 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 360, damping: 24 }}
-        className="w-full max-w-sm space-y-5 rounded-2xl bg-stone-50 p-6 shadow-2xl ring-1 ring-stone-900/5"
+        className="w-full max-w-sm space-y-5 rounded-[1.25rem] bg-card p-6 shadow-[0_18px_44px_-18px_rgb(2_13_21/0.28)] ring-1 ring-ink/[0.06]"
       >
         <div className="space-y-1.5 text-center">
-          <p className="text-lg font-bold text-stone-800">重新開始遊戲？</p>
-          <p className="text-sm text-stone-500">
+          <p className="font-display text-lg font-extrabold text-ink">
+            重新開始遊戲？
+          </p>
+          <p className="text-sm leading-[1.75] text-ink-soft">
             目前的進度會清掉，回到設定畫面。
           </p>
         </div>
         <div className="flex gap-3">
           <Button
             variant="destructive"
-            className="h-auto flex-1 rounded-xl py-2.5 text-base font-bold shadow-md"
+            className="h-auto flex-1 rounded-full py-2.5 text-base font-bold transition-transform duration-150 ease-out active:scale-[0.97]"
             onClick={onConfirm}
           >
             重新開始
           </Button>
           <Button
             variant="outline"
-            className="h-auto flex-1 rounded-xl py-2.5 text-base"
+            className="h-auto flex-1 rounded-full py-2.5 text-base transition-transform duration-150 ease-out active:scale-[0.97]"
             onClick={onCancel}
           >
             取消
@@ -750,10 +746,12 @@ function ResetConfirm({
 
 function LogDialog({ log, onClose }: { log: string[]; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/40 p-4 backdrop-blur-[2px]">
-      <div className="flex max-h-[70vh] w-full max-w-md flex-col rounded-2xl bg-stone-50 p-5 shadow-2xl ring-1 ring-stone-900/5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/45 p-4 backdrop-blur-[2px]">
+      <div className="flex max-h-[70vh] w-full max-w-md flex-col rounded-[1.25rem] bg-card p-5 shadow-[0_18px_44px_-18px_rgb(2_13_21/0.28)] ring-1 ring-ink/[0.06]">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-bold text-stone-800">事件紀錄</h2>
+          <h2 className="font-display text-base font-extrabold text-ink">
+            事件紀錄
+          </h2>
           <Button
             variant="ghost"
             size="icon"
@@ -764,16 +762,14 @@ function LogDialog({ log, onClose }: { log: string[]; onClose: () => void }) {
             ✕
           </Button>
         </div>
-        <div className="min-h-0 flex-1 space-y-1 overflow-y-auto text-sm leading-snug text-stone-600">
+        <div className="min-h-0 flex-1 space-y-1 overflow-y-auto text-sm leading-[1.75] text-ink-soft">
           {log.length === 0 ? (
-            <p className="text-stone-400">尚無紀錄</p>
+            <p className="text-stone">尚無紀錄</p>
           ) : (
             log.map((line, i) => (
               <div
                 key={i}
-                className={
-                  i === 0 ? "font-semibold text-stone-800" : "text-stone-500"
-                }
+                className={i === 0 ? "font-semibold text-ink" : "text-ink-soft"}
               >
                 {line}
               </div>

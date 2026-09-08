@@ -111,11 +111,11 @@ function innerEdge(i: number): { cell: string; stack: string } {
   }; // 左排：右邊朝中心
 }
 
-const SPECIAL: Record<string, { bg: string; emoji?: string }> = {
-  start: { bg: "bg-white" }, // 起點：白底、僅顯示 start.webp 圖檔
-  jail: { bg: "bg-white" }, // 監獄：白底、用 jail.webp 圖檔
-  chance: { bg: "bg-amber-50", emoji: "❓" },
-  fate: { bg: "bg-violet-50", emoji: "✨" },
+const SPECIAL: Record<string, { bg: string; fg?: string; emoji?: string }> = {
+  start: { bg: "bg-paper" }, // 起點：紙色底、僅顯示 start.webp 圖檔
+  jail: { bg: "bg-paper" }, // 監獄：紙色底、用 jail.webp 圖檔
+  chance: { bg: "bg-brand-blue", fg: "text-paper", emoji: "❓" },
+  fate: { bg: "bg-brand-red", fg: "text-paper", emoji: "✨" },
 };
 
 interface Walking {
@@ -139,7 +139,7 @@ const TileCard = memo(function TileCard({
 
   return (
     <div
-      className={`relative flex h-full flex-col overflow-hidden rounded-lg border border-stone-900/[0.06] shadow-sm ${property ? "bg-[#fffdf8]" : (special?.bg ?? "bg-[#fffdf8]")}`}
+      className={`relative flex h-full flex-col overflow-hidden rounded-lg border border-ink/[0.06] ${property ? "bg-paper" : (special?.bg ?? "bg-paper")}`}
       style={
         owner
           ? {
@@ -152,7 +152,9 @@ const TileCard = memo(function TileCard({
     >
       {tile.type !== "start" && (
         <div className="px-1 pt-0.5">
-          <span className="block truncate text-center text-xs font-bold text-stone-700">
+          <span
+            className={`block truncate text-center text-xs font-bold ${special?.fg ?? "text-ink"}`}
+          >
             {tile.name}
           </span>
         </div>
@@ -186,7 +188,7 @@ const TileCard = memo(function TileCard({
           </div>
         ) : (
           // 未買：顯示購買價
-          <div className="px-1 pb-0.5 text-center text-[11px] font-semibold tabular-nums text-stone-400">
+          <div className="px-1 pb-0.5 text-center text-[11px] font-semibold tabular-nums text-ink-soft/70">
             售 ${tile.price.toLocaleString()}
           </div>
         ))}
@@ -272,7 +274,7 @@ export function Board({
   return (
     <div className="aspect-[12/7] w-[min(98vw,calc((100vh_-_1.5rem)*1.714))]">
       <LayoutGroup>
-        <div className="relative grid h-full w-full grid-cols-[repeat(12,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-1 rounded-[22px] border-[6px] border-amber-950/[0.08] bg-[#fdf4e3] bg-[radial-gradient(circle_at_50%_38%,#fefaf0,transparent_70%)] p-1 shadow-[0_2px_0_0_rgba(255,255,255,0.6)_inset,0_22px_55px_-20px_rgba(120,80,20,0.55)]">
+        <div className="relative grid h-full w-full grid-cols-[repeat(12,minmax(0,1fr))] grid-rows-[repeat(7,minmax(0,1fr))] gap-1 rounded-[1.25rem] border-[6px] border-ink/[0.05] bg-paper-warm p-1 shadow-[0_20px_48px_-24px_rgb(2_13_21/0.28)]">
           {BOARD.map((tile) => {
             const pos = tilePos(tile.index);
             return (
@@ -286,7 +288,7 @@ export function Board({
           })}
 
           <div
-            className="m-1 flex items-center justify-center rounded-2xl bg-emerald-50/80 bg-[radial-gradient(circle_at_50%_30%,oklch(0.97_0.03_160),transparent_75%)] p-3 shadow-[0_1px_0_0_rgba(255,255,255,0.7)_inset] ring-1 ring-emerald-900/[0.08]"
+            className="m-1 flex items-center justify-center rounded-[1rem] bg-sand/60 p-3 ring-1 ring-ink/[0.05]"
             style={{ gridColumn: "2 / 12", gridRow: "2 / 7" }}
           >
             {center}

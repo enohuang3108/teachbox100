@@ -32,7 +32,7 @@ export function CharacterPicker({
         <button
           type="button"
           title="點擊更換角色"
-          className="relative rounded-full transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
+          className="relative rounded-full transition-transform duration-150 ease-out hover:-translate-y-[2px] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-1"
         >
           <PlayerAvatar character={value} color={color} size={40} />
         </button>
@@ -57,11 +57,11 @@ export function CharacterPicker({
                   setOpen(false);
                 }}
                 title={taken ? `${c.label}（已被選走）` : c.label}
-                className={`flex flex-col items-center gap-1.5 rounded-xl border-2 p-3 transition ${
+                className={`flex flex-col items-center gap-1.5 rounded-2xl border-2 p-3 transition-[background-color,border-color,transform] duration-150 ease-out ${
                   selected
-                    ? "border-zinc-800 bg-zinc-100"
-                    : "border-transparent hover:bg-zinc-50"
-                } ${taken ? "cursor-not-allowed opacity-30" : ""}`}
+                    ? "border-ink bg-sand"
+                    : "border-transparent hover:bg-paper-warm"
+                } ${taken ? "cursor-not-allowed opacity-30" : "active:scale-[0.97]"}`}
               >
                 <img
                   src={c.src}
@@ -69,7 +69,7 @@ export function CharacterPicker({
                   draggable={false}
                   className="h-20 w-20 object-contain"
                 />
-                <span className="w-full truncate text-center text-sm font-medium leading-tight text-zinc-600">
+                <span className="w-full truncate text-center text-sm font-semibold leading-tight text-ink-soft">
                   {c.label}
                 </span>
               </button>

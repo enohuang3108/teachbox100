@@ -126,32 +126,41 @@ export function SetupPanel() {
   const canStart = draftQuestions.length > 0 && playerCount >= 2;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 p-6">
-      <h1 className="text-2xl font-bold">大富翁 — 遊戲設定</h1>
+    <div className="mx-auto max-w-2xl space-y-6 px-5 py-8 md:px-8">
+      <h1 className="font-display text-[clamp(1.5rem,3vw,2rem)] leading-tight font-extrabold tracking-[-0.01em] text-ink">
+        大富翁 — 遊戲設定
+      </h1>
 
       {/* 題庫匯入 */}
-      <section className="space-y-2 rounded-lg border p-4">
-        <Label className="text-lg">題庫匯入</Label>
+      <section className="space-y-3 rounded-[1.25rem] bg-card p-5 ring-1 ring-ink/[0.06]">
+        <Label className="font-display text-lg font-bold text-ink">
+          題庫匯入
+        </Label>
         <div className="flex items-center gap-3">
           <Input type="file" accept=".xlsx,.xls" onChange={onFile} />
-          <Button variant="outline" onClick={downloadTemplate}>
+          <Button
+            variant="outline"
+            className="rounded-full transition-transform duration-150 ease-out active:scale-[0.97]"
+            onClick={downloadTemplate}
+          >
             下載範本
           </Button>
         </div>
         {draftQuestions.length > 0 && (
-          <p className="text-sm text-green-600">
+          <p className="text-sm font-semibold text-brand-green">
             已載入 {draftQuestions.length} 題
           </p>
         )}
         {errors.length > 0 && (
-          <ul className="max-h-40 overflow-y-auto text-sm text-red-600">
+          <ul className="max-h-40 overflow-y-auto text-sm leading-[1.75] text-brand-red">
             {errors.map((er, i) => (
               <li key={i}>{er}</li>
             ))}
           </ul>
         )}
-        <p className="text-sm text-muted-foreground">
-          想用 AI 出題？點「下載範本」會附一段提示詞，貼給 ChatGPT 或 Claude 就行。
+        <p className="text-sm leading-[1.75] text-muted-foreground">
+          想用 AI 出題？點「下載範本」會附一段提示詞，貼給 ChatGPT 或 Claude
+          就行。
         </p>
       </section>
 
@@ -161,21 +170,28 @@ export function SetupPanel() {
           <DialogHeader>
             <DialogTitle>用 AI 快速產生題庫</DialogTitle>
             <DialogDescription>
-              範本已經下載。把下面的提示詞複製給 ChatGPT 或 Claude，補上你要的主題和題數，它會做出一份 Excel。下載後用上方「選擇檔案」匯入就好。
+              範本已經下載。把下面的提示詞複製給 ChatGPT 或
+              Claude，補上你要的主題和題數，它會做出一份
+              Excel。下載後用上方「選擇檔案」匯入就好。
             </DialogDescription>
           </DialogHeader>
-          <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap rounded-md bg-muted p-3 text-sm">
+          <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap rounded-xl bg-sand p-3 text-sm leading-[1.75]">
             {AI_QUESTION_PROMPT}
           </pre>
-          <Button onClick={copyPrompt} className="w-full">
+          <Button
+            onClick={copyPrompt}
+            className="w-full rounded-full transition-transform duration-150 ease-out active:scale-[0.97]"
+          >
             {copied ? "已複製！" : "複製提示詞"}
           </Button>
         </DialogContent>
       </Dialog>
 
       {/* 玩家設定 */}
-      <section className="space-y-2 rounded-lg border p-4">
-        <Label className="text-lg">人數（2–20）</Label>
+      <section className="space-y-3 rounded-[1.25rem] bg-card p-5 ring-1 ring-ink/[0.06]">
+        <Label className="font-display text-lg font-bold text-ink">
+          人數（2–20）
+        </Label>
         <Input
           type="number"
           min={2}
@@ -187,7 +203,7 @@ export function SetupPanel() {
             syncPlayers(n);
           }}
         />
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm leading-[1.75] text-muted-foreground">
           點頭像換角色，點色塊換顏色
         </p>
         <div className="grid grid-cols-2 gap-2">
@@ -226,7 +242,7 @@ export function SetupPanel() {
       </section>
 
       {/* 規則設定 */}
-      <section className="grid grid-cols-2 gap-4 rounded-lg border p-4">
+      <section className="grid grid-cols-2 gap-4 rounded-[1.25rem] bg-card p-5 ring-1 ring-ink/[0.06]">
         <div>
           <Label>起始金額</Label>
           {/* 起始金額固定 $8,000，不可調整 */}
@@ -325,11 +341,16 @@ export function SetupPanel() {
         </div>
       </section>
 
-      <Button className="w-full" size="lg" disabled={!canStart} onClick={begin}>
+      <Button
+        className="w-full rounded-full text-base font-bold transition-transform duration-150 ease-out active:scale-[0.97]"
+        size="lg"
+        disabled={!canStart}
+        onClick={begin}
+      >
         開始遊戲
       </Button>
       {!canStart && (
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-sm leading-[1.75] text-muted-foreground">
           先匯入題庫，玩家至少要 2 位
         </p>
       )}

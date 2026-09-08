@@ -51,10 +51,10 @@ export function Countdown({
 
   return (
     <div
-      className={`flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-bold tabular-nums shadow-md ring-1 transition ${
+      className={`flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-bold tabular-nums ring-1 transition-colors duration-200 ${
         urgent
-          ? "animate-pulse bg-rose-500 text-white ring-rose-600/20"
-          : "bg-stone-50 text-stone-700 ring-stone-900/5"
+          ? "bg-brand-red text-paper ring-ink/10"
+          : "bg-paper-warm text-ink ring-ink/[0.06]"
       }`}
       title="剩餘時間"
       aria-label="剩餘時間"

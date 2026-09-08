@@ -19,7 +19,10 @@ export function MoneyDisplay({
   className?: string;
 }) {
   const spring = useSpring(value, { stiffness: 150, damping: 22, mass: 0.6 });
-  const text = useTransform(spring, (v) => `$${Math.round(v).toLocaleString()}`);
+  const text = useTransform(
+    spring,
+    (v) => `$${Math.round(v).toLocaleString()}`,
+  );
   const prev = useRef(value);
   const seq = useRef(0);
   const [scope, animate] = useAnimate();
@@ -41,7 +44,7 @@ export function MoneyDisplay({
     );
     animate(
       scope.current,
-      { color: [gain ? "#10b981" : "#ef4444", "#047857"] },
+      { color: [gain ? "#6fa24e" : "#e4522f", "#2c5427"] },
       { duration: 0.7, ease: "easeOut" },
     );
     // 浮動跳字
@@ -65,7 +68,7 @@ export function MoneyDisplay({
             key={delta.id}
             className="pointer-events-none absolute bottom-full left-1/2 mb-0.5 -translate-x-1/2 whitespace-nowrap text-sm font-extrabold tabular-nums"
             style={{
-              color: delta.amount > 0 ? "#10b981" : "#ef4444",
+              color: delta.amount > 0 ? "#2c5427" : "#cb2108",
               textShadow: "0 1px 3px rgba(0,0,0,0.25)",
             }}
             initial={{ y: 6, opacity: 0, scale: 0.7 }}

@@ -11,7 +11,7 @@ export function TurnBanner({ player }: { player: Player | null }) {
       {player && (
         <motion.div
           key="turn-backdrop"
-          className="fixed inset-0 z-40 bg-stone-950/55 backdrop-blur-sm"
+          className="fixed inset-0 z-40 bg-ink/60 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -35,10 +35,10 @@ export function TurnBanner({ player }: { player: Player | null }) {
             className="mt-12 flex flex-col items-center gap-1 leading-tight"
             style={{ textShadow: "0 2px 12px rgba(0,0,0,0.55)" }}
           >
-            <div className="text-sm font-bold uppercase tracking-[0.3em] text-white/70">
+            <div className="text-sm font-bold uppercase tracking-[0.3em] text-paper/70">
               換你了
             </div>
-            <div className="max-w-[16rem] truncate text-5xl font-extrabold text-white">
+            <div className="max-w-[16rem] truncate font-display text-5xl font-black tracking-[-0.02em] text-paper">
               {player.name}
             </div>
           </div>

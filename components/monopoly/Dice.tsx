@@ -68,16 +68,14 @@ export function Dice({
         {lastRoll && lastRoll.length > 0 ? (
           lastRoll.map((d, i) => <Die key={`${rollSeq}-${i}`} value={d} />)
         ) : (
-          <span className="text-sm text-emerald-700/50">
-            擲骰子開始你的回合
-          </span>
+          <span className="text-sm text-ink-soft/70">擲骰子開始你的回合</span>
         )}
       </div>
       <Button
         size="lg"
         disabled={disabled || rolling}
         onClick={onRoll}
-        className="rounded-full bg-amber-500 px-10 py-6 text-lg font-bold text-white shadow-lg shadow-amber-500/30 transition duration-150 ease-out hover:-translate-y-0.5 hover:bg-amber-600 hover:shadow-xl hover:shadow-amber-500/40 active:translate-y-0 active:scale-95 disabled:opacity-50 disabled:hover:translate-y-0"
+        className="rounded-full bg-primary px-10 py-6 text-lg font-bold text-ink transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-[3px] hover:shadow-[0_10px_24px_-8px_rgb(248_176_3/0.6)] active:translate-y-0 active:scale-[0.97] disabled:opacity-50 disabled:hover:translate-y-0"
       >
         {rolling ? "擲骰中…" : "🎲 擲骰子"}
       </Button>
