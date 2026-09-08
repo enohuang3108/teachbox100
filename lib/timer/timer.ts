@@ -7,9 +7,9 @@ export const WARN_AT = 10;
 
 export const MAX_SECONDS = 99 * 60 + 59;
 
-/** 把秒數格式化成 MM:SS；負數一律當 0，超過 99 分就顯示 99:59 */
+/** 把秒數格式化成 MM:SS；負數一律當 0。超過 99 分就變三位數（考試模式排整個上午） */
 export function formatTime(seconds: number): string {
-  const s = Math.min(MAX_SECONDS, Math.max(0, Math.ceil(seconds)));
+  const s = Math.max(0, Math.ceil(seconds));
   const mm = Math.floor(s / 60);
   const ss = s % 60;
   return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;

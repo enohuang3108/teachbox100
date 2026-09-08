@@ -13,17 +13,20 @@ export function TimerDial({
   remaining,
   total,
   done,
+  warnAt = WARN_AT,
 }: {
   remaining: number;
   total: number;
   done: boolean;
+  /** 剩幾秒開始轉紅；考試模式讓老師自己設 */
+  warnAt?: number;
 }) {
-  const warn = remaining <= WARN_AT && remaining > 0;
+  const warn = remaining <= warnAt && remaining > 0;
   const stroke = done || warn ? "var(--brand-red)" : "var(--brand-blue)";
 
   return (
     <div
-      className="relative mx-auto aspect-square w-full max-w-[min(78vw,26rem)]"
+      className="relative mx-auto aspect-square w-full max-w-[min(82vw,30rem)] [container-type:inline-size]"
       role="timer"
       aria-live="off"
     >
@@ -57,7 +60,7 @@ export function TimerDial({
 
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span
-          className="font-display text-ink text-[clamp(3.5rem,17vw,6.5rem)] leading-none font-black tabular-nums"
+          className="font-display text-ink text-[24cqw] leading-none font-black tabular-nums"
           style={{
             color: done || warn ? "var(--brand-red)" : undefined,
             transition: "color 200ms var(--ease-out)",
@@ -66,7 +69,7 @@ export function TimerDial({
           {formatTime(remaining)}
         </span>
         {done && (
-          <span className="text-brand-red mt-3 text-xl font-extrabold">
+          <span className="text-brand-red mt-[2cqw] text-[7cqw] font-extrabold">
             時間到！
           </span>
         )}

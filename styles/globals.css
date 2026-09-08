@@ -62,8 +62,12 @@
   --color-brand-green: var(--brand-green);
 
   /* Typography Tokens */
-  --font-sans: var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui,
+    sans-serif;
+  --font-display:
+    var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui,
+    sans-serif;
   --font-mono: JetBrains Mono, monospace;
   --font-serif: Source Serif 4, serif;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
@@ -119,21 +123,23 @@
   --tracking-normal: 0em;
 
   /* Brand Palette - 取自 public/images/decor 的球球實色，保證 CSS 與圖一致 */
-  --paper: #FDFCF8;
-  --paper-warm: #F8F0E3;
-  --sand: #EDE6D8;
-  --stone: #BEB9B1;
-  --ink: #020D15;
-  --ink-soft: #4A5560;
-  --brand-yellow: #F8B003;
-  --brand-red: #CB2108;
-  --brand-blue: #02569B;
-  --brand-green: #2C5427;
+  --paper: #fdfcf8;
+  --paper-warm: #f8f0e3;
+  --sand: #ede6d8;
+  --stone: #beb9b1;
+  --ink: #020d15;
+  --ink-soft: #4a5560;
+  --brand-yellow: #f8b003;
+  --brand-red: #cb2108;
+  --brand-blue: #02569b;
+  --brand-green: #2c5427;
   --grid-line: rgb(2 13 21 / 0.045);
   --ghost: rgb(2 13 21 / 0.04);
 
   /* Typography Tokens */
-  --font-sans: var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui,
+    sans-serif;
   --font-serif: Source Serif 4, serif;
   --font-mono: JetBrains Mono, monospace;
 
@@ -146,11 +152,16 @@
   --shadow-offset-y: 4px;
   --shadow-2xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
   --shadow-xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 1px 2px -2px hsl(0 0% 0% / 0.10);
-  --shadow: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 1px 2px -2px hsl(0 0% 0% / 0.10);
-  --shadow-md: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 2px 4px -2px hsl(0 0% 0% / 0.10);
-  --shadow-lg: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 4px 6px -2px hsl(0 0% 0% / 0.10);
-  --shadow-xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 8px 10px -2px hsl(0 0% 0% / 0.10);
+  --shadow-sm:
+    0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1);
+  --shadow:
+    0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1);
+  --shadow-md:
+    0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 2px 4px -2px hsl(0 0% 0% / 0.1);
+  --shadow-lg:
+    0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 4px 6px -2px hsl(0 0% 0% / 0.1);
+  --shadow-xl:
+    0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 8px 10px -2px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
 
   /* Light Theme Colors - 全部接到上面的紙感色票 */
@@ -158,7 +169,7 @@
   --foreground: var(--ink);
   --card: var(--paper-warm);
   --card-foreground: var(--ink);
-  --popover: #FFFDF9;
+  --popover: #fffdf9;
   --popover-foreground: var(--ink);
   --primary: var(--brand-yellow);
   --primary-foreground: var(--ink);
@@ -170,8 +181,8 @@
   --accent-foreground: var(--ink);
   --destructive: var(--brand-red);
   --destructive-foreground: var(--paper);
-  --border: rgb(2 13 21 / 0.10);
-  --input: rgb(2 13 21 / 0.10);
+  --border: rgb(2 13 21 / 0.1);
+  --input: rgb(2 13 21 / 0.1);
   --ring: var(--brand-yellow);
 
   /* Chart Colors */
@@ -185,7 +196,7 @@
   --sidebar: oklch(0.9846 0.0017 247.8389);
   --sidebar-foreground: oklch(0.2686 0 0);
   --sidebar-primary: oklch(0.7686 0.1647 70.0804);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
+  --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.9869 0.0214 95.2774);
   --sidebar-accent-foreground: oklch(0.4732 0.1247 46.2007);
   --sidebar-border: oklch(0.9276 0.0058 264.5313);
@@ -194,16 +205,16 @@
 
 .dark {
   /* Dark Theme - 暖色調的暗紙，不要中性灰，才跟亮色是同一個品牌 */
-  --paper: #14120E;
-  --paper-warm: #1E1B16;
-  --sand: #2A251E;
-  --stone: #6B655C;
-  --ink: #F2EDE4;
-  --ink-soft: #A8A196;
-  --brand-yellow: #F8B003;
-  --brand-red: #E4522F;
-  --brand-blue: #3E92D6;
-  --brand-green: #6FA24E;
+  --paper: #14120e;
+  --paper-warm: #1e1b16;
+  --sand: #2a251e;
+  --stone: #6b655c;
+  --ink: #f2ede4;
+  --ink-soft: #a8a196;
+  --brand-yellow: #f8b003;
+  --brand-red: #e4522f;
+  --brand-blue: #3e92d6;
+  --brand-green: #6fa24e;
   --grid-line: rgb(255 255 255 / 0.04);
   --ghost: rgb(255 255 255 / 0.035);
 
@@ -214,7 +225,7 @@
   --popover: var(--paper-warm);
   --popover-foreground: var(--ink);
   --primary: var(--brand-yellow);
-  --primary-foreground: #14120E;
+  --primary-foreground: #14120e;
   --secondary: var(--sand);
   --secondary-foreground: var(--ink);
   --muted: var(--paper-warm);
@@ -222,7 +233,7 @@
   --accent: var(--sand);
   --accent-foreground: var(--ink);
   --destructive: var(--brand-red);
-  --destructive-foreground: #14120E;
+  --destructive-foreground: #14120e;
   --border: rgb(255 255 255 / 0.12);
   --input: rgb(255 255 255 / 0.12);
   --ring: var(--brand-yellow);
@@ -238,14 +249,16 @@
   --sidebar: oklch(0.1684 0 0);
   --sidebar-foreground: oklch(0.9219 0 0);
   --sidebar-primary: oklch(0.7686 0.1647 70.0804);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
+  --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.4732 0.1247 46.2007);
   --sidebar-accent-foreground: oklch(0.9243 0.1151 95.7459);
   --sidebar-border: oklch(0.3715 0 0);
   --sidebar-ring: oklch(0.7686 0.1647 70.0804);
   --radius: 0.75rem;
   --radius-card: 1.25rem;
-  --font-sans: var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui,
+    sans-serif;
   --font-serif: Source Serif 4, serif;
   --font-mono: JetBrains Mono, monospace;
   --shadow-color: hsl(0 0% 0%);
@@ -258,11 +271,16 @@
   --spacing: 0.25rem;
   --shadow-2xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
   --shadow-xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 1px 2px -2px hsl(0 0% 0% / 0.10);
-  --shadow: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 1px 2px -2px hsl(0 0% 0% / 0.10);
-  --shadow-md: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 2px 4px -2px hsl(0 0% 0% / 0.10);
-  --shadow-lg: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 4px 6px -2px hsl(0 0% 0% / 0.10);
-  --shadow-xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 8px 10px -2px hsl(0 0% 0% / 0.10);
+  --shadow-sm:
+    0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1);
+  --shadow:
+    0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1);
+  --shadow-md:
+    0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 2px 4px -2px hsl(0 0% 0% / 0.1);
+  --shadow-lg:
+    0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 4px 6px -2px hsl(0 0% 0% / 0.1);
+  --shadow-xl:
+    0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 8px 10px -2px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
 }
 
@@ -367,7 +385,8 @@
   }
 
   .slide-out-down {
-    animation: slideOutDown var(--duration-fast) var(--ease-in-out-cubic) forwards;
+    animation: slideOutDown var(--duration-fast) var(--ease-in-out-cubic)
+      forwards;
   }
 
   .slide-in-down {
@@ -510,6 +529,25 @@
  * y 軸鎖死（overflow: hidden）—— 投影時老師不會不小心把遊戲捲走。
  * 塞不下的部分靠 --fs-scale 等比縮，比例由 FullscreenButton 量出來寫進來。
  */
+/*
+ * 全螢幕是投影用的，錶盤吃滿高度。stage-inner 預設 64rem，扣掉科目清單
+ * 之後只剩 560px 給錶盤 —— 放寬 max-width 才是真正的瓶頸，svh 上限再高也沒用。
+ */
+#game-stage[data-unit="timer"]:fullscreen > [data-stage-inner] {
+  max-width: 92rem;
+}
+
+#game-stage:fullscreen [role="timer"] {
+  max-width: min(52vw, 74svh);
+  flex: none;
+  width: min(52vw, 74svh);
+}
+
+/* 錶盤與科目清單拉開，投影時兩塊才不會黏在一起 */
+#game-stage:fullscreen [data-exam-layout] {
+  gap: 5rem;
+}
+
 #game-stage:fullscreen {
   max-width: none;
   height: 100%;
@@ -546,13 +584,18 @@
     max-width: 88rem;
   }
 
-  #game-stage[data-unit="coin-buy"]:fullscreen [data-stage-inner] > div:last-child {
+  #game-stage[data-unit="coin-buy"]:fullscreen
+    [data-stage-inner]
+    > div:last-child {
     display: flex;
     align-items: flex-start;
     gap: 2rem;
   }
 
-  #game-stage[data-unit="coin-buy"]:fullscreen [data-stage-inner] > div:last-child > * {
+  #game-stage[data-unit="coin-buy"]:fullscreen
+    [data-stage-inner]
+    > div:last-child
+    > * {
     flex: 1 1 0;
     min-width: 0;
   }
