@@ -6,8 +6,8 @@ import NextImage from "next/image";
 import { SpotlightAvatar } from "./SpotlightAvatar";
 
 const DECK_IMG: Record<"chance" | "fate", string> = {
-  chance: "/images/monopoly/chance.webp",
-  fate: "/images/monopoly/fate.webp",
+  chance: "/images/monopoly/chance-v2.webp",
+  fate: "/images/monopoly/fate-v2.webp",
 };
 
 export function CardDialog({

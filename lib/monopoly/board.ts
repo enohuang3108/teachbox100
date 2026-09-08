@@ -1,7 +1,7 @@
 import type { PropertyTile, Tile } from "./types";
 
-const CHANCE_IMG = "/images/monopoly/chance.webp";
-const FATE_IMG = "/images/monopoly/fate.webp";
+const CHANCE_IMG = "/images/monopoly/chance-v2.webp";
+const FATE_IMG = "/images/monopoly/fate-v2.webp";
 const START_IMG = "/images/monopoly/start.webp";
 const JAIL_IMG = "/images/monopoly/jail.webp";
 
