@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 /**
  * 把 targetId 那個元素丟進原生全螢幕，給上課投影用。
@@ -23,6 +24,8 @@ export const FullscreenButton = ({
 }) => {
   const [supported, setSupported] = useState(false);
   const [active, setActive] = useState(false);
+  // 全螢幕時原本的頂列不在子樹裡，所以把離開鈕 portal 進 stage 才看得到
+  const [stageEl, setStageEl] = useState<HTMLElement | null>(null);
 
   const fit = useCallback(() => {
     const stage = document.getElementById(targetId);
@@ -49,6 +52,7 @@ export const FullscreenButton = ({
     setSupported(document.fullscreenEnabled);
 
     const stage = document.getElementById(targetId);
+    setStageEl(stage);
     const inner = stage?.firstElementChild;
     // 遊戲內容會長高變矮（選了商品、加了硬幣），所以盯著它重算，不是只算一次
     const ro = inner ? new ResizeObserver(fit) : null;
@@ -84,16 +88,31 @@ export const FullscreenButton = ({
   const Icon = active ? Minimize2 : Maximize2;
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={active ? "離開全螢幕" : "全螢幕"}
-      className={cn(
-        "flex cursor-pointer items-center justify-center",
-        className,
-      )}
-    >
-      <Icon size={20} strokeWidth={2} />
-    </button>
+    <>
+      {active &&
+        stageEl &&
+        createPortal(
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label="離開全螢幕"
+            className="bg-background/80 text-foreground hover:bg-background fixed top-4 right-4 z-50 flex size-11 cursor-pointer items-center justify-center rounded-lg border"
+          >
+            <Minimize2 size={20} strokeWidth={2} />
+          </button>,
+          stageEl,
+        )}
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={active ? "離開全螢幕" : "全螢幕"}
+        className={cn(
+          "flex cursor-pointer items-center justify-center",
+          className,
+        )}
+      >
+        <Icon size={20} strokeWidth={2} />
+      </button>
+    </>
   );
 };
