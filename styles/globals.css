@@ -274,6 +274,17 @@
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
   }
+
+  /*
+   * Tailwind v4 的 preflight 把 button 的 cursor 設成 default，
+   * 所以站上每顆原生 <button> 都要自己補 cursor-pointer —— 補了 46 次還是會漏。
+   * 在這裡設一次，Button 元件與手寫的 button 一起吃到。
+   * 停用中的按鈕不給手指游標：可不可按要看得出來。
+   */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 @layer utilities {
@@ -641,4 +652,53 @@
     color-mix(in srgb, var(--paper) 2.1%, transparent) 93%,
     transparent 100%
   );
+}
+
+/* 九九乘法練習：換題的淡入，與答錯的搖頭。
+   兩者都是「一題只會看到一次」的一次性動畫，用 keyframes 沒有被打斷的問題。 */
+@keyframes quiz-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.quiz-enter {
+  animation: quiz-enter var(--duration-enter) var(--ease-out) both;
+}
+
+@keyframes quiz-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+.quiz-shake {
+  animation: quiz-shake 320ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 位移拿掉，淡入留著 —— 顏色與透明度是在傳達「這是新的一題」，不是裝飾 */
+  .quiz-enter {
+    animation: none;
+    opacity: 1;
+  }
+  .quiz-shake {
+    animation: none;
+  }
 }

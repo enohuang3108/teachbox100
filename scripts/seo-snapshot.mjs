@@ -7,7 +7,16 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const SITE = "https://teachbox100.com";
-const PATHS = ["/", "/coin", "/coin/change", "/clock/current-time"];
+// 取樣頁：首頁、一個分類頁、兩個重的教材頁，加上兩個新的工具頁。
+// 不是全站量測 —— Lighthouse 一頁要跑一分鐘，樣本挑會反映問題的那幾種就夠。
+const PATHS = [
+  "/",
+  "/coin",
+  "/coin/change",
+  "/clock/current-time",
+  "/timer",
+  "/multiplication",
+];
 const HISTORY = "docs/seo/history.md";
 const form = process.argv[2] === "mobile" ? "mobile" : "desktop";
 const date = new Date().toISOString().slice(0, 10);

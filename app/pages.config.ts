@@ -61,8 +61,7 @@ const pagesConfig = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afzv4wMGBQADBAD7+wD//wAHBgD8/f37+wQBCAjY19mfp602IR0VBQMDJSYTDAsmJyUA//To7eLXFRUVgn14///19evi8+jd/PDkAgAHB8vO0Pf39iYmJquFe3iHke30/gMFAgIA/v4YFhYxLy4wKyaszd3VzskD/PIAAQMB/PDkAAAA7e7vDAwLCgwMAAAA/fr6AAAAKC5DHUTkuowAAAAASUVORK5CYII=",
     title: "購物",
-    description:
-      "自己挑商品、算總價、再付款，把買東西的流程走一遍。",
+    description: "自己挑商品、算總價、再付款，把買東西的流程走一遍。",
   },
   "coin-change": {
     path: "/coin/change",
@@ -87,20 +86,24 @@ const pagesConfig = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afny57K4wvr6+U5NTf//ALO0swcHB05IPgT8/Pyor7nz+whGIuf/AAGfrt4PB/lKRDsEBgYFDAsJAfn+Ahg8/v79Eg/pDQoNBQQDBP39/hISEQj39nyTtwIECZh8TwEDB/v+AwT///7Z3OHy9PUDAP0DChb+6QEDBg3/FCsEAwMEXVRI/f79AgEC/f79CCxQ/f38Afvv/UdFcv1UWGwAAAAASUVORK5CYII=",
     title: "翻牌配對",
-    description: "老師自訂 2 到 15 組配對卡，孩子翻牌找出一對，練習詞彙與對應關係。",
+    description:
+      "老師自訂 2 到 15 組配對卡，孩子翻牌找出一對，練習詞彙與對應關係。",
     guide: "老師先設定配對組再開始，孩子翻兩張牌找出一對。",
   },
   wheel: {
     path: "/draw/wheel",
     imageSrc: "/images/covers/warm/wheel-v2.webp",
-    blurDataURL: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afbv4QEBAf/9/gYSEOng1/n18x8rN/nw8AH58eP9/PwGEBDpo7QC53cFDPP07XAYdW0E8vT1iY2XNjUlQt+L8t3n/A0KAPeD/+42Av39/LK1ut7b2Qsn8QMODf0CEA4sAAH+8wL//gAuKSNMVlzw3Wz+9vIKE+XozFEAFD4B9/Di9vb3AwQDCAoO/+zBAPz0ABNDAAMDerRNsypywywAAAAASUVORK5CYII=",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afbv4QEBAf/9/gYSEOng1/n18x8rN/nw8AH58eP9/PwGEBDpo7QC53cFDPP07XAYdW0E8vT1iY2XNjUlQt+L8t3n/A0KAPeD/+42Av39/LK1ut7b2Qsn8QMODf0CEA4sAAH+8wL//gAuKSNMVlzw3Wz+9vIKE+XozFEAFD4B9/Di9vb3AwQDCAoO/+zBAPz0ABNDAAMDerRNsypywywAAAAASUVORK5CYII=",
     title: "抽籤轉盤",
-    description: "貼上名單或選項，轉一下隨機抽出一個，點名、分組、選題目都好用。",
+    description:
+      "貼上名單或選項，轉一下隨機抽出一個，點名、分組、選題目都好用。",
   },
   lottery: {
     path: "/draw/lottery",
     imageSrc: "/images/covers/warm/lottery.webp",
-    blurDataURL: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Affv4f7+/woJAwAFB/nmywQPJgEFDvr5+AL//gAKDAm0x+ORqMgCDRnn6e3h4uQCAwIEBwkEvs/ne5mn3t8M6Ow01rqWNjg4e3t0AgIHA77T6ggPKSoU9tHg7Pn7/PLy8/8BAQL++P5WNxXu7O3N6+1dRiJOSUULCgkA/f0B+O/jAAD8zs/S/PsALCojAQQHAwMDBwYFp+FHEotb85QAAAAASUVORK5CYII=",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Affv4f7+/woJAwAFB/nmywQPJgEFDvr5+AL//gAKDAm0x+ORqMgCDRnn6e3h4uQCAwIEBwkEvs/ne5mn3t8M6Ow01rqWNjg4e3t0AgIHA77T6ggPKSoU9tHg7Pn7/PLy8/8BAQL++P5WNxXu7O3N6+1dRiJOSUULCgkA/f0B+O/jAAD8zs/S/PsALCojAQQHAwMDBwYFp+FHEotb85QAAAAASUVORK5CYII=",
     title: "抽籤機",
     description: "名單變成一顆顆乒乓球在玻璃球裡亂飛，被吹出來的那顆就是答案。",
   },
@@ -112,6 +115,33 @@ const pagesConfig = {
     title: "大富翁",
     description: "匯入自訂題庫，答對才能買地蓋房，最多 20 人同樂的教學大富翁。",
     guide: "老師先匯入 Excel 題庫並設定規則，再開始遊戲。",
+  },
+  timer: {
+    path: "/timer",
+    imageSrc: "/images/covers/warm/timer.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR42gGWAGn/Afbv5AkKBtPR1R0iLAkF/AcGBAABAvj4+AIICAS1y+iErMn94pkGBQPAxMnP0dMCAgIC0d/vw9rqlGNOBuro89qXg42drbCyBgoMAuPq9SIYDhUM9OgUXKfUGA0G+sPHzfXz8gRALxmEq9OS+xHX4u5oS1D+7e/Jz9X9/PwB+/Pn+fv9t8vkKR8QKx8P4uTrBgUEEhIRt8VNQdl18S8AAAAASUVORK5CYII=",
+    title: "計時器",
+    description:
+      "上課用的大字倒數計時器，時間到會響鈴，分組討論、小考、限時作答都好用。",
+  },
+  noise: {
+    path: "/noise",
+    imageSrc: "/images/covers/warm/noise.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR42gGWAGn/Affw5QAAAP/+/gIFBvf29v/+/REWFffy8wIAAAD+/v8ABggFAP3k4t1udHyoqK0EBQUCAQAAChAP9MS77JuW/AH+tri8/Pr6BQsNAvr8AM/VvPG2f/fl7h0kLAUEA8jKzvLv7gLc5N6quq4EExkIFxbr6ekNDA3v8PD+/f0B8+3i/P37B//9//8DBAsL5ubnEhIRCgsLzVxOYMzmoBUAAAAASUVORK5CYII=",
+    title: "噪音計",
+    description:
+      "用麥克風即時顯示教室有多吵，太大聲就變紅色，聲音只在這台裝置上計算。",
+  },
+  multiplication: {
+    path: "/multiplication",
+    imageSrc: "/images/covers/warm/multiplication.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR42gGWAGn/Affw5QILDAD39QYGA/Pz9/Ly8xcXFvv7+wL99PPunpXpy8zM4fT29fZ2fIObn6QFBQUEAAMD+trY9g8c2AX84OTKuLq9IB8dAgcIAgEHDxx3Ze3vhNrTmjExKw8PDr7BxPTw7wL/BAQCBw3T6/bB0NAjIiJNS0hPS0gGBwcB9+/kAQID9/n3+fv5DgoO9PX0CgkJBgYGMvBI3uJSnLwAAAAASUVORK5CYII=",
+    title: "九九乘法練習",
+    description: "自己挑要練的乘法表和題數，四選一作答，答完馬上看到答對幾題。",
+    guide: "先選要練哪幾段乘法表，再開始作答。",
   },
 } satisfies Record<string, Page>;
 
