@@ -150,10 +150,11 @@ const TileCard = memo(function TileCard({
           : undefined
       }
     >
+      {/* 地名浮在圖片上：格子太窄，讓字疊到圖上才擠得出可讀的字級 */}
       {tile.type !== "start" && (
-        <div className="px-1 pt-0.5">
+        <div className="absolute inset-x-0 top-0 z-10 px-1 pt-0.5">
           <span
-            className={`block truncate text-center text-xs font-bold ${special?.fg ?? "text-ink"}`}
+            className={`block truncate text-center text-sm font-extrabold leading-tight ${special?.fg ?? "text-ink"}`}
           >
             {tile.name}
           </span>
@@ -166,7 +167,8 @@ const TileCard = memo(function TileCard({
             alt={tile.name}
             fill
             sizes="90px"
-            className="object-contain p-0.5"
+            // 機會／命運的卡面是白的，會把上方的白色地名吃掉：整張往下讓出字的位置
+            className={`object-contain p-0.5 ${special ? "pt-[15%]" : ""}`}
           />
         ) : special?.emoji ? (
           <div className="flex h-full items-center justify-center text-2xl">
