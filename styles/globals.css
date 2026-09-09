@@ -559,6 +559,92 @@
   background: var(--background);
 }
 
+/*
+ * 計分板全螢幕是投影用的，卡片要鋪滿整個畫面。
+ * 40 張卡撐出來的高度會讓 --fs-scale 把整塊等比縮小，於是左右多出一大片留白——
+ * 所以這一頁把 scale 固定成 1，改成讓格線自己吃滿寬高、卡片跟著格子縮。
+ */
+#game-stage[data-unit="scoreboard"]:fullscreen {
+  padding: 0.75rem;
+}
+
+#game-stage[data-unit="scoreboard"]:fullscreen > [data-stage-inner] {
+  --fs-scale: 1;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* PageTemplate 在 stage-inner 與遊戲之間還包了一層 div，不一起拉伸就撐不到底 */
+#game-stage[data-unit="scoreboard"]:fullscreen > [data-stage-inner] > div,
+#game-stage[data-unit="scoreboard"]:fullscreen [data-score-root] {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+}
+
+#game-stage[data-unit="scoreboard"]:fullscreen [data-score-grid] {
+  flex: 1;
+  min-height: 0;
+  /* 欄數隨寬度長，列高平均分掉剩下的高度 —— 組數越多每張卡越矮，不會溢出 */
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+}
+
+#game-stage[data-unit="scoreboard"]:fullscreen [data-score-card] {
+  min-height: 0;
+  justify-content: center;
+  gap: 0;
+  padding: 0.4rem;
+  /* 卡片高度由格線決定，所以卡內字級可以反過來吃卡片自己的高度（cqh） */
+  container-type: size;
+  /* 不能 hidden：皇冠刻意壓在卡片右上角外緣，裁掉就少一半 */
+  overflow: visible;
+}
+
+/* 字級吃格子高度：組數越多卡片越矮，字跟著小，40 組也塞得下 */
+#game-stage[data-unit="scoreboard"]:fullscreen [data-score-value] {
+  font-size: min(4.5rem, 46cqh);
+}
+
+#game-stage[data-unit="scoreboard"]:fullscreen [data-score-name] {
+  font-size: min(2rem, 20cqh);
+  line-height: 1.3;
+  padding-block: 0;
+}
+
+#game-stage[data-unit="scoreboard"]:fullscreen [data-score-foot] button {
+  height: min(2.75rem, 26cqh);
+  width: min(2.75rem, 26cqh);
+}
+
+#game-stage[data-unit="scoreboard"]:fullscreen [data-score-foot] span {
+  font-size: min(0.875rem, 14cqh);
+}
+
+/* 皇冠掛上來時輕輕落下，不是憑空出現（沒有東西是從 scale(0) 冒出來的） */
+[data-score-crown] {
+  transition:
+    transform 200ms var(--ease-out),
+    opacity 200ms var(--ease-out);
+}
+
+@starting-style {
+  [data-score-crown] {
+    opacity: 0;
+    transform: translateY(-3px) rotate(8deg) scale(0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-score-crown] {
+    transition: opacity 200ms var(--ease-out);
+  }
+}
+
 /* 棋盤是固定寬的一大塊，不能套 64rem 上限，讓它用自然寬再交給 --fs-scale 等比縮 */
 #game-stage[data-unit="monopoly"]:fullscreen > [data-stage-inner] {
   width: auto;

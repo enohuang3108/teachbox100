@@ -48,6 +48,9 @@ Barkley SITS on the paper to the right of the bars, upright and alert, holding O
 Centre-left, ONE big multiplication sign — a chunky solid red #CB2108 diagonal cross (X shape), thick arms, hand-drawn edges — standing on the paper. To its right, a solid blue #02569B equals sign (two chunky horizontal bars). NO digits, NO numbers, NO text anywhere; the cross and the equals sign are the only symbols.
 Behind and slightly below them, THREE flat rounded cards lie fanned on the paper, each a plain solid shape with nothing written on it: one white #FFFFFF, one gold #F8B003, one green #2C5427.
 Barkley STANDS UPRIGHT on his hind legs at the right, roughly as tall as the cross, one front paw raised to point at the multiplication cross, the other paw planted on his hip with the elbow bent out.""",
+    "scoreboard": """a classroom team scoreboard.
+Centre, THREE flat upright rounded scoreboard panels standing side by side on the paper, evenly spaced, of slightly different heights like a podium: one blue #02569B, one green #2C5427, one gold #F8B003. Each panel is one solid flat shape with TWO cream KNOCKED-OUT rounded rectangles stacked inside it — a wide short one near the top and a big square one below — and absolutely NOTHING written in them: no digits, no letters, no marks.
+Barkley STANDS UPRIGHT on his hind legs at the right of the panels, roughly as tall as the tallest panel, one front paw raised flat and pressed against the side of the nearest panel as if tallying up the score, the other paw planted on his hip with the elbow bent out.""",
 }
 
 

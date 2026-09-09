@@ -26,21 +26,22 @@
 
 ## 單元
 
-| 單元 | 路徑 | 在教什麼 |
-| --- | --- | --- |
-| 認識新臺幣 | `/coin/introduction` | 每種硬幣、鈔票長什麼樣子，哪些組合價值一樣 |
-| 金錢等值換算 | `/coin/equivalent` | 用不同的錢湊出一樣的金額 |
-| 計算金錢價值 | `/coin/value` | 把一堆硬幣鈔票加起來 |
-| 付款 | `/coin/pay` | 看商品價格，挑出剛好的錢 |
-| 購物 | `/coin/buy` | 挑商品 → 算總價 → 付款，走完整流程 |
-| 找零 | `/coin/change` | 算出該找多少，再把零錢湊出來 |
-| 學習讀時鐘 | `/clock/current-time` | 分清時針分針，讀出幾點幾分 |
-| 翻牌配對 | `/memory` | 記憶配對，可自訂卡片主題 |
-| 大富翁 | `/monopoly` | 全班共用一台電腦輪流玩，題庫可匯入 |
-| 抽籤轉盤 / 抽籤機 | `/draw/wheel`、`/draw/lottery` | 課堂點名、分組用的抽籤工具 |
-| 九九乘法練習 | `/multiplication` | 自選段數與題數，四選一練乘法表 |
-| 計時器 | `/timer` | 大字倒數，時間到響鈴，可全螢幕投影 |
-| 噪音計 | `/noise` | 麥克風即時顯示音量，太吵變紅色 |
+| 單元              | 路徑                           | 在教什麼                                   |
+| ----------------- | ------------------------------ | ------------------------------------------ |
+| 認識新臺幣        | `/coin/introduction`           | 每種硬幣、鈔票長什麼樣子，哪些組合價值一樣 |
+| 金錢等值換算      | `/coin/equivalent`             | 用不同的錢湊出一樣的金額                   |
+| 計算金錢價值      | `/coin/value`                  | 把一堆硬幣鈔票加起來                       |
+| 付款              | `/coin/pay`                    | 看商品價格，挑出剛好的錢                   |
+| 購物              | `/coin/buy`                    | 挑商品 → 算總價 → 付款，走完整流程         |
+| 找零              | `/coin/change`                 | 算出該找多少，再把零錢湊出來               |
+| 學習讀時鐘        | `/clock/current-time`          | 分清時針分針，讀出幾點幾分                 |
+| 翻牌配對          | `/memory`                      | 記憶配對，可自訂卡片主題                   |
+| 大富翁            | `/monopoly`                    | 全班共用一台電腦輪流玩，題庫可匯入         |
+| 抽籤轉盤 / 抽籤機 | `/draw/wheel`、`/draw/lottery` | 課堂點名、分組用的抽籤工具                 |
+| 九九乘法練習      | `/multiplication`              | 自選段數與題數，四選一練乘法表             |
+| 計時器            | `/timer`                       | 大字倒數，時間到響鈴，可全螢幕投影         |
+| 噪音計            | `/noise`                       | 麥克風即時顯示音量，太吵變紅色             |
+| 計分板            | `/scoreboard`                  | 老師手動加減分，最高分那組會亮起來         |
 
 ## 快速開始
 
@@ -55,13 +56,13 @@ pnpm dev            # http://localhost:3000
 
 ### 常用指令
 
-| 指令 | 說明 |
-| --- | --- |
-| `pnpm dev` | 開發伺服器 |
-| `pnpm build` / `pnpm start` | 產出並啟動 production build |
-| `pnpm lint` | oxlint（含 type-aware 規則） |
-| `pnpm test` / `pnpm test:coverage` | Vitest 單元測試 |
-| `pnpm seo:snapshot` | 抓 Lighthouse／SEO 數據寫進 `docs/seo/history.md` |
+| 指令                               | 說明                                              |
+| ---------------------------------- | ------------------------------------------------- |
+| `pnpm dev`                         | 開發伺服器                                        |
+| `pnpm build` / `pnpm start`        | 產出並啟動 production build                       |
+| `pnpm lint`                        | oxlint（含 type-aware 規則）                      |
+| `pnpm test` / `pnpm test:coverage` | Vitest 單元測試                                   |
+| `pnpm seo:snapshot`                | 抓 Lighthouse／SEO 數據寫進 `docs/seo/history.md` |
 
 ## 設計原則
 
@@ -72,26 +73,26 @@ pnpm dev            # http://localhost:3000
 
 不能違反的限制：
 
-| 限制 | 為什麼 |
-| --- | --- |
-| 純前端、可離線 | 教室網路不穩。PWA（`@serwist/next`），狀態進 `localStorage` |
-| 不需要帳號 | 孩子沒有 email，老師不想幫全班開帳號 |
+| 限制             | 為什麼                                                           |
+| ---------------- | ---------------------------------------------------------------- |
+| 純前端、可離線   | 教室網路不穩。PWA（`@serwist/next`），狀態進 `localStorage`      |
+| 不需要帳號       | 孩子沒有 email，老師不想幫全班開帳號                             |
 | 大富翁是單一螢幕 | 老師電腦／投影幕上全班共用，玩家輪流上前操作。**不做多裝置連線** |
-| 動效要克制 | 前庭敏感的孩子會不舒服。一定要接 `prefers-reduced-motion` |
-| 繁體中文台灣用語 | 「新臺幣」不是「人民幣」，「鈔票」不是「紙幣」 |
+| 動效要克制       | 前庭敏感的孩子會不舒服。一定要接 `prefers-reduced-motion`        |
+| 繁體中文台灣用語 | 「新臺幣」不是「人民幣」，「鈔票」不是「紙幣」                   |
 
 ## 技術架構
 
-| 層 | 選用 |
-| --- | --- |
-| 框架 | Next.js 15 App Router、React 19、TypeScript 5.9 |
+| 層   | 選用                                                                       |
+| ---- | -------------------------------------------------------------------------- |
+| 框架 | Next.js 15 App Router、React 19、TypeScript 5.9                            |
 | 樣式 | Tailwind CSS 4、shadcn/ui（Radix）、設計 token 集中在 `styles/globals.css` |
-| 動效 | `motion`（Framer Motion）、`canvas-confetti`；大富翁物理用 matter-js |
-| 狀態 | Zustand（僅遊戲單元），規則邏輯抽成純函式 |
-| 音效 | Howler.js |
-| 離線 | `@serwist/next` service worker |
-| 分析 | PostHog、Umami（皆為 public key） |
-| 測試 | Vitest |
+| 動效 | `motion`（Framer Motion）、`canvas-confetti`；大富翁物理用 matter-js       |
+| 狀態 | Zustand（僅遊戲單元），規則邏輯抽成純函式                                  |
+| 音效 | Howler.js                                                                  |
+| 離線 | `@serwist/next` service worker                                             |
+| 分析 | PostHog、Umami（皆為 public key）                                          |
+| 測試 | Vitest                                                                     |
 
 ### 目錄結構
 
@@ -129,22 +130,21 @@ scripts/            SEO snapshot、IndexNow、GSC 排名查詢
 
 ## 延伸文件
 
-| 文件 | 內容 |
-| --- | --- |
-| [`CONTEXT.md`](CONTEXT.md) | 領域詞彙 glossary（繁中／English／定義），含已知的命名踩雷點 |
-| [`docs/superpowers/specs/2026-09-02-home-redesign.md`](docs/superpowers/specs/2026-09-02-home-redesign.md) | 設計語言、design token、動效原則、生圖 prompt 與後製流程 |
-| [`docs/superpowers/specs/2026-06-01-monopoly-design.md`](docs/superpowers/specs/2026-06-01-monopoly-design.md) | 大富翁單元的設計決策 |
+| 文件                                                                                                             | 內容                                                         |
+| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [`CONTEXT.md`](CONTEXT.md)                                                                                       | 領域詞彙 glossary（繁中／English／定義），含已知的命名踩雷點 |
+| [`docs/superpowers/specs/2026-09-02-home-redesign.md`](docs/superpowers/specs/2026-09-02-home-redesign.md)       | 設計語言、design token、動效原則、生圖 prompt 與後製流程     |
+| [`docs/superpowers/specs/2026-06-01-monopoly-design.md`](docs/superpowers/specs/2026-06-01-monopoly-design.md)   | 大富翁單元的設計決策                                         |
 | [`docs/superpowers/specs/2026-09-02-page-transitions.md`](docs/superpowers/specs/2026-09-02-page-transitions.md) | 換頁轉場與上一頁行為：view transition 與捲動還原踩過的四個坑 |
-| [`.claude/memo/ui-style-guide.md`](.claude/memo/ui-style-guide.md) | 動手改 UI 前的速查 + 已廢止寫法對照表 |
+| [`.claude/memo/ui-style-guide.md`](.claude/memo/ui-style-guide.md)                                               | 動手改 UI 前的速查 + 已廢止寫法對照表                        |
 
 ## 授權
 
-| 範圍 | 授權 |
-| --- | --- |
-| 原始碼 | [MIT](LICENSE) |
+| 範圍                                                | 授權                              |
+| --------------------------------------------------- | --------------------------------- |
+| 原始碼                                              | [MIT](LICENSE)                    |
 | 圖片、插圖、音效等素材（`public/`、`docs/assets/`） | [CC BY-NC-SA 4.0](LICENSE-ASSETS) |
 
 素材可自由用於教學與其他非商業用途，需標示來源，改作須沿用相同授權。商業使用請先聯絡。
 
 © 2026 Eno Huang
-

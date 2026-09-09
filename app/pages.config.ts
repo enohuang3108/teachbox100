@@ -134,6 +134,15 @@ const pagesConfig = {
     description:
       "用麥克風即時顯示教室有多吵，太大聲就變紅色，聲音只在這台裝置上計算。",
   },
+  scoreboard: {
+    path: "/scoreboard",
+    imageSrc: "/images/covers/warm/scoreboard.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afjx5gQCAAMGCgACBPf4/gQC+wUD//j4+QT7/P3w+wLHybXv8epdNh7n8xHt9QcqJyEE2+fyhK7cBPzGDwHeYRjwtLoUtdAIraSRBAsIBmtHHvj5UR4O9PsWCS434KW+pvHv8QHl5N/Z5vMEAe0MBPYqE/zs9Q3i6/4wLScB+fLmAwIBAQAC/v8B/P4AAwIABQQC+Pn5chdKq+vAp1UAAAAASUVORK5CYII=",
+    title: "計分板",
+    description:
+      "老師上課用的分組計分板，2 到 40 組，一次加減 1、2、5 或 10 分，最高分那組會亮起來。",
+  },
   multiplication: {
     path: "/multiplication",
     imageSrc: "/images/covers/warm/multiplication.webp",

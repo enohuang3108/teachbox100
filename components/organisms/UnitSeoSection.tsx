@@ -33,12 +33,16 @@ export function UnitSeoSection({
           <p className="text-muted-foreground mt-4 text-base leading-[1.9]">
             {seo.intro}
           </p>
-          <dl className="text-muted-foreground mt-4 flex flex-col gap-1.5 text-sm leading-[1.8]">
-            <div className="flex gap-2">
-              <dt className="text-ink-soft shrink-0 font-semibold">練習重點</dt>
-              <dd>{seo.teaches}</dd>
-            </div>
-            {seo.curriculum && (
+          {/* 練習重點只對有課綱對應的教材單元有意義；計時器、計分板這類
+              課堂工具沒有「要練什麼」，列出來只是灌水 */}
+          {seo.curriculum && (
+            <dl className="text-muted-foreground mt-4 flex flex-col gap-1.5 text-sm leading-[1.8]">
+              <div className="flex gap-2">
+                <dt className="text-ink-soft shrink-0 font-semibold">
+                  練習重點
+                </dt>
+                <dd>{seo.teaches}</dd>
+              </div>
               <div className="flex gap-2">
                 <dt className="text-ink-soft shrink-0 font-semibold">
                   108 課綱
@@ -54,8 +58,8 @@ export function UnitSeoSection({
                   </ul>
                 </dd>
               </div>
-            )}
-          </dl>
+            </dl>
+          )}
         </div>
         <div className="relative aspect-[4/3] w-full shrink-0 md:w-64">
           <Image

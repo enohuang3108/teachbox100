@@ -67,6 +67,15 @@ export const useSound = () => {
     [sfxVolume],
   );
 
+  /** 計分板加分／減分：短促、可連按，不用慶祝感的 success */
+  const playAddSound = useCallback(() => {
+    ui.play("select", { volume: sfxVolume });
+  }, [sfxVolume]);
+
+  const playSubtractSound = useCallback(() => {
+    ui.play("deselect", { volume: sfxVolume });
+  }, [sfxVolume]);
+
   const playBonusSound = useCallback(() => {
     ui.play("bonus", { volume: sfxVolume });
   }, [sfxVolume]);
@@ -75,6 +84,8 @@ export const useSound = () => {
     playCorrectSound,
     playWrongSound,
     playSpinLoop,
+    playAddSound,
+    playSubtractSound,
     playBonusSound,
     playDiceSound,
     playMoneySound,

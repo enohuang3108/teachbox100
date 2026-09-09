@@ -6,8 +6,12 @@ import { Link } from "next-view-transitions";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
-// 教材頁的 logo 已經在 PageTitleBar 裡，不再放一份
-const UNIT_PATHS = new Set(Object.values(pages).map((p) => p.path));
+// 教材頁的 logo 已經在 PageTitleBar 裡，不再放一份。
+// 學生的搶答頁也不要：那支手機只有一顆按鈕的任務，logo 與意見回饋都是干擾。
+const BARE_PATHS = new Set([
+  ...Object.values(pages).map((p) => p.path),
+  "/scoreboard/join",
+]);
 
 const Logo = ({ size }: { size: number }) => (
   <Link href="/" passHref prefetch={true} aria-label="回到首頁">
@@ -23,7 +27,7 @@ const Logo = ({ size }: { size: number }) => (
 
 export const AppChrome = () => {
   const pathname = usePathname();
-  if (pathname && UNIT_PATHS.has(pathname)) return null;
+  if (pathname && BARE_PATHS.has(pathname)) return null;
 
   return (
     <>
