@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
+import { FitText } from "./FitText";
 import NextImage from "next/image";
 import { memo, type ReactNode } from "react";
 import { BOARD } from "@/lib/monopoly/board";
@@ -152,11 +153,13 @@ const TileCard = memo(function TileCard({
     >
       {tile.type !== "start" && (
         <div className="px-1 pt-0.5">
-          <span
-            className={`block truncate text-center text-[18px] leading-tight font-extrabold ${special?.fg ?? "text-ink"}`}
+          <FitText
+            className={`font-extrabold ${special?.fg ?? "text-ink"}`}
+            min={10}
+            max={22}
           >
             {tile.name}
-          </span>
+          </FitText>
         </div>
       )}
       <div className="relative min-h-0 flex-1">

@@ -6,8 +6,7 @@ import { Link } from "next-view-transitions";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
-// 大富翁要乾淨版面；教材頁的 logo 已經在 PageTitleBar 裡，兩種都不再放一份
-const HIDDEN_PREFIXES = ["/monopoly"];
+// 教材頁的 logo 已經在 PageTitleBar 裡，不再放一份
 const UNIT_PATHS = new Set(Object.values(pages).map((p) => p.path));
 
 const Logo = ({ size }: { size: number }) => (
@@ -24,7 +23,6 @@ const Logo = ({ size }: { size: number }) => (
 
 export const AppChrome = () => {
   const pathname = usePathname();
-  if (HIDDEN_PREFIXES.some((p) => pathname?.startsWith(p))) return null;
   if (pathname && UNIT_PATHS.has(pathname)) return null;
 
   return (

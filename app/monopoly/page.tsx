@@ -188,7 +188,15 @@ export default function MonopolyPage() {
   if (!hydrated) return null;
 
   if (!game || game.phase === "setup") {
-    return <SetupPanel />;
+    return (
+      <>
+        <PageTitleBar
+          trail={getBreadcrumbTrail("monopoly")}
+          siblings={siblingsOf("monopoly")}
+        />
+        <SetupPanel />
+      </>
+    );
   }
 
   const rollDisabled = pa !== null;

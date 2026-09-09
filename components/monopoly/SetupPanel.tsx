@@ -24,6 +24,7 @@ import {
   rowsFromFile,
 } from "@/lib/monopoly/excel";
 import { defaultCharacterId } from "@/lib/monopoly/characters";
+import { DEFAULT_QUESTIONS } from "@/lib/monopoly/default-questions";
 import { useMonopolyStore } from "@/lib/monopoly/store";
 import { PLAYER_COLORS, type EndCondition } from "@/lib/monopoly/types";
 import { CharacterPicker } from "./CharacterPicker";
@@ -349,9 +350,21 @@ export function SetupPanel() {
       >
         開始遊戲
       </Button>
+      <Button
+        variant="outline"
+        className="w-full rounded-full text-base font-bold transition-transform duration-150 ease-out active:scale-[0.97]"
+        size="lg"
+        disabled={playerCount < 2}
+        onClick={() => {
+          importQuestions(DEFAULT_QUESTIONS);
+          begin();
+        }}
+      >
+        使用預設題庫開始遊戲（{DEFAULT_QUESTIONS.length} 題）
+      </Button>
       {!canStart && (
         <p className="text-center text-sm leading-[1.75] text-muted-foreground">
-          先匯入題庫，玩家至少要 2 位
+          要用自己的題庫請先匯入；玩家至少要 2 位
         </p>
       )}
     </div>
