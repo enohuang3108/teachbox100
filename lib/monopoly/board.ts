@@ -2,8 +2,8 @@ import type { PropertyTile, Tile } from "./types";
 
 const CHANCE_IMG = "/images/monopoly/chance-v2.webp";
 const FATE_IMG = "/images/monopoly/fate-v2.webp";
-const START_IMG = "/images/monopoly/start.webp";
-const JAIL_IMG = "/images/monopoly/jail.webp";
+const START_IMG = "/images/monopoly/start-v3.webp";
+const JAIL_IMG = "/images/monopoly/jail-v4.webp";
 
 // 依售價分三級：地段越貴投報率越低、但旅館上限越驚人（高資本豪賭）。
 // 倍率皆相對售價 P：toll=[空地,1棟,2棟,旅館]、house=每棟造價、hotel=升旅館費用。
@@ -45,48 +45,43 @@ function prop(
   };
 }
 
-// 地標圖路徑（編號沿用原素材，移除的格不再引用）
-function landmark(n: number): string {
-  return `/images/monopoly/landmark-${String(n).padStart(2, "0")}.webp`;
-}
-
 // 34 格沿 12×7 方框邊緣排列，順時針。四角皆為特殊格（起點/監獄/機會/命運）。
 // 22 個地產，台北101 在 index 32（倒數第二格，命運卡 moveTo 會用到）。
 export const BOARD: Tile[] = [
   { index: 0, type: "start", name: "起點", image: START_IMG },
-  prop(1, "馬祖藍眼淚", 2300, landmark(23)),
-  prop(2, "新北野柳", 1800, landmark(2)),
+  prop(1, "馬祖藍眼淚", 2300, "/images/monopoly/landmark-01-v2.webp"),
+  prop(2, "新北野柳", 1800, "/images/monopoly/landmark-02-v2.webp"),
   { index: 3, type: "chance", name: "機會", image: CHANCE_IMG },
-  prop(4, "基隆燈塔", 1100, landmark(3)),
-  prop(5, "桃園機場", 2000, landmark(4)),
+  prop(4, "基隆燈塔", 1100, "/images/monopoly/landmark-03-v2.webp"),
+  prop(5, "桃園機場", 2000, "/images/monopoly/landmark-04-v2.webp"),
   { index: 6, type: "fate", name: "命運", image: FATE_IMG },
-  prop(7, "新竹米粉", 1300, landmark(5)),
-  prop(8, "台中歌劇院", 2800, landmark(6)), // 🔴
+  prop(7, "新竹米粉", 1300, "/images/monopoly/landmark-05-v2.webp"),
+  prop(8, "台中歌劇院", 2800, "/images/monopoly/landmark-06a-v2.webp"), // 🔴
   { index: 9, type: "chance", name: "機會", image: CHANCE_IMG },
-  prop(10, "彰化扇形車庫", 1200, landmark(7)),
+  prop(10, "彰化扇形車庫", 1200, "/images/monopoly/landmark-07b-v2.webp"),
   { index: 11, type: "jail", name: "監獄", image: JAIL_IMG },
-  prop(12, "南投日月潭", 2200, landmark(8)),
-  prop(13, "雲林太平雲梯", 1000, landmark(9)),
+  prop(12, "南投日月潭", 2200, "/images/monopoly/landmark-08-v2.webp"),
+  prop(13, "雲林太平雲梯", 1000, "/images/monopoly/landmark-09-v2.webp"),
   { index: 14, type: "fate", name: "命運", image: FATE_IMG },
-  prop(15, "嘉義阿里山", 2600, landmark(10)), // 🔴
-  prop(16, "台南安平古堡", 1900, landmark(11)),
+  prop(15, "嘉義阿里山", 2600, "/images/monopoly/landmark-10-v2.webp"), // 🔴
+  prop(16, "台南安平古堡", 1900, "/images/monopoly/landmark-11-v2.webp"),
   { index: 17, type: "chance", name: "機會", image: CHANCE_IMG },
-  prop(18, "高雄85大樓", 3000, landmark(12)), // 🔴
-  prop(19, "屏東海生館", 1400, landmark(13)),
+  prop(18, "高雄85大樓", 3000, "/images/monopoly/landmark-12-v2.webp"), // 🔴
+  prop(19, "屏東海生館", 1400, "/images/monopoly/landmark-13-v2.webp"),
   { index: 20, type: "fate", name: "命運", image: FATE_IMG },
-  prop(21, "花蓮太魯閣", 2400, landmark(14)),
-  prop(22, "台東熱氣球", 900, landmark(15)), // 🟢 最便宜
+  prop(21, "花蓮太魯閣", 2400, "/images/monopoly/landmark-14-v2.webp"),
+  prop(22, "台東熱氣球", 900, "/images/monopoly/landmark-15-v2.webp"), // 🟢 最便宜
   { index: 23, type: "chance", name: "機會", image: CHANCE_IMG },
-  prop(24, "龍騰斷橋", 1300, landmark(16)),
-  prop(25, "宜蘭龜山島", 1600, landmark(17)),
+  prop(24, "龍騰斷橋", 1300, "/images/monopoly/landmark-16-v2.webp"),
+  prop(25, "宜蘭龜山島", 1600, "/images/monopoly/landmark-17-v2.webp"),
   { index: 26, type: "fate", name: "命運", image: FATE_IMG },
-  prop(27, "阿里山神木", 3400, landmark(19)), // 🔴
+  prop(27, "阿里山神木", 3400, "/images/monopoly/landmark-19-v2.webp"), // 🔴
   { index: 28, type: "fate", name: "命運", image: FATE_IMG },
-  prop(29, "嘉義噴水池", 1000, landmark(20)),
-  prop(30, "澎湖玄武岩", 1700, landmark(22)),
+  prop(29, "嘉義噴水池", 1000, "/images/monopoly/landmark-20-v2.webp"),
+  prop(30, "澎湖玄武岩", 1700, "/images/monopoly/landmark-22-v2.webp"),
   { index: 31, type: "chance", name: "機會", image: CHANCE_IMG },
-  prop(32, "台北101", 4000, landmark(1)), // 🔴 蛋黃地王（倒數第二格）
-  prop(33, "三峽老街", 1500, landmark(24)),
+  prop(32, "台北101", 4000, "/images/monopoly/landmark-01x-v2.webp"), // 🔴 蛋黃地王（倒數第二格）
+  prop(33, "三峽老街", 1500, "/images/monopoly/landmark-24-v2.webp"),
 ];
 
 export const BOARD_SIZE = BOARD.length;

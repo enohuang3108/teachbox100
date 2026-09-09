@@ -114,8 +114,8 @@ function innerEdge(i: number): { cell: string; stack: string } {
 const SPECIAL: Record<string, { bg: string; fg?: string; emoji?: string }> = {
   start: { bg: "bg-paper" }, // 起點：紙色底、僅顯示 start.webp 圖檔
   jail: { bg: "bg-paper" }, // 監獄：紙色底、用 jail.webp 圖檔
-  chance: { bg: "bg-brand-blue", fg: "text-paper", emoji: "❓" },
-  fate: { bg: "bg-brand-red", fg: "text-paper", emoji: "✨" },
+  chance: { bg: "bg-brand-blue/90", fg: "text-paper", emoji: "❓" },
+  fate: { bg: "bg-brand-red/90", fg: "text-paper", emoji: "✨" },
 };
 
 interface Walking {
@@ -153,7 +153,7 @@ const TileCard = memo(function TileCard({
       {tile.type !== "start" && (
         <div className="px-1 pt-0.5">
           <span
-            className={`block truncate text-center text-xs font-bold ${special?.fg ?? "text-ink"}`}
+            className={`block truncate text-center text-[18px] leading-tight font-extrabold ${special?.fg ?? "text-ink"}`}
           >
             {tile.name}
           </span>
@@ -178,7 +178,7 @@ const TileCard = memo(function TileCard({
         (owner ? (
           // 已買：顯示踩到要繳的租金（隨房子棟數變高），用地主代表色標示
           <div
-            className="px-1 pb-0.5 text-center text-[11px] font-extrabold tabular-nums"
+            className="px-1 pb-0.5 text-center text-[16px] font-extrabold tabular-nums"
             style={{ color: owner.color }}
           >
             過路費$
@@ -188,7 +188,7 @@ const TileCard = memo(function TileCard({
           </div>
         ) : (
           // 未買：顯示購買價
-          <div className="px-1 pb-0.5 text-center text-[11px] font-semibold tabular-nums text-ink-soft/70">
+          <div className="px-1 pb-0.5 text-center text-[16px] font-semibold tabular-nums text-ink-soft/70">
             售 ${tile.price.toLocaleString()}
           </div>
         ))}

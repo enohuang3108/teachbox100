@@ -30,7 +30,7 @@ export function CardDialog({
       <SpotlightAvatar player={player} size={size} name />
 
       <motion.div
-        className="text-base font-bold tracking-wide text-paper/85"
+        className="text-[36px] font-extrabold tracking-[0.15em] text-paper/85"
         style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}

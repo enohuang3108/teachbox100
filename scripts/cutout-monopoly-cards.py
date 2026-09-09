@@ -4,7 +4,7 @@ import numpy as np, pathlib
 from PIL import Image
 
 S = 512
-for name, out in (("chance", "chance-v2"), ("fate", "fate-v2")):
+for name, out in (("chance", "chance-v2"), ("fate", "fate-v2"), ("start-final", "start-v3")):
     im = Image.open(f"/tmp/mono-cards/{name}.png").convert("RGB")
     a = np.asarray(im).astype(int)
     bg = np.median(a[:8, :8].reshape(-1, 3), axis=0)

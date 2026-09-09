@@ -321,8 +321,8 @@ export default function MonopolyPage() {
               </motion.div>
               <div className="text-center leading-tight">
                 <div
-                  className={`max-w-[7rem] truncate font-bold ${
-                    active ? "text-base text-ink" : "text-sm text-ink-soft/60"
+                  className={`max-w-[9rem] truncate font-bold ${
+                    active ? "text-2xl text-ink" : "text-lg text-ink-soft/60"
                   }`}
                 >
                   {p.name}
@@ -330,7 +330,7 @@ export default function MonopolyPage() {
                 </div>
                 <div
                   className={`font-extrabold tabular-nums ${
-                    active ? "text-base" : "text-sm"
+                    active ? "text-2xl" : "text-lg"
                   }`}
                 >
                   <MoneyDisplay
