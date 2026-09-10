@@ -78,6 +78,9 @@ export function BuzzPanel() {
               </span>
               <span className="text-ink-soft/70 text-xs break-all">{url}</span>
             </div>
+            <p className="text-ink-soft text-center text-sm leading-[1.6]">
+              請確認老師與學生的裝置連到同一個 Wi-Fi，再掃 QR code 加入。
+            </p>
             {/* 老師開著 QR 等人進來，就是盯這個數字；名單放小字在下面 */}
             <div className="border-ink/10 flex w-full flex-col items-center gap-1 border-t pt-4">
               <span className="text-ink text-xl font-semibold tabular-nums">

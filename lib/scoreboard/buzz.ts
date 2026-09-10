@@ -94,10 +94,30 @@ function hushCloseNoise() {
       : original(...args);
 }
 
+/**
+ * 首次掃 QR 後才下載 signaling 模組，會把下載時間疊到 WebRTC 配對上。
+ * 進學生頁時預載，真正加入時共用同一個 promise，不會多抓一次。
+ */
+let signalingModule: Promise<typeof import("trystero/nostr")> | null = null;
+const loadSignaling = () =>
+  (signalingModule ??= import("trystero/nostr"));
+export const warmSignaling = () => void loadSignaling();
+
+/** 立即送一次；部分瀏覽器的 data channel 剛打開時再補一次，避免漏掉狀態。 */
+export const STATE_RETRY_MS = 150;
+export function synchronizeNewPeer(
+  send: () => void,
+  schedule: (task: () => void, delay: number) => unknown = (task, delay) =>
+    window.setTimeout(task, delay),
+) {
+  send();
+  schedule(send, STATE_RETRY_MS);
+}
+
 // trystero 只在瀏覽器跑得動（WebRTC），動態載入避免進到 SSR 與首屏 bundle
 async function connect(code: string, host: boolean) {
   hushCloseNoise();
-  const { joinRoom, selfId } = await import("trystero/nostr");
+  const { joinRoom, selfId } = await loadSignaling();
   mySelfId = selfId;
   const r = joinRoom({ appId: APP_ID }, roomId(code));
 
@@ -129,9 +149,9 @@ async function connect(code: string, host: boolean) {
       const { open, order } = get();
       state.send({ open, order });
     };
-    // 狀態一動就同步給全班；學生剛連上還沒建好 data channel，晚一拍再補一份
+    // state 變動就同步給全班；新 peer 先立刻拿當前狀態，再短暫補送一次。
     unbroadcast = useBuzzStore.subscribe(broadcast);
-    r.onPeerJoin = () => setTimeout(broadcast, 500);
+    r.onPeerJoin = () => synchronizeNewPeer(broadcast);
     // 刻意不處理 onPeerLeave：手機息屏、切 App 都會斷線，格子不能因此消失。
     // 學生重連時用名字認回同一格（見 addPlayer），分數才留得住。
   } else {
@@ -212,11 +232,12 @@ export async function openRoom() {
   if (get().code) return get().code!;
   const code = savedCode() ?? makeCode();
   rememberCode(code);
+  // QR 出現前老師端已經加入 signaling room；學生掃得很快也不會先連到空房。
+  await connect(code, true);
   set({ code, open: false, players: [], order: [], connected: true });
   // 開房就清空格子：接下來幾組由誰連進來決定
   useScoreboardStore.setState({ teams: [] });
   unsync = syncTeams();
-  await connect(code, true);
   return code;
 }
 

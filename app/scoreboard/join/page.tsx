@@ -6,6 +6,7 @@ import {
   myRank,
   sendBuzz,
   useBuzzStore,
+  warmSignaling,
 } from "@/lib/scoreboard/buzz";
 import { useEffect, useState } from "react";
 
@@ -31,6 +32,8 @@ export default function JoinPage() {
   };
 
   useEffect(() => {
+    // QR 頁一打開就預載；使用者填名字時連線模組已經在路上。
+    warmSignaling();
     const c = location.hash.slice(1).toUpperCase();
     const n = localStorage.getItem("buzz-name") ?? "";
     setCode(c);

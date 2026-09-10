@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { addPlayer, nextOrder } from "./buzz";
+import {
+  addPlayer,
+  nextOrder,
+  synchronizeNewPeer,
+  STATE_RETRY_MS,
+} from "./buzz";
 
 const a = { id: "a", name: "小明" };
 const b = { id: "b", name: "小華" };
@@ -36,5 +41,21 @@ describe("addPlayer", () => {
 
   it("空白名字給預設值", () => {
     expect(addPlayer([], "x", "  ")[0].name).toBe("同學");
+  });
+});
+
+describe("synchronizeNewPeer", () => {
+  it("新 peer 一建立資料通道就先收到目前狀態，不等待固定半秒", () => {
+    const sent: string[] = [];
+    const scheduled: { delay: number; task: () => void }[] = [];
+
+    synchronizeNewPeer(
+      () => sent.push("state"),
+      (task, delay) => void scheduled.push({ task, delay }),
+    );
+
+    expect(sent).toEqual(["state"]);
+    expect(scheduled).toHaveLength(1);
+    expect(scheduled[0].delay).toBe(STATE_RETRY_MS);
   });
 });
