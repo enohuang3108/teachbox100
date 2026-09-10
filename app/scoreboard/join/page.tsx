@@ -21,6 +21,29 @@ export default function JoinPage() {
   const { open, order, connected } = useBuzzStore();
   const rank = joined ? myRank(order) : 0;
 
+  useEffect(() => {
+    // Android Chrome 等支援此屬性的瀏覽器會直接關掉頂端下拉重新整理。
+    // 設在根節點，才涵蓋整個學生頁的捲動範圍。
+    const root = document.documentElement;
+    const previous = root.style.overscrollBehaviorY;
+    root.style.overscrollBehaviorY = "none";
+    return () => {
+      root.style.overscrollBehaviorY = previous;
+    };
+  }, []);
+
+  useEffect(() => {
+    // 有些手機瀏覽器不支援 overscroll-behavior。已進入搶答時，
+    // 以瀏覽器原生確認視窗作最後防線；文案由瀏覽器決定，不能自訂。
+    if (!joined) return;
+    const confirmLeaving = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = true;
+    };
+    window.addEventListener("beforeunload", confirmLeaving);
+    return () => window.removeEventListener("beforeunload", confirmLeaving);
+  }, [joined]);
+
   const join = async (c = code, n = name) => {
     const room = c.trim().toUpperCase();
     const who = n.trim();
