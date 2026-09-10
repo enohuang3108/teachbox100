@@ -32,6 +32,10 @@ next-env.d.ts
 # test coverage
 /coverage
 
+# Playwright failure diagnostics
+/test-results/
+/playwright-report/
+
 # playwright-cli working dir (snapshots / screenshots / logs) — any depth
 .playwright-cli/
 

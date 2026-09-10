@@ -10,19 +10,9 @@ import DigitAnswer, {
   DigitValue,
 } from "@/components/molecules/answer/DigitAnswer";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
+import { isClockAnswerCorrect, randomClockTime } from "@/lib/clock/game";
 import { getRandomFeedback } from "@/lib/utils/gameFeedback";
 import { useEffect, useMemo, useState } from "react";
-
-const getRandomTime = (is24HourClock: boolean): ClockTime => {
-  const randomHour24 = Math.floor(Math.random() * (is24HourClock ? 24 : 12));
-  const randomMinute = Math.floor(Math.random() * 60);
-  const randomSecond = Math.floor(Math.random() * 60);
-  return {
-    hour: randomHour24,
-    minute: randomMinute,
-    second: randomSecond,
-  };
-};
 
 // answer uses 24-hour format
 const defaultAnswer: ClockTime = {
@@ -44,7 +34,7 @@ export default function CurrentTimePage() {
   }, []);
 
   const resetTime = () => {
-    const newAnswer = getRandomTime(is24HourClock);
+    const newAnswer = randomClockTime(is24HourClock);
     setAnswer(newAnswer);
     setSelectedAnswer(defaultAnswer);
     setIsCorrect(null);
@@ -53,10 +43,7 @@ export default function CurrentTimePage() {
   const checkAnswer = () => {
     if (!selectedAnswer || !answer) return;
 
-    const correct =
-      selectedAnswer.hour === answer.hour &&
-      selectedAnswer.minute === answer.minute;
-    setIsCorrect(correct);
+    setIsCorrect(isClockAnswerCorrect(answer, selectedAnswer));
   };
 
   const digitConfig: Record<string, DigitConfig> = useMemo(

@@ -7,6 +7,7 @@ import SelectedCoinsList, { type SelectedCoin } from "@/components/molecules/Sel
 import { useMaxAmount } from "@/components/molecules/setting/MaxAmount";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
+import { createChangeQuestion } from "@/lib/coin/game";
 import type { Coin as CoinType } from "@/lib/types/types";
 import { getRandomFeedback } from "@/lib/utils/gameFeedback";
 import { useCallback, useEffect, useState } from "react";
@@ -14,14 +15,6 @@ import { useCallback, useEffect, useState } from "react";
 const GAME_COINS = AVAILABLE_COINS.filter((coin) =>
   [1, 5, 10, 50, 100].includes(coin.value),
 );
-
-// 找出最接近且大於等於目標金額的 50 或 100 的倍數
-const findClosestPaidAmount = (amount: number): number => {
-  if (amount <= 50) return 50;
-  if (amount <= 100) return 100;
-  // 這裡可以根據需要添加更多級距
-  return Math.ceil(amount / 100) * 100; // 暫定超過 100 就用 100 的倍數
-};
 
 export default function CoinChangePage() {
   const [targetPrice, setTargetPrice] = useState<number | null>(null);
@@ -44,13 +37,11 @@ export default function CoinChangePage() {
   }, [currentSelectedChange, changeAmount]);
 
   const setupNewQuestion = () => {
-    const newTargetPrice = Math.floor(Math.random() * maxAmount - 1) + 1;
-    const newPaidAmount = findClosestPaidAmount(newTargetPrice);
-    const newChangeAmount = newPaidAmount - newTargetPrice;
+    const { price, paid, change } = createChangeQuestion(maxAmount);
 
-    setTargetPrice(newTargetPrice);
-    setPaidAmount(newPaidAmount);
-    setChangeAmount(newChangeAmount);
+    setTargetPrice(price);
+    setPaidAmount(paid);
+    setChangeAmount(change);
     setCurrentSelectedChange(0);
     setSelectedCoins([]);
     setIsCorrect(null);

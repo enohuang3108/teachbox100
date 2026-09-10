@@ -6,6 +6,7 @@ import GameAnswerSection from "@/components/molecules/GameAnswerSection";
 import { AvailableCoins } from "@/components/molecules/setting/AvailableCoins";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
+import { sumValues } from "@/lib/coin/game";
 import type { Coin as CoinType } from "@/lib/types/types";
 import { getRandomFeedback } from "@/lib/utils/gameFeedback";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -43,7 +44,7 @@ export default function CoinEquivalentPage() {
   };
 
   const checkAnswer = () => {
-    const sum = selectedCoins.reduce((a, b) => a + b.value, 0);
+    const sum = sumValues(selectedCoins);
     if (sum === target.value) {
       setIsCorrect(true);
     } else {
@@ -67,7 +68,7 @@ export default function CoinEquivalentPage() {
     />,
   ];
 
-  const currentAmount = selectedCoins.reduce((a, b) => a + b.value, 0);
+  const currentAmount = sumValues(selectedCoins);
 
   return (
     <GamePageTemplate

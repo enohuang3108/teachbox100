@@ -9,7 +9,8 @@ import SelectedCoinsList, { type SelectedCoin } from "@/components/molecules/Sel
 import { useMaxAmount } from "@/components/molecules/setting/MaxAmount";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
-import { PRODUCTS, type Product } from "@/lib/constants/products";
+import type { Product } from "@/lib/constants/products";
+import { createShelfProducts, type ShelfProduct } from "@/lib/coin/game";
 import type { Coin as CoinType } from "@/lib/types/types";
 import { getRandomFeedback } from "@/lib/utils/gameFeedback";
 import { useCallback, useEffect, useState } from "react";
@@ -18,10 +19,6 @@ import { useCallback, useEffect, useState } from "react";
 interface SelectedProduct extends Product {
   id: string;
   price: number;
-}
-
-interface ShelfProduct extends Product {
-  currentPrice: number;
 }
 
 // 根據最大金額動態過濾可用硬幣
@@ -48,20 +45,7 @@ export default function SelectCoinsPage() {
   // 確保只在客戶端執行
   useEffect(() => {
     setIsClient(true);
-    // 生成隨機商品列表並添加 currentPrice
-    const shuffled = [...PRODUCTS].sort(() => 0.5 - Math.random());
-    const shelfProductsWithPrices = shuffled.slice(0, 5).map((product) => {
-      const [minPrice, maxPrice] = product.priceRange;
-      const currentPrice = Math.min(
-        Math.floor(Math.random() * (maxPrice - minPrice + 1)) + minPrice,
-        maxAmount
-      );
-      return {
-        ...product,
-        currentPrice,
-      };
-    });
-    setShelfProducts(shelfProductsWithPrices);
+    setShelfProducts(createShelfProducts(maxAmount));
   }, [maxAmount]);
 
   const checkAnswer = useCallback(() => {
@@ -85,20 +69,7 @@ export default function SelectCoinsPage() {
 
   const resetGame = (): void => {
     setupNewQuestion();
-    // 重新生成隨機商品列表
-    const shuffled = [...PRODUCTS].sort(() => 0.5 - Math.random());
-    const shelfProductsWithPrices = shuffled.slice(0, 5).map((product) => {
-      const [minPrice, maxPrice] = product.priceRange;
-      const currentPrice = Math.min(
-        Math.floor(Math.random() * (maxPrice - minPrice + 1)) + minPrice,
-        maxAmount
-      );
-      return {
-        ...product,
-        currentPrice,
-      };
-    });
-    setShelfProducts(shelfProductsWithPrices);
+    setShelfProducts(createShelfProducts(maxAmount));
   };
 
   // 添加商品到購物車

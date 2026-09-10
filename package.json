@@ -13,7 +13,8 @@
     "lint": "oxlint --type-aware",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@animateicons/react": "^0.5.0",
@@ -91,6 +92,7 @@
   "devDependencies": {
     "@babel/core": "^7.29.7",
     "@babel/preset-env": "^7.29.7",
+    "@playwright/test": "^1.63.0",
     "@types/canvas-confetti": "^1.9.0",
     "@types/matter-js": "^0.20.2",
     "@types/node": "^22.20.1",

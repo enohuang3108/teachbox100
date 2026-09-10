@@ -8,16 +8,11 @@ import SelectedCoinsList, { type SelectedCoin } from "@/components/molecules/Sel
 import { useMaxAmount } from "@/components/molecules/setting/MaxAmount";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
-import { PRODUCTS, type Product } from "@/lib/constants/products";
+import { PRODUCTS } from "@/lib/constants/products";
+import { createPaymentQuestion } from "@/lib/coin/game";
 import type { Coin as CoinType } from "@/lib/types/types";
 import { getRandomFeedback } from "@/lib/utils/gameFeedback";
 import { useCallback, useEffect, useState } from "react";
-
-
-// 根據最大金額動態過濾可用硬幣
-const getAvailableCoins = (maxAmount: number) => {
-  return AVAILABLE_COINS.filter((coin) => coin.value <= maxAmount);
-};
 
 export default function SelectCoinsPage() {
   const [targetAmount, setTargetAmount] = useState<number | null>(null);
@@ -39,32 +34,9 @@ export default function SelectCoinsPage() {
   }, [currentAmount, targetAmount]);
 
   const setupNewQuestion = (): void => {
-    // 篩選出價格區間不超過最大金額的商品
-    const availableProducts: Product[] = PRODUCTS.filter(
-      (product: Product): boolean => product.priceRange[0] <= maxAmount
-    );
+    const { product, price } = createPaymentQuestion(maxAmount);
 
-    // 如果沒有符合條件的商品，使用價格最低的商品
-    const productsToChooseFrom =
-      availableProducts.length > 0
-        ? availableProducts
-        : [
-            PRODUCTS.reduce((min, product) =>
-              product.priceRange[0] < min.priceRange[0] ? product : min
-            ),
-          ];
-
-    const randomProduct =
-      productsToChooseFrom[
-        Math.floor(Math.random() * productsToChooseFrom.length)
-      ];
-    const [minPrice, maxPrice] = randomProduct.priceRange;
-    const price =
-      Math.floor(
-        Math.random() * (Math.min(maxPrice, maxAmount) - minPrice + 1)
-      ) + minPrice;
-
-    setCurrentProduct(randomProduct);
+    setCurrentProduct(product);
     setTargetAmount(price);
     setCurrentAmount(0);
     setSelectedCoins([]);
@@ -157,7 +129,7 @@ export default function SelectCoinsPage() {
               選擇硬幣:
             </h2>
             <div className="flex flex-wrap justify-center gap-4">
-              {getAvailableCoins(maxAmount).map((coin) => {
+              {AVAILABLE_COINS.filter((coin) => coin.value <= maxAmount).map((coin) => {
                 return (
                   <button
                     key={coin.value}
