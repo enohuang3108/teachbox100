@@ -6,8 +6,8 @@ import {
   STATE_RETRY_MS,
 } from "./buzz";
 
-const a = { id: "a", name: "小明" };
-const b = { id: "b", name: "小華" };
+const a = { id: "a", uid: "u-a", name: "小明" };
+const b = { id: "b", uid: "u-b", name: "小華" };
 const base = { open: true, players: [a, b], order: [] };
 
 describe("nextOrder", () => {
@@ -31,16 +31,37 @@ describe("nextOrder", () => {
 });
 
 describe("addPlayer", () => {
-  it("新名字排到最後面", () => {
-    expect(addPlayer([a], "b", "小華")).toEqual([a, b]);
+  it("新的裝置排到最後面", () => {
+    expect(addPlayer([a], "b", { uid: "u-b", name: "小華" })).toEqual([a, b]);
   });
 
-  it("同名重連只換 peer id，順位不動（分數才不會跑掉）", () => {
-    expect(addPlayer([a, b], "a2", "小明")).toEqual([{ ...a, id: "a2" }, b]);
+  it("同一台裝置重連只換 peer id，順位不動（分數才不會跑掉）", () => {
+    expect(addPlayer([a, b], "a2", { uid: "u-a", name: "小明" })).toEqual([
+      { ...a, id: "a2" },
+      b,
+    ]);
   });
 
-  it("空白名字給預設值", () => {
-    expect(addPlayer([], "x", "  ")[0].name).toBe("同學");
+  it("同名的兩個學生各佔一格：不然被擠掉的那個按鈴老師端不會顯示", () => {
+    const both = addPlayer([a], "b", { uid: "u-b", name: "小明" });
+    expect(both).toHaveLength(2);
+    expect(both[0].id).toBe("a");
+  });
+
+  it("都沒填名字也是兩個人，不會互相擠掉", () => {
+    const both = addPlayer(
+      addPlayer([], "p1", { uid: "u-1", name: "" }),
+      "p2",
+      { uid: "u-2", name: "  " },
+    );
+    expect(both.map((p) => p.name)).toEqual(["同學", "同學"]);
+    expect(both.map((p) => p.id)).toEqual(["p1", "p2"]);
+  });
+
+  it("改了名字再連，還是同一格", () => {
+    expect(addPlayer([a], "a2", { uid: "u-a", name: "阿明" })).toEqual([
+      { id: "a2", uid: "u-a", name: "阿明" },
+    ]);
   });
 });
 

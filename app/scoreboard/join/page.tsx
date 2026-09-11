@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/atoms/shadcn/button";
 import {
+  claimDevice,
   joinAsPlayer,
   myRank,
   sendBuzz,
@@ -18,6 +19,8 @@ export default function JoinPage() {
   const [name, setName] = useState("");
   const [joined, setJoined] = useState(false);
   const [busy, setBusy] = useState(false);
+  /** 這台裝置已經有另一個分頁在搶答 */
+  const [taken, setTaken] = useState(false);
   const { open, order, connected } = useBuzzStore();
   const rank = joined ? myRank(order) : 0;
 
@@ -49,6 +52,13 @@ export default function JoinPage() {
     const who = n.trim();
     if (!room || !who) return;
     setBusy(true);
+    // 一台裝置只准一個分頁進去：兩個分頁同時連著會互相擠掉，
+    // 被擠掉的那個按鈴老師端不會顯示，學生完全看不出哪裡不對。
+    if (!(await claimDevice())) {
+      setBusy(false);
+      setTaken(true);
+      return;
+    }
     localStorage.setItem("buzz-name", who);
     await joinAsPlayer(room, who).finally(() => setBusy(false));
     setJoined(true);
@@ -65,6 +75,20 @@ export default function JoinPage() {
     if (c && n) join(c, n);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (taken) {
+    return (
+      <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center gap-4 p-6 text-center">
+        <h1 className="text-ink text-2xl font-bold">已經在另一個分頁加入了</h1>
+        <p className="text-ink-soft text-base leading-[1.75]">
+          一台裝置只能加入一個人。請回到原本那個分頁搶答，或把它關掉再重新加入。
+        </p>
+        <Button variant="outline" onClick={() => location.reload()}>
+          重新加入
+        </Button>
+      </main>
+    );
+  }
 
   if (!joined) {
     return (
@@ -131,7 +155,9 @@ export default function JoinPage() {
             ? "已經按到了，等老師開下一題"
             : open
               ? "現在可以按"
-              : "等老師開放搶答"}
+              : /* 剛加入還沒出題：先確認「你進來了」，再交代不要關掉頁面。
+                   只講「等老師開放搶答」的話，學生分不出是自己沒連上還是老師還沒開始。 */
+                "已經加入了，等老師出題。這一頁先別關掉"}
         </p>
       ) : (
         /* 斷線通常幾秒內自己接回來；接不回來就重新整理，名字會自動帶回去 */

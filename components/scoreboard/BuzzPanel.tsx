@@ -106,7 +106,7 @@ export function BuzzPanel() {
           onClick={renewCode}
           className="text-ink-soft hover:text-ink text-sm underline underline-offset-4 transition-colors duration-150 ease-out"
         >
-          更新房號
+          重新建立房間
         </button>
       </div>
 

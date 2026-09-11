@@ -10,8 +10,10 @@ import { useScoreboardStore } from "./store";
  */
 
 export interface Buzzer {
-  /** trystero 的 peer id */
+  /** trystero 的 peer id，只在這一次連線有效 */
   id: string;
+  /** 學生裝置上固定不變的 id；重連要靠它認回同一格 */
+  uid: string;
   name: string;
   // trystero 的 payload 必須是純 JSON，多這行才過得了它的型別
   [k: string]: string;
@@ -50,7 +52,7 @@ const makeCode = () =>
 
 /**
  * 房號記在 localStorage：老師不小心重整、或投影到一半換頁回來，
- * 黑板上寫的房號還是那一個，全班不用重掃。要換人上課再按「更新房號」。
+ * 黑板上寫的房號還是那一個，全班不用重掃。要換人上課再按「重新建立房間」。
  */
 const CODE_KEY = "scoreboard-buzz-code";
 const savedCode = () => {
@@ -58,6 +60,41 @@ const savedCode = () => {
   return c && /^[A-Z2-9]{4}$/.test(c) ? c : null;
 };
 const rememberCode = (code: string) => localStorage.setItem(CODE_KEY, code);
+
+/**
+ * 學生的身分 id。名字不能當身分：教室裡兩個小明、或兩個都沒填名字
+ * （都變「同學」），用名字認人會把前一個人擠掉，他按鈴老師就看不到。
+ *
+ * 一台裝置一份（localStorage）：關掉分頁再重掃還是認回同一格，分數留得住。
+ * 同一台裝置開兩個分頁的情形由 claimDevice() 擋掉，不會兩個分頁共用這個 id。
+ */
+const UID_KEY = "buzz-uid";
+const myUid = () => {
+  let uid = localStorage.getItem(UID_KEY);
+  if (!uid) localStorage.setItem(UID_KEY, (uid = crypto.randomUUID()));
+  return uid;
+};
+
+/**
+ * 一台裝置只能有一個分頁在搶答：兩個分頁共用同一個身分 id，同時連著會互相
+ * 擠掉 peer id，被擠掉的那個按鈴老師端不會顯示。
+ *
+ * 用 Web Locks 擋：拿到鎖的分頁一直握著不放，分頁關掉或瀏覽器當掉時由瀏覽器
+ * 自動釋放，不需要心跳，也不會留下解不開的狀態。拿不到就是別的分頁已經進去了。
+ */
+export function claimDevice(): Promise<boolean> {
+  if (!navigator.locks) return Promise.resolve(true);
+  return new Promise<boolean>((resolve) => {
+    navigator.locks
+      .request("buzz-device", { ifAvailable: true }, (lock) => {
+        resolve(!!lock);
+        // 拿到就握到分頁關掉為止；沒拿到就直接放掉，讓 request 收工
+        return lock ? new Promise<never>(() => {}) : undefined;
+      })
+      // 鎖不到（權限、非安全來源）就不擋：寧可多一格，也別讓學生進不來
+      .catch(() => resolve(true));
+  });
+}
 
 const APP_ID = "teachbox100-scoreboard";
 const roomId = (code: string) => `${APP_ID}-${code}`;
@@ -126,10 +163,10 @@ async function connect(code: string, host: boolean) {
     onMessage: host ? undefined : (s) => set({ open: s.open, order: s.order }),
   });
 
-  const join = r.makeAction<string>("join", {
+  const join = r.makeAction<JoinPayload>("join", {
     onMessage: host
-      ? (name, { peerId }) =>
-          set((s) => ({ players: addPlayer(s.players, peerId, name) }))
+      ? (payload, { peerId }) =>
+          set((s) => ({ players: addPlayer(s.players, peerId, payload) }))
       : undefined,
   });
 
@@ -162,7 +199,7 @@ async function connect(code: string, host: boolean) {
     const sync = () => set({ connected: Object.keys(r.getPeers()).length > 0 });
     r.onPeerJoin = () => {
       sync();
-      if (myName) join.send(myName);
+      if (myName) join.send({ uid: myUid(), name: myName });
     };
     r.onPeerLeave = sync;
   }
@@ -172,26 +209,36 @@ async function connect(code: string, host: boolean) {
     sendJoin: (name) => {
       myName = name;
       // 老師若已經在線就立刻到，還沒連上就等 onPeerJoin 補送
-      if (Object.keys(r.getPeers()).length) void join.send(name);
+      if (Object.keys(r.getPeers()).length)
+        void join.send({ uid: myUid(), name });
     },
     sendBuzz: () => void buzz.send(null),
   };
   return room;
 }
 
+/** 報到訊息：uid 認人，name 只是顯示用 */
+export interface JoinPayload {
+  uid: string;
+  name: string;
+  [k: string]: string;
+}
+
 /**
- * 報到：同名的視為同一個人重新連線（換手機、息屏重連），只更新 peer id，
- * 保住他在名單裡的順位——順位就是計分板上的格子，換位置分數會跟著跑掉。
+ * 報到：同一個 uid 視為同一個人重新連線（息屏、切 App、重整），只更新 peer id
+ * 與名字，保住他在名單裡的順位——順位就是計分板上的格子，換位置分數會跟著跑掉。
+ * 不用名字認人：同名的兩個學生會互相擠掉，被擠掉的那個按鈴老師端不會顯示。
  */
 export function addPlayer(
   players: Buzzer[],
   peerId: string,
-  raw: string,
+  raw: JoinPayload,
 ): Buzzer[] {
-  const name = String(raw).trim().slice(0, 12) || "同學";
-  return players.some((p) => p.name === name)
-    ? players.map((p) => (p.name === name ? { ...p, id: peerId } : p))
-    : [...players, { id: peerId, name }];
+  const name = String(raw.name).trim().slice(0, 12) || "同學";
+  const uid = String(raw.uid);
+  return players.some((p) => p.uid === uid)
+    ? players.map((p) => (p.uid === uid ? { ...p, id: peerId, name } : p))
+    : [...players, { id: peerId, uid, name }];
 }
 
 /**
