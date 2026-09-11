@@ -89,6 +89,10 @@ export default function RootLayout({
           <Script
             src={process.env.NEXT_PUBLIC_UMAMI_URL}
             data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+            // 收真實使用者的 Core Web Vitals（LCP/INP/CLS/FCP/TTFB）。
+            // Lighthouse 是實驗室數據，排名看的是這個。每次頁面載入會多送一筆
+            // performance 事件，資料列數約翻倍，以目前流量可忽略。
+            data-performance="true"
             strategy="afterInteractive"
           />
         )}
