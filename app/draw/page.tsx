@@ -12,9 +12,8 @@ export const metadata: Metadata = buildMetadata("draw");
 const HUB_KEY = "draw";
 
 /**
- * 抽籤分類頁：兩個工具並排讓老師挑。
- * 跟認識金錢的分類頁不同，這裡沒有先後順序，所以不列「學習順序」，
- * 直接放兩張封面卡，左轉盤右抽籤機。
+ * 抽籤分類頁：工具卡片讓老師依演出方式挑選。
+ * 跟認識金錢的分類頁不同，這裡沒有先後順序，所以不列「學習順序」。
  */
 export default function DrawHubPage() {
   const hub = hubs[HUB_KEY];

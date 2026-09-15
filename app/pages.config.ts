@@ -107,6 +107,15 @@ const pagesConfig = {
     title: "抽籤機",
     description: "名單變成一顆顆乒乓球在玻璃球裡亂飛，被吹出來的那顆就是答案。",
   },
+  ichiban: {
+    path: "/draw/ichiban",
+    imageSrc: "/images/covers/warm/ichiban.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Affv4f7+/woJAwAFB/nmywQPJgEFDvr5+AL//gAKDAm0x+ORqMgCDRnn6e3h4uQCAwIEBwkEvs/ne5mn3t8M6Ow01rqWNjg4e3t0AgIHA77T6ggPKSoU9tHg7Pn7/PLy8/8BAQL++P5WNxXu7O3N6+1dRiJOSUULCgkA/f0B+O/jAAD8zs/S/PsALCojAQQHAwMDBwYFp+FHEotb85QAAAAASUVORK5CYII=",
+    title: "一番賞",
+    description: "按住票券往右撕，像拆開實體一番賞一樣揭曉獎項。",
+    guide: "按住票券，從左往右拉到底揭曉獎項。",
+  },
   monopoly: {
     path: "/monopoly",
     imageSrc: "/images/covers/warm/monopoly.webp",
@@ -174,7 +183,7 @@ export const hubs: Record<string, Hub> = {
   draw: {
     path: "/draw",
     title: "抽籤",
-    children: ["wheel", "lottery"],
+    children: ["wheel", "lottery", "ichiban"],
   },
   coin: {
     path: "/coin",
