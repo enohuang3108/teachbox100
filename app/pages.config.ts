@@ -1,6 +1,8 @@
 export interface Page {
   path: string;
   imageSrc: string;
+  /** 單元說明區的插圖；未指定時，從封面的 warm 版對應到 cutout 版。 */
+  illustrationSrc?: string;
   blurDataURL: string;
   title: string;
   description: string;
@@ -109,7 +111,8 @@ const pagesConfig = {
   },
   ichiban: {
     path: "/draw/ichiban",
-    imageSrc: "/images/covers/warm/ichiban.webp",
+    imageSrc: "/images/covers/warm/ichiban-ticket-apple-transparent.png",
+    illustrationSrc: "/images/covers/warm/ichiban-ticket-apple-transparent.png",
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Affv4f7+/woJAwAFB/nmywQPJgEFDvr5+AL//gAKDAm0x+ORqMgCDRnn6e3h4uQCAwIEBwkEvs/ne5mn3t8M6Ow01rqWNjg4e3t0AgIHA77T6ggPKSoU9tHg7Pn7/PLy8/8BAQL++P5WNxXu7O3N6+1dRiJOSUULCgkA/f0B+O/jAAD8zs/S/PsALCojAQQHAwMDBwYFp+FHEotb85QAAAAASUVORK5CYII=",
     title: "一番賞",

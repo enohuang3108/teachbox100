@@ -1,5 +1,6 @@
 import { pages, type Page } from "@/app/pages.config";
 import { CURRICULUM, pageSeo } from "@/lib/seo-content";
+import { getUnitIllustrationSrc } from "@/lib/unit-illustration";
 import { Link } from "next-view-transitions";
 import Image from "next/image";
 
@@ -24,7 +25,7 @@ export function UnitSeoSection({
     <section className="border-ink/10 mx-auto mt-20 w-full max-w-4xl border-t pt-12">
       {/* 用去背版封面直接站在紙上，不加底板也不加框 —— 有框就變成
           「又一張卡片」，插畫本身的剪影才是這裡想要的重點。
-          cutout/ 是 warm/ 去掉米色底的同一批圖，檔名一致。 */}
+          多數單元用 warm 封面對應的 cutout 圖；已有透明 PNG 的單元直接指定它。 */}
       <div className="flex flex-col-reverse gap-6 md:flex-row md:items-start md:gap-8">
         <div className="min-w-0 flex-1">
           <h2 className="font-display text-ink text-2xl font-extrabold">
@@ -64,7 +65,7 @@ export function UnitSeoSection({
         <div className="relative aspect-[4/3] w-full shrink-0 md:w-64">
           <Image
             fill
-            src={page.imageSrc.replace("/covers/warm/", "/covers/cutout/")}
+            src={getUnitIllustrationSrc(page)}
             sizes="(max-width: 768px) 92vw, 256px"
             alt=""
             className="object-contain"

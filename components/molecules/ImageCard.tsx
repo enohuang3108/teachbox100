@@ -1,5 +1,6 @@
 import { Link } from "next-view-transitions";
 import Image from "next/image";
+import { getCoverPresentation } from "@/lib/cover-presentation";
 
 type CardProps = {
   imageSrc: string;
@@ -24,6 +25,8 @@ export const ImageCard = ({
   index = 0,
   button,
 }: CardProps) => {
+  const presentation = getCoverPresentation(imageSrc);
+
   return (
     <Link
       href={link}
@@ -31,15 +34,21 @@ export const ImageCard = ({
       style={{ animationDelay: `${index * 45}ms` }}
       className="card-enter group flex w-full flex-col rounded-[1.25rem] bg-card p-2 ring-1 ring-black/[0.06] transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-[3px] hover:shadow-[0_8px_24px_-6px_rgb(2_13_21/0.14)] active:scale-[0.985] active:duration-150"
     >
-      <div className="relative aspect-[4/3] overflow-hidden rounded-[0.875rem] bg-sand">
+      <div
+        className={`relative aspect-[4/3] overflow-hidden rounded-[0.875rem] ${presentation.imageContainerClassName}`}
+      >
         <Image
           fill
           src={imageSrc}
           sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 22vw"
-          placeholder="blur"
-          blurDataURL={blurDataURL ?? FALLBACK_BLUR}
+          placeholder={presentation.placeholder}
+          blurDataURL={
+            presentation.placeholder === "blur"
+              ? blurDataURL ?? FALLBACK_BLUR
+              : undefined
+          }
           alt=""
-          className="object-cover"
+          className={presentation.imageClassName}
         />
       </div>
 
