@@ -114,10 +114,9 @@ const pagesConfig = {
     imageSrc: "/images/covers/warm/ichiban-ticket-apple-transparent.png",
     illustrationSrc: "/images/covers/warm/ichiban-ticket-apple-transparent.png",
     blurDataURL:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Affv4f7+/woJAwAFB/nmywQPJgEFDvr5+AL//gAKDAm0x+ORqMgCDRnn6e3h4uQCAwIEBwkEvs/ne5mn3t8M6Ow01rqWNjg4e3t0AgIHA77T6ggPKSoU9tHg7Pn7/PLy8/8BAQL++P5WNxXu7O3N6+1dRiJOSUULCgkA/f0B+O/jAAD8zs/S/PsALCojAQQHAwMDBwYFp+FHEotb85QAAAAASUVORK5CYII=",
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Affw5f//AAEAAP7//gUGCgIB/QMFBfr4+AQBAQACAgD7AQEJAwnu69bBxtvs7fBbWVMC+v0C+fXvC9jA7OzT+PjujpKay8zOCA0QAuHr9ziB3lOY5iZr1MLqNFZNQsnN0PHu7QQbEQUyJRD/Az51EgIpFPgRKStjXwz8+fkB+PDlBwkDAAQAAAICAPb8+/8DBQcG9/T1heZHJwNihoAAAAAASUVORK5CYII=",
     title: "一番賞",
     description: "按住票券往右撕，像拆開實體一番賞一樣揭曉獎項。",
-    guide: "按住票券，從左往右拉到底揭曉獎項。",
   },
   monopoly: {
     path: "/monopoly",

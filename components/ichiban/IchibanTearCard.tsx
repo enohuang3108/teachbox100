@@ -1,160 +1,153 @@
 "use client";
 
 import { finishTear, tearProgress } from "@/lib/ichiban/tear";
-import { animate, useMotionValue, useReducedMotion, useTransform } from "motion/react";
-import { RotateCcw } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { IchibanTicket3D } from "./IchibanTicket3D";
+import { useTearSound } from "@/lib/ichiban/useTearSound";
+import type { IchibanPrize } from "@/lib/ichiban/prizes";
+import { animate, useReducedMotion, type MotionValue } from "motion/react";
+import { Button } from "@/components/atoms/shadcn/button";
+import { ChevronLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
-export interface IchibanPrize {
-  rank: string;
-  name: string;
-  message: string;
-}
+// 按下去縮一點，讓按鈕確實「聽到」了；只轉場 transform，不用 transition-all。
+export const pressable =
+  "font-display rounded-full text-base font-extrabold transition-[transform,background-color,color] duration-150 ease-out active:scale-[0.97]";
 
-const defaultPrize: IchibanPrize = {
-  rank: "A賞",
-  name: "星空投影燈",
-  message: "恭喜抽中頭獎！",
-};
-
-export function IchibanTearCard({ prize = defaultPrize, onReady }: { prize?: IchibanPrize; onReady?: () => void }) {
+/** 撕票的操作層：蓋在輪播 canvas 上，只負責把拖曳換成 progress，3D 由同一個場景畫。 */
+export function IchibanTearControls({
+  prize,
+  progress,
+  onBack,
+  onConfirm,
+}: {
+  prize: IchibanPrize;
+  progress: MotionValue<number>;
+  onBack: () => void;
+  onConfirm: () => void;
+}) {
   const reduceMotion = useReducedMotion();
-  const ticketRef = useRef<HTMLDivElement>(null);
+  const surfaceRef = useRef<HTMLButtonElement>(null);
   const drag = useRef<{ pointerId: number; startX: number } | null>(null);
   const animation = useRef<ReturnType<typeof animate> | null>(null);
-  const coverX = useMotionValue(0);
-  const [travel, setTravel] = useState(480);
   const [revealed, setRevealed] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const [modelState, setModelState] = useState<"loading" | "ready" | "error">("loading");
-  const progress = useTransform(coverX, [0, travel], [0, 1]);
-  const handleReady = useCallback(() => {
-    setModelState("ready");
-    onReady?.();
-  }, [onReady]);
-  const handleError = useCallback(() => {
-    setModelState("error");
-    onReady?.();
-  }, [onReady]);
-
-  useEffect(() => {
-    const ticket = ticketRef.current;
-    if (!ticket) return;
-    const resize = () => setTravel(ticket.clientWidth * 0.76);
-    resize();
-    const observer = new ResizeObserver(resize);
-    observer.observe(ticket);
-    return () => observer.disconnect();
-  }, []);
+  const tearSound = useTearSound();
 
   useEffect(() => () => animation.current?.stop(), []);
 
+  const travel = () => (surfaceRef.current?.clientWidth ?? 780) * 0.76;
+
   const settle = (shouldReveal: boolean) => {
     animation.current?.stop();
-    const target = shouldReveal ? travel : 0;
+    const target = shouldReveal ? 1 : 0;
     if (reduceMotion) {
-      coverX.set(target);
+      progress.set(target);
       setRevealed(shouldReveal);
       return;
     }
     animation.current = shouldReveal
-      ? animate(coverX, target, { duration: 0.48, ease: [0.22, 1, 0.36, 1] })
-      : animate(coverX, target, { type: "spring", stiffness: 320, damping: 30, mass: 0.72 });
-    if (shouldReveal) animation.current.then(() => setRevealed(true));
+      ? animate(progress, target, { duration: 0.48, ease: [0.22, 1, 0.36, 1] })
+      : animate(progress, target, {
+          type: "spring",
+          stiffness: 320,
+          damping: 30,
+          mass: 0.72,
+    });
+    if (shouldReveal) {
+      animation.current.then(() => setRevealed(true));
+    }
   };
 
   const release = (pointerId?: number) => {
-    if (!drag.current || (pointerId !== undefined && drag.current.pointerId !== pointerId)) return;
-    const result = finishTear(coverX.get() / travel);
+    if (
+      !drag.current ||
+      (pointerId !== undefined && drag.current.pointerId !== pointerId)
+    )
+      return;
+    const result = finishTear(progress.get());
     drag.current = null;
     setDragging(false);
+    tearSound.stop();
     settle(result === "revealed");
   };
 
-  const reset = () => {
-    drag.current = null;
-    setDragging(false);
-    setRevealed(false);
-    settle(false);
-  };
-
   return (
-    <section className="relative">
-      <div className="mx-auto flex max-w-3xl flex-col items-center">
-        <h1 className="sr-only">{revealed ? "一番賞：抽獎結果" : "一番賞：沿著封條撕開"}</h1>
+    <>
+      <button
+        ref={surfaceRef}
+        type="button"
+        aria-label="按住一番賞票券，從左往右撕開封條"
+        className={`absolute inset-x-0 top-0 z-10 mx-auto h-[450px] w-full touch-none rounded-2xl outline-offset-4 sm:h-[500px] ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
+        onPointerDown={(event) => {
+          if (!event.isPrimary || event.button !== 0 || revealed) return;
+          animation.current?.stop();
+          drag.current = {
+            pointerId: event.pointerId,
+            startX: event.clientX - progress.get() * travel(),
+          };
+          setDragging(true);
+          tearSound.start();
+          event.currentTarget.setPointerCapture(event.pointerId);
+        }}
+        onPointerMove={(event) => {
+          if (drag.current?.pointerId !== event.pointerId) return;
+          const next = tearProgress(drag.current.startX, event.clientX, travel());
+          tearSound.move(next);
+          progress.set(next);
+        }}
+        onPointerUp={(event) => release(event.pointerId)}
+        onPointerCancel={(event) => release(event.pointerId)}
+        onLostPointerCapture={() => release()}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            settle(true);
+          }
+        }}
+      >
+        <span className="sr-only">從左往右撕開</span>
+      </button>
 
-        <div className="w-full">
-          <div ref={ticketRef} className="relative mx-auto aspect-[1.72/1] w-full max-w-[760px] select-none sm:aspect-[2.15/1]">
-            <button
-              type="button"
-              aria-label="按住一番賞票券，從左往右撕開封條"
-              className={`absolute inset-0 z-10 touch-none rounded-2xl outline-offset-4 ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
-              onPointerDown={(event) => {
-                if (!event.isPrimary || event.button !== 0 || revealed) return;
+      {revealed && (
+        <output className="sr-only">
+          抽中{prize.rank}：{prize.name}
+        </output>
+      )}
+
+      <div className="relative z-10 -mt-5 flex min-h-11 items-center justify-center gap-2">
+        {revealed ? (
+          // 撕開後結果就定了，只能確認，不能返回重撕。
+          <Button
+            size="lg"
+            onClick={onConfirm}
+            className={`${pressable} bg-ink text-paper hover:bg-ink/90 px-6 shadow-sm`}
+          >
+            確認
+          </Button>
+        ) : (
+          <>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => {
                 animation.current?.stop();
-                drag.current = { pointerId: event.pointerId, startX: event.clientX - coverX.get() };
-                setDragging(true);
-                event.currentTarget.setPointerCapture(event.pointerId);
+                tearSound.stop();
+                onBack();
               }}
-              onPointerMove={(event) => {
-                if (drag.current?.pointerId !== event.pointerId) return;
-                coverX.set(tearProgress(drag.current.startX, event.clientX, travel) * travel);
-              }}
-              onPointerUp={(event) => release(event.pointerId)}
-              onPointerCancel={(event) => release(event.pointerId)}
-              onLostPointerCapture={() => release()}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  settle(true);
-                }
-              }}
+              className={`${pressable} border-ink/15 bg-paper text-ink-soft hover:bg-paper-warm hover:text-ink px-5`}
             >
-              <span className="sr-only">從左往右撕開</span>
-            </button>
-
-            <div className="absolute inset-0 overflow-hidden rounded-2xl">
-              <IchibanTicket3D progress={progress} prize={prize} onReady={handleReady} onError={handleError} />
-            </div>
-
-            {modelState === "loading" && (
-              <div className="bg-paper-warm absolute inset-[16%_5%] flex animate-pulse items-center justify-center rounded-2xl text-sm font-bold text-ink-soft">
-                正在準備 3D 票券…
-              </div>
-            )}
-            {modelState === "error" && (
-              <div className="bg-paper-warm absolute inset-[16%_5%] flex items-center justify-center rounded-2xl border border-ink/10 px-5 text-center text-sm font-bold text-ink-soft">
-                3D 票券無法載入，仍可使用下方按鈕揭曉。
-              </div>
-            )}
-
-          </div>
-        </div>
-
-        {revealed && <output className="sr-only">抽中{prize.rank}：{prize.name}。{prize.message}</output>}
-
-        <div className="mt-5 flex min-h-11 items-center justify-center">
-          {revealed ? (
-            <button
-              type="button"
-              onClick={reset}
-              className="bg-ink text-paper hover:bg-ink/90 inline-flex min-h-11 items-center gap-2 rounded-full px-6 font-extrabold shadow-sm transition-transform active:scale-[0.98]"
-            >
-              <RotateCcw aria-hidden size={18} strokeWidth={2.2} />
-              再撕一次
-            </button>
-          ) : (
-            <button
-              type="button"
+              <ChevronLeft aria-hidden strokeWidth={2.4} />
+              返回
+            </Button>
+            <Button
+              size="lg"
               onClick={() => settle(true)}
-              className="text-ink-soft hover:text-ink min-h-11 rounded-full px-5 text-sm font-bold underline decoration-ink/25 underline-offset-4 active:translate-y-px"
+              className={`${pressable} bg-ink text-paper hover:bg-ink/90 px-6 shadow-sm`}
             >
-              無法拖曳？直接揭曉
-            </button>
-          )}
-        </div>
+              直接揭曉
+            </Button>
+          </>
+        )}
       </div>
-    </section>
+    </>
   );
 }

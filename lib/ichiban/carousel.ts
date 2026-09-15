@@ -24,3 +24,8 @@ export function carouselTargetForIndex(index: number, count: number, currentRota
   const baseTarget = -normalizeIndex(index, count) * step;
   return baseTarget + Math.round((currentRotation - baseTarget) / 360) * 360;
 }
+
+/** 甩動放手：依速度推算慣性會滑到哪，再停在最近的一張。速度單位為度/秒。 */
+export function flingCarousel(rotation: number, velocity: number, count: number) {
+  return snapCarousel(rotation + velocity * 0.5, count);
+}

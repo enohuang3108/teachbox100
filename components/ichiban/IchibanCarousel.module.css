@@ -9,3 +9,54 @@
   transform: rotateX(76deg);
 }
 
+.skeleton {
+  perspective: 980px;
+}
+
+.ticket {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: 3px solid rgb(2 13 21 / 0.08);
+  border-radius: 14px;
+  background:
+    linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.65) 50%, transparent 70%) 0 0 / 250% 100% no-repeat,
+    rgb(2 86 155 / 0.1);
+  animation: ticket-shimmer 1.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.center {
+  width: min(126px, 22%);
+  aspect-ratio: 126 / 302;
+  transform: translate(-50%, -50%);
+}
+
+.side {
+  width: min(66px, 12%);
+  aspect-ratio: 66 / 276;
+  animation-delay: 120ms;
+}
+
+.left {
+  transform: translate(calc(-50% - min(252px, 33vw)), calc(-50% + 5px)) rotateY(-28deg);
+}
+
+.right {
+  transform: translate(calc(-50% + min(252px, 33vw)), calc(-50% + 5px)) rotateY(28deg);
+}
+
+@keyframes ticket-shimmer {
+  from {
+    background-position: 100% 0, 0 0;
+  }
+
+  to {
+    background-position: -150% 0, 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticket {
+    animation: none;
+  }
+}
