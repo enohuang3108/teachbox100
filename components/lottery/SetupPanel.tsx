@@ -1,12 +1,11 @@
 "use client";
 
 import { Button } from "@/components/atoms/shadcn/button";
-import { Switch } from "@/components/atoms/shadcn/switch";
 import { MAX_ENTRIES, parseEntries, validateEntries } from "@/lib/lottery/game";
 import { useLotteryStore } from "@/lib/lottery/store";
 
 export function SetupPanel({ onStart }: { onStart: () => void }) {
-  const { text, setText, autoClose, setAutoClose, restoreStarter } = useLotteryStore();
+  const { text, setText, restoreStarter } = useLotteryStore();
   const entries = parseEntries(text);
   const error = validateEntries(entries);
 
@@ -38,15 +37,8 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
       </label>
 
       <div className="bg-paper-warm border-ink/10 flex flex-col gap-4 rounded-2xl border p-4">
-        <label htmlFor="lottery-autoclose" className="flex items-center justify-between gap-4">
-          <span>
-            <span className="text-ink block font-semibold">抽到一顆就關蓋</span>
-            <span className="text-muted-foreground text-sm">
-              關掉的話蓋子會一直開著，球一顆接一顆出來，再點一下才關
-            </span>
-          </span>
-          <Switch id="lottery-autoclose" checked={autoClose} onCheckedChange={setAutoClose} />
-        </label>
+        <p className="text-ink font-semibold">直接點一顆球，打開後揭曉結果</p>
+        <p className="text-muted-foreground text-sm">取消或放回去會讓球回到箱中；選擇再抽一顆後，已抽出的項目不會重複。</p>
       </div>
 
       {error && <p className="text-brand-red text-sm font-medium">{error}</p>}
