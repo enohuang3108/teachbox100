@@ -84,7 +84,7 @@ export function CardDiceDialog({
             onRoll();
           }}
         >
-          🎲 擲骰子
+          擲骰子
         </motion.button>
       ) : (
         <div className="flex flex-col items-center gap-4">

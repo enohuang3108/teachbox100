@@ -25,7 +25,7 @@ export function Dice({ lastRoll, rolling, rollSeq, disabled, onRoll, onComplete 
       </div>
       <Button size="lg" disabled={disabled || rolling} onClick={onRoll}
         className="rounded-full bg-primary px-10 py-6 text-lg font-bold text-ink transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-[3px] hover:shadow-[0_10px_24px_-8px_rgb(248_176_3/0.6)] active:translate-y-0 active:scale-[0.97] disabled:opacity-50 disabled:hover:translate-y-0">
-        {rolling ? "擲骰中…" : "🎲 擲骰子"}
+        {rolling ? "擲骰中…" : "擲骰子"}
       </Button>
     </div>
   );

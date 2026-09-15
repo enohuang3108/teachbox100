@@ -106,7 +106,7 @@ export default function DiceScene({ values, onComplete }: { values: number[]; on
     };
   }, [key]);
 
-  return <div className="relative h-48 w-full" role="img" aria-label={settled ? `擲出 ${values.join("、")} 點` : "骰子拋起、落地翻滾中"}>
+  return <div className="relative h-64 w-full" role="img" aria-label={settled ? `擲出 ${values.join("、")} 點` : "骰子拋起、落地翻滾中"}>
     <div ref={host} className="h-full w-full" aria-hidden="true" />
     {failed && <div className="absolute inset-0 flex items-center justify-center gap-5 text-5xl" aria-hidden="true">{values.map((v, i) => <span key={i}>{["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"][v - 1]}</span>)}</div>}
   </div>;
