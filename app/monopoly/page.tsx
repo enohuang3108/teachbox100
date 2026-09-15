@@ -34,7 +34,6 @@ import { GAME_STAGE_ID } from "@/components/templates/PageTemplate";
 import { TooltipProvider } from "@/components/atoms/shadcn/tooltip";
 
 const STEP_MS = 240; // 每走一格的間隔
-const ROLL_MS = 1333; // 擲骰 Lottie 動畫長度（80 幀 @ 60fps）
 const CUTSCENE_MS = 2500; // 金流／監獄／通過起點等過場顯示時間
 const BANNER_MS = 2000; // 「換你了」橫幅顯示時間
 
@@ -42,6 +41,7 @@ export default function MonopolyPage() {
   const [hydrated, setHydrated] = useState(false);
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
   const [rolling, setRolling] = useState(false);
+  const rollComplete = useRef<(() => void) | null>(null);
   const [rollSeq, setRollSeq] = useState(0);
   const [logOpen, setLogOpen] = useState(false);
   const [walk, setWalk] = useState<{ playerId: string; pos: number } | null>(
@@ -236,14 +236,14 @@ export default function MonopolyPage() {
     }
 
     // 等擲骰動畫落定後，棋子再一格一格走（走到起點那格會暫停跳出加碼題）
-    window.setTimeout(() => {
+    rollComplete.current = () => {
       setRolling(false);
       if (steps <= 0) {
         setWalk(null); // 暫停回合等情況：不走格
         return;
       }
       runWalk({ fromPos, steps, moverId, color: mover.color, startStep: 0 });
-    }, ROLL_MS);
+    };
   }
 
   // 走完最後一步：解除走路狀態，並在落點脈動一圈代表色光環
@@ -357,6 +357,11 @@ export default function MonopolyPage() {
         rollSeq={rollSeq}
         disabled={rollDisabled || busy}
         onRoll={handleRoll}
+        onComplete={() => {
+          const done = rollComplete.current;
+          rollComplete.current = null;
+          done?.();
+        }}
       />
     </div>
   );

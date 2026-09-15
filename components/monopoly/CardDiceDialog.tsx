@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useSound } from "@/lib/hooks/useSound";
 import type { PendingAction, Player } from "@/lib/monopoly/types";
 import { motion } from "motion/react";
@@ -19,6 +20,7 @@ export function CardDiceDialog({
   onResolve: () => void;
 }) {
   const { playDiceSound } = useSound();
+  const [settled, setSettled] = useState(false);
   if (pending?.kind !== "cardDice") return null;
 
   const { card, rolled } = pending;
@@ -77,6 +79,7 @@ export function CardDiceDialog({
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
           onClick={() => {
+            setSettled(false);
             playDiceSound();
             onRoll();
           }}
@@ -85,7 +88,8 @@ export function CardDiceDialog({
         </motion.button>
       ) : (
         <div className="flex flex-col items-center gap-4">
-          <Die value={rolled} />
+          <Die value={rolled} onComplete={() => setSettled(true)} />
+          {settled && <>
           <motion.div
             key={rolled}
             className="text-2xl font-extrabold text-paper"
@@ -111,6 +115,7 @@ export function CardDiceDialog({
           >
             確定
           </motion.button>
+          </>}
         </div>
       )}
     </div>
