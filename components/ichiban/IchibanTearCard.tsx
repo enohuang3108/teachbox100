@@ -5,7 +5,6 @@ import { animate, useMotionValue, useReducedMotion, useTransform } from "motion/
 import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IchibanTicket3D } from "./IchibanTicket3D";
-import styles from "./IchibanTearCard.module.css";
 
 export interface IchibanPrize {
   rank: string;
@@ -19,7 +18,7 @@ const defaultPrize: IchibanPrize = {
   message: "恭喜抽中頭獎！",
 };
 
-export function IchibanTearCard({ prize = defaultPrize }: { prize?: IchibanPrize }) {
+export function IchibanTearCard({ prize = defaultPrize, onReady }: { prize?: IchibanPrize; onReady?: () => void }) {
   const reduceMotion = useReducedMotion();
   const ticketRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ pointerId: number; startX: number } | null>(null);
@@ -30,8 +29,14 @@ export function IchibanTearCard({ prize = defaultPrize }: { prize?: IchibanPrize
   const [dragging, setDragging] = useState(false);
   const [modelState, setModelState] = useState<"loading" | "ready" | "error">("loading");
   const progress = useTransform(coverX, [0, travel], [0, 1]);
-  const handleReady = useCallback(() => setModelState("ready"), []);
-  const handleError = useCallback(() => setModelState("error"), []);
+  const handleReady = useCallback(() => {
+    setModelState("ready");
+    onReady?.();
+  }, [onReady]);
+  const handleError = useCallback(() => {
+    setModelState("error");
+    onReady?.();
+  }, [onReady]);
 
   useEffect(() => {
     const ticket = ticketRef.current;
@@ -75,19 +80,11 @@ export function IchibanTearCard({ prize = defaultPrize }: { prize?: IchibanPrize
   };
 
   return (
-    <section className={`${styles.stagePattern} relative overflow-hidden rounded-3xl border border-ink/10 px-4 py-8 sm:px-8 sm:py-12`}>
+    <section className="relative">
       <div className="mx-auto flex max-w-3xl flex-col items-center">
-        <div className="mb-7 text-center">
-          <p className="font-display text-brand-red text-sm font-black tracking-[0.16em]">一番賞</p>
-          <h1 className="font-display text-ink mt-2 text-3xl font-black tracking-tight sm:text-4xl">
-            {revealed ? "抽獎結果" : "沿著封條撕開"}
-          </h1>
-          <p className="text-muted-foreground mt-2 text-sm sm:text-base">
-            {revealed ? "獎項已揭曉，可以重新體驗撕籤。" : "按住票券，從左往右拉開封條。"}
-          </p>
-        </div>
+        <h1 className="sr-only">{revealed ? "一番賞：抽獎結果" : "一番賞：沿著封條撕開"}</h1>
 
-        <div className="w-full py-4 sm:py-8">
+        <div className="w-full">
           <div ref={ticketRef} className="relative mx-auto aspect-[1.72/1] w-full max-w-[760px] select-none sm:aspect-[2.15/1]">
             <button
               type="button"

@@ -20,6 +20,9 @@ const prizes: IchibanPrize[] = [
 export function IchibanCarousel({ onSelect }: { onSelect: (prize: IchibanPrize) => void }) {
   const reduceMotion = useReducedMotion();
   const rotation = useMotionValue(0);
+  const focus = useMotionValue(0);
+  const choosing = useRef(false);
+  const [chosen, setChosen] = useState(false);
   const drag = useRef<{ pointerId: number; startX: number; startRotation: number } | null>(null);
   const moved = useRef(false);
   const ignoreClick = useRef(false);
@@ -40,6 +43,7 @@ export function IchibanCarousel({ onSelect }: { onSelect: (prize: IchibanPrize) 
   );
 
   const moveTo = (index: number, chooseAfter = false) => {
+    if (choosing.current) return;
     animation.current?.stop();
     const target = carouselTargetForIndex(index, prizes.length, rotation.get());
     setActiveIndex(index);
@@ -49,7 +53,13 @@ export function IchibanCarousel({ onSelect }: { onSelect: (prize: IchibanPrize) 
       return;
     }
     animation.current = animate(rotation, target, { type: "spring", stiffness: 190, damping: 25, mass: 0.82 });
-    if (chooseAfter) animation.current.then(() => onSelect(prizes[index]));
+    if (chooseAfter) {
+      choosing.current = true;
+      setChosen(true);
+      animation.current
+        .then(() => animate(focus, 1, { duration: 0.75, ease: [0.65, 0, 0.35, 1] }))
+        .then(() => onSelect(prizes[index]));
+    }
   };
 
   const release = (pointerId: number) => {
@@ -92,21 +102,17 @@ export function IchibanCarousel({ onSelect }: { onSelect: (prize: IchibanPrize) 
   };
 
   return (
-    <section className={`${styles.stage} relative overflow-hidden rounded-3xl border border-ink/10 px-3 py-8 sm:px-8 sm:py-11`}>
-      <div className="relative z-[1] text-center">
-        <p className="font-display text-brand-red text-sm font-black tracking-[0.16em]">一番賞</p>
-        <h1 className="font-display text-ink mt-2 text-3xl font-black tracking-tight sm:text-4xl">挑一張幸運籤</h1>
-        <p className="text-muted-foreground mt-2 text-sm sm:text-base">左右拖曳旋轉票券，點一下選中的票券。</p>
-      </div>
-
+    <section className="relative">
+      <h1 className="sr-only">一番賞：挑一張幸運籤</h1>
       <div
         aria-label="一番賞 3D 票券輪播"
-        className={`${styles.viewport} relative mx-auto mt-3 h-[390px] w-full max-w-[760px] touch-none overflow-hidden rounded-2xl outline-offset-4 sm:h-[430px] ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
+        className={`${styles.viewport} relative mx-auto h-[390px] w-full max-w-[760px] touch-none overflow-hidden rounded-2xl outline-offset-4 sm:h-[430px] ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
       >
-        <div className={`${styles.floor} pointer-events-none absolute bottom-4 left-1/2 h-24 w-[72%] -translate-x-1/2 rounded-full`} />
+        <div className={`${styles.floor} pointer-events-none absolute bottom-4 left-1/2 h-24 w-[72%] -translate-x-1/2 rounded-full transition-opacity duration-300 ${chosen ? "opacity-0" : ""}`} />
         <div className="absolute inset-0">
           <IchibanCarouselScene
             rotation={rotation}
+            focus={focus}
             count={prizes.length}
             activeIndex={activeIndex}
             onTicketClick={(index) => {
@@ -133,7 +139,9 @@ export function IchibanCarousel({ onSelect }: { onSelect: (prize: IchibanPrize) 
         )}
       </div>
 
-      <p className="text-ink-soft -mt-5 text-center text-xs font-bold sm:text-sm">也可以使用左右方向鍵，按 Enter 選擇</p>
+      <p
+        className={`text-ink-soft -mt-5 text-center text-xs font-bold transition-opacity duration-300 sm:text-sm ${chosen ? "opacity-0" : ""}`}
+      >也可以使用左右方向鍵，按 Enter 選擇</p>
     </section>
   );
 }
