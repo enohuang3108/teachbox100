@@ -195,7 +195,6 @@ export function LotteryMachine({ labels, onPick }: { labels: string[]; onPick: (
         }}>
         <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
       </button>
-      <p className={styles.instruction}>{phase === "empty" ? "球都抽完了" : "點一顆球開始抽籤"}</p>
       <div className="sr-only" aria-label="可抽的球">
         {draw.remainingIds.map((id) => <button key={id} type="button" onClick={() => choose(id)}>抽第 {id + 1} 顆球</button>)}
       </div>

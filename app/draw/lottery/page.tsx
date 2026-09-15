@@ -72,33 +72,51 @@ export default function LotteryPage() {
           }}
         />
       ) : (
-        <div className="flex flex-col gap-4">
-          <div className="text-ink flex flex-wrap items-center gap-x-6 gap-y-1 text-lg font-bold tabular-nums">
-            <span>
-              還剩 {labels.length - picked.length} / {labels.length} 顆
-            </span>
+        <div className="grid items-start gap-5 lg:grid-cols-[15rem_minmax(0,1fr)]">
+          <aside
+            aria-label="已抽出的名單"
+            className="border-ink/10 bg-paper-warm/70 rounded-2xl border p-4 shadow-[0_12px_32px_-24px_rgb(2_13_21/0.45)] lg:sticky lg:top-4"
+          >
+            <div className="border-ink/10 flex items-baseline justify-between gap-3 border-b pb-3">
+              <h2 className="font-display text-ink text-xl font-extrabold">抽籤紀錄</h2>
+              <span className="text-ink-soft text-sm font-bold tabular-nums">
+                還剩 {labels.length - picked.length} / {labels.length} 顆
+              </span>
+            </div>
+            {picked.length === 0 ? (
+              <p className="text-ink-soft mt-3 text-sm leading-[1.75]">點箱子裡任一顆球開始抽。</p>
+            ) : (
+              <ol className="divide-ink/15 mt-2 max-h-[min(60svh,520px)] divide-y divide-dashed overflow-y-auto">
+                {picked.map((label, index) => (
+                  <li key={index} className="grid grid-cols-[auto_1fr] items-center gap-3 py-2.5">
+                    <span className="bg-paper border-ink/10 text-ink-soft rounded-full border px-2.5 py-0.5 text-sm font-extrabold tabular-nums">
+                      {index + 1}
+                    </span>
+                    <span className="text-ink min-w-0 truncate font-bold">{label}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
             {picked.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={restoreAll}>
+              <Button variant="outline" size="sm" className="mt-3 w-full" onClick={restoreAll}>
                 全部放回
               </Button>
             )}
-          </div>
+          </aside>
 
-          {exhausted && (
-            <div className="bg-brand-yellow/20 border-brand-yellow/60 flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-5 py-4">
-              <p className="text-ink font-display text-xl font-extrabold">
-                🎉 都抽完了！最後一顆是「{picked[picked.length - 1]}」
-              </p>
-              <Button onClick={restoreAll}>全部放回</Button>
+          <div className="flex min-w-0 flex-col gap-4">
+            {exhausted && (
+              <div className="border-ink/10 bg-paper-warm flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-5 py-4">
+                <p className="text-ink font-display text-xl font-extrabold">
+                  都抽完了，最後一顆是「{picked[picked.length - 1]}」
+                </p>
+                <Button onClick={restoreAll}>全部放回</Button>
+              </div>
+            )}
+            <div className="relative h-[min(75svh,700px)] min-h-[420px] w-full">
+              <LotteryMachine key={round} labels={labels} onPick={onPick} />
             </div>
-          )}
-          <div className="relative h-[min(75svh,700px)] min-h-[420px] w-full">
-            <LotteryMachine key={round} labels={labels} onPick={onPick} />
-
           </div>
-          {picked.length > 0 && <div className="flex flex-wrap justify-center gap-2" aria-label="已抽出的名單">
-            {picked.map((label, index) => <span key={index} className="bg-paper-warm rounded-full border border-ink/10 px-4 py-2 text-sm">{index + 1}. {label}</span>)}
-          </div>}
         </div>
       )}
 
