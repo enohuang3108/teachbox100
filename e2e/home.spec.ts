@@ -24,6 +24,7 @@ test("首頁列出所有教材單元，且沒有漏掛或多掛的入口", async
     "/coin/introduction",
     "/coin/pay",
     "/coin/value",
+    "/draw/ichiban",
     "/draw/lottery",
     "/draw/wheel",
     "/memory",
