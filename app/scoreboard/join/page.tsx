@@ -144,7 +144,7 @@ export default function JoinPage() {
         type="button"
         onClick={sendBuzz}
         disabled={!connected || !open || rank > 0}
-        className="bg-brand-yellow text-ink flex-1 rounded-3xl text-5xl font-bold shadow-sm transition-[transform,opacity,background-color] duration-150 ease-out active:scale-[0.97] disabled:opacity-40"
+        className="bg-brand-yellow text-ink flex-1 rounded-3xl text-5xl font-bold shadow-sm transition-[transform,opacity,background-color] supports-[-webkit-touch-callout:none]:transition-[transform,background-color] duration-150 ease-out active:scale-[0.97] disabled:opacity-40"
       >
         {rank > 0 ? (RANK_LABEL[rank] ?? `第 ${rank} 個`) : "搶答"}
       </button>
