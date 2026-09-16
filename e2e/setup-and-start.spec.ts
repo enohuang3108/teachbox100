@@ -12,7 +12,7 @@ test("翻牌配對以有效預設牌組開始，會顯示盤面與翻牌次數",
   await expect(page.getByText("翻牌 1 次")).toBeVisible();
 });
 
-test("轉盤與抽籤機以老師輸入的名單開始", async ({ page }) => {
+test("轉盤與扭蛋機以老師輸入的名單開始", async ({ page }) => {
   await page.goto("/draw/wheel");
   await page.getByRole("textbox", { name: "名單，一行一個" }).fill("小明\n小華");
   await page.getByRole("button", { name: "開始", exact: true }).click();

@@ -5,7 +5,7 @@ test("點球、取消、打開揭曉、放回與再抽一顆", async ({ page }) 
   await page.getByRole("textbox", { name: "名單，一行一個" }).fill("小明\n小華");
   await page.getByRole("button", { name: "開始", exact: true }).click();
 
-  const box = page.getByRole("button", { name: "透明抽籤箱，點一顆球或按 Enter 開始抽籤" });
+  const box = page.getByRole("button", { name: "扭蛋機，點一顆扭蛋或按 Enter 開始抽籤" });
   await box.press("Enter");
   await expect(page.getByRole("button", { name: "打開", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "取消", exact: true }).click();
