@@ -106,8 +106,8 @@ const pagesConfig = {
     imageSrc: "/images/covers/warm/lottery.webp",
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Affv4f7+/woJAwAFB/nmywQPJgEFDvr5+AL//gAKDAm0x+ORqMgCDRnn6e3h4uQCAwIEBwkEvs/ne5mn3t8M6Ow01rqWNjg4e3t0AgIHA77T6ggPKSoU9tHg7Pn7/PLy8/8BAQL++P5WNxXu7O3N6+1dRiJOSUULCgkA/f0B+O/jAAD8zs/S/PsALCojAQQHAwMDBwYFp+FHEotb85QAAAAASUVORK5CYII=",
-    title: "抽籤機",
-    description: "名單變成一顆顆乒乓球在玻璃球裡亂飛，被吹出來的那顆就是答案。",
+    title: "扭蛋機",
+    description: "滿滿一箱扭蛋，學生自己挑一顆，打開才知道是誰。",
   },
   ichiban: {
     path: "/draw/ichiban",
@@ -175,6 +175,10 @@ export interface Hub {
   title: string;
   /** 屬於這個 hub 的 pages key，陣列順序即建議的學習順序 */
   children: string[];
+  /** 首頁卡片牆用：hub 取代旗下所有子頁，只露出一張卡當入口 */
+  imageSrc: string;
+  blurDataURL: string;
+  description: string;
 }
 
 /**
@@ -184,12 +188,21 @@ export interface Hub {
 export const hubs: Record<string, Hub> = {
   draw: {
     path: "/draw",
+    // 畫面上就叫「抽籤」；「線上抽籤」這個搜尋字留在 pageSeo.draw.title 的 <title> 裡
     title: "抽籤",
+    description: "轉盤、扭蛋機、一番賞三種抽法，點名、分組、抽題都好用。",
+    imageSrc: "/images/covers/warm/wheel-v2.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afbv4QEBAf/9/gYSEOng1/n18x8rN/nw8AH58eP9/PwGEBDpo7QC53cFDPP07XAYdW0E8vT1iY2XNjUlQt+L8t3n/A0KAPeD/+42Av39/LK1ut7b2Qsn8QMODf0CEA4sAAH+8wL//gAuKSNMVlzw3Wz+9vIKE+XozFEAFD4B9/Di9vb3AwQDCAoO/+zBAPz0ABNDAAMDerRNsypywywAAAAASUVORK5CYII=",
     children: ["wheel", "lottery", "ichiban"],
   },
   coin: {
     path: "/coin",
     title: "認識金錢",
+    description: "從認識新臺幣到算找零，六個單元由淺入深一關一關練。",
+    imageSrc: "/images/covers/warm/coin-introduction-v2.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afry5v/++gEBAwAEC//otf304Qkmafz7+gL//voB6LAAAwn/+OkB6bIJAtvk17j9AQcEBgYK9hhdCPjf9/sAydkL7+bOoMLea2sGAeXgz9Tj6jEQ4g8SHvYLN0hGRgECArGtowLZ496+xayTv9v4+BoQDwI3NTAGBAEICAgB/vXq+/z78PPvEQoOAQgH2tnc+fn5LzEvbK1MgAx6lX0AAAAASUVORK5CYII=",
     children: [
       "coin-introduction",
       "coin-equivalent",

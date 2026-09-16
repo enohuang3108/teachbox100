@@ -1,4 +1,4 @@
-"""用 OpenAI gpt-image-2 產生 memory 封面（warm 版），以抽籤機封面當風格參考圖。
+"""用 OpenAI gpt-image-2 產生 memory 封面（warm 版），以扭蛋機封面當風格參考圖。
 
 API key 放 macOS 鑰匙圈：security add-generic-password -s openai-api-key-for-image -a openai -w <key>
 生出來的圖底色跟專案米色差幾階、也不是 4:3，所以事後把接近底色的像素統一成 BG、
