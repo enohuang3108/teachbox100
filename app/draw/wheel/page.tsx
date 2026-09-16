@@ -6,16 +6,13 @@ import { SettingsButton } from "@/components/atoms/SettingsButton";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
 import { SoundToggleButton } from "@/components/atoms/SoundToggleButton";
 import { Button } from "@/components/atoms/shadcn/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/atoms/shadcn/dialog";
+import { Dialog, DialogContent } from "@/components/atoms/shadcn/dialog";
 import { TooltipProvider } from "@/components/atoms/shadcn/tooltip";
 import { ACTION_BTN, Tip } from "@/components/templates/GamePageTemplate";
-import { GAME_STAGE_ID, PageTemplate } from "@/components/templates/PageTemplate";
+import {
+  GAME_STAGE_ID,
+  PageTemplate,
+} from "@/components/templates/PageTemplate";
 import { SetupPanel } from "@/components/wheel/SetupPanel";
 import { useWheel } from "@/components/wheel/useWheel";
 import { Wheel } from "@/components/wheel/Wheel";
@@ -26,18 +23,20 @@ import { useEffect, useState } from "react";
 const pageInfo: PageWithKey = { ...pages.wheel, key: "wheel" };
 
 export default function WheelPage() {
-  // persist 要等 client 才有資料；SEO 區塊在 PageTemplate 裡照常 SSR，只擋遊戲本體
+  // persist 要等 client 才有資料；介紹頁與 SEO 區塊照常 SSR，只擋轉盤本體
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
 
-  const [mode, setMode] = useState<"setup" | "play">("setup");
+  // 介紹頁 →（開始）設定 →（開始）轉盤；轉盤裡按設定再打開同一個對話框
+  const [entered, setEntered] = useState(false);
+  const [setupOpen, setSetupOpen] = useState(false);
   const { text, removeOnPick, sound, setSound } = useWheelStore();
   const entries = parseEntries(text);
-  const wheel = useWheel(entries, sound);
+  const wheel = useWheel(entries, sound, removeOnPick);
 
   const exhausted = wheel.active.length < 2;
 
-  const actions = mode === "play" && (
+  const actions = (
     <TooltipProvider delayDuration={350} skipDelayDuration={600}>
       <Tip label="全部放回">
         <RefreshCWIcon
@@ -47,7 +46,7 @@ export default function WheelPage() {
           onClick={wheel.restoreAll}
         />
       </Tip>
-      <SettingsButton onClick={() => setMode("setup")} />
+      <SettingsButton onClick={() => setSetupOpen(true)} />
       <SoundToggleButton on={sound} onToggle={setSound} />
       <Tip label="全螢幕">
         <FullscreenButton targetId={GAME_STAGE_ID} className={ACTION_BTN} />
@@ -56,71 +55,68 @@ export default function WheelPage() {
   );
 
   return (
-    <PageTemplate page={pageInfo} actions={actions || undefined}>
-      {!hydrated ? null : mode === "setup" ? (
-        <SetupPanel onStart={() => setMode("play")} />
-      ) : (
-        <div className="flex flex-col gap-4">
-          {removeOnPick && (
-            <div className="text-ink flex flex-wrap items-center gap-x-6 gap-y-1 text-lg font-bold tabular-nums">
-              <span>
-                還剩 {wheel.active.length} / {entries.length} 個
-              </span>
-              {wheel.removedCount > 0 && (
-                <Button variant="ghost" size="sm" onClick={wheel.restoreAll}>
-                  全部放回
-                </Button>
+    <>
+      <PageTemplate
+        page={pageInfo}
+        actions={actions}
+        landing={{
+          startLabel: "開始使用",
+          onStart: () => setSetupOpen(true),
+          entered,
+        }}
+      >
+        {hydrated && (
+          <div className="relative flex flex-col items-center">
+            {/* 抽到的結果浮在轉盤上方、不佔版面，轉盤才會落在畫面正中間；不另外跳窗，下一次轉才把它拿掉 */}
+            <div
+              className="pointer-events-none absolute bottom-full left-1/2 mb-6 flex w-max max-w-[90vw] -translate-x-1/2 flex-col items-center text-center"
+              aria-live="polite"
+            >
+              {wheel.result !== null && !wheel.spinning && (
+                <>
+                  <span className="text-caption text-muted-foreground">
+                    抽到了
+                  </span>
+                  <span className="font-display text-4xl leading-tight font-black break-all text-ink animate-in fade-in-0 zoom-in-95 duration-200 sm:text-5xl">
+                    {wheel.result}
+                  </span>
+                </>
               )}
             </div>
-          )}
 
-          {exhausted ? (
-            <div className="bg-brand-yellow/20 border-brand-yellow/60 flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-5 py-4">
-              <p className="text-ink font-display text-xl font-extrabold">
-                🎉 都抽完了！最後一個是「{wheel.active[0]?.label}」
-              </p>
-              <Button onClick={wheel.restoreAll}>全部放回</Button>
-            </div>
-          ) : (
-            <Wheel
-              labels={wheel.active.map((e) => e.label)}
-              rotation={wheel.rotation}
-              spinMs={wheel.spinMs}
-              spinning={wheel.spinning}
-              disabled={wheel.result !== null}
-              onSpin={wheel.spin}
-            />
-          )}
-        </div>
-      )}
-
-      <Dialog
-        open={wheel.result !== null}
-        onOpenChange={(open) => !open && wheel.dismiss(removeOnPick)}
-      >
-        <DialogContent className="text-center">
-          <DialogHeader className="items-center">
-            <DialogDescription>抽到了</DialogDescription>
-            <DialogTitle className="font-display text-ink text-4xl leading-tight font-black break-all sm:text-5xl">
-              {wheel.result}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="mt-2 flex justify-center gap-2">
-            <Button variant="outline" onClick={() => wheel.dismiss(removeOnPick)}>
-              關閉
-            </Button>
-            <Button
-              onClick={() => {
-                wheel.dismiss(removeOnPick);
-                // 等對話框關掉、盤面（可能已少一格）重畫後再轉
-                window.setTimeout(wheel.spin, 0);
-              }}
-            >
-              再轉一次
-            </Button>
+            {exhausted ? (
+              <div className="flex w-full flex-wrap items-center justify-between gap-3 rounded-2xl border border-brand-yellow/60 bg-brand-yellow/20 px-5 py-4">
+                <p className="font-display text-xl font-extrabold text-ink">
+                  🎉 都抽完了！最後一個是「{wheel.active[0]?.label}」
+                </p>
+                <Button onClick={wheel.restoreAll}>全部放回</Button>
+              </div>
+            ) : (
+              <Wheel
+                labels={wheel.active.map((e) => e.label)}
+                rotation={wheel.rotation}
+                spinMs={wheel.spinMs}
+                spinning={wheel.spinning}
+                disabled={false}
+                onSpin={wheel.spin}
+              />
+            )}
           </div>
+        )}
+      </PageTemplate>
+
+      {/* 放在 PageTemplate 外面：介紹頁階段 children 不渲染，設定要在那時就能開 */}
+      <Dialog open={setupOpen} onOpenChange={setSetupOpen}>
+        <DialogContent className="max-w-4xl gap-0 overflow-hidden p-0 sm:rounded-[1.5rem]">
+          <SetupPanel
+            onStart={() => {
+              wheel.restoreAll();
+              setSetupOpen(false);
+              setEntered(true);
+            }}
+          />
         </DialogContent>
       </Dialog>
-    </PageTemplate>
+    </>
   );
 }

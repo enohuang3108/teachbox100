@@ -4,19 +4,19 @@ import { Button } from "@/components/atoms/shadcn/button";
 import { DialogDescription } from "@/components/atoms/shadcn/dialog";
 import { Switch } from "@/components/atoms/shadcn/switch";
 import { StepSetup } from "@/components/organisms/StepSetup";
-import { MAX_ENTRIES, parseEntries, validateEntries } from "@/lib/wheel/game";
-import { useWheelStore } from "@/lib/wheel/store";
+import { MAX_ENTRIES, parseEntries, validateEntries } from "@/lib/gacha/game";
+import { useGachaStore } from "@/lib/gacha/store";
 import { ListOrdered, SlidersHorizontal } from "lucide-react";
 
 export function SetupPanel({ onStart }: { onStart: () => void }) {
-  const { text, setText, removeOnPick, setRemoveOnPick, restoreStarter } =
-    useWheelStore();
+  const { text, setText, restoreStarter, putBack, setPutBack } =
+    useGachaStore();
   const entries = parseEntries(text);
   const error = validateEntries(entries);
 
   return (
     <StepSetup
-      title="轉盤設定"
+      title="扭蛋機設定"
       blocker={error}
       startLabel="開始"
       onStart={onStart}
@@ -25,15 +25,15 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
           key: "entries",
           label: "名單",
           icon: ListOrdered,
-          summary: `${entries.length} 個`,
+          summary: `${entries.length} 顆扭蛋`,
           done: !error,
           content: (
             <section className="space-y-5">
               <header className="flex items-end justify-between gap-3">
                 <div>
-                  <h3 className="text-h3 text-ink">轉盤上要有誰？</h3>
+                  <h3 className="text-h3 text-ink">扭蛋裡要放什麼？</h3>
                   <DialogDescription className="mt-1">
-                    一行一個：學生姓名、座號、題號、獎品都可以。
+                    一行一顆：學生姓名、座號、題號、獎品都可以。點一顆扭蛋就打開揭曉。
                   </DialogDescription>
                 </div>
                 <span className="shrink-0 text-caption text-muted-foreground">
@@ -64,31 +64,31 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
           key: "rules",
           label: "玩法",
           icon: SlidersHorizontal,
-          summary: removeOnPick ? "抽過的拿掉" : "可以重複抽",
+          summary: putBack ? "抽完放回箱子" : "抽完收起來",
           content: (
             <section className="space-y-5">
               <header>
-                <h3 className="text-h3 text-ink">抽到的人還要留在轉盤上嗎？</h3>
+                <h3 className="text-h3 text-ink">抽到的扭蛋要放回箱子嗎？</h3>
                 <DialogDescription className="mt-1">
-                  點名、分組通常拿掉；抽獎品、選題目可以重複。
+                  點名、分組通常收起來；抽獎品、選題目可以放回去讓它再被抽到。
                 </DialogDescription>
               </header>
               <label
-                htmlFor="wheel-remove"
+                htmlFor="gacha-put-back"
                 className="flex cursor-pointer items-start justify-between gap-4 rounded-2xl border border-border bg-background px-4 py-3.5"
               >
                 <span className="min-w-0">
                   <span className="block text-sm font-semibold text-ink">
-                    抽過的拿掉
+                    抽完放回箱子
                   </span>
                   <span className="mt-0.5 block text-caption text-muted-foreground">
-                    抽到的人下一次轉之前從轉盤移除，直到按「全部放回」。
+                    揭曉後扭蛋回到箱子裡，還會再被抽到；關掉就記進抽籤紀錄、不再出現。
                   </span>
                 </span>
                 <Switch
-                  id="wheel-remove"
-                  checked={removeOnPick}
-                  onCheckedChange={setRemoveOnPick}
+                  id="gacha-put-back"
+                  checked={putBack}
+                  onCheckedChange={setPutBack}
                   className="mt-0.5"
                 />
               </label>

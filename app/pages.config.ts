@@ -100,12 +100,13 @@ const pagesConfig = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afbv4QEBAf/9/gYSEOng1/n18x8rN/nw8AH58eP9/PwGEBDpo7QC53cFDPP07XAYdW0E8vT1iY2XNjUlQt+L8t3n/A0KAPeD/+42Av39/LK1ut7b2Qsn8QMODf0CEA4sAAH+8wL//gAuKSNMVlzw3Wz+9vIKE+XozFEAFD4B9/Di9vb3AwQDCAoO/+zBAPz0ABNDAAMDerRNsypywywAAAAASUVORK5CYII=",
     title: "抽籤轉盤",
+    headline: "轉吧！轉吧！七彩霓虹燈",
     description:
       "貼上名單或選項，轉一下隨機抽出一個，點名、分組、選題目都好用。",
   },
-  lottery: {
-    path: "/draw/lottery",
-    imageSrc: "/images/covers/warm/lottery.webp",
+  gacha: {
+    path: "/draw/gacha",
+    imageSrc: "/images/covers/warm/gacha.webp",
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Affv4f7+/woJAwAFB/nmywQPJgEFDvr5+AL//gAKDAm0x+ORqMgCDRnn6e3h4uQCAwIEBwkEvs/ne5mn3t8M6Ow01rqWNjg4e3t0AgIHA77T6ggPKSoU9tHg7Pn7/PLy8/8BAQL++P5WNxXu7O3N6+1dRiJOSUULCgkA/f0B+O/jAAD8zs/S/PsALCojAQQHAwMDBwYFp+FHEotb85QAAAAASUVORK5CYII=",
     title: "扭蛋機",
@@ -198,7 +199,7 @@ export const hubs: Record<string, Hub> = {
     imageSrc: "/images/covers/warm/wheel-v2.webp",
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afbv4QEBAf/9/gYSEOng1/n18x8rN/nw8AH58eP9/PwGEBDpo7QC53cFDPP07XAYdW0E8vT1iY2XNjUlQt+L8t3n/A0KAPeD/+42Av39/LK1ut7b2Qsn8QMODf0CEA4sAAH+8wL//gAuKSNMVlzw3Wz+9vIKE+XozFEAFD4B9/Di9vb3AwQDCAoO/+zBAPz0ABNDAAMDerRNsypywywAAAAASUVORK5CYII=",
-    children: ["wheel", "lottery", "ichiban"],
+    children: ["wheel", "gacha", "ichiban"],
   },
   coin: {
     path: "/coin",

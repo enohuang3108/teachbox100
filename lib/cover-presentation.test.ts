@@ -13,7 +13,7 @@ describe("cover presentation", () => {
   });
 
   it("keeps warm backdrops for the existing opaque covers", () => {
-    expect(getCoverPresentation(pages.lottery.imageSrc)).toEqual({
+    expect(getCoverPresentation(pages.gacha.imageSrc)).toEqual({
       imageClassName: "object-cover",
       imageContainerClassName: "bg-sand",
       placeholder: "blur",

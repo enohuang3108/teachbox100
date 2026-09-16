@@ -11,8 +11,8 @@ describe("unit illustration", () => {
   });
 
   it("keeps existing units on their cutout artwork", () => {
-    expect(getUnitIllustrationSrc(pages.lottery)).toBe(
-      "/images/covers/cutout/lottery.webp",
+    expect(getUnitIllustrationSrc(pages.gacha)).toBe(
+      "/images/covers/cutout/gacha.webp",
     );
   });
 });

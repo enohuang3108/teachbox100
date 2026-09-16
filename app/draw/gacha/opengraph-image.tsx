@@ -1,6 +1,6 @@
 import { generateOgImageResponse, getOgImageMetadata } from "@/lib/og-image";
 
-const pageKey = "lottery";
+const pageKey = "gacha";
 
 export const { alt, size, contentType } = getOgImageMetadata(pageKey);
 

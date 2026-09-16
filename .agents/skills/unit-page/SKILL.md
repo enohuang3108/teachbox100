@@ -31,11 +31,9 @@ sitemap 與 llms.txt 自動展開 `pages` 與 `hubs`，不必改。`app/sitemap.
 | 自訂操作的教材 | `PageTemplate` ＋ 自拼 `TooltipProvider` | 轉盤、扭蛋機、一番賞、翻牌、九九乘法、計時器、噪音計 |
 | 分類頁 hub | 兩者都不用，手寫版型 | `app/draw/page.tsx`、`app/coin/page.tsx` |
 
-`PageTemplate` 的順序：三段 JSON-LD → `PageTitleBar` → `#game-stage`（帶 `data-unit={key}`）→ `data-stage-inner` → children → `UnitSeoSection`。
+`PageTemplate` 的順序：三段 JSON-LD → `PageTitleBar` → `#game-stage`（帶 `data-unit={key}`）→ `data-stage-inner` → children → `UnitSeoSection`。傳了 `landing` 時換成下面「介紹頁」的順序。
 
-**先看說明再進內容**：`PageTemplate` 傳 `landing={{ startLabel, onStart? }}`，一開始只渲染 `UnitHero`（定位句＋ `pageSeo.intro` ＋開始鈕）與 FAQ，按下才換成內容、頂列鈕才出現，內容頁不再掛 SEO 區塊。計時器、噪音計用這個；大富翁在 `MonopolyGate` 手動組同一套。
-
-**`UnitSeoSection` 必須留在 server。** 遊戲本體是 client component，搜尋引擎與 AI 爬蟲只讀得到這一段文字。滿版遊戲（大富翁）套不了模板，要在自己的 `layout.tsx` 手動補三段 schema 與這一段。
+**`UnitSeoSection` 必須出現在 SSR 的 HTML 裡。** 遊戲本體多半在 client 才畫得出來，搜尋引擎與 AI 爬蟲只讀得到這一段文字 —— 它不能包進 `next/dynamic({ ssr: false })` 或 hydrate 之後才出現的分支。滿版遊戲（大富翁）套不了模板，要在自己的 `layout.tsx` 手動補三段 schema 與這一段。
 
 ## 零件
 
@@ -46,6 +44,19 @@ sitemap 與 llms.txt 自動展開 `pages` 與 `hubs`，不必改。`app/sitemap.
 最後一節預設是 `<h1>`。分類頁內文已經有大標，傳 `asHeading={false}`，把 h1 留給內文那個。
 
 路徑寫進 `pages.config` 之後 `AppChrome` 會自動讓位（`BARE_PATHS`）；沒寫進去就會有兩顆 logo。
+
+### 介紹頁（landing）
+
+先讓老師看懂這是什麼、再進工具的頁面用。`PageTemplate` 傳 `landing={{ startLabel, onStart? }}`：
+
+- 進頁面只渲染 `UnitHero` ＋ `UnitSeoSection withIntro={false}`；頂列鈕先不給。按下開始鈕才換成 `#game-stage`，內容頁不再掛 SEO 區塊。
+- `UnitHero` 大標取 `pages.config` 的 `headline ?? description`，說明只放 `pageSeo.intro` 的第一句。`description` 還餵首頁卡片與 schema，要短標題就加 `headline`，不改 `description`。
+- `onStart` 讓介紹頁那顆鈕直接做第一個動作（噪音計的「噓」直接開麥克風），不必進來再按一次。
+- 狀態不記住：每次進頁面都從介紹頁開始。
+
+實例：計時器、噪音計。
+
+要先設定才能開始的頁，`landing.entered` 交給頁面控制：`onStart` 打開設定 Dialog，設定裡按開始才 `setEntered(true)`。Dialog 要放在 `PageTemplate` **外面** —— 介紹頁階段 children 不渲染。實例：轉盤（`app/draw/wheel/page.tsx`）。大富翁走 `MonopolyGate`（在 layout 裡）組同一套。
 
 ### 設定 → 開始
 
@@ -62,6 +73,10 @@ const [mode, setMode] = useState<"setup" | "play">("setup");
 
 `SetupPanel` 介面固定 `({ onStart }: { onStart: () => void })`，自己讀寫該遊戲的 store，底部一顆 `<Button size="lg" disabled={!!error}>`。回設定走 `SettingsButton onClick={() => setMode("setup")}`；會丟掉進行中的局面時先跳確認。
 
+配合介紹頁時，設定放進 Dialog，外殼一律用 `StepSetup`（`components/organisms/StepSetup.tsx`）：給 `steps`（每站 `label`／`icon`／`summary`／`done?`／`content`）、`blocker`、`startLabel`、`onStart`，它負責左側步驟側欄、捲動內容、底部固定列（一句總結＋上一步／下一步，最後一站才是開始、`blocker` 有值就擋住並顯示原因）。`DialogContent` 固定 `max-w-4xl gap-0 overflow-hidden p-0`。每站內容自己帶 `h3` ＋ `DialogDescription`。實例：大富翁（題庫／玩家／規則）、轉盤（名單／玩法）。
+
+互斥選項用 `Tabs`（有各自內容）或長得一樣的 radiogroup（純單選）。載入慢的遊戲在開 Dialog 時背景預載程式碼與素材（`lib/monopoly/preload.ts`），按開始就不用等。
+
 ### 頂列鈕
 
 `ACTION_BTN` 與 `Tip` 從 `GamePageTemplate` export 出來給非模板頁重用，六個自訂版型頁因此手感一致。
@@ -70,9 +85,17 @@ const [mode, setMode] = useState<"setup" | "play">("setup");
 
 `Tip` 裡面要包一層 `<span>`（動畫 icon 與 `FullscreenButton` 沒轉出 ref，`asChild` 定位不到）。每顆都要自己的 `aria-label`，讀螢幕器不靠 tooltip。只在 play 模式給：`actions={actions || undefined}`。
 
+### 邊角控制
+
+工具頁的主要操作貼螢幕邊，讓中間留給投影要看的東西：計時器是右下角直排圓鈕（最常按的開始鈕最大、放最下面、計時中變紅），噪音計是右邊置中的直立刻度尺。滿版的場景（扭蛋機的箱子）也走同一招：`fixed inset-x-0 top-16 bottom-0 [#game-stage:fullscreen_&]:top-0`，一般時讓出頂列、全螢幕時吃滿整個畫面。
+
+一律包 `StageFixed`（`components/templates/StageFixed.tsx`），裡面再寫 `position: fixed`。全螢幕時 `[data-stage-inner]` 帶 transform 做等比縮放，直接寫在 children 裡的 fixed 會改以它為準、縮進舞台框；`StageFixed` portal 到沒有 transform 的 `#game-stage`，一般與全螢幕都貼著螢幕邊。內容區記得留出按鈕的寬度（計時器 `pr-28 sm:px-28`），手機上才不會蓋到。
+
 ### 全螢幕
 
 三件套缺一不可：`id={GAME_STAGE_ID}`、`data-stage-inner`、`data-unit={key}`。
+
+全螢幕只顯示 `#game-stage` 那棵子樹，portal 到 `body` 的浮層會被擋在外面。`dialog.tsx` 與 `popover.tsx` 都已經在全螢幕時改掛進 `document.fullscreenElement`；新增會 portal 的元件照同一招做。
 
 `FullscreenButton` 量 `[data-stage-inner]` 算出 `--fs-scale` 等比縮放；per-unit 微調在 `styles/globals.css` 用 `#game-stage[data-unit="..."]`。不支援 element fullscreen（iOS Safari）時那顆鈕不渲染，不給壞掉的按鈕。
 

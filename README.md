@@ -37,7 +37,7 @@
 | 學習讀時鐘        | `/clock/current-time`          | 分清時針分針，讀出幾點幾分                 |
 | 翻牌配對          | `/memory`                      | 記憶配對，可自訂卡片主題                   |
 | 大富翁            | `/monopoly`                    | 全班共用一台電腦輪流玩，題庫可匯入         |
-| 抽籤（轉盤 / 扭蛋機 / 一番賞） | `/draw`、`/draw/wheel`、`/draw/lottery`、`/draw/ichiban` | 課堂點名、分組、抽題與獎勵用的抽籤工具 |
+| 抽籤（轉盤 / 扭蛋機 / 一番賞） | `/draw`、`/draw/wheel`、`/draw/gacha`、`/draw/ichiban` | 課堂點名、分組、抽題與獎勵用的抽籤工具 |
 | 九九乘法練習      | `/multiplication`              | 自選段數與題數，四選一練乘法表             |
 | 計時器            | `/timer`                       | 大字倒數，時間到響鈴，可全螢幕投影         |
 | 噪音計            | `/noise`                       | 麥克風即時顯示音量，太吵變紅色             |
@@ -99,7 +99,7 @@ pnpm dev            # http://localhost:3000
 ```
 app/                Next.js App Router；pages.config.ts 是首頁的唯一資料來源
 components/         atoms / molecules / organisms / templates 分層
-lib/                純邏輯：monopoly 規則、memory、lottery、hooks、helpers
+lib/                純邏輯：monopoly 規則、memory、gacha、hooks、helpers
 public/images/      單元封面、硬幣、吉祥物（一律 webp）
 docs/               設計 spec、SEO 紀錄
 scripts/            SEO snapshot、IndexNow、GSC 排名查詢

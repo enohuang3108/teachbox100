@@ -589,7 +589,12 @@
   justify-content: center;
   overflow: hidden;
   padding: clamp(0.5rem, 2vh, 1.5rem) clamp(1rem, 5vw, 4rem);
-  background: var(--background);
+  /* 全螢幕只剩這棵子樹，站底的 Background 格線看不到了，在這裡補一份一樣的 */
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
 /*
@@ -706,14 +711,6 @@
 #game-stage[data-unit="monopoly"]:fullscreen > header > nav,
 #game-stage[data-unit="monopoly"]:fullscreen [data-fs-hide] {
   display: none;
-}
-
-/* 大富翁的漸層底是頁面自己畫的，全螢幕接手 background 後要補回來 */
-#game-stage[data-unit="monopoly"]:fullscreen {
-  background:
-    radial-gradient(circle at 22% 12%, oklch(0.95 0.05 85), transparent 55%),
-    radial-gradient(circle at 88% 90%, oklch(0.94 0.04 160), transparent 55%),
-    #fbf6ec;
 }
 
 #game-stage:fullscreen > [data-stage-inner] {

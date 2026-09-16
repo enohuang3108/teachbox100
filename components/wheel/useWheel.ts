@@ -10,7 +10,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * 一輪抽選的進行狀態。規則在 lib/wheel/game，這裡只管時序。
  * entries 是老師設定的完整名單；removed 記「已抽走」的原始 index，盤面只畫剩下的。
  */
-export function useWheel(entries: string[], soundOn: boolean) {
+export function useWheel(
+  entries: string[],
+  soundOn: boolean,
+  removeOnPick: boolean,
+) {
   const [rotation, setRotation] = useState(0);
   const [spinMs, setSpinMs] = useState(SPIN_MS);
   const [spinning, setSpinning] = useState(false);
@@ -24,18 +28,28 @@ export function useWheel(entries: string[], soundOn: boolean) {
     .map((label, index) => ({ label, index }))
     .filter((e) => !removed.has(e.index));
 
+  // 結果直接留在畫面上，不另外跳窗；下一次轉的時候才把上一個抽到的拿掉，
+  // 所以這裡用「拿掉之後」的名單抽，不能用還沒重畫的 active
   const spin = useCallback(() => {
-    if (spinning || active.length < 2) return;
-    const slot = pickIndex(active.length, defaultRng);
-    pending.current = active[slot].index;
+    if (spinning) return;
+    const nextRemoved =
+      result !== null && removeOnPick ? new Set(removed).add(result) : removed;
+    const pool = entries
+      .map((label, index) => ({ label, index }))
+      .filter((e) => !nextRemoved.has(e.index));
+    setRemoved(nextRemoved);
+    setResult(null);
+    if (pool.length < 2) return;
+    const slot = pickIndex(pool.length, defaultRng);
+    pending.current = pool[slot].index;
     // 減少動態：不轉直接揭曉；transition 時間跟著歸零，指標還是會指對格
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
     setSpinMs(reduced ? 0 : SPIN_MS);
-    setRotation((r) => rotationFor(slot, active.length, r, defaultRng));
+    setRotation((r) => rotationFor(slot, pool.length, r, defaultRng));
     setSpinning(true);
-  }, [spinning, active]);
+  }, [spinning, result, removeOnPick, removed, entries]);
 
   useEffect(() => {
     if (!spinning) return;
@@ -53,12 +67,6 @@ export function useWheel(entries: string[], soundOn: boolean) {
     };
   }, [spinning, spinMs, soundOn, playSpinLoop, playBonusSound]);
 
-  /** 收掉結果；removeIt 為 true 就把這個人從盤面拿掉 */
-  const dismiss = (removeIt: boolean) => {
-    if (result !== null && removeIt) setRemoved((s) => new Set(s).add(result));
-    setResult(null);
-  };
-
   const restoreAll = () => {
     setRemoved(new Set());
     setResult(null);
@@ -72,7 +80,6 @@ export function useWheel(entries: string[], soundOn: boolean) {
     result: result === null ? null : entries[result],
     removedCount: removed.size,
     spin,
-    dismiss,
     restoreAll,
   };
 }

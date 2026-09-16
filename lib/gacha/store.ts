@@ -3,28 +3,28 @@ import { persist } from "zustand/middleware";
 import { STARTER_TEXT } from "./game";
 
 // 老師的名單與偏好存在這台裝置；機器裡球的位置不存，重整就重來。
-interface LotteryStore {
+interface GachaStore {
   text: string;
   sound: boolean;
-  /** 抽到一顆就關蓋；關掉的話蓋子一直開著，球一顆接一顆出來，再點一下才關 */
-  autoClose: boolean;
+  /** 揭曉後把扭蛋放回箱子（可能再被抽到）；關掉就收進抽籤紀錄、不再出現 */
+  putBack: boolean;
   setText: (text: string) => void;
   setSound: (v: boolean) => void;
-  setAutoClose: (v: boolean) => void;
+  setPutBack: (v: boolean) => void;
   restoreStarter: () => void;
 }
 
-export const useLotteryStore = create<LotteryStore>()(
+export const useGachaStore = create<GachaStore>()(
   persist(
     (set) => ({
       text: STARTER_TEXT,
       sound: true,
-      autoClose: true,
+      putBack: false,
       setText: (text) => set({ text }),
       setSound: (sound) => set({ sound }),
-      setAutoClose: (autoClose) => set({ autoClose }),
+      setPutBack: (putBack) => set({ putBack }),
       restoreStarter: () => set({ text: STARTER_TEXT }),
     }),
-    { name: "lottery-machine" },
+    { name: "gacha-machine" },
   ),
 );

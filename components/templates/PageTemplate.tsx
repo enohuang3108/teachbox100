@@ -26,9 +26,15 @@ export const PageTemplate = ({
   children: React.ReactNode;
   actions?: React.ReactNode;
   /** 給了就先只顯示介紹頁（說明＋FAQ），按開始鈕才換成內容；內容頁不再掛 SEO 區塊 */
-  landing?: { startLabel: string; onStart?: () => void };
+  landing?: {
+    startLabel: string;
+    onStart?: () => void;
+    /** 要先開設定再進內容時由頁面控制；不給就是按下開始鈕立刻進 */
+    entered?: boolean;
+  };
 }) => {
-  const [entered, setEntered] = useState(!landing);
+  const [enteredState, setEntered] = useState(!landing);
+  const entered = landing?.entered ?? enteredState;
   const key = String(page.key);
   const learningResourceSchema = getLearningResourceSchema(key);
   const breadcrumbSchema = getBreadcrumbSchema(key);
