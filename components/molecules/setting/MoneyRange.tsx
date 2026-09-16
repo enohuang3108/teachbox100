@@ -52,8 +52,8 @@ export function MoneyRange({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-gray-700">金錢區間</h3>
-        <span className="rounded-full bg-blue-100 px-2 py-1 text-sm font-medium text-blue-600">
+        <h3 className="text-sm font-medium text-foreground">金錢區間</h3>
+        <span className="rounded-full bg-secondary px-2 py-1 text-sm font-medium text-foreground">
           {minAmount}～{maxAmount} 元
         </span>
       </div>
@@ -72,7 +72,7 @@ export function MoneyRange({
           onCommit({ minAmount: nextMinAmount, maxAmount: nextMaxAmount })
         }
       />
-      <div className="flex justify-between text-xs text-gray-500">
+      <div className="flex justify-between text-xs text-muted-foreground">
         <span>{MIN_LIMIT} 元</span>
         <span>{MAX_LIMIT} 元</span>
       </div>

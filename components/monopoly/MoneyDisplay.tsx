@@ -8,6 +8,7 @@ import {
   useTransform,
 } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { BRAND, BRAND_DARK } from "@/lib/design-tokens";
 
 // 金額顯示：數字滾動跳動，金額增減時彈一下並閃色，
 // 並在上方浮出 +$X／−$X 跳字（收綠付紅、向上飄淡出），讓收租／過起點等金流一眼看到。
@@ -44,7 +45,7 @@ export function MoneyDisplay({
     );
     animate(
       scope.current,
-      { color: [gain ? "#6fa24e" : "#e4522f", "#2c5427"] },
+      { color: [gain ? BRAND_DARK.green : BRAND_DARK.red, BRAND.green] },
       { duration: 0.7, ease: "easeOut" },
     );
     // 浮動跳字
@@ -68,7 +69,7 @@ export function MoneyDisplay({
             key={delta.id}
             className="pointer-events-none absolute bottom-full left-1/2 mb-0.5 -translate-x-1/2 whitespace-nowrap text-sm font-extrabold tabular-nums"
             style={{
-              color: delta.amount > 0 ? "#2c5427" : "#cb2108",
+              color: delta.amount > 0 ? BRAND.green : BRAND.red,
               textShadow: "0 1px 3px rgba(0,0,0,0.25)",
             }}
             initial={{ y: 6, opacity: 0, scale: 0.7 }}

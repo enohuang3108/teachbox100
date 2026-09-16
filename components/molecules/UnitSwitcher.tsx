@@ -49,7 +49,7 @@ export const UnitSwitcher = ({
         <DropdownMenu.Content
           align="start"
           sideOffset={6}
-          className="border-ink/10 bg-paper data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 z-50 min-w-[13rem] origin-[var(--radix-dropdown-menu-content-transform-origin)] rounded-xl border p-1 shadow-[0_8px_24px_-8px_rgb(2_13_21_/_0.18)] duration-150 ease-out"
+          className="border-ink/10 bg-paper data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 z-(--z-modal) min-w-[13rem] origin-[var(--radix-dropdown-menu-content-transform-origin)] rounded-xl border p-1 shadow-[0_8px_24px_-8px_rgb(2_13_21_/_0.18)] duration-150 ease-out"
         >
           {siblings.map((s) => {
             const current = s.path === path;

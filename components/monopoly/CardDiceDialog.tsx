@@ -47,7 +47,7 @@ export function CardDiceDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-ink/60 px-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-(--z-modal) flex flex-col items-center justify-center gap-5 bg-ink/60 px-4 backdrop-blur-sm">
       <SpotlightAvatar player={player} size={96} name />
 
       <motion.div

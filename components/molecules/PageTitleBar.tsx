@@ -26,13 +26,16 @@ export const PageTitleBar = ({
   trail,
   siblings,
   actions,
+  asHeading = true,
 }: {
   trail: Crumb[];
   siblings: Sibling[];
   actions?: React.ReactNode;
+  /** 分類頁的 h1 是內文那個大標，這條列上就不要再出一個，否則一頁兩個 h1 */
+  asHeading?: boolean;
 }) => (
   // 底色從紙色淡到透明：內容捲到下面時不會被一條硬邊切開
-  <header className="header-scrim sticky top-0 z-40 flex min-h-16 w-full items-center gap-3 px-3 pt-[env(safe-area-inset-top)] sm:px-5">
+  <header className="header-scrim sticky top-0 z-(--z-overlay) flex min-h-16 w-full items-center gap-3 px-3 pt-[env(safe-area-inset-top)] sm:px-5">
     <Link
       href="/"
       prefetch={true}
@@ -67,13 +70,23 @@ export const PageTitleBar = ({
               /
             </span>
             {i === trail.length - 1 ? (
-              <h1 className="text-ink min-w-0 text-sm font-bold">
-                <UnitSwitcher
-                  title={crumb.title}
-                  path={crumb.path}
-                  siblings={siblings}
-                />
-              </h1>
+              asHeading ? (
+                <h1 className="text-ink min-w-0 text-sm font-bold">
+                  <UnitSwitcher
+                    title={crumb.title}
+                    path={crumb.path}
+                    siblings={siblings}
+                  />
+                </h1>
+              ) : (
+                <span className="text-ink min-w-0 text-sm font-bold">
+                  <UnitSwitcher
+                    title={crumb.title}
+                    path={crumb.path}
+                    siblings={siblings}
+                  />
+                </span>
+              )
             ) : (
               <Link
                 href={crumb.path}

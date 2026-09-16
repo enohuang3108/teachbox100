@@ -5,8 +5,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { createPortal } from "react-dom";
 import { BoxDraw, type BoxDrawPhase } from "@/lib/lottery/box-draw";
 import styles from "./LotteryMachine.module.css";
+import { BRAND } from "@/lib/design-tokens";
 
-const BALL_COLORS = ["#f8b003", "#cb2108", "#02569b", "#2c5427"];
+const BALL_COLORS = [BRAND.yellow, BRAND.red, BRAND.blue, BRAND.green];
 type BallRecord = { id: number; body: Body; color: string };
 type VanishingBall = { x: number; y: number; r: number; color: string; startedAt: number };
 
@@ -41,7 +42,7 @@ function drawBall(context: CanvasRenderingContext2D, x: number, y: number, radiu
   context.restore();
   context.beginPath();
   context.arc(x, y, radius * scale, 0, Math.PI * 2);
-  context.strokeStyle = "#020d15";
+  context.strokeStyle = BRAND.ink;
   context.lineWidth = Math.max(1.5, radius * 0.045);
   context.stroke();
 }
@@ -172,7 +173,7 @@ export function LotteryMachine({ labels, onPick }: { labels: string[]; onPick: (
 
   return <>
     <div ref={machineRef} className={styles.machine}>
-      <button type="button" className={styles.canvasHit} disabled={phase !== "ready"} aria-label="透明抽籤箱，點一顆球或按 Enter 開始抽籤"
+      <button type="button" className={styles.canvasHit} disabled={phase !== "ready"} aria-label="扭蛋機，點一顆扭蛋或按 Enter 開始抽籤"
         onPointerMove={(event) => {
           if (phase !== "ready") return;
           const rect = event.currentTarget.getBoundingClientRect();

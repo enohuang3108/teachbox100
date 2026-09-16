@@ -32,23 +32,6 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Chart Colors */
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-
-  /* Sidebar Colors */
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-
   /* Brand & Paper Tokens */
   --color-paper: var(--paper);
   --color-paper-warm: var(--paper-warm);
@@ -60,6 +43,21 @@
   --color-brand-red: var(--brand-red);
   --color-brand-blue: var(--brand-blue);
   --color-brand-green: var(--brand-green);
+  --color-panel: var(--panel);
+
+  /* 狀態色 —— 答對、提醒、錯誤、資訊。soft 是底色，ink 是壓在 soft 上的字色 */
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-ink: var(--success-ink);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-ink: var(--warning-ink);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-ink: var(--danger-ink);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-info-ink: var(--info-ink);
 
   /* Typography Tokens */
   --font-sans:
@@ -70,6 +68,34 @@
     sans-serif;
   --font-mono: JetBrains Mono, monospace;
   --font-serif: Source Serif 4, serif;
+
+  /* 字級階層。中文沒有斷詞也沒有小寫字母，行高一律 >= 1.7，標題才壓到 1.3 以下 */
+  --text-display: clamp(2.75rem, 6vw, 4.5rem);
+  --text-display--line-height: 1.02;
+  --text-display--font-weight: 900;
+  --text-display--letter-spacing: -0.03em;
+  --text-hero: clamp(2.25rem, 5vw, 3.5rem);
+  --text-hero--line-height: 1.1;
+  --text-hero--font-weight: 900;
+  --text-hero--letter-spacing: -0.02em;
+  --text-h1: clamp(1.5rem, 3.2vw, 2.25rem);
+  --text-h1--line-height: 1.3;
+  --text-h1--font-weight: 700;
+  --text-h2: clamp(1.5rem, 3vw, 2rem);
+  --text-h2--line-height: 1.25;
+  --text-h2--font-weight: 800;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h3: 1.25rem;
+  --text-h3--line-height: 1.4;
+  --text-h3--font-weight: 700;
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.75;
+  --text-body: 1rem;
+  --text-body--line-height: 1.75;
+  --text-caption: 0.875rem;
+  --text-caption--line-height: 1.5;
+  --text-caption--font-weight: 600;
+
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
@@ -87,6 +113,8 @@
   --duration-press: 0.14s;
   --duration-hover: 0.2s;
   --duration-enter: 0.26s;
+  /* 退場永遠比進場快：進場是使用者在等系統，退場是系統在回應使用者 */
+  --duration-exit: 0.16s;
 
   /* Animation Easings */
   --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
@@ -97,6 +125,7 @@
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --radius: 0.75rem;
   --tracking-normal: var(--tracking-normal);
+  --spacing: var(--spacing);
   --shadow-2xl: var(--shadow-2xl);
   --shadow-xl: var(--shadow-xl);
   --shadow-lg: var(--shadow-lg);
@@ -105,13 +134,6 @@
   --shadow-sm: var(--shadow-sm);
   --shadow-xs: var(--shadow-xs);
   --shadow-2xs: var(--shadow-2xs);
-  --spacing: var(--spacing);
-  --letter-spacing: var(--letter-spacing);
-  --shadow-offset-y: var(--shadow-offset-y);
-  --shadow-offset-x: var(--shadow-offset-x);
-  --shadow-spread: var(--shadow-spread);
-  --shadow-blur: var(--shadow-blur);
-  --shadow-opacity: var(--shadow-opacity);
 }
 
 :root {
@@ -135,6 +157,37 @@
   --brand-green: #2c5427;
   --grid-line: rgb(2 13 21 / 0.045);
   --ghost: rgb(2 13 21 / 0.04);
+
+  /*
+   * 實體面板的深色。刻意不在 .dark 覆寫 —— LED 價格牌與貨架層板畫的是「物件」，
+   * 不是介面表面；物件不會因為介面切到暗色就變成米色。
+   */
+  --panel: #1c1a17;
+
+  /* 狀態色。soft 當底、ink 當字 —— warning 的字不能用 brand-yellow，對比不足 */
+  --success: var(--brand-green);
+  --success-soft: #e8f0e4;
+  --success-ink: #24471f;
+  --warning: var(--brand-yellow);
+  --warning-soft: #fdf1d6;
+  --warning-ink: #7a5300;
+  --danger: var(--brand-red);
+  --danger-soft: #fbe6e1;
+  --danger-ink: #a51b06;
+  --info: var(--brand-blue);
+  --info-soft: #dde9f3;
+  --info-ink: #02569b;
+
+  /*
+   * 層級。四層就夠，寫死的 z-50 沒人知道自己壓在誰上面。
+   * 用法：z-(--z-modal)
+   */
+  --z-base: 10;
+  --z-sticky: 20;
+  --z-header: 30;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-toast: 60;
 
   /* Typography Tokens */
   --font-sans:
@@ -185,22 +238,7 @@
   --input: rgb(2 13 21 / 0.1);
   --ring: var(--brand-yellow);
 
-  /* Chart Colors */
-  --chart-1: oklch(0.7686 0.1647 70.0804);
-  --chart-2: oklch(0.6658 0.1574 58.3183);
-  --chart-3: oklch(0.5553 0.1455 48.9975);
-  --chart-4: oklch(0.4732 0.1247 46.2007);
-  --chart-5: oklch(0.4137 0.1054 45.9038);
 
-  /* Sidebar Colors */
-  --sidebar: oklch(0.9846 0.0017 247.8389);
-  --sidebar-foreground: oklch(0.2686 0 0);
-  --sidebar-primary: oklch(0.7686 0.1647 70.0804);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.9869 0.0214 95.2774);
-  --sidebar-accent-foreground: oklch(0.4732 0.1247 46.2007);
-  --sidebar-border: oklch(0.9276 0.0058 264.5313);
-  --sidebar-ring: oklch(0.7686 0.1647 70.0804);
 }
 
 .dark {
@@ -217,6 +255,16 @@
   --brand-green: #6fa24e;
   --grid-line: rgb(255 255 255 / 0.04);
   --ghost: rgb(255 255 255 / 0.035);
+
+  /* 暗色的 soft 是暖調深色，不是把亮色的淡底調暗 —— 調暗會偏灰，跟紙感脫節 */
+  --success-soft: #1e2a1a;
+  --success-ink: #8fc46a;
+  --warning-soft: #2c2312;
+  --warning-ink: #f2bb3f;
+  --danger-soft: #2e1712;
+  --danger-ink: #f08163;
+  --info-soft: #14212c;
+  --info-ink: #6fb3e6;
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -238,22 +286,7 @@
   --input: rgb(255 255 255 / 0.12);
   --ring: var(--brand-yellow);
 
-  /* Chart Colors for Dark Theme */
-  --chart-1: oklch(0.8369 0.1644 84.4286);
-  --chart-2: oklch(0.6658 0.1574 58.3183);
-  --chart-3: oklch(0.4732 0.1247 46.2007);
-  --chart-4: oklch(0.5553 0.1455 48.9975);
-  --chart-5: oklch(0.4732 0.1247 46.2007);
 
-  /* Sidebar Colors for Dark Theme */
-  --sidebar: oklch(0.1684 0 0);
-  --sidebar-foreground: oklch(0.9219 0 0);
-  --sidebar-primary: oklch(0.7686 0.1647 70.0804);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.4732 0.1247 46.2007);
-  --sidebar-accent-foreground: oklch(0.9243 0.1151 95.7459);
-  --sidebar-border: oklch(0.3715 0 0);
-  --sidebar-ring: oklch(0.7686 0.1647 70.0804);
   --radius: 0.75rem;
   --radius-card: 1.25rem;
   --font-sans:

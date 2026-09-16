@@ -1,7 +1,13 @@
 import { hubs, pages } from "@/app/pages.config";
 import { PageDecor } from "@/components/atoms/PageDecor";
 import { ImageCard } from "@/components/molecules/ImageCard";
-import { getBreadcrumbSchema, getFaqSchema, getHubSchema } from "@/lib/jsonld";
+import { PageTitleBar } from "@/components/molecules/PageTitleBar";
+import {
+  getBreadcrumbSchema,
+  getBreadcrumbTrail,
+  getFaqSchema,
+  getHubSchema,
+} from "@/lib/jsonld";
 import { buildMetadata } from "@/lib/seo";
 import { pageSeo } from "@/lib/seo-content";
 import type { Metadata } from "next";
@@ -34,23 +40,14 @@ export default function DrawHubPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(getFaqSchema(HUB_KEY)) }}
       />
 
+      {/* 麵包屑跟教材頁走同一條列；asHeading 關掉，h1 留給內文的大標 */}
+      <PageTitleBar trail={getBreadcrumbTrail(HUB_KEY)} siblings={[]} asHeading={false} />
+
       <main className="relative min-h-screen">
         <PageDecor />
 
-        <div className="mx-auto w-full max-w-4xl px-5 pt-8 pb-20 md:px-8 md:pt-28">
-          <nav aria-label="麵包屑">
-            <ol className="text-muted-foreground flex gap-2 text-sm">
-              <li>
-                <Link href="/" className="hover:text-ink underline-offset-4 hover:underline">
-                  首頁
-                </Link>
-              </li>
-              <li aria-hidden>/</li>
-              <li aria-current="page">{hub.title}</li>
-            </ol>
-          </nav>
-
-          <h1 className="font-display text-ink mt-6 text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.1] font-black tracking-[-0.02em]">
+        <div className="mx-auto w-full max-w-4xl px-5 pt-8 pb-20 md:px-8">
+          <h1 className="font-display text-ink text-hero">
             {hub.title}
           </h1>
           <p className="text-muted-foreground mt-5 text-lg leading-[1.85]">{seo.intro}</p>

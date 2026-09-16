@@ -25,7 +25,7 @@ export function CardDialog({
   const deckLabel = pending.deck === "chance" ? "機會" : "命運";
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-ink/60 px-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-(--z-modal) flex flex-col items-center justify-center gap-5 bg-ink/60 px-4 backdrop-blur-sm">
       {/* 玩家頭像 ＋ 光暈（沿用過場聚光燈風格） */}
       <SpotlightAvatar player={player} size={size} name />
 

@@ -142,7 +142,7 @@ export default function CoinIntroductionPage() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <DialogTrigger asChild>
-                        <Card className="flex flex-col justify-center items-center group relative cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                        <Card className="flex flex-col justify-center items-center group relative cursor-pointer transition-[transform,box-shadow] duration-hover hover:-translate-y-[3px] hover:shadow-xl">
                           <CardHeader className="pb-3">
                           </CardHeader>
                           <CardContent className="flex flex-col items-center gap-3">

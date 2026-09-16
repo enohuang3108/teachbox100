@@ -8,3 +8,9 @@ For a user-visible behavior change, a new unit, or a bug fix, read [the testing 
 4. Run the affected test first, then the relevant project scripts from `package.json`. Update the matrix when a unit's public behavior or agent-verification need changes.
 
 Done means the changed behavior has a passing test at its chosen seam and the matrix still describes it accurately.
+
+# UI
+
+Before writing or changing any UI — a new component, a layout change, a color, an animation, a new page — read [the design system](.agents/skills/design-system/SKILL.md). It defines which token expresses which intent for color, type scale, stacking, and motion.
+
+Done means `pnpm lint:tokens` is clean and the change was seen in both light and dark.

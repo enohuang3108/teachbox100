@@ -128,7 +128,7 @@ export function SetupPanel() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-5 py-8 md:px-8">
-      <h1 className="font-display text-[clamp(1.5rem,3vw,2rem)] leading-tight font-extrabold tracking-[-0.01em] text-ink">
+      <h1 className="font-display text-h2 text-ink">
         大富翁 — 遊戲設定
       </h1>
 

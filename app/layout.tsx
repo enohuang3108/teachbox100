@@ -101,18 +101,18 @@ export default function RootLayout({
           className={`${nunito.variable} ${notoSansTC.variable} font-sans m-0 overflow-x-hidden p-0`}
         >
           <div className="hidden noscript:block">
-            <div className="fixed inset-0 bg-yellow-50 z-50 flex items-center justify-center p-4">
-              <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6 text-center">
+            <div className="fixed inset-0 bg-warning-soft z-(--z-modal) flex items-center justify-center p-4">
+              <div className="max-w-md mx-auto bg-card rounded-lg shadow-lg p-6 text-center">
                 <div className="mb-4">
-                  <WarningIcon className="mx-auto h-12 w-12 text-yellow-400" />
+                  <WarningIcon className="mx-auto h-12 w-12 text-warning" />
                 </div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                <h2 className="text-lg font-semibold text-foreground mb-2">
                   需要啟用 JavaScript
                 </h2>
-                <p className="text-gray-600 mb-4">
+                <p className="text-muted-foreground mb-4">
                   這個網站需要 JavaScript 才能運作，請到瀏覽器設定裡開啟。
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   This application requires JavaScript to function properly.
                   Please enable JavaScript in your browser settings.
                 </p>

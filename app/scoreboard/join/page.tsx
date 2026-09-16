@@ -131,7 +131,7 @@ export default function JoinPage() {
           {/* 綠點＝連著，灰點＝掉了。學生一眼看得出按下去有沒有用 */}
           <span
             className={`size-2.5 rounded-full transition-colors duration-200 ease-out ${
-              connected ? "bg-emerald-500" : "bg-ink/25"
+              connected ? "bg-success" : "bg-ink/25"
             }`}
           />
           {name}

@@ -11,6 +11,7 @@
     "seo:rank": "python3 scripts/gsc-rank.py --record",
     "start": "next start",
     "lint": "oxlint --type-aware",
+    "lint:tokens": "node scripts/check-design-tokens.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

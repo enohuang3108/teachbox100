@@ -21,20 +21,20 @@ export default function SelectedCoinsList({
           <button
             key={coin.id}
             onClick={() => onRemoveCoin(coin)}
-            className="group relative transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-full"
+            className="group relative transition-transform duration-hover hover:-translate-y-[3px] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
             aria-label={`移除 ${coin.value}元硬幣`}
           >
             <div className="relative">
               <Coin coinValue={coin.value} />
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-bold">
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-danger text-paper text-xs flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-bold">
                 ×
               </div>
             </div>
           </button>
         ))
       ) : (
-        <div className="flex flex-col items-center justify-center text-gray-500">
-          <div className="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center mb-2">
+        <div className="flex flex-col items-center justify-center text-muted-foreground">
+          <div className="w-16 h-16 rounded-full border-2 border-dashed border-border flex items-center justify-center mb-2">
             <span className="text-2xl">+</span>
           </div>
           <p className="text-sm font-medium">尚未選擇硬幣</p>

@@ -12,6 +12,7 @@ import {
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import type { IchibanPrize } from "@/lib/ichiban/prizes";
+import { BRAND } from "@/lib/design-tokens";
 
 const PEEL_MORPH_COUNT = 20;
 
@@ -60,8 +61,8 @@ function createPrizeLabel(prize: IchibanPrize, renderer: THREE.WebGLRenderer, re
     context.font = `${weight} ${size}px ${family}`;
     context.fillText(text, 768, y);
   };
-  drawFittedText(prize.rank, 145, 900, 190, 92, 1120, "#cb2108");
-  drawFittedText(prize.name, 300, 900, 92, 48, 1260, "#020d15");
+  drawFittedText(prize.rank, 145, 900, 190, 92, 1120, BRAND.red);
+  drawFittedText(prize.name, 300, 900, 92, 48, 1260, BRAND.ink);
 
   const texture = new THREE.CanvasTexture(labelCanvas);
   texture.colorSpace = THREE.SRGBColorSpace;

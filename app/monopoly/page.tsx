@@ -557,7 +557,7 @@ function PurchaseConfirm({
       : `在${tile.name}蓋一棟房子？`;
   const confirmText = isBuy ? "購買" : toHotel ? "蓋旅館" : "蓋房子";
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-ink/60 px-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-(--z-modal) flex flex-col items-center justify-center gap-6 bg-ink/60 px-4 backdrop-blur-sm">
       {/* 玩家頭像 ＋ 光暈（沿用過場聚光燈風格） */}
       <SpotlightAvatar player={player} size={size} name />
 
@@ -721,7 +721,7 @@ function ResetConfirm({
   onCancel: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/45 p-4 backdrop-blur-[2px]">
+    <div className="fixed inset-0 z-(--z-modal) flex items-center justify-center bg-ink/45 p-4 backdrop-blur-[2px]">
       <motion.div
         initial={{ scale: 0.85, opacity: 0, y: 12 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -759,7 +759,7 @@ function ResetConfirm({
 
 function LogDialog({ log, onClose }: { log: string[]; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/45 p-4 backdrop-blur-[2px]">
+    <div className="fixed inset-0 z-(--z-modal) flex items-center justify-center bg-ink/45 p-4 backdrop-blur-[2px]">
       <div className="flex max-h-[70vh] w-full max-w-md flex-col rounded-[1.25rem] bg-card p-5 shadow-[0_18px_44px_-18px_rgb(2_13_21/0.28)] ring-1 ring-ink/[0.06]">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-display text-base font-extrabold text-ink">

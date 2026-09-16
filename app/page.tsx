@@ -1,4 +1,4 @@
-import { pages } from "@/app/pages.config";
+import { hubs, pages } from "@/app/pages.config";
 import { BarkleyEyes } from "@/components/atoms/BarkleyEyes";
 import {
   FACT_BADGE,
@@ -16,7 +16,12 @@ const CONTAINER = "mx-auto w-full max-w-[1200px] px-5 md:px-8";
 export default function Home() {
   const websiteSchema = getWebsiteSchema();
   const organizationSchema = getOrganizationSchema();
-  const entries = Object.entries(pages);
+  // hub 取代旗下子頁：首頁只露一張入口卡，權重集中到分類頁而不是散給六張教材卡
+  const grouped = new Set(Object.values(hubs).flatMap((hub) => hub.children));
+  const entries = [
+    ...Object.entries(hubs),
+    ...Object.entries(pages).filter(([key]) => !grouped.has(key)),
+  ];
 
   return (
     <>
@@ -42,10 +47,10 @@ export default function Home() {
           <div className="grid items-center gap-10 lg:grid-cols-[7fr_5fr] lg:gap-12">
             <div className="order-2 text-center lg:order-1 lg:text-left">
               <h1 className="font-display text-ink">
-                <span className="block text-[clamp(2.75rem,6vw,4.5rem)] leading-[1.02] font-black tracking-[-0.03em]">
+                <span className="block text-display">
                   TeachBox100
                 </span>
-                <span className="mt-3 block text-[clamp(1.5rem,3.2vw,2.25rem)] leading-[1.3] font-bold text-ink-soft">
+                <span className="mt-3 block text-h1 text-ink-soft">
                   從遊戲開始，把知識留下
                 </span>
               </h1>
@@ -108,7 +113,7 @@ export default function Home() {
           className={`${CONTAINER} scroll-mt-8 pb-20 md:pb-28`}
         >
           <div className="max-w-2xl">
-            <h2 className="font-display text-[clamp(1.5rem,3vw,2rem)] leading-tight font-extrabold tracking-[-0.01em] text-ink">
+            <h2 className="font-display text-h2 text-ink">
               選一個有興趣的開始吧！
             </h2>
           </div>

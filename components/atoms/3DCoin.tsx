@@ -53,7 +53,7 @@ export default function ThreeDCoin({
         className={cn(
           "relative w-full",
           "[transform-style:preserve-3d]",
-          "transition-all duration-700",
+          "transition-transform duration-700",
           isFlipped
             ? "[transform:rotateY(180deg)]"
             : "[transform:rotateY(0deg)]"

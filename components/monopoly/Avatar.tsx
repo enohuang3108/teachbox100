@@ -28,7 +28,7 @@ export function PlayerAvatar({
   }
   return (
     <span
-      className="inline-grid shrink-0 place-items-center overflow-hidden rounded-full bg-white"
+      className="inline-grid shrink-0 place-items-center overflow-hidden rounded-full bg-paper"
       style={{
         width: size,
         height: size,

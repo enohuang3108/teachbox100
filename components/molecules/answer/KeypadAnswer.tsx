@@ -37,26 +37,26 @@ export default function KeypadAnswer({ value, onChange }: KeypadAnswerProps) {
           <Button
             key={num}
             onClick={() => handleButtonClick(num.toString())}
-            className="bg-gray-100 py-3 text-lg text-black hover:bg-gray-200 md:py-4 md:text-xl"
+            className="bg-muted py-3 text-lg text-foreground hover:bg-accent md:py-4 md:text-xl"
           >
             {num}
           </Button>
         ))}
         <Button
           onClick={() => handleButtonClick("clear")}
-          className="bg-red-100 py-3 text-lg text-red-700 hover:bg-red-200 md:py-4 md:text-xl"
+          className="bg-danger-soft py-3 text-lg text-danger-ink hover:bg-danger/20 md:py-4 md:text-xl"
         >
           清除
         </Button>
         <Button
           onClick={() => handleButtonClick("0")}
-          className="bg-gray-100 py-3 text-lg text-black hover:bg-gray-200 md:py-4 md:text-xl"
+          className="bg-muted py-3 text-lg text-foreground hover:bg-accent md:py-4 md:text-xl"
         >
           0
         </Button>
         <Button
           onClick={() => handleButtonClick("backspace")}
-          className="bg-yellow-100 py-3 text-lg text-yellow-700 hover:bg-yellow-200 md:py-4 md:text-xl"
+          className="bg-warning-soft py-3 text-lg text-warning-ink hover:bg-warning/20 md:py-4 md:text-xl"
         >
           ←
         </Button>

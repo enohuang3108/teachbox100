@@ -94,12 +94,12 @@ export default function CoinChangePage() {
         <AmountDisplay
           label="已付金額"
           amount={paidAmount}
-          amountColor="text-yellow-400"
+          amountColor="text-warning"
         />
         <AmountDisplay
           label="售價"
           amount={targetPrice}
-          amountColor="text-green-400"
+          amountColor="text-success"
         />
       </div>
 
@@ -126,7 +126,7 @@ export default function CoinChangePage() {
         handleNextQuestion={resetGame}
       >
         <div>
-          <div className="mb-6 flex min-h-[80px] w-full flex-col items-center rounded-md border bg-gray-100 p-4">
+          <div className="mb-6 flex min-h-[80px] w-full flex-col items-center rounded-md border bg-muted p-4">
             <h2 className="mb-2 self-start text-lg font-semibold">
               已選找零硬幣：
             </h2>
@@ -147,7 +147,7 @@ export default function CoinChangePage() {
                   <button
                     key={coin.value}
                     onClick={() => handleCoinClick(coin)}
-                    className={"relative cursor-pointer transition-transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50"}
+                    className={"relative cursor-pointer transition-transform duration-hover hover:-translate-y-[3px] active:scale-[0.97] disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50"}
                     aria-label={`選擇 ${coin.name}`}
                   >
                     <Coin coinValue={coin.value} />

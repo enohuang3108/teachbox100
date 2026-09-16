@@ -151,10 +151,10 @@ export default function SelectCoinsPage() {
             onProductSelect={handleProductSelect}
           />
         ) : (
-          <div className="w-full mb-8 flex items-center justify-center h-64 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 rounded-2xl">
+          <div className="w-full mb-8 flex items-center justify-center h-64 bg-muted rounded-2xl">
             <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 mb-4"></div>
-              <p className="text-gray-800 font-medium">正在載入...</p>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-ink mb-4"></div>
+              <p className="text-foreground font-medium">正在載入...</p>
             </div>
           </div>
         )}
@@ -173,7 +173,7 @@ export default function SelectCoinsPage() {
                 <AmountDisplay
                   label="總金額"
                   amount={targetAmount}
-                  amountColor="text-green-600"
+                  amountColor="text-success"
                 />
               </div>
             )}
@@ -201,7 +201,7 @@ export default function SelectCoinsPage() {
           handleNextQuestion={resetGame}
         >
           <div>
-            <div className="mb-6 flex min-h-[80px] w-full flex-col items-center rounded-md border bg-gray-100 p-4">
+            <div className="mb-6 flex min-h-[80px] w-full flex-col items-center rounded-md border bg-muted p-4">
               <h2 className="mb-2 self-start text-lg font-semibold">已選硬幣:</h2>
               <SelectedCoinsList
                 selectedCoins={selectedCoins}
@@ -221,7 +221,7 @@ export default function SelectCoinsPage() {
                       key={coin.value}
                       onClick={() => handleCoinClick(coin)}
                       className={
-                        "relative cursor-pointer transition-transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50"
+                        "relative cursor-pointer transition-transform duration-hover hover:-translate-y-[3px] active:scale-[0.97] disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50"
                       }
                       aria-label={`選擇 ${coin.name}`}
                     >

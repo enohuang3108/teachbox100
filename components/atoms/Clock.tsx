@@ -197,7 +197,7 @@ const Clock: FC<ClockProps> = ({
         <div
           key={i}
           className={cn(
-            "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-neutral-400 text-base font-medium",
+            "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-muted-foreground text-base font-medium",
           )}
           style={{
             transform: `rotate(${deg}deg) translateY(-180px) rotate(-${deg}deg)`,
@@ -219,7 +219,7 @@ const Clock: FC<ClockProps> = ({
         <div
           key={i}
           className={cn(
-            "absolute left-1/2 top-1/2 h-4 w-[1px] -translate-x-1/2 -translate-y-1/2 bg-gray-500",
+            "absolute left-1/2 top-1/2 h-4 w-[1px] -translate-x-1/2 -translate-y-1/2 bg-stone",
           )}
           style={{
             transform: `rotate(${deg}deg) translateY(149px)`,
@@ -235,7 +235,7 @@ const Clock: FC<ClockProps> = ({
         {/* 時針 */}
         <div
           className={cn(
-            "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-black shadow-md w-[4px] h-[28%] -translate-x-1/2 -translate-y-full",
+            "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-ink shadow-md w-[4px] h-[28%] -translate-x-1/2 -translate-y-full",
             !isDraggingRef.current && "transition-transform duration-300 ease-in-out",
           )}
           style={{
@@ -246,7 +246,7 @@ const Clock: FC<ClockProps> = ({
         {/* 分針 */}
         <div
           className={cn(
-            "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-black shadow-sm w-[6px] h-[43%] -translate-x-1/2 -translate-y-full",
+            "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-ink shadow-sm w-[6px] h-[43%] -translate-x-1/2 -translate-y-full",
             !isDraggingRef.current && "transition-transform duration-300 ease-in-out",
             { "cursor-move": precision === "minute" && draggable && !!onChange }
           )}
@@ -260,7 +260,7 @@ const Clock: FC<ClockProps> = ({
         {/* drag ball */}
         <div
           className={cn(
-            "absolute top-1/2 left-1/2 rounded-full bg-blue-500 size-3 -translate-x-1/2 -translate-y-full",
+            "absolute top-1/2 left-1/2 rounded-full bg-primary size-3 -translate-x-1/2 -translate-y-full",
             !isDraggingRef.current && "transition-transform duration-300 ease-in-out",
             { "cursor-move": precision === "minute" && draggable && !!onChange }
           )}
@@ -275,7 +275,7 @@ const Clock: FC<ClockProps> = ({
         {precision === "second" && (
           <div
             className={cn(
-              "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-red-500 shadow-sm w-[1px] h-[43%] -translate-x-1/2 -translate-y-full transition-transform duration-300 ease-in-out",
+              "absolute top-1/2 left-1/2 origin-bottom rounded-full bg-danger shadow-sm w-[1px] h-[43%] -translate-x-1/2 -translate-y-full transition-transform duration-300 ease-in-out",
               {
                 "cursor-move": precision === "second" && draggable && !!onChange,
               },
@@ -296,7 +296,7 @@ const Clock: FC<ClockProps> = ({
       id="clock"
       ref={clockRef}
       className={cn(
-        "relative w-[320px] h-[320px] m-16 rounded-full border-4 border-gray-800 bg-white touch-none",
+        "relative w-[320px] h-[320px] m-16 rounded-full border-4 border-ink bg-paper touch-none",
         className,
       )}
     >
@@ -313,7 +313,7 @@ const Clock: FC<ClockProps> = ({
       )}
 
       {/* 中心點 */}
-      <div className="absolute top-1/2 left-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-black shadow" />
+      <div className="absolute top-1/2 left-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-ink shadow" />
     </div>
   );
 };

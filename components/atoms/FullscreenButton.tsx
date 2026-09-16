@@ -108,7 +108,7 @@ export const FullscreenButton = ({
             type="button"
             onClick={toggle}
             aria-label="離開全螢幕"
-            className="bg-background/80 text-foreground hover:bg-background fixed top-4 right-4 z-50 flex size-11 cursor-pointer items-center justify-center rounded-lg border"
+            className="bg-background/80 text-foreground hover:bg-background fixed top-4 right-4 z-(--z-modal) flex size-11 cursor-pointer items-center justify-center rounded-lg border"
           >
             <Minimize2 size={20} strokeWidth={2} />
           </button>,

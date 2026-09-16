@@ -59,10 +59,10 @@ export function AudioSettings() {
           <button
             type="button"
             aria-label="關閉音量設定"
-            className="fixed inset-0 z-40 cursor-default"
+            className="fixed inset-0 z-(--z-overlay) cursor-default"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute right-0 top-12 z-50 w-56 space-y-3 rounded-2xl bg-card p-4 shadow-[0_16px_36px_-16px_rgb(2_13_21/0.3)] ring-1 ring-ink/[0.06]">
+          <div className="absolute right-0 top-12 z-(--z-modal) w-56 space-y-3 rounded-2xl bg-card p-4 shadow-[0_16px_36px_-16px_rgb(2_13_21/0.3)] ring-1 ring-ink/[0.06]">
             <VolumeRow
               label="背景音樂"
               icon={<Music className="h-3.5 w-3.5" />}

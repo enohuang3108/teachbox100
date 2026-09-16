@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import type { CutsceneEvent, Player } from "@/lib/monopoly/types";
 import { useSound } from "@/lib/hooks/useSound";
 import { SpotlightAvatar } from "./SpotlightAvatar";
+import { BRAND_DARK } from "@/lib/design-tokens";
 
 function fmt(n: number): string {
   const s = Math.abs(n).toLocaleString();
@@ -28,7 +29,7 @@ function Party({
       <motion.div
         className="text-3xl font-extrabold tabular-nums"
         style={{
-          color: gain ? "#6fa24e" : "#e4522f",
+          color: gain ? BRAND_DARK.green : BRAND_DARK.red,
           textShadow: "0 2px 10px rgba(0,0,0,0.55)",
         }}
         initial={{ y: 10, opacity: 0, scale: 0.8 }}
@@ -141,7 +142,7 @@ export function MoneyCutscene({
       {event && (
         <motion.div
           key="money-backdrop"
-          className="fixed inset-0 z-40 bg-ink/60 backdrop-blur-sm"
+          className="fixed inset-0 z-(--z-overlay) bg-ink/60 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -151,7 +152,7 @@ export function MoneyCutscene({
       {event && (
         <motion.div
           key={event.seq}
-          className="pointer-events-none fixed inset-x-0 top-[26%] z-50 flex flex-col items-center px-4"
+          className="pointer-events-none fixed inset-x-0 top-[26%] z-(--z-modal) flex flex-col items-center px-4"
           initial={{ y: -16, scale: 0.9, opacity: 0 }}
           animate={{ y: 0, scale: 1, opacity: 1 }}
           exit={{ y: 12, scale: 0.92, opacity: 0 }}

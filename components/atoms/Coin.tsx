@@ -37,7 +37,7 @@ export default function Coin({ coinValue, size, className }: CoinProps) {
 
   return (
     <div 
-      className="relative transition-transform hover:scale-105"
+      className="relative transition-transform duration-hover hover:-translate-y-[3px] active:scale-[0.97]"
       style={{
         width: `${imageSize}px`,
         height: `${imageSize}px`,

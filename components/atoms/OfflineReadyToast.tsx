@@ -78,7 +78,7 @@ export const OfflineReadyToast = () => {
       aria-live="polite"
       data-visible={phase === "enter"}
       className={[
-        "fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-50",
+        "fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-(--z-toast)",
         "bg-brand-blue flex items-center gap-3 rounded-full py-3 pr-2.5 pl-5",
         // 陰影帶一點藥丸自己的藍，比純黑陰影服貼
         "shadow-[0_8px_30px_rgb(2_86_155/0.30)]",

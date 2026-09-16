@@ -11,7 +11,7 @@ export function TurnBanner({ player }: { player: Player | null }) {
       {player && (
         <motion.div
           key="turn-backdrop"
-          className="fixed inset-0 z-40 bg-ink/60 backdrop-blur-sm"
+          className="fixed inset-0 z-(--z-overlay) bg-ink/60 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -21,7 +21,7 @@ export function TurnBanner({ player }: { player: Player | null }) {
       {player && (
         <motion.div
           key={player.id}
-          className="pointer-events-none fixed inset-x-0 top-[30%] z-50 flex flex-col items-center px-4"
+          className="pointer-events-none fixed inset-x-0 top-[30%] z-(--z-modal) flex flex-col items-center px-4"
           initial={{ y: -20, scale: 0.85, opacity: 0 }}
           animate={{ y: 0, scale: 1, opacity: 1 }}
           exit={{ y: 16, scale: 0.9, opacity: 0 }}

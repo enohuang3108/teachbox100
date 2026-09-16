@@ -41,13 +41,13 @@ export default function OfflinePage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br">
       <div className="text-center p-8 max-w-md">
-        <div className={`w-4 h-4 rounded-full mx-auto mb-4 ${isOnline ? "bg-green-500" : "bg-red-500"}`}></div>
+        <div className={`w-4 h-4 rounded-full mx-auto mb-4 ${isOnline ? "bg-success" : "bg-danger"}`}></div>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+        <h1 className="text-3xl font-bold text-foreground mb-4">
           {isOnline ? "連線正常" : "目前離線"}
         </h1>
 
-        <p className="text-gray-600 mb-6">
+        <p className="text-muted-foreground mb-6">
           {isOnline
             ? "網路回來了，按下面的按鈕回首頁。"
             : "現在連不上網路，檢查一下 Wi-Fi 或行動網路。"
@@ -63,7 +63,7 @@ export default function OfflinePage() {
             重試 {retryCount > 0 && `(${retryCount})`}
           </Button>
         )}
-        <div className="text-sm text-gray-500 mt-8">
+        <div className="text-sm text-muted-foreground mt-8">
           <p>看到的內容可能是之前存下來的</p>
           <p>網路恢復後會自動更新</p>
         </div>

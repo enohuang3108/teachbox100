@@ -54,16 +54,16 @@ export const ShoppingCart = ({
       <div
         className={`min-h-[200px] p-4 border-2 border-dashed rounded-lg transition-colors ${
           selectedProducts.length === 0
-            ? "border-gray-300 bg-gray-50"
-            : "border-blue-300 bg-blue-50"
-        } hover:border-blue-400 hover:bg-blue-100`}
+            ? "border-border bg-muted"
+            : "border-primary bg-secondary"
+        } hover:border-primary hover:bg-accent`}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         role="region"
         aria-label="購物車放置區域"
       >
         {selectedProducts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full min-h-[180px] text-gray-500">
+          <div className="flex flex-col items-center justify-center h-full min-h-[180px] text-muted-foreground">
             <ShoppingCartIcon className="w-18 h-18 mb-4" />
             <p className="text-center text-sm leading-relaxed max-w-xs">
               把商品拖到這裡，或點一下商品放進購物車
@@ -75,10 +75,10 @@ export const ShoppingCart = ({
               <button
                 onClick={() => onProductRemove(product.id)}
                 key={product.id}
-                className="bg-white cursor-pointer rounded-lg p-3 shadow-md border border-gray-200 relative group"
+                className="bg-card cursor-pointer rounded-lg p-3 shadow-md border border-border relative group"
               >
                 <div
-                  className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 w-6 h-6 bg-danger hover:bg-danger-ink text-paper rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   aria-label={`移除 ${product.name}`}
                 >
                   ×
@@ -95,7 +95,7 @@ export const ShoppingCart = ({
 
                 <div className="text-center">
                   <h3 className="text-sm font-semibold mb-1">{product.name}</h3>
-                  <p className="text-sm font-bold text-green-600">
+                  <p className="text-sm font-bold text-success">
                     ${product.price}
                   </p>
                 </div>

@@ -23,10 +23,10 @@ const AmountDisplay: React.FC<AmountDisplayProps> = ({
 
   return (
     <div
-      className={`flex h-auto ${sizeStyles[size].padding} w-full flex-col items-center justify-center rounded-md bg-zinc-800`}
+      className={`flex h-auto ${sizeStyles[size].padding} w-full flex-col items-center justify-center rounded-md bg-panel`}
     >
       {label && (
-        <div className="mb-2 text-sm font-medium text-gray-400">{label}</div>
+        <div className="mb-2 text-sm font-medium text-muted-foreground">{label}</div>
       )}
       <div
         className={`flex items-end space-x-2 ${sizeStyles[size].container} font-bold ${amountColor} [text-shadow:0_0_20px]`}

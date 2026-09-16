@@ -54,7 +54,7 @@ export default function GameAnswerSection({
       <div className="mt-6 md:mt-8">
         <Button
           onClick={checkAnswer}
-          className="w-full rounded-full bg-black py-5 text-xl text-white hover:bg-gray-800 md:py-6 md:text-2xl"
+          className="w-full rounded-full bg-ink py-5 text-xl text-paper hover:bg-ink-soft md:py-6 md:text-2xl"
           disabled={!hasAnswer || showFeedback}
         >
           {submitMessage}
@@ -63,7 +63,7 @@ export default function GameAnswerSection({
 
       {/* 回饋訊息 */}
       <div
-        className={`absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`absolute inset-0 flex flex-col items-center justify-center bg-paper/95 transition-opacity duration-300 ${
           showFeedback ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
@@ -72,8 +72,8 @@ export default function GameAnswerSection({
             isCorrect === null
               ? ""
               : isCorrect
-                ? "text-green-700"
-                : "text-red-700"
+                ? "text-success-ink"
+                : "text-danger-ink"
           }`}
         >
           <p className="mb-4 text-2xl font-bold md:text-3xl">
@@ -85,7 +85,7 @@ export default function GameAnswerSection({
           </p>
           <Button
             onClick={handleNextQuestion}
-            className="mt-4 rounded-full bg-black px-8 py-4 text-lg text-white hover:bg-gray-800"
+            className="mt-4 rounded-full bg-ink px-8 py-4 text-lg text-paper hover:bg-ink-soft"
           >
             下一題
           </Button>

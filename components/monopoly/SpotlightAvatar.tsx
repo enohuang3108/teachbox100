@@ -12,7 +12,7 @@ export function SpotlightAvatar({
   haloSize = size * 2.5,
   grayscale = false,
   name = false,
-  nameClassName = "max-w-[8rem] text-base font-bold text-white/85",
+  nameClassName = "max-w-[8rem] text-base font-bold text-paper/85",
 }: {
   player: Player;
   size?: number;

@@ -96,10 +96,10 @@ export const Product3D = ({
         {!isModelLoaded && (
           <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-10">
             <div
-              className={`${config.progressBarWidth} h-1 bg-black/20 backdrop-blur-sm rounded-full overflow-hidden`}
+              className={`${config.progressBarWidth} h-1 bg-ink/20 rounded-full overflow-hidden`}
             >
               <div
-                className="h-full bg-gray-400 transition-all duration-300"
+                className="h-full bg-stone transition-[width] duration-normal"
                 style={{ width: `${loadingProgress * 100}%` }}
               ></div>
             </div>

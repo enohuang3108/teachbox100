@@ -13,13 +13,13 @@ export const SimpleCard = ({ children, className }: CardProps) => {
     return (
       <div
         {...rest}
-        className={cn("absolute size-6 border-slate-600", className)}
+        className={cn("absolute size-6 border-stone", className)}
       />
     );
   };
   return (
     <div className={cn(
-      "relative rounded-lg border-2 border-slate-200 transition-all duration-200 hover:border-slate-300",
+      "relative rounded-lg border-2 border-border transition-colors duration-hover hover:border-stone",
       className
     )}>
       <Icon className="-top-0.5 -left-0.5 rounded-tl-lg border-t-2 border-l-2" />

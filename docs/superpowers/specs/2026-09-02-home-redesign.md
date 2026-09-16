@@ -26,6 +26,9 @@
 
 ## 2. Design Tokens
 
+> 2026-09-16 起，**挑哪個 token 看 [`.agents/skills/design-system/SKILL.md`](../../../.agents/skills/design-system/SKILL.md)**；
+> 這一節是改版當下的快照，值的權威來源永遠是 `styles/globals.css`。
+
 全部定義在 `styles/globals.css`。色票用 hex 不用 oklch —— 品牌四色是從 `public/images/decor/blob-*.webp` **實際取樣**出來的，CSS 的色點必須跟生成圖完全同色，否則分類點跟背景色塊差一階會看起來很髒。**若重生色塊，必須重新取樣並同步更新這裡的 hex。**
 
 ### 2.1 色彩
@@ -376,7 +379,7 @@ public/icons/logo-transparent.webp       去背 logo（頁面左上角 FaviconBu
 
 ## 7. 已知限制與未完成
 
-- **其他頁面尚未套用新語言。** token 是全站生效的（`--background`、`--card`、`--radius` 都換了），但 `/coin/*`、`/clock/*`、`/monopoly` 的版型和元件還是舊寫法
+- ~~其他頁面尚未套用新語言~~ 2026-09-16 已遷移：`/coin/*`、`/clock/*`、`/monopoly` 的顏色與動效全部接上 token，`pnpm lint:tokens` 會擋回歸。挑 token 的規則搬到 [`.agents/skills/design-system/SKILL.md`](../../../.agents/skills/design-system/SKILL.md)，這份留改版脈絡
 - **暗色模式沒有切換器。** token 已備齊，但沒有 UI 可以切
 - **OG 圖還是舊的。** `app/**/opengraph-image.tsx` 沒跟著換
 - **Firefox 的 fallback 順滑度天生差一點。** 原生走合成執行緒依實際捲動位置取樣，JS 要等 scroll → rAF，快速捲動時可能慢一幀。位置會對

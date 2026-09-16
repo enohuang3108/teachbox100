@@ -24,8 +24,8 @@ export const useMaxAmount = () => {
     <div className="space-y-4">
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-700">{name}</h3>
-          <span className="rounded-full bg-blue-100 px-2 py-1 text-sm font-medium text-blue-600">
+          <h3 className="text-sm font-medium text-foreground">{name}</h3>
+          <span className="rounded-full bg-secondary px-2 py-1 text-sm font-medium text-foreground">
             {maxAmount} 元
           </span>
         </div>
@@ -37,9 +37,9 @@ export const useMaxAmount = () => {
             step="10"
             value={maxAmount}
             onChange={(e) => updateMaxAmount(Number(e.target.value))}
-            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-blue-500"
+            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-secondary accent-primary"
           />
-          <div className="mt-1 flex justify-between text-xs text-gray-500">
+          <div className="mt-1 flex justify-between text-xs text-muted-foreground">
             <span>10 元</span>
             <span>2000 元</span>
           </div>

@@ -20,13 +20,13 @@ export const AvailableCoins: React.FC<AvailableCoinsProps> = ({enabledCoins,setE
 
   return(
     <div className="space-y-2">
-      <h3 className="mb-©2 text-sm font-medium text-gray-700">可用硬幣</h3>
+      <h3 className="mb-2 text-sm font-medium text-foreground">可用硬幣</h3>
       <div className="flex flex-wrap gap-2">
         {AVAILABLE_COINS.map((coin) => (
           <button
             key={coin.value}
             onClick={() => toggleCoin(coin.value)}
-            className={`flex h-[70px] w-[70px] flex-col items-center justify-center p-0 transition-all ${
+            className={`flex h-[70px] w-[70px] flex-col items-center justify-center p-0 transition-[transform,background-color,border-color] ${
               !enabledCoins.includes(coin.value) && "opacity-50 grayscale"
             }`}
           >

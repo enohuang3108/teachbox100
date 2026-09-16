@@ -1,7 +1,9 @@
 // 卡背：跟封面同一款——阿黃同色的黑牌面（插畫色板 black）、兩顆 paper-warm 大眼。幾何照封面量的。
 /* oxlint-disable jsx-a11y/prefer-tag-over-role */
+import { BRAND } from "@/lib/design-tokens";
+
 export const CARD_BACK_INK = "#0D0D0D";
-const CREAM = "#F8F0E3";
+const CREAM = BRAND.paperWarm;
 
 export function CardBack() {
   return (

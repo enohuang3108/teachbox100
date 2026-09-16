@@ -179,12 +179,12 @@ export default function DigitAnswer({
     >
       {Object.entries(config).map(([key, { label }]) => (
         <div key={key} className="flex flex-col items-center">
-          <div className="mb-1 text-lg font-medium text-gray-600">{label}</div>
+          <div className="mb-1 text-lg font-medium text-muted-foreground">{label}</div>
           <div className="flex flex-col items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className="h-12 w-12 rounded-full transition-transform hover:bg-gray-100 active:scale-95 [&_svg]:size-8"
+              className="h-12 w-12 rounded-full transition-transform hover:bg-accent active:scale-95 [&_svg]:size-8"
               onMouseDown={() => !isMobile && startLongPress(key, 1)}
               onMouseUp={() => !isMobile && stopLongPress()}
               onMouseLeave={() => !isMobile && stopLongPress()}
@@ -194,7 +194,7 @@ export default function DigitAnswer({
             >
               <ChevronUp />
             </Button>
-            <div className="relative min-w-[3.5rem] min-h-[3.5rem] overflow-hidden rounded-md border border-gray-200 bg-white px-2 py-1 text-2xl font-bold shadow-sm md:h-14 md:min-w-[4rem] md:text-3xl">
+            <div className="relative min-w-[3.5rem] min-h-[3.5rem] overflow-hidden rounded-md border border-border bg-card px-2 py-1 text-2xl font-bold shadow-sm md:h-14 md:min-w-[4rem] md:text-3xl">
               <span
                 ref={setStagingRef(key)}
                 className="absolute inset-0 flex items-center justify-center transition-transform duration-300 ease-in-out"
@@ -210,7 +210,7 @@ export default function DigitAnswer({
             <Button
               variant="ghost"
               size="icon"
-              className="h-12 w-12 rounded-full transition-transform hover:bg-gray-100 active:scale-95 [&_svg]:size-8"
+              className="h-12 w-12 rounded-full transition-transform hover:bg-accent active:scale-95 [&_svg]:size-8"
               onMouseDown={() => !isMobile && startLongPress(key, -1)}
               onMouseUp={() => !isMobile && stopLongPress()}
               onMouseLeave={() => !isMobile && stopLongPress()}
