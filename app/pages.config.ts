@@ -6,6 +6,8 @@ export interface Page {
   blurDataURL: string;
   title: string;
   description: string;
+  /** 介紹頁（UnitHero）的大標；未指定時用 description。description 還餵首頁卡片與 schema，不能為了標題縮短 */
+  headline?: string;
   guide?: string;
 }
 
@@ -133,6 +135,7 @@ const pagesConfig = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR42gGWAGn/Afbv5AkKBtPR1R0iLAkF/AcGBAABAvj4+AIICAS1y+iErMn94pkGBQPAxMnP0dMCAgIC0d/vw9rqlGNOBuro89qXg42drbCyBgoMAuPq9SIYDhUM9OgUXKfUGA0G+sPHzfXz8gRALxmEq9OS+xHX4u5oS1D+7e/Jz9X9/PwB+/Pn+fv9t8vkKR8QKx8P4uTrBgUEEhIRt8VNQdl18S8AAAAASUVORK5CYII=",
     title: "計時器",
+    headline: "上課用的倒數計時器",
     description:
       "上課用的大字倒數計時器，時間到會響鈴，分組討論、小考、限時作答都好用。",
   },
@@ -142,6 +145,7 @@ const pagesConfig = {
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR42gGWAGn/Affw5QAAAP/+/gIFBvf29v/+/REWFffy8wIAAAD+/v8ABggFAP3k4t1udHyoqK0EBQUCAQAAChAP9MS77JuW/AH+tri8/Pr6BQsNAvr8AM/VvPG2f/fl7h0kLAUEA8jKzvLv7gLc5N6quq4EExkIFxbr6ekNDA3v8PD+/f0B8+3i/P37B//9//8DBAsL5ubnEhIRCgsLzVxOYMzmoBUAAAAASUVORK5CYII=",
     title: "噪音計",
+    headline: "教室太吵了嗎",
     description:
       "用麥克風即時顯示教室有多吵，太大聲就變紅色，聲音只在這台裝置上計算。",
   },

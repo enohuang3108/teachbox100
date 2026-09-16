@@ -24,7 +24,14 @@ function PopoverContent({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
   return (
-    <PopoverPrimitive.Portal>
+    // 原生 element fullscreen 只顯示那棵子樹，portal 到 body 會被蓋住；有全螢幕元素時就 portal 進去（同 dialog.tsx）
+    <PopoverPrimitive.Portal
+      container={
+        typeof document === "undefined"
+          ? undefined
+          : (document.fullscreenElement ?? undefined)
+      }
+    >
       <PopoverPrimitive.Content
         data-slot="popover-content"
         align={align}

@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("計時器開始後可暫停，重設後回到可開始狀態", async ({ page }) => {
   await page.goto("/timer");
+  await page.getByRole("button", { name: "開始使用" }).click();
   await page.getByRole("button", { name: "開始", exact: true }).click();
   await expect(page.getByRole("button", { name: "暫停", exact: true })).toBeVisible();
 
@@ -29,7 +30,7 @@ test("噪音計被拒絕麥克風時，會給老師可採取行動的提示", as
     });
   });
   await page.goto("/noise");
-  await page.getByRole("button", { name: "打開麥克風" }).click();
+  await page.getByRole("button", { name: "噓", exact: true }).click();
 
   await expect(page.getByText("瀏覽器擋住了麥克風。", { exact: false })).toBeVisible();
 });

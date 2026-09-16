@@ -1,6 +1,6 @@
 /** 計時器的純邏輯。倒數走 deadline 時間戳，不累加 tick —— 分頁被節流也不會走慢。 */
 
-export const PRESETS = [60, 180, 300, 600, 900] as const;
+export const PRESETS = [60, 180, 300, 600, 900, 1200, 1800, 2400, 3000] as const;
 
 /** 剩下不到這個秒數就進入警示配色與加速的節拍 */
 export const WARN_AT = 10;

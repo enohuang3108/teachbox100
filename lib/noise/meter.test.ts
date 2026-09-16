@@ -34,6 +34,8 @@ describe("zoneOf", () => {
   it("依門檻分三區", () => {
     expect(zoneOf(10, 70)).toBe("quiet");
     expect(zoneOf(55, 70)).toBe("ok");
+    expect(zoneOf(35, 70)).toBe("ok"); // 門檻的一半就進黃區
+    expect(zoneOf(34, 70)).toBe("quiet");
     expect(zoneOf(80, 70)).toBe("loud");
   });
 });

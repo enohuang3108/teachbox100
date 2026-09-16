@@ -33,6 +33,8 @@ sitemap 與 llms.txt 自動展開 `pages` 與 `hubs`，不必改。`app/sitemap.
 
 `PageTemplate` 的順序：三段 JSON-LD → `PageTitleBar` → `#game-stage`（帶 `data-unit={key}`）→ `data-stage-inner` → children → `UnitSeoSection`。
 
+**先看說明再進內容**：`PageTemplate` 傳 `landing={{ startLabel, onStart? }}`，一開始只渲染 `UnitHero`（定位句＋ `pageSeo.intro` ＋開始鈕）與 FAQ，按下才換成內容、頂列鈕才出現，內容頁不再掛 SEO 區塊。計時器、噪音計用這個；大富翁在 `MonopolyGate` 手動組同一套。
+
 **`UnitSeoSection` 必須留在 server。** 遊戲本體是 client component，搜尋引擎與 AI 爬蟲只讀得到這一段文字。滿版遊戲（大富翁）套不了模板，要在自己的 `layout.tsx` 手動補三段 schema 與這一段。
 
 ## 零件

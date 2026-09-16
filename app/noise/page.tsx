@@ -3,9 +3,10 @@
 import { pages, type PageWithKey } from "@/app/pages.config";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
 import { Button } from "@/components/atoms/shadcn/button";
-import { Slider } from "@/components/atoms/shadcn/slider";
 import { TooltipProvider } from "@/components/atoms/shadcn/tooltip";
 import { NoiseMeter } from "@/components/noise/NoiseMeter";
+import { ThresholdSlider } from "@/components/noise/ThresholdSlider";
+import { StageFixed } from "@/components/templates/StageFixed";
 import { useNoiseMeter } from "@/components/noise/useNoiseMeter";
 import { useNoiseStore } from "@/lib/noise/store";
 import { ACTION_BTN, Tip } from "@/components/templates/GamePageTemplate";
@@ -37,35 +38,22 @@ export default function NoisePage() {
   );
 
   return (
-    <PageTemplate page={pageInfo} actions={actions}>
+    <PageTemplate
+      page={pageInfo}
+      actions={actions}
+      // 介紹頁的按鈕直接開麥克風，不必進來再按一次
+      landing={{ startLabel: "噓", onStart: meter.start }}
+    >
       <div className="flex flex-col items-center gap-8">
         {meter.state === "on" ? (
           <>
-            <NoiseMeter level={meter.level} limit={limit} />
-
-            <div className="bg-paper-warm border-ink/10 flex w-full max-w-md flex-col gap-3 rounded-2xl border p-4">
-              <span className="text-ink flex items-center justify-between font-semibold">
-                太吵的門檻
-                <span className="text-muted-foreground tabular-nums">
-                  {limit}
-                </span>
-              </span>
-              <Slider
-                value={[limit]}
-                min={20}
-                max={95}
-                step={1}
-                onValueChange={([v]) => setLimit(v)}
-                aria-label="太吵的門檻"
-              />
-              <span className="text-muted-foreground text-sm">
-                班上比較活潑就往右調，需要安靜寫作業就往左調。
-              </span>
+            {/* 右邊固定著門檻刻度尺，左右各留一段空間，柱子才不會被蓋到；往上提一點，不要沉在畫面中下方 */}
+            <div className="-mt-16 w-full px-16 sm:-mt-24 sm:px-20">
+              <NoiseMeter level={meter.level} limit={limit} />
             </div>
-
-            <Button variant="outline" onClick={meter.stop}>
-              關掉麥克風
-            </Button>
+            <StageFixed>
+              <ThresholdSlider value={limit} onChange={setLimit} />
+            </StageFixed>
           </>
         ) : (
           <div className="flex max-w-md flex-col items-center gap-5 text-center">

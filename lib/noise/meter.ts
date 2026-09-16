@@ -36,6 +36,7 @@ export function smooth(prev: number, next: number): number {
 /** 刻度落在哪一區，決定配色與表情 */
 export function zoneOf(level: number, limit: number): "quiet" | "ok" | "loud" {
   if (level >= limit) return "loud";
-  if (level >= limit * 0.7) return "ok";
+  // 門檻一半以上就算「還可以」，讓黃色區間寬一點
+  if (level >= limit * 0.5) return "ok";
   return "quiet";
 }

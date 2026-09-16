@@ -1,14 +1,12 @@
 "use client";
 
 import { pages, siblingsOf } from "@/app/pages.config";
-import { Button } from "@/components/atoms/shadcn/button";
 import { Dialog, DialogContent } from "@/components/atoms/shadcn/dialog";
 import { PageTitleBar } from "@/components/molecules/PageTitleBar";
+import { UnitHero } from "@/components/organisms/UnitHero";
 import { getBreadcrumbTrail } from "@/lib/jsonld";
 import { preloadMonopoly } from "@/lib/monopoly/preload";
 import { useMonopolyStore } from "@/lib/monopoly/store";
-import { getUnitIllustrationSrc } from "@/lib/unit-illustration";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { SetupPanel } from "./SetupPanel";
 
@@ -62,33 +60,15 @@ export function MonopolyGate({
     <>
       {titleBar}
       <div className="px-4 pb-20 md:px-8">
-        <section className="mx-auto flex w-full max-w-4xl flex-col items-center gap-8 pt-8 md:flex-row md:pt-16">
-          <div className="flex-1 space-y-4">
-            <p className="text-h1 text-balance text-ink">{page.description}</p>
-            <p className="text-body text-muted-foreground">{intro}</p>
-            <Button
-              size="lg"
-              className="rounded-full px-10 text-base font-bold transition-transform duration-press ease-out active:scale-[0.97]"
-              onClick={() => {
-                preloadMonopoly();
-                setEntered(true);
-              }}
-            >
-              開始遊戲
-            </Button>
-          </div>
-          {/* 去背插圖直接站在紙上，跟其他單元說明區同一種處理 */}
-          <div className="relative aspect-[4/3] w-full md:w-80">
-            <Image
-              fill
-              priority
-              src={getUnitIllustrationSrc(page)}
-              sizes="(max-width: 768px) 92vw, 320px"
-              alt=""
-              className="object-contain"
-            />
-          </div>
-        </section>
+        <UnitHero
+          page={page}
+          intro={intro}
+          startLabel="開始遊戲"
+          onStart={() => {
+            preloadMonopoly();
+            setEntered(true);
+          }}
+        />
         {seo}
       </div>
     </>

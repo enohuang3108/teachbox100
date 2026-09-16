@@ -8,6 +8,13 @@ const ZONE_COLOR = {
   loud: "var(--brand-red)",
 } as const;
 
+// 三級字大小跟著區間走，不隨音量連續縮放 —— 一直抖動的字反而讀不清
+const ZONE_SCALE = {
+  quiet: 0.8,
+  ok: 1.4,
+  loud: 2.2,
+} as const;
+
 const ZONE_TEXT = {
   quiet: "很安靜",
   ok: "還可以",
@@ -26,19 +33,24 @@ export function NoiseMeter({ level, limit }: { level: number; limit: number }) {
     <div className="flex w-full flex-col items-center gap-6">
       {/* 讀螢幕器只播這一句「很安靜／還可以／太吵了」。
           底下 24 根柱子是同一份資訊的視覺版，逐格報讀只會變成噪音，整組藏起來。 */}
-      <output
-        className="font-display text-[clamp(2.5rem,10vw,4rem)] leading-none font-black"
-        style={{
-          color: ZONE_COLOR[zone],
-          transition: "color 200ms var(--ease-out)",
-        }}
-        aria-live="polite"
-      >
-        {ZONE_TEXT[zone]}
-      </output>
+      {/* 越吵字越大：用 transform 放大（不動 layout），外層留足高度讓放大後不壓到柱子 */}
+      <div className="flex h-36 items-end sm:h-44">
+        <output
+          className="font-display inline-block origin-bottom text-[clamp(2.5rem,10vw,4rem)] leading-none font-black motion-reduce:!transform-none"
+          style={{
+            color: ZONE_COLOR[zone],
+            transform: `scale(${ZONE_SCALE[zone]})`,
+            transition:
+              "color 200ms var(--ease-out), transform 200ms var(--ease-out)",
+          }}
+          aria-live="polite"
+        >
+          {ZONE_TEXT[zone]}
+        </output>
+      </div>
 
       <div
-        className="flex h-40 w-full items-end gap-[2px] sm:h-56"
+        className="flex h-56 w-full items-end gap-[2px] sm:h-72"
         aria-hidden="true"
       >
         {Array.from({ length: SEGMENTS }, (_, i) => {
