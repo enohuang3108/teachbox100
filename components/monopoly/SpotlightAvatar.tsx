@@ -6,13 +6,14 @@ import { PlayerAvatar } from "./Avatar";
 
 // 過場聚光燈頭像：玩家代表色放射光暈 ＋ 旋轉彈入的角色頭像，可選在下方顯示名字。
 // 收租過場、回合橫幅、抽卡、購買／答題對話框等暗場聚光燈共用同一套進場動畫。
+// 投影給全班看，頭像與名字預設就要大；呼叫端沒有特別理由別傳 size。
 export function SpotlightAvatar({
   player,
-  size = 96,
+  size = 144,
   haloSize = size * 2.5,
   grayscale = false,
   name = false,
-  nameClassName = "max-w-[8rem] text-base font-bold text-paper/85",
+  nameClassName = "max-w-[16rem] font-display text-3xl font-black text-paper",
 }: {
   player: Player;
   size?: number;
@@ -22,7 +23,7 @@ export function SpotlightAvatar({
   nameClassName?: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-3">
       <div className="relative flex items-center justify-center">
         <motion.span
           className="pointer-events-none absolute rounded-full"

@@ -21,13 +21,12 @@ export function CardDialog({
 }) {
   if (pending?.kind !== "drawCard") return null;
 
-  const size = 96;
   const deckLabel = pending.deck === "chance" ? "機會" : "命運";
 
   return (
     <div className="fixed inset-0 z-(--z-modal) flex flex-col items-center justify-center gap-5 bg-ink/60 px-4 backdrop-blur-sm">
       {/* 玩家頭像 ＋ 光暈（沿用過場聚光燈風格） */}
-      <SpotlightAvatar player={player} size={size} name />
+      <SpotlightAvatar player={player} name />
 
       <motion.div
         className="text-[36px] font-extrabold tracking-[0.15em] text-paper/85"

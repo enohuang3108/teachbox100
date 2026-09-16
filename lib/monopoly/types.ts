@@ -1,6 +1,17 @@
 // === 題目 ===
 export type QuestionType = "choice" | "boolean" | "short";
 
+// 難度：Excel 未填或舊題庫視為「普通」
+export type Difficulty = "easy" | "normal" | "hard";
+
+export const DIFFICULTIES: Difficulty[] = ["easy", "normal", "hard"];
+
+export const DIFFICULTY_LABEL: Record<Difficulty, string> = {
+  easy: "簡單",
+  normal: "普通",
+  hard: "困難",
+};
+
 export interface Question {
   id: string;
   type: QuestionType;
@@ -8,6 +19,22 @@ export interface Question {
   options?: string[];
   answer: string; // choice: 選項文字; boolean: "是"/"否"; short: 參考答案
   explanation?: string;
+  difficulty?: Difficulty; // 未填 = normal
+}
+
+export function difficultyOf(q: Question): Difficulty {
+  return q.difficulty ?? "normal";
+}
+
+// 差異化教學給學生的是「上限」：設普通的學生抽簡單與普通，設困難的三級都抽
+export const DIFFICULTY_CAP_LABEL: Record<Difficulty, string> = {
+  easy: "簡單",
+  normal: "普通以下",
+  hard: "困難以下",
+};
+
+export function withinCap(q: Question, cap: Difficulty): boolean {
+  return DIFFICULTIES.indexOf(difficultyOf(q)) <= DIFFICULTIES.indexOf(cap);
 }
 
 // === 棋盤 ===
@@ -93,6 +120,7 @@ export interface Player {
   name: string;
   color: string;
   character: string; // 角色 slug，對應 lib/monopoly/characters.ts
+  difficulty: Difficulty;
   money: number;
   position: number;
   ownedTiles: number[];
@@ -109,6 +137,7 @@ export interface PlayerInput {
   name: string;
   color: string;
   character: string; // 角色 slug，對應 lib/monopoly/characters.ts
+  difficulty?: Difficulty; // 差異化教學：這位學生抽哪一級的題；未設 = normal
 }
 
 // === 設定 ===
@@ -123,6 +152,9 @@ export interface GameSettings {
   startingMoney: number;
   diceCount: 1 | 2;
   passStartBonus: number;
+  passStartQuiz?: boolean; // 經過起點要不要出加碼題；舊 persist 沒有 = 要
+  passStartQuizBonus?: number; // 加碼題答對拿的錢；舊 persist 沒有 = PASS_START_QUIZ_BONUS
+  differentiated?: boolean; // 差異化教學：開啟才依玩家難度出題；舊 persist 沒有 = 關閉
   endCondition: EndCondition;
 }
 
@@ -131,6 +163,9 @@ export const DEFAULT_SETTINGS: GameSettings = {
   startingMoney: 8000,
   diceCount: 2,
   passStartBonus: 2000,
+  passStartQuiz: true,
+  passStartQuizBonus: 3000,
+  differentiated: false,
   endCondition: { type: "time", minutes: 40 },
 };
 
@@ -227,6 +262,5 @@ export interface GameState {
   pendingAction: PendingAction;
   startedAt: number | null;
   lapsByPlayer: Record<string, number>;
-  log: string[];
   cutsceneEvents?: CutsceneEvent[]; // 近期過場事件佇列（依序播放；seq 遞增供 UI 去重）
 }

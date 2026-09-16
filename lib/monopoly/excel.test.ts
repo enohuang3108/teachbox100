@@ -108,6 +108,27 @@ describe("parseQuestions", () => {
     expect(r.ok).toBe(false);
   });
 
+  it("難度留空 → 普通", () => {
+    const r = parseQuestions([{ 題型: "簡答", 題目: "x", 正確答案: "y" }]);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.questions[0].difficulty).toBe("normal");
+  });
+
+  it("難度中文對應", () => {
+    const r = parseQuestions([
+      { 題型: "簡答", 題目: "x", 正確答案: "y", 難度: "困難" },
+    ]);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.questions[0].difficulty).toBe("hard");
+  });
+
+  it("難度非法 → 錯誤", () => {
+    const r = parseQuestions([
+      { 題型: "簡答", 題目: "x", 正確答案: "y", 難度: "地獄" },
+    ]);
+    expect(r.ok).toBe(false);
+  });
+
   it("缺少正確答案 → 錯誤", () => {
     const r = parseQuestions([{ 題型: "簡答", 題目: "x", 正確答案: "" }]);
     expect(r.ok).toBe(false);

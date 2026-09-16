@@ -15,6 +15,7 @@ import {
 import { seqRng } from "./rng";
 import {
   DEFAULT_SETTINGS,
+  type Difficulty,
   type Player,
   type PlayerInput,
   type Question,
@@ -96,6 +97,37 @@ describe("takeTurn 擲骰與移動", () => {
     );
   });
 
+  it("答對加碼金額可設定", () => {
+    let s = game();
+    s = {
+      ...s,
+      settings: { ...s.settings, passStartQuizBonus: 5000 },
+      players: replaceForTest(s.players, 0, { position: 33 }),
+    };
+    s = takeTurn(s, seqRng([0.5, 0]), 0);
+    const right = answerPassStart(s, true, seqRng([0]), 0);
+    expect(right.players[0].money).toBe(DEFAULT_SETTINGS.startingMoney + 5000);
+  });
+
+  it("關掉過起點加碼題 → 不出題，直接 +passStartBonus 並結算落點", () => {
+    let s = game();
+    s = {
+      ...s,
+      settings: { ...s.settings, passStartQuiz: false },
+      players: replaceForTest(s.players, 0, { position: 33 }),
+    };
+    s = takeTurn(s, seqRng([0.5, 0]), 0); // 繞回 4
+    expect(s.pendingAction?.kind).not.toBe("passStartQuestion");
+    expect(s.players[0].money).toBe(
+      DEFAULT_SETTINGS.startingMoney + DEFAULT_SETTINGS.passStartBonus,
+    );
+    expect(s.lapsByPlayer["p0"]).toBe(1);
+    expect(s.cutsceneEvents?.at(-1)).toMatchObject({
+      kind: "passStart",
+      amount: DEFAULT_SETTINGS.passStartBonus,
+    });
+  });
+
   it("skipTurns>0 時跳過該玩家、不擲骰、換下一位", () => {
     let s = game();
     s = { ...s, players: replaceForTest(s.players, 0, { skipTurns: 1 }) };
@@ -144,6 +176,59 @@ describe("resolveLanding 各格", () => {
       playerId: s.players[0].id,
       reason: "jail",
     });
+  });
+});
+
+describe("出題難度跟著玩家（差異化教學）", () => {
+  const BANK: Question[] = [
+    { id: "e", type: "short", text: "簡單題", answer: "a", difficulty: "easy" },
+    { id: "n", type: "short", text: "普通題", answer: "b" },
+    { id: "h", type: "short", text: "困難題", answer: "c", difficulty: "hard" },
+  ];
+  // 讓輪到的玩家站在無主地上觸發 buyQuestion，換不同亂數抽幾次，收集抽得到的題目
+  function poolFor(
+    difficulty: Difficulty | undefined,
+    { questions = BANK, differentiated = true } = {},
+  ) {
+    const ids = new Set<string>();
+    for (const r of [0, 0.2, 0.4, 0.6, 0.8, 0.99]) {
+      let s = startGame(
+        { ...DEFAULT_SETTINGS, differentiated },
+        questions,
+        PLAYERS.map((p) => ({ ...p, difficulty })),
+        0,
+      );
+      s = { ...s, players: replaceForTest(s.players, 0, { position: 1 }) };
+      s = resolveLanding(s, seqRng([r]), 0);
+      const pending = s.pendingAction;
+      if (pending && "question" in pending) ids.add(pending.question.id);
+    }
+    return [...ids].sort();
+  }
+
+  it("簡單只抽簡單題", () => {
+    expect(poolFor("easy")).toEqual(["e"]);
+  });
+
+  it("普通 = 普通以下：抽簡單與普通，不抽困難", () => {
+    expect(poolFor("normal")).toEqual(["e", "n"]);
+  });
+
+  it("困難 = 困難以下：三級都抽得到", () => {
+    expect(poolFor("hard")).toEqual(["e", "h", "n"]);
+  });
+
+  it("沒設難度的玩家算普通", () => {
+    expect(poolFor(undefined)).toEqual(["e", "n"]);
+  });
+
+  it("沒勾差異化教學 → 忽略玩家難度，從整份題庫抽", () => {
+    expect(poolFor("easy", { differentiated: false })).toEqual(["e", "h", "n"]);
+  });
+
+  it("該範圍沒有題目 → 退回整份題庫，不會抽空", () => {
+    const onlyHard = BANK.filter((q) => q.id === "h");
+    expect(poolFor("easy", { questions: onlyHard })).toEqual(["h"]);
   });
 });
 

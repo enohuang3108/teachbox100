@@ -16,7 +16,7 @@ function fmt(n: number): string {
 function Party({
   player,
   amount,
-  size = 96,
+  size,
 }: {
   player: Player;
   amount: number;
@@ -77,7 +77,7 @@ export function MoneyCutscene({
       label = jail ? "監獄 🚔" : "休息 😴";
       body = p ? (
         <div className="flex flex-col items-center gap-2">
-          <SpotlightAvatar player={p} haloSize={240} grayscale={jail} name />
+          <SpotlightAvatar player={p} grayscale={jail} name />
           <motion.div
             className="text-3xl font-extrabold text-brand-yellow"
             style={{ textShadow: "0 2px 10px rgba(0,0,0,0.55)" }}
@@ -99,10 +99,10 @@ export function MoneyCutscene({
       const owner = byId(event.ownerId);
       label = `付過路費 · ${event.tileName}`;
       body = (
-        <div className="flex items-center gap-5">
-          {payer && <Party player={payer} amount={-event.amount} size={84} />}
+        <div className="flex items-center gap-8">
+          {payer && <Party player={payer} amount={-event.amount} size={120} />}
           <motion.div
-            className="text-4xl"
+            className="text-6xl"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{
@@ -114,7 +114,7 @@ export function MoneyCutscene({
           >
             💸
           </motion.div>
-          {owner && <Party player={owner} amount={event.amount} size={84} />}
+          {owner && <Party player={owner} amount={event.amount} size={120} />}
         </div>
       );
     } else {
@@ -159,7 +159,7 @@ export function MoneyCutscene({
           transition={{ type: "spring", stiffness: 320, damping: 24 }}
         >
           <div
-            className="mb-6 max-w-[34rem] text-center text-base font-bold tracking-wide text-paper/85"
+            className="mb-8 max-w-[40rem] text-center text-2xl font-bold tracking-wide text-paper/90"
             style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
           >
             {label}

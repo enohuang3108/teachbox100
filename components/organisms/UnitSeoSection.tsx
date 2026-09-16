@@ -13,9 +13,12 @@ import Image from "next/image";
 export function UnitSeoSection({
   pageKey,
   page,
+  withIntro = true,
 }: {
   pageKey: string;
   page: Page;
+  /** 大富翁把介紹搬進頁首 hero，這裡只留 FAQ 與其他教材 */
+  withIntro?: boolean;
 }) {
   const seo = pageSeo[pageKey];
   if (!seo) return null;
@@ -26,54 +29,58 @@ export function UnitSeoSection({
       {/* 用去背版封面直接站在紙上，不加底板也不加框 —— 有框就變成
           「又一張卡片」，插畫本身的剪影才是這裡想要的重點。
           多數單元用 warm 封面對應的 cutout 圖；已有透明 PNG 的單元直接指定它。 */}
-      <div className="flex flex-col-reverse gap-6 md:flex-row md:items-start md:gap-8">
-        <div className="min-w-0 flex-1">
-          <h2 className="font-display text-ink text-2xl font-extrabold">
-            關於「{page.title}」
-          </h2>
-          <p className="text-muted-foreground mt-4 text-base leading-[1.9]">
-            {seo.intro}
-          </p>
-          {/* 練習重點只對有課綱對應的教材單元有意義；計時器、計分板這類
+      {withIntro && (
+        <div className="flex flex-col-reverse gap-6 md:flex-row md:items-start md:gap-8">
+          <div className="min-w-0 flex-1">
+            <h2 className="font-display text-ink text-2xl font-extrabold">
+              關於「{page.title}」
+            </h2>
+            <p className="text-muted-foreground mt-4 text-base leading-[1.9]">
+              {seo.intro}
+            </p>
+            {/* 練習重點只對有課綱對應的教材單元有意義；計時器、計分板這類
               課堂工具沒有「要練什麼」，列出來只是灌水 */}
-          {seo.curriculum && (
-            <dl className="text-muted-foreground mt-4 flex flex-col gap-1.5 text-sm leading-[1.8]">
-              <div className="flex gap-2">
-                <dt className="text-ink-soft shrink-0 font-semibold">
-                  練習重點
-                </dt>
-                <dd>{seo.teaches}</dd>
-              </div>
-              <div className="flex gap-2">
-                <dt className="text-ink-soft shrink-0 font-semibold">
-                  108 課綱
-                </dt>
-                <dd>
-                  <ul className="flex flex-col gap-1">
-                    {seo.curriculum.map((code) => (
-                      <li key={code}>
-                        <span className="text-ink font-semibold">{code}</span>{" "}
-                        {CURRICULUM[code]}
-                      </li>
-                    ))}
-                  </ul>
-                </dd>
-              </div>
-            </dl>
-          )}
+            {seo.curriculum && (
+              <dl className="text-muted-foreground mt-4 flex flex-col gap-1.5 text-sm leading-[1.8]">
+                <div className="flex gap-2">
+                  <dt className="text-ink-soft shrink-0 font-semibold">
+                    練習重點
+                  </dt>
+                  <dd>{seo.teaches}</dd>
+                </div>
+                <div className="flex gap-2">
+                  <dt className="text-ink-soft shrink-0 font-semibold">
+                    108 課綱
+                  </dt>
+                  <dd>
+                    <ul className="flex flex-col gap-1">
+                      {seo.curriculum.map((code) => (
+                        <li key={code}>
+                          <span className="text-ink font-semibold">{code}</span>{" "}
+                          {CURRICULUM[code]}
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
+              </dl>
+            )}
+          </div>
+          <div className="relative aspect-[4/3] w-full shrink-0 md:w-64">
+            <Image
+              fill
+              src={getUnitIllustrationSrc(page)}
+              sizes="(max-width: 768px) 92vw, 256px"
+              alt=""
+              className="object-contain"
+            />
+          </div>
         </div>
-        <div className="relative aspect-[4/3] w-full shrink-0 md:w-64">
-          <Image
-            fill
-            src={getUnitIllustrationSrc(page)}
-            sizes="(max-width: 768px) 92vw, 256px"
-            alt=""
-            className="object-contain"
-          />
-        </div>
-      </div>
+      )}
 
-      <h2 className="font-display text-ink mt-12 text-2xl font-extrabold">
+      <h2
+        className={`font-display text-ink text-2xl font-extrabold ${withIntro ? "mt-12" : ""}`}
+      >
         常見問題
       </h2>
       <div className="mt-4 flex flex-col gap-2">

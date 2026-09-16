@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import type { Question, QuestionType } from "./types";
+import type { Difficulty, Question, QuestionType } from "./types";
 
 export interface RawRow {
   題型?: string;
@@ -10,6 +10,7 @@ export interface RawRow {
   選項D?: string;
   正確答案?: string;
   解析?: string;
+  難度?: string;
 }
 
 export interface ParseError {
@@ -17,8 +18,7 @@ export interface ParseError {
   message: string;
 }
 export type ParseResult =
-  | { ok: true; questions: Question[] }
-  | { ok: false; errors: ParseError[] };
+  { ok: true; questions: Question[] } | { ok: false; errors: ParseError[] };
 
 const TYPE_MAP: Record<string, QuestionType> = {
   選擇: "choice",
@@ -27,6 +27,12 @@ const TYPE_MAP: Record<string, QuestionType> = {
 };
 
 const LETTER_TO_INDEX: Record<string, number> = { A: 0, B: 1, C: 2, D: 3 };
+
+const DIFFICULTY_MAP: Record<string, Difficulty> = {
+  簡單: "easy",
+  普通: "normal",
+  困難: "hard",
+};
 
 function str(v: unknown): string {
   return (v ?? "").toString().trim();
@@ -48,6 +54,18 @@ export function parseQuestions(rows: RawRow[]): ParseResult {
     const text = str(raw.題目);
     const answerRaw = str(raw.正確答案);
     const explanation = str(raw.解析) || undefined;
+    const difficultyText = str(raw.難度);
+    // 難度留空 = 普通，維持舊題庫可用
+    const difficulty = difficultyText
+      ? DIFFICULTY_MAP[difficultyText]
+      : "normal";
+    if (!difficulty) {
+      errors.push({
+        row: rowNum,
+        message: `難度「${difficultyText}」不合法，須為 困難／普通／簡單，或留空`,
+      });
+      return;
+    }
 
     const type = TYPE_MAP[typeText];
     if (!type) {
@@ -94,7 +112,15 @@ export function parseQuestions(rows: RawRow[]): ParseResult {
         });
         return;
       }
-      questions.push({ id: `q${i}`, type, text, options, answer, explanation });
+      questions.push({
+        id: `q${i}`,
+        type,
+        text,
+        options,
+        answer,
+        explanation,
+        difficulty,
+      });
       return;
     }
 
@@ -111,12 +137,26 @@ export function parseQuestions(rows: RawRow[]): ParseResult {
         });
         return;
       }
-      questions.push({ id: `q${i}`, type, text, answer, explanation });
+      questions.push({
+        id: `q${i}`,
+        type,
+        text,
+        answer,
+        explanation,
+        difficulty,
+      });
       return;
     }
 
     // short
-    questions.push({ id: `q${i}`, type, text, answer: answerRaw, explanation });
+    questions.push({
+      id: `q${i}`,
+      type,
+      text,
+      answer: answerRaw,
+      explanation,
+      difficulty,
+    });
   });
 
   if (errors.length > 0) return { ok: false, errors };
@@ -136,7 +176,7 @@ export async function rowsFromFile(file: File): Promise<RawRow[]> {
 export const AI_QUESTION_PROMPT = `你是一位出題助手。請依照以下規格，幫我產生一份可直接匯入的 Excel (.xlsx) 題庫檔案。
 
 【欄位格式】第一列為下列標題，順序固定：
-題型｜題目｜選項A｜選項B｜選項C｜選項D｜正確答案｜解析
+題型｜題目｜選項A｜選項B｜選項C｜選項D｜正確答案｜解析｜難度
 
 【填寫規則】
 1. 題型：限填「選擇」「是非」「簡答」其中之一。
@@ -144,11 +184,12 @@ export const AI_QUESTION_PROMPT = `你是一位出題助手。請依照以下規
 3. 是非題：選項欄位留空；正確答案填「是」或「否」。
 4. 簡答題：選項欄位留空；正確答案直接填答案文字。
 5. 解析：可留空，建議簡短說明。
+6. 難度：限填「困難」「普通」「簡單」其中之一；留空視為普通。
 
 【範例】
-選擇｜台灣最高的山是？｜玉山｜雪山｜合歡山｜阿里山｜A｜玉山海拔3952公尺
-是非｜台北是台灣的首都｜｜｜｜｜是｜
-簡答｜台灣最長的河川是？｜｜｜｜｜濁水溪｜
+選擇｜台灣最高的山是？｜玉山｜雪山｜合歡山｜阿里山｜A｜玉山海拔3952公尺｜簡單
+是非｜台北是台灣的首都｜｜｜｜｜是｜｜普通
+簡答｜台灣最長的河川是？｜｜｜｜｜濁水溪｜｜困難
 
 【我的需求】
 請依上述格式，產生〈在此補上：年級／科目／主題／題數，例如「國小三年級數學乘法，共20題，以選擇題為主」〉，最後輸出成可下載的 .xlsx 檔案。`;
@@ -165,6 +206,7 @@ export function buildTemplateBlob(): Blob {
       選項D: "阿里山",
       正確答案: "A",
       解析: "玉山海拔3952公尺",
+      難度: "簡單",
     },
     {
       題型: "是非",
@@ -175,6 +217,7 @@ export function buildTemplateBlob(): Blob {
       選項D: "",
       正確答案: "是",
       解析: "",
+      難度: "普通",
     },
     {
       題型: "簡答",
@@ -185,6 +228,7 @@ export function buildTemplateBlob(): Blob {
       選項D: "",
       正確答案: "濁水溪",
       解析: "",
+      難度: "困難",
     },
   ];
   const ws = XLSX.utils.json_to_sheet(data, {
@@ -197,6 +241,7 @@ export function buildTemplateBlob(): Blob {
       "選項D",
       "正確答案",
       "解析",
+      "難度",
     ],
   });
   const wb = XLSX.utils.book_new();

@@ -28,7 +28,7 @@ export function TurnBanner({ player }: { player: Player | null }) {
           transition={{ type: "spring", stiffness: 320, damping: 24 }}
         >
           {/* 頭像 ＋ 後方放射光暈 */}
-          <SpotlightAvatar player={player} size={96} haloSize={260} />
+          <SpotlightAvatar player={player} size={160} haloSize={400} />
 
           {/* 文字置中、白色、加陰影確保暗場可讀 */}
           <div

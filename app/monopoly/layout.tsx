@@ -1,10 +1,12 @@
 import { pages } from "@/app/pages.config";
+import { MonopolyGate } from "@/components/monopoly/MonopolyGate";
 import { UnitSeoSection } from "@/components/organisms/UnitSeoSection";
 import {
   getBreadcrumbSchema,
   getFaqSchema,
   getLearningResourceSchema,
 } from "@/lib/jsonld";
+import { pageSeo } from "@/lib/seo-content";
 import { buildMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
@@ -15,8 +17,8 @@ export default function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // 大富翁為滿版互動遊戲，無法套用 PageTemplate，故在 layout 直接注入結構化資料，
-  // 說明與 FAQ 也在這裡接在遊戲下面，爬蟲才有字可讀。
+  // 大富翁為滿版互動遊戲，無法套用 PageTemplate，故在 layout 直接注入結構化資料；
+  // 說明與 FAQ 在 server 渲染好交給 MonopolyGate，只在介紹頁出現。
   const learningResourceSchema = getLearningResourceSchema("monopoly");
   const breadcrumbSchema = getBreadcrumbSchema("monopoly");
   const faqSchema = getFaqSchema("monopoly");
@@ -41,10 +43,18 @@ export default function Layout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
-      {children}
-      <div className="px-4 pb-20 md:px-8">
-        <UnitSeoSection pageKey="monopoly" page={pages.monopoly} />
-      </div>
+      <MonopolyGate
+        intro={pageSeo.monopoly.intro}
+        seo={
+          <UnitSeoSection
+            pageKey="monopoly"
+            page={pages.monopoly}
+            withIntro={false}
+          />
+        }
+      >
+        {children}
+      </MonopolyGate>
     </>
   );
 }

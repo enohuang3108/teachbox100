@@ -291,7 +291,7 @@ export function Board({
           })}
 
           <div
-            className="m-1 flex items-center justify-center rounded-[1rem] bg-sand/60 p-3 ring-1 ring-ink/[0.05]"
+            className="relative m-1 flex items-center justify-center rounded-[1rem] bg-sand/60 p-3 ring-1 ring-ink/[0.05]"
             style={{ gridColumn: "2 / 12", gridRow: "2 / 7" }}
           >
             {center}

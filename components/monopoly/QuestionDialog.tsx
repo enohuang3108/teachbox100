@@ -58,12 +58,7 @@ export function QuestionDialog({
       <DialogContent className="overflow-visible" hideClose>
         {/* 浮在 dialog 上緣外側：玩家頭像 ＋ 名稱 ＋ 光暈（沿用過場聚光燈風格） */}
         <div className="absolute bottom-full left-1/2 mb-4 -translate-x-1/2">
-          <SpotlightAvatar
-            player={player}
-            haloSize={240}
-            name
-            nameClassName="max-w-[10rem] text-base font-bold text-paper/90"
-          />
+          <SpotlightAvatar player={player} name />
         </div>
 
         <DialogHeader>

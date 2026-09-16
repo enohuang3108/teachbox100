@@ -29,7 +29,8 @@ interface MonopolyStore {
   importQuestions: (questions: Question[]) => void;
   updateSettings: (patch: Partial<GameSettings>) => void;
   setPlayers: (players: PlayerInput[]) => void;
-  begin: () => void;
+  /** 傳 questions 就用那份開局（預設題庫），不覆蓋老師匯入的 draftQuestions */
+  begin: (questions?: Question[]) => void;
   roll: () => void;
   answer: (correct: boolean) => void;
   answerPassStart: (correct: boolean) => void;
@@ -57,11 +58,11 @@ export const useMonopolyStore = create<MonopolyStore>()(
         set((s) => ({ draftSettings: { ...s.draftSettings, ...patch } })),
       setPlayers: (players) => set({ draftPlayers: players }),
 
-      begin: () => {
-        const { draftSettings, draftQuestions, draftPlayers } = get();
+      begin: (questions) => {
+        const { draftSettings, draftPlayers } = get();
+        const draftQuestions = questions ?? get().draftQuestions;
         if (draftQuestions.length === 0 || draftPlayers.length < 2) return;
-        // 起始金額固定 $8,000（不可調整），覆蓋任何舊的 persist 值
-        const settings = { ...draftSettings, startingMoney: 8000 };
+        const settings = draftSettings;
         set({
           game: startGame(settings, draftQuestions, draftPlayers, now()),
         });
@@ -118,6 +119,18 @@ export const useMonopolyStore = create<MonopolyStore>()(
       },
       reset: () => set({ game: null }),
     }),
-    { name: "monopoly-game" },
+    {
+      name: "monopoly-game",
+      // v1：起始金額開放老師設定。v0 時它不能改、畫面一律當 8000，
+      // 但 persist 裡可能還留著更早的預設 15000，升級時統一換成 8000
+      version: 1,
+      migrate: (persisted, version) => {
+        const s = persisted as { draftSettings?: GameSettings };
+        if (version < 1 && s.draftSettings) {
+          s.draftSettings = { ...s.draftSettings, startingMoney: 8000 };
+        }
+        return s as never;
+      },
+    },
   ),
 );

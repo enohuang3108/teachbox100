@@ -9,8 +9,9 @@ import { orientDie, sampleDie } from "@/lib/monopoly/dice";
 const PLAYBACK_SPEED = 2.6;
 
 type Motion ={ fps: number; tracks: number[][][] };
+// 模組層快取：設定頁的 preloadMonopoly 先呼叫，第一次擲骰就不用再抓與解析
 let assets: Promise<[THREE.Group, Motion]> | undefined;
-function loadAssets() {
+export function loadAssets() {
   return assets ??= Promise.all([
     new GLTFLoader().loadAsync("/3d_model/monopoly-die.glb").then(g => g.scene),
     fetch("/3d_model/monopoly-dice-motion.json").then(r => {
@@ -20,7 +21,8 @@ function loadAssets() {
   ]).catch(error => { assets = undefined; throw error; });
 }
 
-export default function DiceScene({ values, onComplete }: { values: number[]; onComplete?: () => void }) {
+// still：直接擺在落地姿勢、不播翻滾，給還沒擲過時的待機畫面用
+export default function DiceScene({ values, onComplete, still = false }: { values: number[]; onComplete?: () => void; still?: boolean }) {
   const host = useRef<HTMLDivElement>(null);
   const complete = useRef(onComplete);
   useEffect(() => { complete.current = onComplete; }, [onComplete]);
@@ -86,7 +88,7 @@ export default function DiceScene({ values, onComplete }: { values: number[]; on
       const start = performance.now();
       const animate = (now: number) => {
         if (disposed || !renderer) return;
-        const tick = reduced ? motion.tracks[0].length - 1 : (now - start) / 1000 * motion.fps * PLAYBACK_SPEED;
+        const tick = reduced || still ? motion.tracks[0].length - 1 : (now - start) / 1000 * motion.fps * PLAYBACK_SPEED;
         for (const { pivot, track } of dice) {
           const pose = sampleDie(track, tick);
           pivot.position.copy(pose.position);
@@ -104,7 +106,7 @@ export default function DiceScene({ values, onComplete }: { values: number[]; on
       ground?.geometry.dispose();
       if (ground?.material instanceof THREE.Material) ground.material.dispose();
     };
-  }, [key]);
+  }, [key, still]);
 
   return <div className="relative h-64 w-full" role="img" aria-label={settled ? `擲出 ${values.join("、")} 點` : "骰子拋起、落地翻滾中"}>
     <div ref={host} className="h-full w-full" aria-hidden="true" />

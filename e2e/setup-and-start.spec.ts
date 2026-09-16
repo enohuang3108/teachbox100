@@ -34,7 +34,14 @@ test("九九乘法選好範圍後開始，會出現第一題與四個答案", as
 
 test("大富翁用預設題庫可開始遊戲並進入第一位玩家回合", async ({ page }) => {
   await page.goto("/monopoly");
-  await page.getByRole("button", { name: /使用預設題庫開始遊戲/ }).click();
+  await page.getByRole("button", { name: "開始遊戲", exact: true }).click();
+  // 設定三站：題庫（預設）→ 玩家 → 規則，最後一站才有開始
+  await page.getByRole("button", { name: "下一步" }).click();
+  await page.getByRole("button", { name: "下一步" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "開始遊戲", exact: true })
+    .click();
 
   await expect(page.getByRole("button", { name: "擲骰子" })).toBeVisible();
 });

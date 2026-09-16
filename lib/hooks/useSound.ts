@@ -44,9 +44,12 @@ export const useSound = () => {
     ui.play("stop", { volume: sfxVolume });
   }, [sfxVolume]);
 
+  // 延後 0.4 秒：對上 3D 骰子拋起後落地翻滾的那一刻，按下當下就響會比畫面早
   const playDiceSound = useCallback(() => {
-    diceSound.volume(BASE_VOLUME.dice * sfxVolume);
-    diceSound.play();
+    window.setTimeout(() => {
+      diceSound.volume(BASE_VOLUME.dice * sfxVolume);
+      diceSound.play();
+    }, 400);
   }, [sfxVolume]);
 
   // 金錢增加／減少共用同一音效

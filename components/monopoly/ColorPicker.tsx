@@ -1,17 +1,17 @@
 "use client";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/atoms/shadcn/dialog";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/atoms/shadcn/popover";
 import { PLAYER_COLORS } from "@/lib/monopoly/types";
+import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
 import { useState } from "react";
 
 // 顏色顯示順序即 PLAYER_COLORS 的陣列順序，要調整排列請改 lib/monopoly/types.ts。
-// 點擊色塊即可從 20 色中挑選；其他玩家已選的顏色會被停用，避免代表色撞色。
+// 點色塊就地彈出調色盤（不開新對話框），其他玩家已選的顏色停用，避免代表色撞色。
 export function ColorPicker({
   value,
   takenByOthers,
@@ -24,21 +24,26 @@ export function ColorPicker({
   const [open, setOpen] = useState(false);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <button
           type="button"
-          title="點擊更換顏色"
           aria-label="更換顏色"
-          className="h-7 w-7 shrink-0 rounded-full border-2 border-paper ring-1 ring-ink/15 transition-transform duration-150 ease-out hover:-translate-y-[2px] active:scale-[0.95] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+          className="h-7 w-7 shrink-0 rounded-full border-2 border-paper ring-1 ring-ink/15 transition-transform duration-press ease-out active:scale-[0.95] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
           style={{ backgroundColor: value }}
         />
-      </DialogTrigger>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>選擇代表色</DialogTitle>
-        </DialogHeader>
-        <div className="grid grid-cols-5 gap-3 py-2">
+      </PopoverTrigger>
+      <PopoverContent
+        side="top"
+        sideOffset={8}
+        className="w-auto rounded-[1.5rem] border-border bg-card p-3 shadow-lg"
+      >
+        {/* 20 色排兩列，一列會超出對話框寬度 */}
+        <div
+          role="radiogroup"
+          aria-label="代表色"
+          className="grid grid-cols-10 gap-1.5"
+        >
           {PLAYER_COLORS.map((color) => {
             const taken = color !== value && takenByOthers.includes(color);
             const selected = color === value;
@@ -46,32 +51,34 @@ export function ColorPicker({
               <button
                 key={color}
                 type="button"
+                role="radio"
+                aria-checked={selected}
+                aria-label={taken ? `${color}（已被選走）` : color}
                 disabled={taken}
                 onClick={() => {
                   onSelect(color);
                   setOpen(false);
                 }}
-                title={taken ? "已被選走" : color}
                 style={{ backgroundColor: color }}
-                className={`relative h-10 w-10 overflow-hidden rounded-full transition-transform duration-150 ease-out ${
-                  selected
-                    ? "ring-2 ring-ink ring-offset-2"
-                    : "ring-1 ring-ink/10"
-                } ${
+                className={cn(
+                  "relative flex size-7 items-center justify-center overflow-hidden rounded-full transition-transform duration-press ease-out",
                   taken
-                    ? "cursor-not-allowed opacity-60"
-                    : "hover:-translate-y-[2px] active:scale-[0.95]"
-                }`}
+                    ? "cursor-not-allowed opacity-35"
+                    : "hover:-translate-y-[2px] active:scale-[0.9]",
+                )}
               >
+                {selected && (
+                  <Check className="size-4 text-paper" strokeWidth={3} />
+                )}
                 {taken && (
-                  // 斜線禁用標記：旋轉一條跨對角的細線，由圓形 overflow 裁切
-                  <span className="pointer-events-none absolute left-1/2 top-1/2 h-[2.5px] w-[150%] -translate-x-1/2 -translate-y-1/2 rotate-45 bg-paper/90 shadow-[0_0_0_1px_rgb(2_13_21/0.35)]" />
+                  // 斜線禁用標記，由圓形 overflow 裁切
+                  <span className="pointer-events-none absolute top-1/2 left-1/2 h-[2px] w-[150%] -translate-x-1/2 -translate-y-1/2 rotate-45 bg-paper/90" />
                 )}
               </button>
             );
           })}
         </div>
-      </DialogContent>
-    </Dialog>
+      </PopoverContent>
+    </Popover>
   );
 }

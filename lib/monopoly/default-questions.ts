@@ -3,10 +3,12 @@ import type { Question } from "./types";
 /**
  * 內建題庫：國小中年級通識（自然、社會、數學、語文、生活常識）。
  * 用途是讓沒有自備 Excel 的老師能一鍵開場，不打算做成可編輯資料。
+ * 簡單、普通、困難各 10 題，勾差異化教學時預設題庫也分得出級。
  */
 export const DEFAULT_QUESTIONS: Question[] = [
   {
     id: "d1",
+    difficulty: "easy",
     type: "choice",
     text: "台灣最高的山是哪一座？",
     options: ["玉山", "雪山", "阿里山", "陽明山"],
@@ -15,6 +17,7 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d2",
+    difficulty: "hard",
     type: "choice",
     text: "一年之中有幾個月有 31 天？",
     options: ["5 個月", "6 個月", "7 個月", "8 個月"],
@@ -23,6 +26,7 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d3",
+    difficulty: "normal",
     type: "boolean",
     text: "蝙蝠是鳥類。",
     answer: "否",
@@ -30,6 +34,7 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d4",
+    difficulty: "normal",
     type: "short",
     text: "水在攝氏幾度會結冰？",
     answer: "0 度",
@@ -37,6 +42,7 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d5",
+    difficulty: "hard",
     type: "choice",
     text: "彩虹的顏色由外而內，最外圈是什麼顏色？",
     options: ["紅色", "紫色", "綠色", "黃色"],
@@ -45,6 +51,7 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d6",
+    difficulty: "hard",
     type: "boolean",
     text: "地球繞著太陽轉一圈大約要一年。",
     answer: "是",
@@ -52,12 +59,14 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d7",
+    difficulty: "easy",
     type: "short",
     text: "7 乘以 8 等於多少？",
     answer: "56",
   },
   {
     id: "d8",
+    difficulty: "hard",
     type: "choice",
     text: "下列哪一個不是台灣的直轄市？",
     options: ["新竹市", "台中市", "高雄市", "桃園市"],
@@ -66,6 +75,7 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d9",
+    difficulty: "easy",
     type: "boolean",
     text: "月亮會自己發光。",
     answer: "否",
@@ -73,6 +83,7 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d10",
+    difficulty: "hard",
     type: "choice",
     text: "人體最大的器官是什麼？",
     options: ["皮膚", "肝臟", "肺臟", "心臟"],
@@ -81,12 +92,14 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d11",
+    difficulty: "easy",
     type: "short",
     text: "一個星期有幾天？",
     answer: "7 天",
   },
   {
     id: "d12",
+    difficulty: "hard",
     type: "choice",
     text: "「守株待兔」這個成語是在形容什麼？",
     options: [
@@ -100,6 +113,7 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d13",
+    difficulty: "normal",
     type: "boolean",
     text: "植物行光合作用會放出氧氣。",
     answer: "是",
@@ -107,6 +121,7 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d14",
+    difficulty: "easy",
     type: "choice",
     text: "台灣的形狀常被形容像什麼？",
     options: ["蕃薯", "香蕉", "鳳梨", "西瓜"],
@@ -114,12 +129,14 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d15",
+    difficulty: "normal",
     type: "short",
     text: "一公斤等於幾公克？",
     answer: "1000 公克",
   },
   {
     id: "d16",
+    difficulty: "easy",
     type: "boolean",
     text: "垃圾分類時，寶特瓶應該丟一般垃圾。",
     answer: "否",
@@ -127,6 +144,7 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d17",
+    difficulty: "hard",
     type: "choice",
     text: "下列哪一種動物是兩棲類？",
     options: ["青蛙", "蜥蜴", "海豚", "企鵝"],
@@ -135,12 +153,14 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d18",
+    difficulty: "hard",
     type: "short",
     text: "三角形的內角和是幾度？",
     answer: "180 度",
   },
   {
     id: "d19",
+    difficulty: "easy",
     type: "choice",
     text: "打 119 是要找誰？",
     options: ["消防隊", "警察局", "電力公司", "郵局"],
@@ -149,12 +169,14 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d20",
+    difficulty: "normal",
     type: "boolean",
     text: "台灣位於北半球。",
     answer: "是",
   },
   {
     id: "d21",
+    difficulty: "easy",
     type: "choice",
     text: "一天當中，太陽從哪個方向升起？",
     options: ["東方", "西方", "南方", "北方"],
@@ -162,12 +184,14 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d22",
+    difficulty: "normal",
     type: "short",
     text: "100 減去 37 等於多少？",
     answer: "63",
   },
   {
     id: "d23",
+    difficulty: "normal",
     type: "boolean",
     text: "颱風在台灣多半發生在冬天。",
     answer: "否",
@@ -175,6 +199,7 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d24",
+    difficulty: "hard",
     type: "choice",
     text: "「一年之計在於春」的下一句常接什麼？",
     options: [
@@ -187,6 +212,7 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d25",
+    difficulty: "hard",
     type: "choice",
     text: "下列哪一個是可再生能源？",
     options: ["太陽能", "石油", "煤炭", "天然氣"],
@@ -195,12 +221,14 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d26",
+    difficulty: "easy",
     type: "short",
     text: "正方形有幾條邊？",
     answer: "4 條",
   },
   {
     id: "d27",
+    difficulty: "normal",
     type: "boolean",
     text: "過馬路時綠燈亮了就可以完全不用看左右來車。",
     answer: "否",
@@ -208,6 +236,7 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d28",
+    difficulty: "normal",
     type: "choice",
     text: "蜜蜂採蜜時，順便幫植物做了什麼事？",
     options: ["傳播花粉", "澆水", "施肥", "除草"],
@@ -215,12 +244,14 @@ export const DEFAULT_QUESTIONS: Question[] = [
   },
   {
     id: "d29",
+    difficulty: "easy",
     type: "short",
     text: "農曆正月初一是哪一個節日？",
     answer: "春節",
   },
   {
     id: "d30",
+    difficulty: "normal",
     type: "choice",
     text: "下列哪一個習慣最能省水？",
     options: [
