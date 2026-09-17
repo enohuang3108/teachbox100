@@ -9,7 +9,6 @@ import {
 } from "@/lib/jsonld";
 import { UnitHero } from "@/components/organisms/UnitHero";
 import { UnitSeoSection } from "@/components/organisms/UnitSeoSection";
-import { pageSeo } from "@/lib/seo-content";
 import { useState } from "react";
 import { PageTitleBar } from "../molecules/PageTitleBar";
 
@@ -71,7 +70,7 @@ export const PageTemplate = ({
         <div className="px-4 pb-20 md:px-8">
           <UnitHero
             page={page}
-            intro={pageSeo[key]?.intro ?? ""}
+            intro={page.intro}
             startLabel={landing.startLabel}
             onStart={() => {
               setEntered(true);

@@ -25,8 +25,7 @@ const pageInfo: PageWithKey = { ...pages.gacha, key: "gacha" };
 
 // Canvas 物理模擬只在開始遊戲後於瀏覽器執行。
 const GachaMachine = dynamic(
-  () =>
-    import("@/components/gacha/GachaMachine").then((m) => m.GachaMachine),
+  () => import("@/components/gacha/GachaMachine").then((m) => m.GachaMachine),
   { ssr: false },
 );
 export default function GachaPage() {
@@ -40,6 +39,7 @@ export default function GachaPage() {
   const { text, sound, setSound, putBack } = useGachaStore();
   const [round, setRound] = useState(0);
   const [picked, setPicked] = useState<string[]>([]);
+  const [shake, setShake] = useState(0);
   const { playCorrectSound } = useSound();
 
   // round 變了就給機器一份新陣列 → 全部放回
@@ -96,34 +96,35 @@ export default function GachaPage() {
                 labels={labels}
                 putBack={putBack}
                 onPick={onPick}
+                shake={shake}
               />
             </div>
 
             <aside
               aria-label="已抽出的名單"
-              className="fixed top-20 left-4 z-(--z-sticky) w-56 rounded-2xl border border-border bg-card/90 p-3 shadow-sm backdrop-blur-[2px] [#game-stage:fullscreen_&]:top-4"
+              className="fixed top-20 left-4 z-(--z-sticky) w-64 rounded-3xl bg-card/90 px-5 pt-5 pb-4 shadow-sm backdrop-blur-[2px] [#game-stage:fullscreen_&]:top-4"
             >
-              <div className="flex items-baseline justify-between gap-3 border-b border-border pb-2">
-                <h2 className="text-sm font-bold text-ink">抽籤紀錄</h2>
-                {!putBack && (
-                  <span className="text-caption font-bold text-ink-soft tabular-nums">
-                    還剩 {labels.length - picked.length} / {labels.length} 顆
-                  </span>
-                )}
-              </div>
+              <h2 className="font-display text-2xl font-extrabold text-ink">
+                抽籤紀錄
+              </h2>
+              {!putBack && (
+                <p className="mt-0.5 text-caption text-ink-soft tabular-nums">
+                  還剩 {labels.length - picked.length} / {labels.length} 顆
+                </p>
+              )}
               {picked.length === 0 ? (
-                <p className="mt-2 text-caption text-ink-soft">
-                  點一顆扭蛋打開，按住可以撥動。
+                <p className="mt-3 text-caption text-ink-soft">
+                  點一顆扭蛋打開。
                 </p>
               ) : (
-                <ol className="mt-1 max-h-[40svh] divide-y divide-dashed divide-border overflow-y-auto">
+                <ol className="mt-2 max-h-[40svh] divide-y divide-border overflow-y-auto">
                   {picked.map((label, index) => (
                     <li
                       key={index}
-                      className="grid grid-cols-[auto_1fr] items-center gap-2 py-1.5"
+                      className="flex items-center justify-between gap-3 py-3"
                     >
-                      <span className="text-caption font-bold text-ink-soft tabular-nums">
-                        {index + 1}
+                      <span className="shrink-0 text-sm text-ink-soft tabular-nums">
+                        第 {index + 1} 顆
                       </span>
                       <span className="min-w-0 truncate text-sm font-bold text-ink">
                         {label}
@@ -132,22 +133,22 @@ export default function GachaPage() {
                   ))}
                 </ol>
               )}
-              {picked.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2 w-full rounded-full"
-                  onClick={restoreAll}
-                >
-                  全部放回
-                </Button>
-              )}
             </aside>
+
+            {/* 操作鈕跟計時器一樣固定在右下角直排，只有一顆搖一搖 */}
+            <div className="fixed right-6 bottom-6 z-(--z-sticky) flex flex-col items-center gap-3">
+              <Button
+                onClick={() => setShake((n) => n + 1)}
+                className="size-24 rounded-full p-0 text-xl font-bold transition-transform duration-press ease-out active:scale-[0.97]"
+              >
+                搖一搖
+              </Button>
+            </div>
 
             {exhausted && (
               <div className="fixed inset-x-4 bottom-6 z-(--z-sticky) mx-auto flex max-w-xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
                 <p className="font-display text-xl font-extrabold text-ink">
-                  都抽完了，最後一顆是「{picked[picked.length - 1]}」
+                  都抽完了
                 </p>
                 <Button onClick={restoreAll}>全部放回</Button>
               </div>

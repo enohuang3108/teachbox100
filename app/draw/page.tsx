@@ -50,7 +50,7 @@ export default function DrawHubPage() {
           <h1 className="font-display text-ink text-hero">
             {hub.title}
           </h1>
-          <p className="text-muted-foreground mt-5 text-lg leading-[1.85]">{seo.intro}</p>
+          <p className="text-muted-foreground mt-5 text-lg leading-[1.85]">{hub.intro}</p>
 
           <h2 className="font-display text-ink mt-14 text-2xl font-extrabold">選一個開始</h2>
           <ul className="mt-6 grid gap-5 sm:grid-cols-2">

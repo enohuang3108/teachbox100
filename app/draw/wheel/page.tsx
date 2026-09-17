@@ -35,6 +35,11 @@ export default function WheelPage() {
   const wheel = useWheel(entries, sound, removeOnPick);
 
   const exhausted = wheel.active.length < 2;
+  // 剩一格時轉盤停用，最後那個人等於自動抽中，一起列進紀錄
+  const records =
+    exhausted && wheel.active[0]
+      ? [...wheel.history, wheel.active[0].label]
+      : wheel.history;
 
   const actions = (
     <TooltipProvider delayDuration={350} skipDelayDuration={600}>
@@ -84,22 +89,57 @@ export default function WheelPage() {
               )}
             </div>
 
-            {exhausted ? (
-              <div className="flex w-full flex-wrap items-center justify-between gap-3 rounded-2xl border border-brand-yellow/60 bg-brand-yellow/20 px-5 py-4">
-                <p className="font-display text-xl font-extrabold text-ink">
-                  🎉 都抽完了！最後一個是「{wheel.active[0]?.label}」
+            <aside
+              aria-label="已抽出的名單"
+              className="fixed top-20 left-4 z-(--z-sticky) w-64 rounded-3xl bg-card/90 px-5 pt-5 pb-4 shadow-sm backdrop-blur-[2px] [#game-stage:fullscreen_&]:top-4"
+            >
+              <h2 className="font-display text-2xl font-extrabold text-ink">
+                抽籤紀錄
+              </h2>
+              {removeOnPick && (
+                <p className="mt-0.5 text-caption text-ink-soft tabular-nums">
+                  還剩 {entries.length - records.length} / {entries.length} 個
                 </p>
-                <Button onClick={wheel.restoreAll}>全部放回</Button>
+              )}
+              {records.length === 0 ? (
+                <p className="mt-3 text-caption text-ink-soft">
+                  點轉盤開始抽。
+                </p>
+              ) : (
+                <ol className="mt-2 max-h-[40svh] divide-y divide-border overflow-y-auto">
+                  {records.map((label, index) => (
+                    <li
+                      key={index}
+                      className="flex items-center justify-between gap-3 py-3"
+                    >
+                      <span className="shrink-0 text-sm text-ink-soft tabular-nums">
+                        第 {index + 1} 個
+                      </span>
+                      <span className="min-w-0 truncate text-sm font-bold text-ink">
+                        {label}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </aside>
+
+            {/* 抽完了轉盤照樣留著（停在最後一格），提示條跟扭蛋機一樣浮在下面 */}
+            <Wheel
+              labels={wheel.active.map((e) => e.label)}
+              rotation={wheel.rotation}
+              spinMs={wheel.spinMs}
+              spinning={wheel.spinning}
+              disabled={exhausted}
+              onSpin={wheel.spin}
+            />
+            {exhausted && (
+              <div className="fixed inset-x-4 bottom-6 z-(--z-sticky) mx-auto flex max-w-xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
+                <p className="font-display text-xl font-extrabold text-ink">
+                  都抽完了
+                </p>
+                <Button onClick={wheel.restoreAll}>再來一次</Button>
               </div>
-            ) : (
-              <Wheel
-                labels={wheel.active.map((e) => e.label)}
-                rotation={wheel.rotation}
-                spinMs={wheel.spinMs}
-                spinning={wheel.spinning}
-                disabled={false}
-                onSpin={wheel.spin}
-              />
             )}
           </div>
         )}

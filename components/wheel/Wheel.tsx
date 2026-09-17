@@ -63,7 +63,7 @@ export function Wheel({
       disabled={disabled || spinning}
       onClick={onSpin}
       className={cn(
-        "wheel-button mx-auto block w-full max-w-[min(72vh,34rem)] rounded-full",
+        "wheel-button mx-auto block disabled:cursor-not-allowed w-full max-w-[min(72vh,34rem)] rounded-full",
         "transition-transform duration-150 ease-out active:scale-[0.985] disabled:active:scale-100",
       )}
     >
@@ -78,7 +78,12 @@ export function Wheel({
             const left = mid > 180;
             return (
               <g key={i}>
-                <path d={slicePath(i, slice)} fill={`var(--brand-${colors[i]})`} />
+                {/* 只剩一格時 360° 弧起點等於終點，path 會畫不出來，改畫整圓 */}
+                {count === 1 ? (
+                  <circle cx={R} cy={R} r={R} fill={`var(--brand-${colors[i]})`} />
+                ) : (
+                  <path d={slicePath(i, slice)} fill={`var(--brand-${colors[i]})`} />
+                )}
                 <text
                   transform={`rotate(${mid - 90 + (left ? 180 : 0)} ${R} ${R})`}
                   x={left ? R - LABEL_R : R + LABEL_R}
@@ -105,7 +110,9 @@ export function Wheel({
           dominantBaseline="central"
           fontSize={26}
           fontWeight={900}
-          fill="var(--ink)"
+          // 抽完了中心鈕變灰，看得出按不下去
+          fill={disabled ? "var(--ink-soft)" : "var(--ink)"}
+          opacity={disabled ? 0.45 : 1}
           className="font-display select-none"
         >
           轉

@@ -1,11 +1,14 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// 開發機 3100 常有人在用：E2E_PORT=3199 另開一台，搭配 NEXT_DIST_DIR 才不會跟那台搶 .next
+const port = process.env.E2E_PORT ?? "3100";
+
 export default defineConfig({
   testDir: "./e2e",
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   use: {
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: `http://127.0.0.1:${port}`,
     trace: "on-first-retry",
   },
   projects: [
@@ -15,8 +18,8 @@ export default defineConfig({
   webServer: {
     // 不重用 3000 等預設埠：開發機常同時跑著另一個 Next 專案，
     // 重用會讓測試看似通過、實際卻驗證了錯的網站。
-    command: "pnpm exec next dev . --hostname 127.0.0.1 --port 3100",
-    url: "http://127.0.0.1:3100",
+    command: `pnpm exec next dev . --hostname 127.0.0.1 --port ${port}`,
+    url: `http://127.0.0.1:${port}`,
     reuseExistingServer: false,
     timeout: 120_000,
   },

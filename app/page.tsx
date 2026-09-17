@@ -1,3 +1,4 @@
+import { getUnitIllustrationSrc } from "@/lib/unit-illustration";
 import { hubs, pages } from "@/app/pages.config";
 import { BarkleyEyes } from "@/components/atoms/BarkleyEyes";
 import {
@@ -124,7 +125,7 @@ export default function Home() {
                 key={key}
                 index={index}
                 link={page.path}
-                imageSrc={page.imageSrc}
+                imageSrc={getUnitIllustrationSrc(page)}
                 blurDataURL={page.blurDataURL}
                 cardTitle={page.title}
                 cardDescription={page.description}

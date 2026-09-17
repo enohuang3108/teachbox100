@@ -19,6 +19,7 @@ import { IchibanCarouselScene } from "./IchibanCarouselScene";
 import { IchibanTearControls, pressable } from "./IchibanTearCard";
 import { Button } from "@/components/atoms/shadcn/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { StageFixed } from "@/components/templates/StageFixed";
 import { useIchibanStore } from "@/lib/ichiban/store";
 import type { IchibanPrize } from "@/lib/ichiban/prizes";
 import styles from "./IchibanCarousel.module.css";
@@ -28,6 +29,7 @@ const focusEase = [0.65, 0, 0.35, 1] as const;
 export function IchibanCarousel() {
   const prizes = useIchibanStore((state) => state.prizes);
   const pool = useIchibanStore((state) => state.pool);
+  const colors = useIchibanStore((state) => state.colors);
   const count = pool.length;
   const confirmDraw = useIchibanStore((state) => state.confirmDraw);
   const reduceMotion = useReducedMotion();
@@ -65,6 +67,34 @@ export function IchibanCarousel() {
     },
     [],
   );
+
+  /** 快轉兩圈多、慢慢停在隨機一張，像把整桶籤攪一攪；按住拖曳或點票會打斷 */
+  const spin = () => {
+    if (choosing.current || count < 2) return;
+    animation.current?.stop();
+    const landed = snapCarousel(
+      rotation.get() - 720 - Math.random() * 360,
+      count,
+    );
+    setActiveIndex(landed.index);
+    if (reduceMotion) {
+      rotation.set(landed.rotation);
+      return;
+    }
+    animation.current = animate(rotation, landed.rotation, {
+      duration: 2.6,
+      ease: [0.12, 0.8, 0.2, 1],
+    });
+  };
+
+  // 一進來先轉一次
+  const spunIn = useRef(false);
+  useEffect(() => {
+    if (modelState !== "ready" || spunIn.current || reduceMotion) return;
+    spunIn.current = true;
+    spin();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modelState, reduceMotion]);
 
   const moveTo = (index: number, chooseAfter = false) => {
     if (choosing.current) return;
@@ -166,7 +196,8 @@ export function IchibanCarousel() {
     if (Math.abs(deltaX) > 6) moved.current = true;
     const dt = (event.timeStamp - drag.current.lastTime) / 1000;
     if (dt > 0) {
-      const instant = carouselRotationFromDrag(0, event.clientX - drag.current.lastX) / dt;
+      const instant =
+        carouselRotationFromDrag(0, event.clientX - drag.current.lastX) / dt;
       drag.current.velocity = drag.current.velocity * 0.4 + instant * 0.6;
       drag.current.lastX = event.clientX;
       drag.current.lastTime = event.timeStamp;
@@ -175,7 +206,11 @@ export function IchibanCarousel() {
   };
 
   // 箭頭按鈕：點一下轉一格；長按超過 300ms 就持續旋轉，放開停在最近的一張。
-  const hold = useRef<{ timer: number; frame: number | null; last: number } | null>(null);
+  const hold = useRef<{
+    timer: number;
+    frame: number | null;
+    last: number;
+  } | null>(null);
   const HOLD_SPEED = 160; // 度/秒
 
   const startHold = (direction: 1 | -1) => {
@@ -187,7 +222,9 @@ export function IchibanCarousel() {
       state.last = performance.now();
       const tick = (now: number) => {
         // 往右看下一張 = 旋轉角度遞減。
-        rotation.set(rotation.get() - direction * HOLD_SPEED * ((now - state.last) / 1000));
+        rotation.set(
+          rotation.get() - direction * HOLD_SPEED * ((now - state.last) / 1000),
+        );
         state.last = now;
         state.frame = requestAnimationFrame(tick);
       };
@@ -248,6 +285,7 @@ export function IchibanCarousel() {
             progress={progress}
             prize={prize}
             count={count}
+            colors={colors}
             activeIndex={activeIndex}
             onTicketClick={(index) => {
               if (!ignoreClick.current) moveTo(index, true);
@@ -269,7 +307,9 @@ export function IchibanCarousel() {
           >
             <div className={`${styles.ticket} ${styles.side} ${styles.left}`} />
             <div className={`${styles.ticket} ${styles.center}`} />
-            <div className={`${styles.ticket} ${styles.side} ${styles.right}`} />
+            <div
+              className={`${styles.ticket} ${styles.side} ${styles.right}`}
+            />
             <span className="sr-only">正在排列 3D 票券…</span>
           </div>
         )}
@@ -296,42 +336,63 @@ export function IchibanCarousel() {
             // 抽走的票從輪播移除，停在原位置的下一張（最後一張就回到第一張）。
             const nextIndex = count > 1 ? activeIndex % (count - 1) : 0;
             setActiveIndex(nextIndex);
-            rotation.set(carouselTargetForIndex(nextIndex, Math.max(1, count - 1), rotation.get()));
+            rotation.set(
+              carouselTargetForIndex(
+                nextIndex,
+                Math.max(1, count - 1),
+                rotation.get(),
+              ),
+            );
             backToCarousel();
           }}
         />
       ) : (
-        // 佔住按鈕列的高度，選中後按鈕出現時下方內容才不會跳。
-        <div className="relative z-10 -mt-5 flex min-h-11 items-center justify-center gap-24">
-          {count > 1 &&
-            ([
-              [-1, "上一張", ChevronLeft],
-              [1, "下一張", ChevronRight],
-            ] as const).map(([direction, label, Icon]) => (
+        <>
+          {/* 佔住按鈕列的高度，選中後按鈕出現時下方內容才不會跳。 */}
+          <div className="relative z-10 -mt-5 min-h-11" />
+          {/* 操作鈕跟計時器一樣固定在右下角直排，最常按的旋轉鈕最大、放最下面 */}
+          <StageFixed>
+            <div className="fixed right-6 bottom-6 z-(--z-sticky) flex flex-col items-center gap-3">
+              {count > 1 &&
+                (
+                  [
+                    [-1, "上一張", ChevronLeft],
+                    [1, "下一張", ChevronRight],
+                  ] as const
+                ).map(([direction, label, Icon]) => (
+                  <Button
+                    key={label}
+                    variant="outline"
+                    size="icon"
+                    aria-label={`${label}（長按連續旋轉）`}
+                    onPointerDown={(event) => {
+                      if (event.button !== 0) return;
+                      event.currentTarget.setPointerCapture(event.pointerId);
+                      startHold(direction);
+                    }}
+                    onPointerUp={() => stopHold()}
+                    onPointerCancel={() => stopHold()}
+                    onKeyDown={(event) => {
+                      if (event.key !== "Enter" && event.key !== " ") return;
+                      event.preventDefault();
+                      moveTo((activeIndex + direction + count) % count);
+                    }}
+                    onContextMenu={(event) => event.preventDefault()}
+                    className={`${pressable} border-ink/15 bg-paper text-ink hover:bg-paper-warm size-16 rounded-full`}
+                  >
+                    <Icon aria-hidden strokeWidth={2.4} />
+                  </Button>
+                ))}
               <Button
-                key={label}
-                variant="outline"
-                size="icon"
-                aria-label={`${label}（長按連續旋轉）`}
-                onPointerDown={(event) => {
-                  if (event.button !== 0) return;
-                  event.currentTarget.setPointerCapture(event.pointerId);
-                  startHold(direction);
-                }}
-                onPointerUp={() => stopHold()}
-                onPointerCancel={() => stopHold()}
-                onKeyDown={(event) => {
-                  if (event.key !== "Enter" && event.key !== " ") return;
-                  event.preventDefault();
-                  moveTo((activeIndex + direction + count) % count);
-                }}
-                onContextMenu={(event) => event.preventDefault()}
-                className={`${pressable} border-ink/15 bg-paper text-ink hover:bg-paper-warm size-11 rounded-full`}
+                disabled={count < 2}
+                onClick={spin}
+                className={`${pressable} mt-2 size-24 rounded-full p-0 text-xl font-bold`}
               >
-                <Icon aria-hidden strokeWidth={2.4} />
+                旋轉
               </Button>
-            ))}
-        </div>
+            </div>
+          </StageFixed>
+        </>
       )}
     </section>
   );

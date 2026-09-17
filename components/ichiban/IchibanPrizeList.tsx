@@ -11,34 +11,31 @@ export function IchibanPrizeList() {
 
   return (
     <aside
-      aria-label="一番賞列表"
-      className="border-ink/10 bg-paper-warm/70 rounded-2xl border p-4 shadow-[0_12px_32px_-24px_rgb(2_13_21/0.45)]"
+      aria-label="一番賞獎項"
+      className="fixed top-20 left-4 z-(--z-sticky) max-h-[calc(100svh-6rem)] w-64 overflow-y-auto rounded-3xl bg-card/90 px-5 pt-5 pb-4 shadow-sm backdrop-blur-[2px] [#game-stage:fullscreen_&]:top-4"
     >
-      <div className="flex items-baseline justify-between gap-3 border-b border-ink/10 pb-3">
-        <h2 className="font-display text-ink text-xl font-extrabold">
-          一番賞列表
-        </h2>
-        <span className="text-ink-soft text-sm font-bold tabular-nums">
-          共 {total} 張
-        </span>
-      </div>
-      <p className="text-ink-soft mt-2 text-sm">目前可抽的獎項</p>
-      <ol className="mt-3 divide-y divide-dashed divide-ink/15">
+      <h2 className="font-display text-2xl font-extrabold text-ink">
+        一番賞獎項
+      </h2>
+      <p className="mt-0.5 text-caption text-ink-soft tabular-nums">
+        共 {total} 張
+      </p>
+      <ol className="mt-2 divide-y divide-border">
         {prizes.map((prize, index) => {
           const remaining = prize.quantity - (drawn[index] ?? 0);
           return (
             // 抽完的獎項整列劃掉、變淡，還留在列表上讓大家知道已經被抽走。
             <li
               key={`${prize.rank}-${index}`}
-              className={`grid grid-cols-[auto_1fr_auto] items-center gap-3 py-3 first:pt-1 ${remaining === 0 ? "line-through decoration-2 opacity-45" : ""}`}
+              className={`flex items-center justify-between gap-3 py-3 ${remaining === 0 ? "line-through decoration-2 opacity-45" : ""}`}
             >
-              <span className="bg-paper border-ink/10 text-ink rounded-full border px-2.5 py-1 text-sm font-extrabold whitespace-nowrap">
+              <span className="shrink-0 text-sm text-ink-soft">
                 {prize.rank}
               </span>
-              <span className="text-ink min-w-0 truncate font-bold">
+              <span className="min-w-0 flex-1 truncate text-sm font-bold text-ink">
                 {prize.name}
               </span>
-              <span className="text-ink-soft text-sm font-bold tabular-nums whitespace-nowrap">
+              <span className="shrink-0 text-sm text-ink-soft tabular-nums">
                 {remaining} / {prize.quantity}
               </span>
             </li>

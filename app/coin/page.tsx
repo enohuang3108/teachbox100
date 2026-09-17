@@ -52,7 +52,7 @@ export default function CoinHubPage() {
             {hub.title}
           </h1>
           <p className="text-muted-foreground mt-5 text-lg leading-[1.85]">
-            {seo.intro}
+            {hub.intro}
           </p>
 
           {/* 這串順序本身就是這頁最有價值的內容 —— 子頁各自為政，只有這裡說得出先後 */}

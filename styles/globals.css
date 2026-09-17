@@ -66,8 +66,6 @@
   --font-display:
     var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui,
     sans-serif;
-  --font-mono: JetBrains Mono, monospace;
-  --font-serif: Source Serif 4, serif;
 
   /* 字級階層。中文沒有斷詞也沒有小寫字母，行高一律 >= 1.7，標題才壓到 1.3 以下 */
   --text-display: clamp(2.75rem, 6vw, 4.5rem);
@@ -147,7 +145,9 @@
   /* Brand Palette - 取自 public/images/decor 的球球實色，保證 CSS 與圖一致 */
   --paper: #fdfcf8;
   --paper-warm: #f8f0e3;
+  --paper-warm: #f7f4ef;
   --sand: #ede6d8;
+  /* --sand: #ece3da; */
   --stone: #beb9b1;
   --ink: #020d15;
   --ink-soft: #4a5560;
@@ -193,8 +193,6 @@
   --font-sans:
     var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui,
     sans-serif;
-  --font-serif: Source Serif 4, serif;
-  --font-mono: JetBrains Mono, monospace;
 
   /* Shadow System */
   --shadow-color: hsl(0 0% 0%);
@@ -237,8 +235,6 @@
   --border: rgb(2 13 21 / 0.1);
   --input: rgb(2 13 21 / 0.1);
   --ring: var(--brand-yellow);
-
-
 }
 
 .dark {
@@ -286,14 +282,8 @@
   --input: rgb(255 255 255 / 0.12);
   --ring: var(--brand-yellow);
 
-
   --radius: 0.75rem;
   --radius-card: 1.25rem;
-  --font-sans:
-    var(--font-nunito), var(--font-noto-tc), ui-sans-serif, system-ui,
-    sans-serif;
-  --font-serif: Source Serif 4, serif;
-  --font-mono: JetBrains Mono, monospace;
   --shadow-color: hsl(0 0% 0%);
   --shadow-opacity: 0.1;
   --shadow-blur: 8px;
@@ -602,12 +592,31 @@
  * 40 張卡撐出來的高度會讓 --fs-scale 把整塊等比縮小，於是左右多出一大片留白——
  * 所以這一頁把 scale 固定成 1，改成讓格線自己吃滿寬高、卡片跟著格子縮。
  */
+/* 計分板一般模式也跟全螢幕同一套：舞台吃滿頂列以下的視窗，卡片平分高度、字級跟著卡片縮放 */
+#game-stage[data-unit="scoreboard"] {
+  max-width: none;
+  /* 扣掉頂列 4rem 與 main 上下的 padding（p-4 / md:p-8） */
+  height: calc(100svh - 6rem);
+}
+
+@media (min-width: 768px) {
+  #game-stage[data-unit="scoreboard"] {
+    height: calc(100svh - 8rem);
+  }
+}
+
 #game-stage[data-unit="scoreboard"]:fullscreen {
+  height: 100%;
   padding: 0.75rem;
 }
 
 #game-stage[data-unit="scoreboard"]:fullscreen > [data-stage-inner] {
   --fs-scale: 1;
+  /* 蓋掉下面 #game-stage:fullscreen 通用的 64rem 上限，寬螢幕才鋪得滿 */
+  max-width: none;
+}
+
+#game-stage[data-unit="scoreboard"] > [data-stage-inner] {
   max-width: none;
   height: 100%;
   min-height: 0;
@@ -616,15 +625,15 @@
 }
 
 /* PageTemplate 在 stage-inner 與遊戲之間還包了一層 div，不一起拉伸就撐不到底 */
-#game-stage[data-unit="scoreboard"]:fullscreen > [data-stage-inner] > div,
-#game-stage[data-unit="scoreboard"]:fullscreen [data-score-root] {
+#game-stage[data-unit="scoreboard"] > [data-stage-inner] > div,
+#game-stage[data-unit="scoreboard"] [data-score-root] {
   display: flex;
   flex: 1;
   min-height: 0;
   flex-direction: column;
 }
 
-#game-stage[data-unit="scoreboard"]:fullscreen [data-score-grid] {
+#game-stage[data-unit="scoreboard"] [data-score-grid] {
   flex: 1;
   min-height: 0;
   /* 欄數隨寬度長，列高平均分掉剩下的高度 —— 組數越多每張卡越矮，不會溢出 */
@@ -632,7 +641,7 @@
   grid-auto-rows: minmax(0, 1fr);
 }
 
-#game-stage[data-unit="scoreboard"]:fullscreen [data-score-card] {
+#game-stage[data-unit="scoreboard"] [data-score-card] {
   min-height: 0;
   justify-content: center;
   gap: 0;
@@ -644,23 +653,24 @@
 }
 
 /* 字級吃格子高度：組數越多卡片越矮，字跟著小，40 組也塞得下 */
-#game-stage[data-unit="scoreboard"]:fullscreen [data-score-value] {
-  font-size: min(4.5rem, 46cqh);
+#game-stage[data-unit="scoreboard"] [data-score-value] {
+  /* 不設固定上限：卡片多大字就多大，寬度那邊也要顧到三位數分數 */
+  font-size: min(46cqh, 28cqw);
 }
 
-#game-stage[data-unit="scoreboard"]:fullscreen [data-score-name] {
-  font-size: min(2rem, 20cqh);
+#game-stage[data-unit="scoreboard"] [data-score-name] {
+  font-size: min(18cqh, 9cqw);
   line-height: 1.3;
   padding-block: 0;
 }
 
-#game-stage[data-unit="scoreboard"]:fullscreen [data-score-foot] button {
-  height: min(2.75rem, 26cqh);
-  width: min(2.75rem, 26cqh);
+#game-stage[data-unit="scoreboard"] [data-score-foot] button {
+  height: min(4rem, 26cqh);
+  width: min(4rem, 26cqh);
 }
 
-#game-stage[data-unit="scoreboard"]:fullscreen [data-score-foot] span {
-  font-size: min(0.875rem, 14cqh);
+#game-stage[data-unit="scoreboard"] [data-score-foot] span {
+  font-size: min(1.25rem, 10cqh);
 }
 
 /* 皇冠掛上來時輕輕落下，不是憑空出現（沒有東西是從 scale(0) 冒出來的） */

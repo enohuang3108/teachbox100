@@ -51,6 +51,16 @@ const RefreshCWIcon = forwardRef<RefreshCCWIconWIcon, RefreshCCWIcoWIcon>(
         )}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        // 頂列當按鈕用（重新出題、全部放回）：讀螢幕器與鍵盤要認得它是按鈕
+        {...(props.onClick && {
+          role: "button",
+          tabIndex: 0,
+          onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
+            if (e.key !== "Enter" && e.key !== " ") return;
+            e.preventDefault();
+            e.currentTarget.click();
+          },
+        })}
         {...props}
       >
         <motion.svg

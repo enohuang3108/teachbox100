@@ -2,12 +2,16 @@ import { expect, test } from "@playwright/test";
 
 test("設定獎項內容後，撕開票券會顯示兩行設定值", async ({ page }) => {
   await page.goto("/draw/ichiban");
-  const prizeList = page.getByLabel("一番賞列表");
+  const prizeList = page.getByLabel("一番賞獎項");
 
   // 介紹頁 → 設定 → 開始
   await page.getByRole("button", { name: "開始使用" }).click();
-  await page.getByRole("combobox", { name: "第 1 張籤的獎項" }).selectOption("A賞");
-  await page.getByRole("textbox", { name: "第 1 張籤的內容" }).fill("客製化禮物");
+  // Radix Select 不是原生 <select>：點開再選
+  await page.getByRole("combobox", { name: "第 1 張籤的獎項" }).click();
+  await page.getByRole("option", { name: "A賞", exact: true }).click();
+  await page
+    .getByRole("textbox", { name: "第 1 張籤的內容" })
+    .fill("客製化禮物");
   await page.getByRole("spinbutton", { name: "第 1 張籤的數量" }).fill("4");
   await page.getByRole("button", { name: "開始", exact: true }).click();
   await expect(prizeList.getByText("共 10 張")).toBeVisible();
@@ -17,5 +21,7 @@ test("設定獎項內容後，撕開票券會顯示兩行設定值", async ({ pa
   await page.getByRole("button", { name: "直接揭曉" }).click();
   // 籤池是隨機洗牌，抽到哪一賞不固定，只驗證「抽中X賞：內容」的格式
   await expect(page.locator("output")).toHaveText(/^抽中[A-M]賞：\S+$/);
-  await expect(page.locator("output")).not.toContainText("。", { timeout: 2_000 });
+  await expect(page.locator("output")).not.toContainText("。", {
+    timeout: 2_000,
+  });
 });

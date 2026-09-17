@@ -22,6 +22,9 @@ export function useWheel(
   /** 抽中的原始 index；null 表示沒有待處理的結果 */
   const [result, setResult] = useState<number | null>(null);
   const pending = useRef<number | null>(null);
+  const pendingLabel = useRef<string | null>(null);
+  /** 這一輪抽過的名字，照順序 */
+  const [history, setHistory] = useState<string[]>([]);
   const { playSpinLoop, playBonusSound } = useSound();
 
   const active = entries
@@ -42,6 +45,7 @@ export function useWheel(
     if (pool.length < 2) return;
     const slot = pickIndex(pool.length, defaultRng);
     pending.current = pool[slot].index;
+    pendingLabel.current = pool[slot].label;
     // 減少動態：不轉直接揭曉；transition 時間跟著歸零，指標還是會指對格
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -58,6 +62,9 @@ export function useWheel(
       loop?.stop();
       setSpinning(false);
       setResult(pending.current);
+      // 抽中當下就記名字，不在 effect deps 放 entries（每次 render 都是新陣列，計時會一直重來）
+      const label = pendingLabel.current;
+      if (label !== null) setHistory((h) => [...h, label]);
       if (soundOn) playBonusSound();
       realisticEffect();
     }, spinMs + 60);
@@ -70,6 +77,7 @@ export function useWheel(
   const restoreAll = () => {
     setRemoved(new Set());
     setResult(null);
+    setHistory([]);
   };
 
   return {
@@ -79,6 +87,7 @@ export function useWheel(
     spinning,
     result: result === null ? null : entries[result],
     removedCount: removed.size,
+    history,
     spin,
     restoreAll,
   };

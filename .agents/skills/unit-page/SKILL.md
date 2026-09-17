@@ -11,9 +11,9 @@ description: TeachBox100 單元頁的組裝規則 —— 註冊點順序、頁�
 
 順序固定，每一步都有東西依賴前一步：
 
-1. **`app/pages.config.ts`** 的 `pagesConfig` 加 key：`path` / `imageSrc` / `blurDataURL` / `title` / `description` / `guide?`。屬於某個分類就再加進 `hubs[x].children`。
+1. **`app/pages.config.ts`** 的 `pagesConfig` 加 key：`path` / `imageSrc` / `blurDataURL` / `title` / `description` / `intro` / `guide?`。屬於某個分類就再加進 `hubs[x].children`。
    這是所有東西的源頭 —— 首頁卡牆、sitemap、llms.txt、OG 圖全部讀它。
-2. **`lib/seo-content.ts`** 的 `pageSeo[key]`：`title` / `teaches` / `description` / `intro` / `faq`（＋ `curriculum?` / `steps?`）。
+2. **`lib/seo-content.ts`** 的 `pageSeo[key]`：`title` / `teaches` / `description` / `faq`（＋ `curriculum?` / `steps?`）。
    漏了 `buildMetadata` 直接 throw，而且 `app/llms.txt/route.ts` 對每個 key 無條件取 `seo.faq`，整條 route 500。
 3. **`app/<route>/layout.tsx`**：`export const metadata = buildMetadata("<key>")`。
    page 是 `"use client"`，不能自己 export metadata，這層一定要有。
@@ -50,7 +50,7 @@ sitemap 與 llms.txt 自動展開 `pages` 與 `hubs`，不必改。`app/sitemap.
 先讓老師看懂這是什麼、再進工具的頁面用。`PageTemplate` 傳 `landing={{ startLabel, onStart? }}`：
 
 - 進頁面只渲染 `UnitHero` ＋ `UnitSeoSection withIntro={false}`；頂列鈕先不給。按下開始鈕才換成 `#game-stage`，內容頁不再掛 SEO 區塊。
-- `UnitHero` 大標取 `pages.config` 的 `headline ?? description`，說明只放 `pageSeo.intro` 的第一句。`description` 還餵首頁卡片與 schema，要短標題就加 `headline`，不改 `description`。
+- `UnitHero` 大標取 `pages.config` 的 `headline ?? description`，說明放 `pages.config` 的 `intro` 全文（不截斷，所以要短而吸引人，操作細節寫進 FAQ）。`description` 還餵首頁卡片與 schema，要短標題就加 `headline`，不改 `description`。
 - `onStart` 讓介紹頁那顆鈕直接做第一個動作（噪音計的「噓」直接開麥克風），不必進來再按一次。
 - 狀態不記住：每次進頁面都從介紹頁開始。
 
@@ -73,7 +73,7 @@ const [mode, setMode] = useState<"setup" | "play">("setup");
 
 `SetupPanel` 介面固定 `({ onStart }: { onStart: () => void })`，自己讀寫該遊戲的 store，底部一顆 `<Button size="lg" disabled={!!error}>`。回設定走 `SettingsButton onClick={() => setMode("setup")}`；會丟掉進行中的局面時先跳確認。
 
-配合介紹頁時，設定放進 Dialog，外殼一律用 `StepSetup`（`components/organisms/StepSetup.tsx`）：給 `steps`（每站 `label`／`icon`／`summary`／`done?`／`content`）、`blocker`、`startLabel`、`onStart`，它負責左側步驟側欄、捲動內容、底部固定列（一句總結＋上一步／下一步，最後一站才是開始、`blocker` 有值就擋住並顯示原因）。`DialogContent` 固定 `max-w-4xl gap-0 overflow-hidden p-0`。每站內容自己帶 `h3` ＋ `DialogDescription`。實例：大富翁（題庫／玩家／規則）、轉盤（名單／玩法）。
+配合介紹頁時，設定放進 Dialog，外殼一律用 `StepSetup`（`components/organisms/StepSetup.tsx`）：給 `steps`（每站 `label`／`icon`／`summary`／`done?`／`content`）、`blocker`、`startLabel`、`onStart`，它負責左側步驟側欄、捲動內容、底部固定列（一句總結＋上一步／下一步，最後一站才是開始、`blocker` 有值就擋住並顯示原因）。`DialogContent` 固定 `max-w-4xl gap-0 overflow-hidden p-0`。每站內容自己帶 `h3` ＋ `DialogDescription`。實例：大富翁（題庫／玩家／規則）、轉盤（名單／玩法）、翻翻配對（牌組／玩法）、計分板（組別／外觀）。
 
 互斥選項用 `Tabs`（有各自內容）或長得一樣的 radiogroup（純單選）。載入慢的遊戲在開 Dialog 時背景預載程式碼與素材（`lib/monopoly/preload.ts`），按開始就不用等。
 
@@ -88,6 +88,14 @@ const [mode, setMode] = useState<"setup" | "play">("setup");
 ### 邊角控制
 
 工具頁的主要操作貼螢幕邊，讓中間留給投影要看的東西：計時器是右下角直排圓鈕（最常按的開始鈕最大、放最下面、計時中變紅），噪音計是右邊置中的直立刻度尺。滿版的場景（扭蛋機的箱子）也走同一招：`fixed inset-x-0 top-16 bottom-0 [#game-stage:fullscreen_&]:top-0`，一般時讓出頂列、全螢幕時吃滿整個畫面。
+
+**右下角操作鈕**是給老師站在大螢幕／觸控白板前按的：手指點得到、教室後排看得出按了什麼。有「一直會按的主動作」的工具頁都用這一組，頂列只留設定類。規格照計時器（`app/timer/page.tsx`）：
+
+- 容器 `fixed right-6 bottom-6 z-(--z-sticky) flex flex-col items-center gap-3`，直排。
+- 次要鈕 `size-16 rounded-full p-0`（`variant="outline"`）；主鈕只有一顆，`mt-2 size-24 rounded-full p-0 text-xl font-bold`，放最下面。按壓一律 `transition-transform duration-press ease-out active:scale-[0.97]`。
+- 主鈕只放字（「開始」「旋轉」「搖一搖」），不加 icon —— 字就是它的可及名稱；次要鈕只放 icon，一定要給 `aria-label`。
+- 動作不能做時 `disabled`，不要藏起來讓位置跳動；進入另一個階段（一番賞撕票）才整組收掉。
+- 實例：計時器（時間／重設／開始）、扭蛋機（搖一搖）、一番賞（上一張／下一張／旋轉）。
 
 一律包 `StageFixed`（`components/templates/StageFixed.tsx`），裡面再寫 `position: fixed`。全螢幕時 `[data-stage-inner]` 帶 transform 做等比縮放，直接寫在 children 裡的 fixed 會改以它為準、縮進舞台框；`StageFixed` portal 到沒有 transform 的 `#game-stage`，一般與全螢幕都貼著螢幕邊。內容區記得留出按鈕的寬度（計時器 `pr-28 sm:px-28`），手機上才不會蓋到。
 
@@ -127,7 +135,7 @@ const [mode, setMode] = useState<"setup" | "play">("setup");
 
 目前站上有兩處還沒滿足這張表，新頁照表做就好：金錢六頁與時鐘頁會發聲但沒給開關（`GameAnswerSection` 無條件播放）；計時器有開關但沒被記住（`app/timer/page.tsx` 用 `useState`，是全站唯一沒 persist 的音效開關）。
 
-**文案與實作是同一份契約。** 改了玩法就要改 `lib/seo-content.ts` 的 `intro` 與 `faq` —— 那份同時餵給頁面、搜尋引擎和 `llms.txt`，寫錯一次錯三個地方。刪掉一個設定就把講它的那題 FAQ 一起刪掉。
+**文案與實作是同一份契約。** 改了玩法就要改 `app/pages.config.ts` 的 `intro` 與 `lib/seo-content.ts` 的 `faq` —— 那份同時餵給頁面、搜尋引擎和 `llms.txt`，寫錯一次錯三個地方。刪掉一個設定就把講它的那題 FAQ 一起刪掉。
 
 ## 收尾
 

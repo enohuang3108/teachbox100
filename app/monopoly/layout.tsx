@@ -6,7 +6,6 @@ import {
   getFaqSchema,
   getLearningResourceSchema,
 } from "@/lib/jsonld";
-import { pageSeo } from "@/lib/seo-content";
 import { buildMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
@@ -44,7 +43,7 @@ export default function Layout({
         />
       )}
       <MonopolyGate
-        intro={pageSeo.monopoly.intro}
+        intro={pages.monopoly.intro}
         seo={
           <UnitSeoSection
             pageKey="monopoly"

@@ -30,6 +30,8 @@ export function IchibanTearControls({
   const animation = useRef<ReturnType<typeof animate> | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [dragging, setDragging] = useState(false);
+  /** 封條拉開到 5% 就不能返回換票，免得偷看後反悔 */
+  const [torn, setTorn] = useState(false);
   const tearSound = useTearSound();
 
   useEffect(() => () => animation.current?.stop(), []);
@@ -51,7 +53,7 @@ export function IchibanTearControls({
           stiffness: 320,
           damping: 30,
           mass: 0.72,
-    });
+        });
     if (shouldReveal) {
       animation.current.then(() => setRevealed(true));
     }
@@ -90,9 +92,14 @@ export function IchibanTearControls({
         }}
         onPointerMove={(event) => {
           if (drag.current?.pointerId !== event.pointerId) return;
-          const next = tearProgress(drag.current.startX, event.clientX, travel());
+          const next = tearProgress(
+            drag.current.startX,
+            event.clientX,
+            travel(),
+          );
           tearSound.move(next);
           progress.set(next);
+          if (next >= 0.05) setTorn(true);
         }}
         onPointerUp={(event) => release(event.pointerId)}
         onPointerCancel={(event) => release(event.pointerId)}
@@ -125,19 +132,21 @@ export function IchibanTearControls({
           </Button>
         ) : (
           <>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => {
-                animation.current?.stop();
-                tearSound.stop();
-                onBack();
-              }}
-              className={`${pressable} border-ink/15 bg-paper text-ink-soft hover:bg-paper-warm hover:text-ink px-5`}
-            >
-              <ChevronLeft aria-hidden strokeWidth={2.4} />
-              返回
-            </Button>
+            {!torn && (
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => {
+                  animation.current?.stop();
+                  tearSound.stop();
+                  onBack();
+                }}
+                className={`${pressable} border-ink/15 bg-paper text-ink-soft hover:bg-paper-warm hover:text-ink px-5`}
+              >
+                <ChevronLeft aria-hidden strokeWidth={2.4} />
+                返回
+              </Button>
+            )}
             <Button
               size="lg"
               onClick={() => settle(true)}

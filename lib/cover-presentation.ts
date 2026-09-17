@@ -1,5 +1,6 @@
 export function getCoverPresentation(imageSrc: string) {
-  if (imageSrc.endsWith(".png")) {
+  // 去背圖（透明 PNG、covers/cutout/）直接站在卡片上，不墊底色也不裁切
+  if (imageSrc.endsWith(".png") || imageSrc.includes("/covers/cutout/")) {
     return {
       imageClassName: "object-contain",
       imageContainerClassName: "bg-transparent",

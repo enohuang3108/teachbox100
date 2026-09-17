@@ -1,6 +1,13 @@
 "use client";
 
 import { Button } from "@/components/atoms/shadcn/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/atoms/shadcn/select";
 import { DialogDescription } from "@/components/atoms/shadcn/dialog";
 import { StepSetup } from "@/components/organisms/StepSetup";
 import {
@@ -97,20 +104,24 @@ export function IchibanSettings({ onStart }: { onStart: () => void }) {
                       <span className="sm:sr-only">
                         第 {index + 1} 張籤的獎項
                       </span>
-                      <select
+                      <Select
                         value={prize.rank}
-                        onChange={(event) =>
-                          update(index, "rank", event.target.value)
-                        }
-                        aria-label={`第 ${index + 1} 張籤的獎項`}
-                        className="w-full rounded-lg border border-ink/10 bg-paper px-3 py-2 font-bold outline-none transition-colors focus-visible:border-ink/30 focus-visible:ring-2 focus-visible:ring-ring sm:border-transparent sm:bg-transparent sm:px-2"
+                        onValueChange={(value) => update(index, "rank", value)}
                       >
-                        {RANKS.map((rank) => (
-                          <option key={rank} value={rank}>
-                            {rank}
-                          </option>
-                        ))}
-                      </select>
+                        <SelectTrigger
+                          aria-label={`第 ${index + 1} 張籤的獎項`}
+                          className="rounded-lg border-ink/10 bg-paper font-bold sm:border-transparent sm:bg-transparent sm:px-2"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {RANKS.map((rank) => (
+                            <SelectItem key={rank} value={rank}>
+                              {rank}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </label>
                     <label className="grid gap-1 text-sm font-semibold text-ink sm:block">
                       <span className="sm:sr-only">

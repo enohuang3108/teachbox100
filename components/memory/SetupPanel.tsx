@@ -10,6 +10,7 @@ import {
 } from "@/components/atoms/shadcn/dialog";
 import { Input } from "@/components/atoms/shadcn/input";
 import { Switch } from "@/components/atoms/shadcn/switch";
+import { StepSetup } from "@/components/organisms/StepSetup";
 import {
   MAX_FACE_LENGTH,
   MAX_GROUPS,
@@ -22,71 +23,126 @@ import {
 import { fileToFace } from "@/lib/memory/image";
 import { useMemoryStore } from "@/lib/memory/store";
 import { cn } from "@/lib/utils";
-import { ImagePlus, Plus, Trash2, X } from "lucide-react";
+import {
+  ImagePlus,
+  Layers,
+  Plus,
+  SlidersHorizontal,
+  Trash2,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 
 export function SetupPanel({ onStart }: { onStart: () => void }) {
-  const { deck, setDeck, preview, setPreview, restoreStarter } = useMemoryStore();
+  const { deck, setDeck, preview, setPreview, restoreStarter } =
+    useMemoryStore();
   const [confirmRestore, setConfirmRestore] = useState(false);
   const validation = validateDeck(deck);
 
   const patch = (i: number, p: Partial<PairGroup>) =>
     setDeck(deck.map((g, j) => (j === i ? { ...g, ...p } : g)));
 
+  const blocker = validation.ok
+    ? null
+    : (validation.deck ?? "有配對還沒填好，請看紅字那一組");
+
   return (
-    <div className="flex flex-col gap-6">
-      <ul className="flex flex-col gap-3">
-        {deck.map((g, i) => (
-          <GroupRow
-            key={g.id}
-            group={g}
-            index={i}
-            error={validation.groups[i]}
-            canRemove={deck.length > MIN_GROUPS}
-            onChange={(p) => patch(i, p)}
-            onRemove={() => setDeck(deck.filter((_, j) => j !== i))}
-          />
-        ))}
-      </ul>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <Button
-          variant="outline"
-          disabled={deck.length >= MAX_GROUPS}
-          onClick={() => setDeck([...deck, newGroup()])}
-        >
-          <Plus /> 新增配對
-        </Button>
-        <span className="text-muted-foreground text-sm">
-          {deck.length} / {MAX_GROUPS} 組
-        </span>
-        <Button
-          variant="ghost"
-          className="ml-auto"
-          onClick={() => setConfirmRestore(true)}
-        >
-          恢復預設牌組
-        </Button>
-      </div>
-
-      <div className="bg-paper-warm border-ink/10 flex flex-col gap-4 rounded-2xl border p-4">
-        <label htmlFor="memory-preview" className="flex items-center justify-between gap-4">
-          <span>
-            <span className="text-ink block font-semibold">開局先看牌</span>
-            <span className="text-muted-foreground text-sm">
-              開始時全部翻開 2 秒再蓋回去
-            </span>
-          </span>
-          <Switch id="memory-preview" checked={preview} onCheckedChange={setPreview} />
-        </label>
-      </div>
-
-      {validation.deck && (
-        <p className="text-brand-red text-sm font-medium">{validation.deck}</p>
-      )}
-      <Button size="lg" disabled={!validation.ok} onClick={onStart}>
-        開始遊戲
-      </Button>
+    <>
+      <StepSetup
+        title="翻翻配對設定"
+        blocker={blocker}
+        startLabel="開始遊戲"
+        onStart={onStart}
+        steps={[
+          {
+            key: "deck",
+            label: "牌組",
+            icon: Layers,
+            summary: `${deck.length} 組`,
+            done: validation.ok,
+            content: (
+              <section className="space-y-5">
+                <header className="flex items-end justify-between gap-3">
+                  <div>
+                    <h3 className="text-h3 text-ink">要配對哪些牌？</h3>
+                    <DialogDescription className="mt-1">
+                      每組兩張卡面，可以是文字或圖片；打開「同卡面」就是兩張一樣。
+                    </DialogDescription>
+                  </div>
+                  <span className="shrink-0 text-caption text-muted-foreground">
+                    {deck.length}／{MAX_GROUPS} 組
+                  </span>
+                </header>
+                <ul className="flex flex-col gap-3">
+                  {deck.map((g, i) => (
+                    <GroupRow
+                      key={g.id}
+                      group={g}
+                      index={i}
+                      error={validation.groups[i]}
+                      canRemove={deck.length > MIN_GROUPS}
+                      onChange={(p) => patch(i, p)}
+                      onRemove={() => setDeck(deck.filter((_, j) => j !== i))}
+                    />
+                  ))}
+                </ul>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button
+                    variant="outline"
+                    disabled={deck.length >= MAX_GROUPS}
+                    onClick={() => setDeck([...deck, newGroup()])}
+                  >
+                    <Plus /> 新增配對
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-auto text-muted-foreground hover:text-ink"
+                    onClick={() => setConfirmRestore(true)}
+                  >
+                    恢復預設牌組
+                  </Button>
+                </div>
+              </section>
+            ),
+          },
+          {
+            key: "rules",
+            label: "玩法",
+            icon: SlidersHorizontal,
+            summary: preview ? "開局先看牌" : "直接開始",
+            content: (
+              <section className="space-y-5">
+                <header>
+                  <h3 className="text-h3 text-ink">開局要先讓學生看一眼嗎？</h3>
+                  <DialogDescription className="mt-1">
+                    年紀小或牌多時先看牌比較容易上手。
+                  </DialogDescription>
+                </header>
+                <label
+                  htmlFor="memory-preview"
+                  className="flex cursor-pointer items-start justify-between gap-4 rounded-2xl border border-border bg-background px-4 py-3.5"
+                >
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-ink">
+                      開局先看牌
+                    </span>
+                    <span className="mt-0.5 block text-caption text-muted-foreground">
+                      開始時全部翻開 2 秒再蓋回去
+                    </span>
+                  </span>
+                  <Switch
+                    id="memory-preview"
+                    checked={preview}
+                    onCheckedChange={setPreview}
+                    className="mt-0.5"
+                  />
+                </label>
+              </section>
+            ),
+          },
+        ]}
+      />
 
       <Dialog open={confirmRestore} onOpenChange={setConfirmRestore}>
         <DialogContent>
@@ -112,7 +168,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
 
@@ -145,7 +201,9 @@ function GroupRow({
       )}
     >
       <div className="flex items-center gap-2">
-        <span className="text-ink w-14 shrink-0 text-sm font-bold">配對 {index + 1}</span>
+        <span className="text-ink w-14 shrink-0 text-sm font-bold">
+          配對 {index + 1}
+        </span>
         <FaceInput
           label={`配對 ${index + 1} 卡面 1`}
           placeholder="卡面 1"
@@ -171,7 +229,10 @@ function GroupRow({
         </Button>
       </div>
       <div className="mt-2 flex items-center justify-between gap-3 pl-16">
-        <label htmlFor={`same-${group.id}`} className="text-muted-foreground flex items-center gap-2 text-sm">
+        <label
+          htmlFor={`same-${group.id}`}
+          className="text-muted-foreground flex items-center gap-2 text-sm"
+        >
           <Switch
             id={`same-${group.id}`}
             checked={group.sameFace}
@@ -242,7 +303,10 @@ function FaceInput({
         aria-label={label}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
-        className={cn("bg-paper min-w-0 flex-1", failed && "border-brand-red/50")}
+        className={cn(
+          "bg-paper min-w-0 flex-1",
+          failed && "border-brand-red/50",
+        )}
       />
       {!disabled && (
         <label

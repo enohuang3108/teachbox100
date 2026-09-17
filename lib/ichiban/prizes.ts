@@ -4,7 +4,7 @@ export interface IchibanPrize {
   quantity: number;
 }
 
-export const ICHIBAN_RANKS = [..."ABCDEFGHIJKLM"].map((letter) => `${letter}賞`);
+export const ICHIBAN_RANKS = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].map((letter) => `${letter}賞`);
 
 export const DEFAULT_ICHIBAN_PRIZES: IchibanPrize[] = [
   { rank: "A賞", name: "星空投影燈", quantity: 1 },

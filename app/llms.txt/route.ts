@@ -4,12 +4,12 @@ import { CURRICULUM, pageSeo } from "@/lib/seo-content";
 
 /**
  * /llms.txt — 給 AI 檢索爬蟲的純文字站點摘要。
- * 由 seo-content.ts 產生而非另存靜態檔，避免兩份內容各自漂移。
+ * 由 pages.config.ts 與 seo-content.ts 產生而非另存靜態檔，避免兩份內容各自漂移。
  */
 export const dynamic = "force-static";
 
 export function GET(): Response {
-  const entries: [string, { path: string; title: string }][] = [
+  const entries: [string, { path: string; title: string; intro: string }][] = [
     ...Object.entries(hubs),
     ...Object.entries(pages),
   ];
@@ -35,7 +35,7 @@ export function GET(): Response {
       `## ${page.title}`,
       `URL: ${SITE_URL}${page.path}`,
       "",
-      seo.intro,
+      page.intro,
       "",
       facts,
       ...(steps ? ["", "### 建議的學習順序", steps] : []),

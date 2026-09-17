@@ -3,13 +3,7 @@
 import { BoxDraw } from "@/lib/gacha/box-draw";
 import { BRAND } from "@/lib/design-tokens";
 import { Bodies, Body, Composite, Engine } from "matter-js";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import * as THREE from "three";
 import styles from "./GachaMachine.module.css";
@@ -89,6 +83,52 @@ function disposeGroup(group: THREE.Group) {
   });
 }
 
+/** 結果頁的扭蛋：同一顆 3D 殼，斜 45 度擺著不動，只畫一格 */
+function StillCapsule({ color }: { color: string }) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    const size = host.clientWidth;
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(size, size);
+    renderer.domElement.style.display = "block";
+    host.appendChild(renderer.domElement);
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1.1, 1.1, 1.1, -1.1, 0.1, 10);
+    camera.position.z = 5;
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xd9cfbf, 2.2));
+    const sun = new THREE.DirectionalLight(0xffffff, 2.4);
+    sun.position.set(-0.6, 0.9, 1);
+    scene.add(sun);
+    const shared = {
+      top: new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 0.28,
+        metalness: 0.02,
+      }),
+      seam: new THREE.MeshStandardMaterial({
+        color: BRAND.ink,
+        roughness: 0.6,
+      }),
+    };
+    const capsule = capsuleMesh(color, shared);
+    // 往前傾一點看得到接縫那圈，再斜 45 度
+    capsule.rotation.set(0.35, 0, -Math.PI / 4);
+    scene.add(capsule);
+    renderer.render(scene, camera);
+    return () => {
+      disposeGroup(capsule);
+      shared.top.dispose();
+      shared.seam.dispose();
+      renderer.dispose();
+      renderer.domElement.remove();
+    };
+  }, [color]);
+  return <div ref={hostRef} className={styles.chosenBall} aria-hidden="true" />;
+}
+
 function Result({
   id,
   label,
@@ -100,17 +140,10 @@ function Result({
   putBack: boolean;
   onContinue: () => void;
 }) {
-  const ballStyle = {
-    "--ball-color": BALL_COLORS[id % BALL_COLORS.length],
-  } as CSSProperties;
   return (
     <dialog open className={styles.resultScreen} aria-label={`抽中：${label}`}>
       <div className={styles.resultContent}>
-        <div
-          className={styles.chosenBall}
-          style={ballStyle}
-          aria-hidden="true"
-        />
+        <StillCapsule color={BALL_COLORS[id % BALL_COLORS.length]} />
         <output className={styles.result} data-testid="gacha-result">
           {label}
         </output>
@@ -135,10 +168,13 @@ export function GachaMachine({
   labels,
   putBack,
   onPick,
+  shake = 0,
 }: {
   labels: string[];
   putBack: boolean;
   onPick: (label: string) => void;
+  /** 每加 1 就把箱子裡的扭蛋往隨機方向甩一次 */
+  shake?: number;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const ballsRef = useRef<Ball[]>([]);
@@ -506,6 +542,20 @@ export function GachaMachine({
     setSelectedId(null);
     setPhase("ready");
   };
+
+  useEffect(() => {
+    if (shake === 0) return;
+    for (const ball of ballsRef.current) {
+      if (ball.entering) continue;
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 16 + Math.random() * 10;
+      Body.setVelocity(ball.body, {
+        x: Math.cos(angle) * speed,
+        y: Math.sin(angle) * speed,
+      });
+      Body.setAngularVelocity(ball.body, (Math.random() - 0.5) * 0.4);
+    }
+  }, [shake]);
 
   const pickRandom = () => {
     const id = remaining[Math.floor(Math.random() * remaining.length)];

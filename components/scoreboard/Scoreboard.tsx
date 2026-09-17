@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  STEPS,
   teamHue,
   toneStyle,
   type Team,
@@ -64,17 +63,14 @@ function MinusButton({ team, step }: { team: Team; step: number }) {
 }
 
 /**
- * 全螢幕時依組數與畫面比例挑欄數。
+ * 依組數與格線大小挑欄數（一般模式與全螢幕都是滿版格線）。
  * 固定 minmax 的欄寬在 10 組時會排成 7 欄 × 2 列，卡片變成細長條；
  * 這裡改成試算每一種欄數，取「卡片最大且最接近目標長寬比」的那個。
  * 格線高度由 CSS 決定（flex:1），不隨欄數變，所以量測不會跟版面互相追著跑。
  */
 const CARD_RATIO = 1.4; // 卡片理想的寬 / 高
 
-function useFullscreenColumns(
-  count: number,
-  ref: RefObject<HTMLElement | null>,
-) {
+function useFitColumns(count: number, ref: RefObject<HTMLElement | null>) {
   const [cols, setCols] = useState<number | null>(null);
 
   useEffect(() => {
@@ -82,7 +78,6 @@ function useFullscreenColumns(
     if (!el) return;
 
     const measure = () => {
-      if (!document.fullscreenElement) return setCols(null);
       const { clientWidth: w, clientHeight: h } = el;
       if (!w || !h) return;
       const gap = 12;
@@ -135,7 +130,7 @@ function Crown() {
       data-score-crown
       viewBox="0 0 24 20"
       aria-hidden="true"
-      className="text-brand-yellow pointer-events-none absolute -top-2 -right-2 h-[20%] max-h-7 min-h-4 w-auto rotate-20"
+      className="text-brand-yellow pointer-events-none absolute -top-[0.45em] -right-[0.45em] h-[0.7em] w-auto rotate-20"
     >
       {/* 一體成形：三個尖角連著冠身與底座，圓珠的圓心落在尖端上，接縫才不會露出來 */}
       <path
@@ -223,35 +218,19 @@ function BuzzBar() {
 }
 
 export function Scoreboard() {
-  const { teams, step, setStep, hueSeed, tone } = useScoreboardStore();
+  const { teams, step, hueSeed, tone } = useScoreboardStore();
   const score = useScore();
   const top = Math.max(...teams.map((t) => t.score));
   const gridRef = useRef<HTMLDivElement>(null);
-  const cols = useFullscreenColumns(teams.length, gridRef);
+  const cols = useFitColumns(teams.length, gridRef);
 
   return (
-    <div data-score-root className="flex flex-col items-center gap-6">
+    // 右邊留出右下角操作鈕的寬度，才不會蓋到卡片
+    <div
+      data-score-root
+      className="flex flex-col items-center gap-6 pr-20 sm:px-20"
+    >
       <BuzzBar />
-
-      <fieldset className="flex items-center gap-2">
-        <legend className="sr-only">一次加減幾分</legend>
-        <span className="text-ink-soft mr-1 text-base">一次</span>
-        {STEPS.map((n) => (
-          <button
-            key={n}
-            type="button"
-            aria-pressed={step === n}
-            onClick={() => setStep(n)}
-            className={`rounded-full border px-4 py-1.5 text-base font-semibold tabular-nums transition-[background-color,color,border-color,transform] duration-150 ease-out active:scale-[0.97] ${
-              step === n
-                ? "bg-ink border-ink text-paper"
-                : "bg-paper-warm border-ink/10 text-ink-soft hover:text-ink"
-            }`}
-          >
-            {n} 分
-          </button>
-        ))}
-      </fieldset>
 
       <div
         ref={gridRef}
@@ -261,7 +240,7 @@ export function Scoreboard() {
             : undefined
         }
         data-score-grid
-        className="grid w-full grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4"
+        className="grid w-full grid-cols-2 gap-3 sm:gap-4"
       >
         {/* 連線模式剛開房、還沒人掃進來：格子是空的，給一句話交代在等什麼 */}
         {teams.length === 0 && (
@@ -280,7 +259,6 @@ export function Scoreboard() {
               style={colors}
               className="relative flex touch-manipulation flex-col items-center gap-2 rounded-2xl border p-4 select-none transition-[border-color,transform] duration-200 ease-out has-[button:active]:scale-[0.99]"
             >
-              {leading && <Crown />}
               {/* 加分區鋪滿整張卡：上課要能隨手一點就加分，不用瞄準小按鈕。
                   卡面上的名字與分數都是純顯示、不可選取，連按不會反白或誤觸編輯；
                   改名走設定面板。只有扣分鈕靠 z-10 疊在上面。 */}
@@ -292,9 +270,13 @@ export function Scoreboard() {
               />
               <span
                 data-score-name
-                className="text-ink-soft pointer-events-none w-full truncate py-1 text-center text-xl font-semibold"
+                className="text-ink-soft pointer-events-none flex w-full justify-center px-[0.75em] py-1 text-xl font-semibold"
               >
-                {t.name}
+                {/* 皇冠掛在組名最後一個字的右上角；字級用 em 跟著組名一起縮放 */}
+                <span className="relative min-w-0">
+                  <span className="block truncate">{t.name}</span>
+                  {leading && <Crown />}
+                </span>
               </span>
               <Score value={t.score} />
               <div

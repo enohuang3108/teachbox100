@@ -21,14 +21,11 @@ export function UnitHero({
   startLabel: string;
   onStart: () => void;
 }) {
-  // 頭頁只放 intro 第一句：長介紹（計時器）整段攤開會把開始鈕擠到折線下
-  const cut = intro.indexOf("。") + 1;
-  const lead = cut > 0 ? intro.slice(0, cut) : intro;
   return (
     <section className="mx-auto flex w-full max-w-4xl flex-col items-center gap-8 pt-8 md:flex-row md:pt-16">
       <div className="flex-1 space-y-4">
         <p className="text-h1 text-balance text-ink">{page.headline ?? page.description}</p>
-        <p className="text-body text-muted-foreground">{lead}</p>
+        <p className="text-body text-muted-foreground">{intro}</p>
         <Button
           size="lg"
           className="rounded-full px-10 text-base font-bold transition-transform duration-press ease-out active:scale-[0.97]"

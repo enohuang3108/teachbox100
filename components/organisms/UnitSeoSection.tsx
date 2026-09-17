@@ -36,7 +36,7 @@ export function UnitSeoSection({
               關於「{page.title}」
             </h2>
             <p className="text-muted-foreground mt-4 text-base leading-[1.9]">
-              {seo.intro}
+              {page.intro}
             </p>
             {/* 練習重點只對有課綱對應的教材單元有意義；計時器、計分板這類
               課堂工具沒有「要練什麼」，列出來只是灌水 */}

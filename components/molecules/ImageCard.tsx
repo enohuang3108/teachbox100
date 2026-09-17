@@ -44,7 +44,7 @@ export const ImageCard = ({
           placeholder={presentation.placeholder}
           blurDataURL={
             presentation.placeholder === "blur"
-              ? blurDataURL ?? FALLBACK_BLUR
+              ? blurDataURL || FALLBACK_BLUR
               : undefined
           }
           alt=""

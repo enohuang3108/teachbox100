@@ -14,6 +14,19 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import type { IchibanPrize } from "@/lib/ichiban/prizes";
 import { BRAND } from "@/lib/design-tokens";
 
+/**
+ * 四套票色輪流用：框是品牌色，票面是同色系手調的淺色，再乘 FACE_SATURATION 降彩度。
+ * 撕開後露出的票內用系統 paper 色。
+ */
+const TICKET_COLORWAYS = [
+  { frame: BRAND.blue, face: "#d7e6f1" },
+  { frame: BRAND.red, face: "#f7dccf" },
+  { frame: BRAND.green, face: "#dfe8d2" },
+  // 黃框本身就亮，票面要再淺一階的奶油色才分得開
+  { frame: BRAND.yellow, face: "#fdf1cf" },
+];
+const FACE_SATURATION = 0.5;
+
 const PEEL_MORPH_COUNT = 20;
 
 function applyPeel(parts: THREE.Mesh[], value: number) {
@@ -93,6 +106,7 @@ export function IchibanCarouselScene({
   progress,
   prize,
   count,
+  colors,
   activeIndex,
   onTicketClick,
   onPointerDown,
@@ -111,6 +125,8 @@ export function IchibanCarouselScene({
   /** 有值時把獎項文字放進選中的票券；選票階段為 null。 */
   prize: IchibanPrize | null;
   count: number;
+  /** 每張票的票色編號，對應 TICKET_COLORWAYS */
+  colors: number[];
   activeIndex: number;
   onTicketClick: (index: number) => void;
   onPointerDown: PointerEventHandler<HTMLButtonElement>;
@@ -258,6 +274,19 @@ export function IchibanCarouselScene({
             object.material = Array.isArray(object.material)
               ? object.material.map((material) => material.clone())
               : object.material.clone();
+            // 按順序輪三套票色；材質名稱是模型裡的 "Blue #02569b"（框）、"Yellow #f8b003"（票面）
+            const colorway = TICKET_COLORWAYS[(colors[index] ?? index) % TICKET_COLORWAYS.length];
+            (Array.isArray(object.material) ? object.material : [object.material]).forEach((material) => {
+              const color = (material as THREE.MeshStandardMaterial).color;
+              if (material.name.startsWith("Blue")) color.set(colorway.frame);
+              if (material.name.startsWith("Yellow")) {
+                const { h, s, l } = color.set(colorway.face).getHSL({ h: 0, s: 0, l: 0 });
+                color.setHSL(h, s * FACE_SATURATION, l);
+              }
+              if (material.name.startsWith("Paper")) color.set(BRAND.paper);
+              // 票色不過 ACES，才會跟 CSS 色票一致
+              if (/^(Blue|Yellow|Paper)/.test(material.name)) material.toneMapped = false;
+            });
           });
           // 繞票面法線轉 90° 讓票券直立、正面仍朝使用者；選中後由 focus 轉回橫的。
           model.rotation.y = Math.PI / 2;
@@ -300,7 +329,7 @@ export function IchibanCarouselScene({
       renderRef.current = () => {};
       renderer.dispose();
     };
-  }, [count, focus, onError, onReady, progress, rotation]);
+  }, [count, colors, focus, onError, onReady, progress, rotation]);
 
   useEffect(() => {
     const item = itemsRef.current[activeRef.current];
