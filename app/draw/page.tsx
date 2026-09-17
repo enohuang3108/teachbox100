@@ -1,6 +1,7 @@
 import { hubs, pages } from "@/app/pages.config";
 import { PageDecor } from "@/components/atoms/PageDecor";
 import { ImageCard } from "@/components/molecules/ImageCard";
+import { getUnitIllustrationSrc } from "@/lib/unit-illustration";
 import { PageTitleBar } from "@/components/molecules/PageTitleBar";
 import {
   getBreadcrumbSchema,
@@ -59,7 +60,7 @@ export default function DrawHubPage() {
               return (
                 <li key={key}>
                   <ImageCard
-                    imageSrc={page.imageSrc}
+                    imageSrc={getUnitIllustrationSrc(page)}
                     blurDataURL={page.blurDataURL}
                     cardTitle={page.title}
                     cardDescription={page.slogan}
