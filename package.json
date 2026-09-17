@@ -55,6 +55,7 @@
     "@tailwindcss/postcss": "^4.3.3",
     "@types/howler": "^2.2.13",
     "@uidotdev/usehooks": "^2.4.1",
+    "@upstash/redis": "^1.38.4",
     "beanheads": "^0.3.3",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",

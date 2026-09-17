@@ -32,12 +32,15 @@ export function StepSetup({
   blocker,
   startLabel,
   onStart,
+  secondary,
 }: {
   title: string;
   steps: SetupStep[];
   blocker?: string | null;
   startLabel: string;
   onStart: () => void;
+  /** 最後一步才出現在開始鈕左邊的次要動作（例：分享設定：設定還沒填完不該分享） */
+  secondary?: React.ReactNode;
 }) {
   const [stepKey, setStepKey] = useState(steps[0].key);
   const index = Math.max(
@@ -119,6 +122,7 @@ export function StepSetup({
             )}
           </p>
           <div className="ml-auto flex gap-2">
+            {isLast && secondary}
             {index > 0 && (
               <Button
                 variant="ghost"

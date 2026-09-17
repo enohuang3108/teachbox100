@@ -1,13 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/shadcn/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/atoms/shadcn/dialog";
+import { DialogDescription } from "@/components/atoms/shadcn/dialog";
 import { Checkbox } from "@/components/atoms/shadcn/checkbox";
 import { Input } from "@/components/atoms/shadcn/input";
 import { Switch } from "@/components/atoms/shadcn/switch";
@@ -44,6 +38,7 @@ import {
   Library,
   Plus,
   Repeat,
+  Share2,
   SlidersHorizontal,
   Timer,
   Trophy,
@@ -54,6 +49,7 @@ import {
 import { useEffect, useState } from "react";
 import { PASS_START_QUIZ_BONUS } from "@/lib/monopoly/rules";
 import { StepSetup, type SetupStep } from "@/components/organisms/StepSetup";
+import { ShareDialog } from "./ShareDialog";
 import { CharacterPicker } from "./CharacterPicker";
 import { ColorPicker } from "./ColorPicker";
 
@@ -255,9 +251,9 @@ export function SetupPanel() {
     draftQuestions.length > 0 ? "custom" : "default",
   );
   const [errors, setErrors] = useState<string[]>([]);
-  const [promptOpen, setPromptOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const playerCount = draftSettings.playerCount;
 
@@ -332,17 +328,13 @@ export function SetupPanel() {
     a.download = "大富翁題庫範本.xlsx";
     a.click();
     URL.revokeObjectURL(url);
-    setCopied(false);
-    setPromptOpen(true);
-  }
-
-  async function copyPrompt() {
-    try {
-      await navigator.clipboard.writeText(AI_QUESTION_PROMPT);
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
+    navigator.clipboard
+      .writeText(AI_QUESTION_PROMPT)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {});
   }
 
   const questions = source === "default" ? DEFAULT_QUESTIONS : draftQuestions;
@@ -434,8 +426,7 @@ export function SetupPanel() {
               </label>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-caption text-muted-foreground">
-                  沒有題庫？下載範本會附一段提示詞，貼給 ChatGPT 或 Claude
-                  就能出題。
+                  沒有題庫？下載題庫範本會附一段提示詞，貼給 AI 就能出題。
                 </p>
                 <Button
                   variant="outline"
@@ -444,7 +435,25 @@ export function SetupPanel() {
                   onClick={downloadTemplate}
                 >
                   <Download className="size-4" aria-hidden />
-                  下載範本
+                  {/* 兩段文字疊在同一格，寬度固定取長的那段，換字不會把按鈕擠到下一行 */}
+                  <span className="grid">
+                    <span
+                      className={cn(
+                        "col-start-1 row-start-1",
+                        copied && "invisible",
+                      )}
+                    >
+                      下載題庫範本
+                    </span>
+                    <span
+                      className={cn(
+                        "col-start-1 row-start-1",
+                        !copied && "invisible",
+                      )}
+                    >
+                      已複製提示詞
+                    </span>
+                  </span>
                 </Button>
               </div>
               {errors.length > 0 && (
@@ -849,31 +858,31 @@ export function SetupPanel() {
         steps={steps}
         blocker={blocker}
         startLabel="開始遊戲"
+        secondary={
+          <Button
+            variant="ghost"
+            className={cn("rounded-full", PRESS)}
+            disabled={!bankDone}
+            onClick={() => setShareOpen(true)}
+          >
+            <Share2 className="size-4" aria-hidden />
+            分享設定
+          </Button>
+        }
         onStart={() =>
           begin(source === "default" ? DEFAULT_QUESTIONS : undefined)
         }
       />
-      <Dialog open={promptOpen} onOpenChange={setPromptOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>用 AI 快速產生題庫</DialogTitle>
-            <DialogDescription>
-              範本已經下載。把下面的提示詞複製給 ChatGPT 或
-              Claude，補上你要的主題和題數，它會做出一份
-              Excel。下載後拖進上傳區就好。
-            </DialogDescription>
-          </DialogHeader>
-          <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap rounded-xl bg-sand p-3 text-sm leading-[1.75]">
-            {AI_QUESTION_PROMPT}
-          </pre>
-          <Button
-            onClick={copyPrompt}
-            className={cn("w-full rounded-full", PRESS)}
-          >
-            {copied ? "已複製！" : "複製提示詞"}
-          </Button>
-        </DialogContent>
-      </Dialog>
+      {shareOpen && (
+        <ShareDialog
+          onClose={() => setShareOpen(false)}
+          setup={{
+            settings: draftSettings,
+            players: draftPlayers,
+            questions: source === "default" ? null : draftQuestions,
+          }}
+        />
+      )}
     </>
   );
 }

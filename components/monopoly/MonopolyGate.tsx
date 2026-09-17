@@ -5,9 +5,11 @@ import { Dialog, DialogContent } from "@/components/atoms/shadcn/dialog";
 import { PageTitleBar } from "@/components/molecules/PageTitleBar";
 import { UnitHero } from "@/components/organisms/UnitHero";
 import { getBreadcrumbTrail } from "@/lib/jsonld";
+import { decodeSetup } from "@/lib/monopoly/share";
 import { preloadMonopoly } from "@/lib/monopoly/preload";
 import { useMonopolyStore } from "@/lib/monopoly/store";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { SetupPanel } from "./SetupPanel";
 
 const page = pages.monopoly;
@@ -31,6 +33,23 @@ export function MonopolyGate({
     (s) => s.game !== null && s.game.phase !== "setup",
   );
   const [entered, setEntered] = useState(false);
+
+  // 老師分享的連結：把設定、玩家、題目帶進草稿後直接開設定，讓收到的人確認再開始
+  useEffect(() => {
+    decodeSetup(location.hash).then((setup) => {
+      if (!setup) return;
+      useMonopolyStore.setState({
+        game: null,
+        draftSettings: setup.settings,
+        draftPlayers: setup.players,
+        draftQuestions: setup.questions ?? [],
+      });
+      notifyLoaded(new URLSearchParams(location.search));
+      history.replaceState(null, "", location.pathname);
+      preloadMonopoly();
+      setEntered(true);
+    });
+  }, []);
 
   // persist 要到 client 才讀得到；hydrate 前一律當成沒開局，server HTML 才有介紹頁
   if (hydrated && inGame) return children;
@@ -73,4 +92,25 @@ export function MonopolyGate({
       </div>
     </>
   );
+}
+
+const dateLabel = (ms: number) =>
+  new Date(ms).toLocaleDateString("zh-TW", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+/** 短連結才有 expires 可講；完整連結不會過期，只說已載入 */
+function notifyLoaded(query: URLSearchParams) {
+  const expires = Number(query.get("expires"));
+  toast.success("已載入分享連結", {
+    // 預設 4 秒；設定視窗同時打開，老師視線不在提示上，留久一點
+    duration: 6_000,
+    description: !expires
+      ? undefined
+      : query.get("extended")
+        ? `連結快到期了，已延長到 ${dateLabel(expires)}`
+        : `這個連結會在 ${dateLabel(expires)} 過期`,
+  });
 }

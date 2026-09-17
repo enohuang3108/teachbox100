@@ -1,6 +1,6 @@
 ---
 name: unit-page
-description: TeachBox100 單元頁的組裝規則 —— 註冊點順序、頁面骨架、breadcrumb、設定→開始、頂列鈕、全螢幕、store，以及使用者看得到的產品約定。新增一個教材頁或分類頁、改任何單元頁的結構之前讀。Read before adding or restructuring any unit or hub page in this repo.
+description: TeachBox100 單元頁的組裝規則 —— 註冊點順序、頁面骨架、breadcrumb、設定→開始、分享連結、頂列鈕、全螢幕、store，以及使用者看得到的產品約定。新增一個教材頁或分類頁、改任何單元頁的結構之前讀。Read before adding or restructuring any unit or hub page in this repo.
 ---
 
 # 單元頁
@@ -77,6 +77,40 @@ const [mode, setMode] = useState<"setup" | "play">("setup");
 
 互斥選項用 `Tabs`（有各自內容）或長得一樣的 radiogroup（純單選）。載入慢的遊戲在開 Dialog 時背景預載程式碼與素材（`lib/monopoly/preload.ts`），按開始就不用等。
 
+### 分享連結
+
+老師設定完，把**設定＋題目**分享給別的老師。目前只有大富翁有，新單元照它做。
+
+**兩種連結，同一份 payload：**
+
+| | 完整連結 | 短連結 |
+|---|---|---|
+| 長相 | `/<unit>#setup=<payload>` | `/s/<8 碼>` |
+| 存在哪 | 網址本身 | Upstash Redis（`lib/short-link.ts`） |
+| 期限 | 不會過期、離線可開 | 正式站 6 個月、本機與 preview 30 天；打開或重複分享時剩不到 1 個月就延到 1 個月 |
+
+payload 放 `#` 不放 query：不送到伺服器、沒有長度上限。格式是 `lib/<game>/share.ts` 的 `encodeSetup`／`decodeSetup` —— 分隔字元的純文字（不是 JSON，省三成）→ `deflate-raw` → base64url，第一欄是版本號；**改格式就加版本，舊連結還在外面**。`decodeSetup` 面對的是別人給的字串，任何不對一律回 `null`。
+
+**加進一個新單元：**
+
+1. `lib/<game>/share.ts`：`encodeSetup`／`decodeSetup` 加 round-trip 測試（每種題型、預設題庫、壞字串）。用預設題庫時 payload 只帶設定。
+2. `lib/short-link.ts` 的 `SHARE_UNITS` 加 key；`app/api/share/route.ts` 依 `unit` 選該單元的 `decodeSetup`／`encodeSetup`（目前寫死大富翁，第二個單元進來時改成對照表）。
+3. `ShareDialog` 目前在 `components/monopoly/`、`unit` 寫死 —— 第二個單元進來時搬到 `components/organisms/`，`unit` 改 prop。
+4. 設定面板把「分享設定」鈕傳給 `StepSetup` 的 `secondary`（只在最後一步出現：設定沒填完不給分享）。
+5. 單元入口（大富翁是 `MonopolyGate`）掛載時 `decodeSetup(location.hash)`：成功就覆寫 store 草稿、打開設定 Dialog、`toast.success("已載入分享連結")`，description 讀 query 的 `expires`／`extended` 講到期日，最後 `history.replaceState` 清掉 query 與 hash。
+6. `lib/seo-content.ts` 的 FAQ 補一題怎麼分享。
+
+**完成條件：** 本機建一個短連結，用乾淨的瀏覽器 context 打開，設定 Dialog 帶到同一份題目、右下角 toast 有到期日；同一份設定再分享一次拿到同一個 id。
+
+**陷阱：**
+
+- **短連結 id 是內容雜湊**（SHA-256 前 8 碼），同內容同 id。伺服器要先 decode 再自己 `encodeSetup` 才算雜湊 —— 不同瀏覽器的 deflate 輸出不一樣。撞到不同內容才退回隨機 id（`SET NX` 後比對 value）。
+- `lib/short-link.ts` 有 `import "server-only"`，token 只活在 `/api/share` 與 `app/s/[id]`。env 用 `KV_REST_API_URL`／`KV_REST_API_TOKEN`（見 `example.env.local`），沒填時分享視窗只給完整連結。
+- 本機、preview、正式站**共用同一個 Redis**，所以 TTL 看 `VERCEL_ENV`；免費額度 256MB、每月 50 萬指令，`/api/share` 每 IP 每分鐘 5 次、payload 上限 64KB。
+- 「有沒有延長」看打開前剩多少（差超過一天才算）：本機 TTL 等於延長量，用 `EXPIRE GT` 的回傳值判斷會每次都說有延長。
+- 動態路由（`/s/[id]`）不進 PWA precache，`next.config.js` 的 `pageUrls` 已排除含 `[` 的路徑。
+- 全站共用 `app/layout.tsx` 裡那一個 Toaster（右下角），單元裡直接呼叫 `toast.*`。
+
 ### 頂列鈕
 
 `ACTION_BTN` 與 `Tip` 從 `GamePageTemplate` export 出來給非模板頁重用，六個自訂版型頁因此手感一致。
@@ -125,6 +159,7 @@ const [mode, setMode] = useState<"setup" | "play">("setup");
 | 回得去 | 「恢復預設名單／牌組」與「全部放回」是固定字眼，頂列 `aria-label`、剩餘數、抽完提示三處用同一個詞 |
 | 有聲音就能關 | 會發出聲音的頁就給一顆開關，放頂列。開關本身也是設定，一樣要被記住 |
 | 沒有壓力 | 教材類不計時、不計分、不排名、不扣分。答錯停留得比答對久，並把正解標出來，鼓勵重試 |
+| 分享帶得走 | 有設定的單元給「分享設定」：短連結與完整連結並列，短連結標出失效日期；打開別人的連結先進設定讓老師確認，不直接開局 |
 | 上限講明 | 名單 60 個、每項 20 字、翻牌 2–15 組、計分板 2–40 組。UI 上以「已用 / 上限」呈現；超限時錯誤訊息出現在「開始」上方，同時 disable 按鈕 |
 | 免費免註冊 | 全站無登入、無付費牆、無廣告。學生搶答只要一個名字，不建帳號 |
 | 可離線 | 素材要放 `public/` 的 images｜3d_model｜sounds｜lottie｜icons｜fonts 之一，用固定路徑才抓得到。離線導頁落在 `/offline` |

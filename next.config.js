@@ -5,8 +5,9 @@ import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 
 // 所有 app router 頁面路徑 —— 拿來 precache，讓老師裝了 PWA（或只是逛過首頁）
 // 之後，離線也能直接開任何一個單元，不必事先逐頁點過。
+// 動態路由（/s/[id] 短網址）沒有固定網址，precache 不了。
 const pageUrls = readdirSync("app", { recursive: true })
-  .filter((f) => /(^|\/)page\.tsx$/.test(f))
+  .filter((f) => /(^|\/)page\.tsx$/.test(f) && !f.includes("["))
   .map((f) => "/" + f.replace(/\/?page\.tsx$/, ""));
 
 // service worker 自己、next-pwa 時代留下的殘骸、macOS 垃圾檔，都不要進 precache。
