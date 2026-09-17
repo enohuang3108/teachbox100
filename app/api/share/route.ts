@@ -2,8 +2,9 @@ import { decodeFor, encodeFor, isShareUnit } from "@/lib/share/units";
 import { allowCreate, createShortLink } from "@/lib/short-link";
 import { NextResponse } from "next/server";
 
-// 40 題壓縮後約 2KB；翻牌放了照片的牌組才會超過，那種只給完整連結
-const MAX_HASH = 64_000;
+// 文字設定都只有幾 KB（大富翁 40 題約 2KB）；會用到這麼大的只有翻牌的照片，
+// 分享前已壓到 lib/memory/share.ts 的 SHARE_IMAGE_BUDGET 以內
+const MAX_HASH = 256_000;
 
 export async function POST(req: Request) {
   const ip =

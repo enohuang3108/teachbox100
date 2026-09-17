@@ -16,6 +16,11 @@ export interface ShareCodec<T> {
   encode: (setup: T) => Promise<string>;
   /** 連結是別人給的，壞掉或格式不對一律回 null，不讓它弄壞老師本機的設定 */
   decode: (hash: string) => Promise<T | null>;
+  /**
+   * 分享前在瀏覽器端整理一次（例如壓縮照片），只影響連結，不動老師本機的設定。
+   * 伺服器重新編碼時不會呼叫。
+   */
+  prepare: (setup: T) => Promise<T>;
 }
 
 // 使用者文字裡剛好有分隔字元會切錯欄位，先拿掉（正常輸入不會有這些控制字元）
@@ -53,8 +58,10 @@ async function pipe(
 export function defineCodec<T>(
   serialize: (setup: T) => string,
   parse: (text: string) => T,
+  prepare: (setup: T) => Promise<T> = async (setup) => setup,
 ): ShareCodec<T> {
   return {
+    prepare,
     async encode(setup) {
       const text = new TextEncoder().encode(serialize(setup));
       const packed = await pipe(text, new CompressionStream("deflate-raw"));

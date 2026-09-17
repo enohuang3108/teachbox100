@@ -34,5 +34,7 @@ export const sharePath = (unit: ShareUnit) => pages[unit].path;
 /** 各單元的 codec 型別不同，呼叫端只知道 unit 字串時走這兩個 */
 export const encodeFor = <K extends ShareUnit>(unit: K, setup: SetupOf<K>) =>
   (SHARE_CODECS[unit] as unknown as ShareCodec<SetupOf<K>>).encode(setup);
+export const prepareFor = <K extends ShareUnit>(unit: K, setup: SetupOf<K>) =>
+  (SHARE_CODECS[unit] as unknown as ShareCodec<SetupOf<K>>).prepare(setup);
 export const decodeFor = <K extends ShareUnit>(unit: K, hash: string) =>
   (SHARE_CODECS[unit] as unknown as ShareCodec<SetupOf<K>>).decode(hash);

@@ -10,6 +10,7 @@ import {
 } from "@/components/atoms/shadcn/dialog";
 import {
   encodeFor,
+  prepareFor,
   sharePath,
   type SetupOf,
   type ShareUnit,
@@ -48,48 +49,50 @@ export function ShareDialog({
   useEffect(() => {
     let alive = true;
     const { unit, setup } = snapshot;
-    encodeFor(unit, setup as never).then(async (hash) => {
-      if (!alive) return;
-      setLong(`${location.origin}${sharePath(unit)}#${hash}`);
-      try {
-        const res = await fetch("/api/share", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ unit, hash }),
-        });
-        if (res.status === 413) {
-          if (alive)
-            setShort({
-              state: "failed",
-              reason: "內容太大（例如放了圖片），請用完整連結",
-            });
-          return;
-        }
-        if (res.status === 429) {
-          if (alive)
-            setShort({
-              state: "failed",
-              reason: "分享太頻繁，請一分鐘後再試，或先用完整連結",
-            });
-          return;
-        }
-        if (!res.ok) throw new Error(String(res.status));
-        const { id, expiresAt } = (await res.json()) as {
-          id: string;
-          expiresAt: number;
-        };
-        if (alive)
-          setShort({
-            state: "ok",
-            url: `${location.origin}/s/${id}`,
-            expiresAt,
+    prepareFor(unit, setup as never)
+      .then((prepared) => encodeFor(unit, prepared))
+      .then(async (hash) => {
+        if (!alive) return;
+        setLong(`${location.origin}${sharePath(unit)}#${hash}`);
+        try {
+          const res = await fetch("/api/share", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ unit, hash }),
           });
-      } catch {
-        // 離線或額度用完：完整連結照樣能用
-        if (alive)
-          setShort({ state: "failed", reason: "暫時無法產生，請用完整連結" });
-      }
-    });
+          if (res.status === 413) {
+            if (alive)
+              setShort({
+                state: "failed",
+                reason: "內容太大（例如放了圖片），請用完整連結",
+              });
+            return;
+          }
+          if (res.status === 429) {
+            if (alive)
+              setShort({
+                state: "failed",
+                reason: "分享太頻繁，請一分鐘後再試，或先用完整連結",
+              });
+            return;
+          }
+          if (!res.ok) throw new Error(String(res.status));
+          const { id, expiresAt } = (await res.json()) as {
+            id: string;
+            expiresAt: number;
+          };
+          if (alive)
+            setShort({
+              state: "ok",
+              url: `${location.origin}/s/${id}`,
+              expiresAt,
+            });
+        } catch {
+          // 離線或額度用完：完整連結照樣能用
+          if (alive)
+            setShort({ state: "failed", reason: "暫時無法產生，請用完整連結" });
+        }
+      });
     return () => {
       alive = false;
     };

@@ -93,7 +93,7 @@ payload 放 `#` 不放 query：不送到伺服器、沒有長度上限。壓縮�
 
 **加進一個新單元：**
 
-1. `lib/<game>/share.ts`：`defineCodec(serialize, parse)`，只放要分享的欄位 —— 音效開關、進行中的進度、分數不放。在 `lib/share/units.test.ts` 的 `samples` 補一份。
+1. `lib/<game>/share.ts`：`defineCodec(serialize, parse, prepare?)`，只放要分享的欄位 —— 音效開關、進行中的進度、分數不放。會變大的內容（翻牌照片）在 `prepare` 裡縮到預算內：它只在瀏覽器端、分享那一刻跑，老師本機存的不動。在 `lib/share/units.test.ts` 的 `samples` 補一份。
 2. `lib/share/units.ts` 的 `SHARE_CODECS` 加一行，key 用 `pages.config` 的 key（短連結靠它導回 `pages[key].path`；有連結在外面之後不能改名）。API 與 `/s/[id]` 自動吃到。
 3. 設定面板給 `StepSetup` 傳 `share={{ unit, setup }}`。setup 取**面板正在編輯的草稿**（一番賞的 `draft`、計分板框裡的名單），不是 store 裡上次存的。按鈕只在最後一步出現，有 `blocker` 時不能按。
 4. 頁面呼叫 `useSharedSetup(unit, (setup) => { 寫進 store; 打開設定 Dialog })`。toast、到期日、清掉網址都在 hook 裡。
@@ -105,7 +105,7 @@ payload 放 `#` 不放 query：不送到伺服器、沒有長度上限。壓縮�
 
 - **短連結 id 是內容雜湊**（SHA-256 前 8 碼），同內容同 id。伺服器先 decode 再自己 encode 才算雜湊 —— 不同瀏覽器的 deflate 輸出不一樣。撞到不同內容才退回隨機 id（`SET NX` 後比對 value）。
 - `lib/short-link.ts` 有 `import "server-only"`，token 只活在 `/api/share` 與 `app/s/[id]`。env 用 `KV_REST_API_URL`／`KV_REST_API_TOKEN`（見 `.example.env.local`），沒填時分享視窗只給完整連結。
-- 本機、preview、正式站**共用同一個 Redis**，所以 TTL 看 `VERCEL_ENV`；免費額度 256MB、每月 50 萬指令，`/api/share` 每 IP 每分鐘 5 次（本機驗證多個單元會撞到，隔一分鐘再測）、payload 上限 64KB（翻牌放多張照片會超過，回 413，只給完整連結）。
+- 本機、preview、正式站**共用同一個 Redis**，所以 TTL 看 `VERCEL_ENV`；免費額度 256MB、每月 50 萬指令，`/api/share` 每 IP 每分鐘 5 次（本機驗證多個單元會撞到，隔一分鐘再測）、payload 上限 256KB（超過回 413，只給完整連結）。
 - 「有沒有延長」看打開前剩多少（差超過一天才算）：本機 TTL 等於延長量，用 `EXPIRE GT` 的回傳值判斷會每次都說有延長。
 - React hook 只用 Next 內建 React 有的 API：`useEffectEvent` 型別與 vitest 都過，頁面執行時才 500。
 - `app/api/**/route.ts` 只能 export HTTP method 與 route 設定，常數留在檔內。
