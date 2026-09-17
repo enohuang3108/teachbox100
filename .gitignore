@@ -5,6 +5,7 @@
 
 # next.js
 /.next/
+/.next-e2e/
 /out/
 
 # production
@@ -52,3 +53,6 @@ __pycache__/
 
 # 建置時產生的離線素材清單（見 next.config.js）
 public/offline-assets.json
+
+# storybook
+storybook-static/

@@ -9,14 +9,15 @@ description: TeachBox100 的紙感設計語言 —— 色彩、字級、層級�
 
 ## 動手前
 
-1. 開 `styles/globals.css`，看 `@theme inline`（產生 utility）與 `:root` / `.dark`（值）。
-2. 照下面四張表挑 token。表上沒有的角色，先問這個角色是不是真的新的 —— 多半是既有 token 換個名字。
-3. 可按的東西補 `active:scale-[0.97]`；有位移的動畫在 `@media (prefers-reduced-motion: reduce)` 收掉位移、留住透明度。
-4. 跑 `pnpm lint:tokens`。
-5. 改到 `--paper` / `--ink` / `--brand-*` 的值 → 同步 `lib/design-tokens.ts`，`pnpm test` 會比對兩邊。
+1. 跑 `pnpm storybook`，看 Foundations 三頁（色彩、字級、動效）與既有元件 —— **要的東西多半已經有了**。
+2. 開 `styles/globals.css`，看 `@theme inline`（產生 utility）與 `:root` / `.dark`（值）。
+3. 照下面四張表挑 token。表上沒有的角色，先問這個角色是不是真的新的 —— 多半是既有 token 換個名字。
+4. 可按的東西補 `active:scale-[0.97]`；有位移的動畫在 `@media (prefers-reduced-motion: reduce)` 收掉位移、留住透明度。
+5. 跑 `pnpm lint:tokens`。改到共用元件再跑 `pnpm test:stories`（需要 Storybook 開著）。
+6. 改到 `--paper` / `--ink` / `--brand-*` 的值 → 同步 `lib/design-tokens.ts`，`pnpm test` 會比對兩邊。
 
-**完成條件：`pnpm lint:tokens` 乾淨，而且亮色與暗色都親眼看過。** 暗色還沒有切換 UI，
-在 devtools 給 `<html>` 加 `class="dark"` 看。
+**完成條件：`pnpm lint:tokens` 乾淨，而且亮色與暗色都親眼看過。**
+站上還沒有暗色切換 UI，在 devtools 給 `<html>` 加 `class="dark"`；Storybook 有工具列可切。
 
 ## 色彩
 
@@ -105,10 +106,27 @@ Tailwind v4 的 `hover:` 已內建包在 `@media (hover: hover)`。
 | 每個選項一個色相的 RadioGroup | `SELECTED_OPTION`（`lib/ui-classes.ts`） |
 | 手寫 `text-[clamp(...)]` 的標題 | 字級 token |
 
+## Storybook
+
+共用元件的清單就是 Storybook 本身：`pnpm storybook`（6006 埠）。分四層 ——
+Foundations（token）、Primitives（vendored 的 shadcn）、Atoms、Molecules。
+工具列右上角可切亮暗，每個 story 兩邊都要看得下去。
+
+**新增共用元件就補一個 `.stories.tsx`**，放在元件旁邊。story 用真的 props 與真的文案，
+不要 lorem ipsum —— 中文的字寬與換行跟英文差很多，假字看不出版型會不會爆。
+
+`pnpm test:stories` 會把每個 story 開一次，渲染錯誤（缺 provider、缺 prop）當場失敗。
+`storybook build` 只保證打包得起來，不保證畫得出來。
+
+單元頁專屬的元件（`components/monopoly/**`、`wheel`、`memory`、`gacha`、`scoreboard`…）
+沒有 story：它們綁自己的 store 與遊戲狀態，抽出來看沒有意義。
+
 ## 相關檔案
 
 - `styles/globals.css` —— 所有 token、keyframes、全螢幕版型
 - `lib/design-tokens.ts` —— 給 canvas 的色票副本，由 `lib/design-tokens.test.ts` 守著
 - `lib/ui-classes.ts` —— 跨元件共用的 class 組合
 - `scripts/check-design-tokens.mjs` —— `pnpm lint:tokens` 跑的規則
+- `scripts/check-stories.mjs` —— `pnpm test:stories` 跑的 story 渲染檢查
+- `.storybook/` —— Storybook 設定與 Foundations 三頁
 - `docs/superpowers/specs/2026-09-02-home-redesign.md` —— 2026-09-02 改版的完整脈絡與生圖規範
