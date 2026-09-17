@@ -7,6 +7,8 @@
  */
 
 export const SHARE_KEY = "setup=";
+/** 短連結收的 hash 上限；文字設定都只有幾 KB（大富翁 40 題約 2KB），會碰到的只有翻牌照片 */
+export const SHARE_MAX_HASH = 64_000;
 export const RS = "\x1e";
 export const US = "\x1f";
 export const GS = "\x1d";

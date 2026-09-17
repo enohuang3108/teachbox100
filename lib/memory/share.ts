@@ -17,10 +17,10 @@ export interface MemorySetup {
 
 /**
  * 照片總長放得進這個量就原圖分享；放不進就整副牌一起往下降一級，品質一致。
- * 壓縮後的連結實測約是照片總長的 0.9 倍，240KB 落在短連結上限 256KB（app/api/share/route.ts）以內。
- * 實測 15 組全放照片（30 張，本機每張約 13KB）停在 280px q0.7。
+ * 壓縮後的連結實測約是照片總長的 0.9 倍，54KB 落在短連結上限 SHARE_MAX_HASH（64KB）以內。
+ * 本機每張約 13KB：4 張原圖、8 張約降到 240px；降到最低一級還放不下，分享視窗會提示圖片過大。
  */
-export const SHARE_IMAGE_BUDGET = 240_000;
+export const SHARE_IMAGE_BUDGET = 54_000;
 const LADDER: [size: number, quality: number][] = [
   [320, 0.7],
   [320, 0.6],

@@ -105,7 +105,7 @@ payload 放 `#` 不放 query：不送到伺服器、沒有長度上限。壓縮�
 
 - **短連結 id 是內容雜湊**（SHA-256 前 8 碼），同內容同 id。伺服器先 decode 再自己 encode 才算雜湊 —— 不同瀏覽器的 deflate 輸出不一樣。撞到不同內容才退回隨機 id（`SET NX` 後比對 value）。
 - `lib/short-link.ts` 有 `import "server-only"`，token 只活在 `/api/share` 與 `app/s/[id]`。env 用 `KV_REST_API_URL`／`KV_REST_API_TOKEN`（見 `.example.env.local`），沒填時分享視窗只給完整連結。
-- 本機、preview、正式站**共用同一個 Redis**，所以 TTL 看 `VERCEL_ENV`；免費額度 256MB、每月 50 萬指令，`/api/share` 每 IP 每分鐘 5 次（本機驗證多個單元會撞到，隔一分鐘再測）、payload 上限 256KB（超過回 413，只給完整連結）。
+- 本機、preview、正式站**共用同一個 Redis**，所以 TTL 看 `VERCEL_ENV`；免費額度 256MB、每月 50 萬指令，`/api/share` 每 IP 每分鐘 5 次（本機驗證多個單元會撞到，隔一分鐘再測）、payload 上限 64KB（`SHARE_MAX_HASH`，超過時分享視窗直接說原因、只給完整連結；翻牌照片先壓到 `SHARE_IMAGE_BUDGET`，最低一級還放不下就提示圖片過大）。
 - 「有沒有延長」看打開前剩多少（差超過一天才算）：本機 TTL 等於延長量，用 `EXPIRE GT` 的回傳值判斷會每次都說有延長。
 - React hook 只用 Next 內建 React 有的 API：`useEffectEvent` 型別與 vitest 都過，頁面執行時才 500。
 - `app/api/**/route.ts` 只能 export HTTP method 與 route 設定，常數留在檔內。

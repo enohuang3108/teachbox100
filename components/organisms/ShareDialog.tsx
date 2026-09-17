@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/atoms/shadcn/dialog";
+import { SHARE_MAX_HASH } from "@/lib/share/codec";
 import {
   encodeFor,
   prepareFor,
@@ -17,6 +18,12 @@ import {
 } from "@/lib/share/units";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+
+// 會超過上限的只有翻牌照片（已先壓到最小一級），講具體原因老師才知道要改什麼
+const tooLargeReason = (unit: ShareUnit) =>
+  unit === "memory"
+    ? "圖片過大，短連結放不下。請減少照片，或改用完整連結"
+    : "內容過大，短連結放不下，請用完整連結";
 
 const PRESS =
   "transition-transform duration-press ease-out active:scale-[0.97]";
@@ -54,6 +61,12 @@ export function ShareDialog({
       .then(async (hash) => {
         if (!alive) return;
         setLong(`${location.origin}${sharePath(unit)}#${hash}`);
+        // 已知放不下就不打 API，省一次往返與次數額度
+        if (hash.length > SHARE_MAX_HASH) {
+          if (alive)
+            setShort({ state: "failed", reason: tooLargeReason(unit) });
+          return;
+        }
         try {
           const res = await fetch("/api/share", {
             method: "POST",
@@ -64,7 +77,7 @@ export function ShareDialog({
             if (alive)
               setShort({
                 state: "failed",
-                reason: "內容太大（例如放了圖片），請用完整連結",
+                reason: tooLargeReason(unit),
               });
             return;
           }
@@ -112,7 +125,9 @@ export function ShareDialog({
           hint={
             short.state === "ok"
               ? `於 ${new Date(short.expiresAt).toLocaleDateString("zh-TW", { year: "numeric", month: "long", day: "numeric" })} 失效`
-              : "約 6 個月後失效"
+              : short.state === "loading"
+                ? "約 6 個月後失效"
+                : ""
           }
           value={
             short.state === "ok"

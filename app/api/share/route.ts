@@ -1,10 +1,7 @@
+import { SHARE_MAX_HASH } from "@/lib/share/codec";
 import { decodeFor, encodeFor, isShareUnit } from "@/lib/share/units";
 import { allowCreate, createShortLink } from "@/lib/short-link";
 import { NextResponse } from "next/server";
-
-// 文字設定都只有幾 KB（大富翁 40 題約 2KB）；會用到這麼大的只有翻牌的照片，
-// 分享前已壓到 lib/memory/share.ts 的 SHARE_IMAGE_BUDGET 以內
-const MAX_HASH = 256_000;
 
 export async function POST(req: Request) {
   const ip =
@@ -18,7 +15,7 @@ export async function POST(req: Request) {
   if (!isShareUnit(unit) || typeof hash !== "string") {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
-  if (hash.length > MAX_HASH) {
+  if (hash.length > SHARE_MAX_HASH) {
     return NextResponse.json({ error: "too large" }, { status: 413 });
   }
   const setup = await decodeFor(unit, hash);

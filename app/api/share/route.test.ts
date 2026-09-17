@@ -54,10 +54,10 @@ describe("POST /api/share", () => {
     expect(allowCreate).not.toHaveBeenCalled();
   });
 
-  it("超過 256KB 回 413，不碰 Redis", async () => {
+  it("超過 64KB 回 413，不碰 Redis", async () => {
     const res = await post({
       unit: "monopoly",
-      hash: "setup=" + "A".repeat(256_001),
+      hash: "setup=" + "A".repeat(64_001),
     });
     expect(res.status).toBe(413);
     expect(allowCreate).not.toHaveBeenCalled();
