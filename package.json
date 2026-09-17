@@ -18,7 +18,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "audit:fix": "pnpm audit || pnpm audit --fix=override; pnpm install --lockfile-only && (git diff --quiet pnpm-workspace.yaml pnpm-lock.yaml || (git add pnpm-workspace.yaml pnpm-lock.yaml && git commit -m 'chore(deps): apply pnpm audit override fixes'))"
+    
   },
   "dependencies": {
     "@animateicons/react": "^0.5.0",
