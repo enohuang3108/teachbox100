@@ -6,6 +6,7 @@
 # next.js
 /.next/
 /.next-e2e/
+/.next-build/
 /out/
 
 # production
@@ -56,3 +57,6 @@ public/offline-assets.json
 
 # storybook
 storybook-static/
+
+# QA 截圖只留本機（每輪上百張），報告 md 進版控
+/docs/qa/reports/assets/
