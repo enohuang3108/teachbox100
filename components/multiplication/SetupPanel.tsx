@@ -24,6 +24,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
       title="九九乘法設定"
       blocker={tables.length === 0 ? "至少選一段乘法表" : null}
       startLabel="開始練習"
+      share={{ unit: "multiplication", setup: { tables, count } }}
       onStart={onStart}
       steps={[
         {

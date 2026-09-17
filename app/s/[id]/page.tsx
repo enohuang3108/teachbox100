@@ -1,3 +1,4 @@
+import { isShareUnit, sharePath } from "@/lib/share/units";
 import { resolveShortLink } from "@/lib/short-link";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -22,9 +23,10 @@ export default async function ShortLinkPage({
   if (!link) notFound();
   // 到期資訊走 query，hash 維持原樣給 decodeSetup；單元頁讀完就清掉
   const [unit, hash] = link.target.split("#");
+  if (!isShareUnit(unit)) notFound();
   const query = new URLSearchParams({ expires: String(link.expiresAt) });
   if (link.extended) query.set("extended", "1");
-  redirect(`/${unit}?${query}#${hash}`);
+  redirect(`${sharePath(unit)}?${query}#${hash}`);
 }
 
 function Unavailable() {

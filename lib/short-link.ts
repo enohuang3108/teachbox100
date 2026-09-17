@@ -1,5 +1,6 @@
 // token 只能在伺服器用：被 client 元件 import 時 build 直接失敗
 import "server-only";
+import type { ShareUnit } from "@/lib/share/units";
 import { Redis } from "@upstash/redis";
 
 // Vercel Marketplace 接的 Upstash 給 KV_*，直接在 Upstash 建的給 UPSTASH_*
@@ -8,10 +9,6 @@ const redis = new Redis({
   token:
     process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN ?? "",
 });
-
-/** 有短連結的單元；value 存「單元#hash」，以後別的單元加進來不用搬資料 */
-export const SHARE_UNITS = ["monopoly"] as const;
-export type ShareUnit = (typeof SHARE_UNITS)[number];
 
 const DAY = 60 * 60 * 24;
 // 正式站建立後 6 個月過期；本機與 preview 測試用的連結留 30 天就好（共用同一個 Redis）

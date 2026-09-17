@@ -1,5 +1,6 @@
 "use client";
 
+import { useSharedSetup } from "@/lib/share/useSharedSetup";
 import { pages, type PageWithKey } from "@/app/pages.config";
 import { RefreshCWIcon } from "@/components/atoms/ani-icons/refresh-cw";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
@@ -21,7 +22,7 @@ import {
   PageTemplate,
 } from "@/components/templates/PageTemplate";
 import { clearOrder } from "@/lib/scoreboard/buzz";
-import { STEPS, useScoreboardStore } from "@/lib/scoreboard/store";
+import { MAX_TEAMS, STEPS, useScoreboardStore } from "@/lib/scoreboard/store";
 import { StageFixed } from "@/components/templates/StageFixed";
 import { Check } from "lucide-react";
 import { useState } from "react";
@@ -32,6 +33,18 @@ export default function ScoreboardPage() {
   // 介紹頁 →（開始使用）設定 →（開始計分）計分板；計分板裡按設定再打開同一個對話框
   const [entered, setEntered] = useState(false);
   const [setupOpen, setSetupOpen] = useState(false);
+  useSharedSetup("scoreboard", ({ names, step, tone, hueSeed }) => {
+    // 分數從 0 開始：拿到連結的是另一個班
+    useScoreboardStore.setState({
+      teams: names
+        .slice(0, MAX_TEAMS)
+        .map((name, id) => ({ id, name, score: 0 })),
+      step,
+      tone,
+      hueSeed,
+    });
+    setSetupOpen(true);
+  });
   const { resetScores, sound, setSound, step, setStep } = useScoreboardStore();
   const [stepOpen, setStepOpen] = useState(false);
 

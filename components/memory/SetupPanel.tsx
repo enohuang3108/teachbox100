@@ -52,6 +52,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
         title="翻翻配對設定"
         blocker={blocker}
         startLabel="開始遊戲"
+        share={{ unit: "memory", setup: { deck, preview } }}
         onStart={onStart}
         steps={[
           {

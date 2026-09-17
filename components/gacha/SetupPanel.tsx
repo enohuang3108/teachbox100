@@ -19,6 +19,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
       title="扭蛋機設定"
       blocker={error}
       startLabel="開始"
+      share={{ unit: "gacha", setup: { text, putBack } }}
       onStart={onStart}
       steps={[
         {

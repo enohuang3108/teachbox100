@@ -79,35 +79,36 @@ const [mode, setMode] = useState<"setup" | "play">("setup");
 
 ### 分享連結
 
-老師設定完，把**設定＋題目**分享給別的老師。目前只有大富翁有，新單元照它做。
+老師設定完，把設定（名單、牌組、題目…）分享給別的老師。有 `StepSetup` 設定的單元都要有：大富翁、轉盤、扭蛋機、一番賞、翻翻配對、九九乘法、計分板。金錢與時鐘的難度設定不持久化，不分享。
 
 **兩種連結，同一份 payload：**
 
 | | 完整連結 | 短連結 |
 |---|---|---|
-| 長相 | `/<unit>#setup=<payload>` | `/s/<8 碼>` |
+| 長相 | `<pages[key].path>#setup=<payload>` | `/s/<8 碼>` |
 | 存在哪 | 網址本身 | Upstash Redis（`lib/short-link.ts`） |
 | 期限 | 不會過期、離線可開 | 正式站 6 個月、本機與 preview 30 天；打開或重複分享時剩不到 1 個月就延到 1 個月 |
 
-payload 放 `#` 不放 query：不送到伺服器、沒有長度上限。格式是 `lib/<game>/share.ts` 的 `encodeSetup`／`decodeSetup` —— 分隔字元的純文字（不是 JSON，省三成）→ `deflate-raw` → base64url，第一欄是版本號；**改格式就加版本，舊連結還在外面**。`decodeSetup` 面對的是別人給的字串，任何不對一律回 `null`。
+payload 放 `#` 不放 query：不送到伺服器、沒有長度上限。壓縮與編碼在 `lib/share/codec.ts`；各單元只寫「設定 ⇄ 純文字」，慣例（分隔字元、版本號）寫在那個檔案開頭。**改格式就加版本，舊連結還在別人手上。** decode 面對的是別人給的字串，任何不對一律回 `null`。
 
 **加進一個新單元：**
 
-1. `lib/<game>/share.ts`：`encodeSetup`／`decodeSetup` 加 round-trip 測試（每種題型、預設題庫、壞字串）。用預設題庫時 payload 只帶設定。
-2. `lib/short-link.ts` 的 `SHARE_UNITS` 加 key；`app/api/share/route.ts` 依 `unit` 選該單元的 `decodeSetup`／`encodeSetup`（目前寫死大富翁，第二個單元進來時改成對照表）。
-3. `ShareDialog` 目前在 `components/monopoly/`、`unit` 寫死 —— 第二個單元進來時搬到 `components/organisms/`，`unit` 改 prop。
-4. 設定面板把「分享設定」鈕傳給 `StepSetup` 的 `secondary`（只在最後一步出現：設定沒填完不給分享）。
-5. 單元入口（大富翁是 `MonopolyGate`）掛載時 `decodeSetup(location.hash)`：成功就覆寫 store 草稿、打開設定 Dialog、`toast.success("已載入分享連結")`，description 讀 query 的 `expires`／`extended` 講到期日，最後 `history.replaceState` 清掉 query 與 hash。
-6. `lib/seo-content.ts` 的 FAQ 補一題怎麼分享。
+1. `lib/<game>/share.ts`：`defineCodec(serialize, parse)`，只放要分享的欄位 —— 音效開關、進行中的進度、分數不放。在 `lib/share/units.test.ts` 的 `samples` 補一份。
+2. `lib/share/units.ts` 的 `SHARE_CODECS` 加一行，key 用 `pages.config` 的 key（短連結靠它導回 `pages[key].path`；有連結在外面之後不能改名）。API 與 `/s/[id]` 自動吃到。
+3. 設定面板給 `StepSetup` 傳 `share={{ unit, setup }}`。setup 取**面板正在編輯的草稿**（一番賞的 `draft`、計分板框裡的名單），不是 store 裡上次存的。按鈕只在最後一步出現，有 `blocker` 時不能按。
+4. 頁面呼叫 `useSharedSetup(unit, (setup) => { 寫進 store; 打開設定 Dialog })`。toast、到期日、清掉網址都在 hook 裡。
+5. `lib/seo-content.ts` 該單元的 FAQ 補一題怎麼分享。
 
-**完成條件：** 本機建一個短連結，用乾淨的瀏覽器 context 打開，設定 Dialog 帶到同一份題目、右下角 toast 有到期日；同一份設定再分享一次拿到同一個 id。
+**完成條件：** 本機把設定改成跟預設不同 → 分享 → 用乾淨的瀏覽器 context 打開短連結，該單元 localStorage 的設定跟送出的一致、設定 Dialog 開著、右下角 toast 有到期日；`pnpm test` 的 `units.test.ts` 綠。
 
 **陷阱：**
 
-- **短連結 id 是內容雜湊**（SHA-256 前 8 碼），同內容同 id。伺服器要先 decode 再自己 `encodeSetup` 才算雜湊 —— 不同瀏覽器的 deflate 輸出不一樣。撞到不同內容才退回隨機 id（`SET NX` 後比對 value）。
-- `lib/short-link.ts` 有 `import "server-only"`，token 只活在 `/api/share` 與 `app/s/[id]`。env 用 `KV_REST_API_URL`／`KV_REST_API_TOKEN`（見 `example.env.local`），沒填時分享視窗只給完整連結。
-- 本機、preview、正式站**共用同一個 Redis**，所以 TTL 看 `VERCEL_ENV`；免費額度 256MB、每月 50 萬指令，`/api/share` 每 IP 每分鐘 5 次、payload 上限 64KB。
+- **短連結 id 是內容雜湊**（SHA-256 前 8 碼），同內容同 id。伺服器先 decode 再自己 encode 才算雜湊 —— 不同瀏覽器的 deflate 輸出不一樣。撞到不同內容才退回隨機 id（`SET NX` 後比對 value）。
+- `lib/short-link.ts` 有 `import "server-only"`，token 只活在 `/api/share` 與 `app/s/[id]`。env 用 `KV_REST_API_URL`／`KV_REST_API_TOKEN`（見 `.example.env.local`），沒填時分享視窗只給完整連結。
+- 本機、preview、正式站**共用同一個 Redis**，所以 TTL 看 `VERCEL_ENV`；免費額度 256MB、每月 50 萬指令，`/api/share` 每 IP 每分鐘 5 次（本機驗證多個單元會撞到，隔一分鐘再測）、payload 上限 64KB（翻牌放多張照片會超過，回 413，只給完整連結）。
 - 「有沒有延長」看打開前剩多少（差超過一天才算）：本機 TTL 等於延長量，用 `EXPIRE GT` 的回傳值判斷會每次都說有延長。
+- React hook 只用 Next 內建 React 有的 API：`useEffectEvent` 型別與 vitest 都過，頁面執行時才 500。
+- `app/api/**/route.ts` 只能 export HTTP method 與 route 設定，常數留在檔內。
 - 動態路由（`/s/[id]`）不進 PWA precache，`next.config.js` 的 `pageUrls` 已排除含 `[` 的路徑。
 - 全站共用 `app/layout.tsx` 裡那一個 Toaster（右下角），單元裡直接呼叫 `toast.*`。
 

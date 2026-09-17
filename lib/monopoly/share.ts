@@ -1,3 +1,4 @@
+import { clean, defineCodec, fail, GS, num, RS, US } from "@/lib/share/codec";
 import {
   DIFFICULTIES,
   type Difficulty,
@@ -15,14 +16,6 @@ export interface SharedSetup {
   questions: Question[] | null;
 }
 
-// 放 hash 不放 query：不會送到伺服器，也沒有 URL 長度上限的問題
-export const SHARE_KEY = "setup=";
-
-// 不用 JSON：欄位名與引號在 40 題的題庫裡佔掉約三成。
-// 記錄以 RS 分隔、欄位以 US 分隔、清單以 GS 分隔；第一筆開頭是版本號，改格式就加版本
-const RS = "\x1e";
-const US = "\x1f";
-const GS = "\x1d";
 const VERSION = "1";
 
 const TYPE_CODE: Record<QuestionType, string> = {
@@ -37,10 +30,8 @@ const END_CODE: Record<EndCondition["type"], string> = {
   laps: "p",
 };
 
-// 使用者文字裡剛好有分隔字元會切錯欄位，先拿掉（Excel 題目不會有這些控制字元）
-// oxlint-disable-next-line no-control-regex -- 要比對的就是分隔用的控制字元
-const clean = (s: string) => s.replace(/[\x1d-\x1f]/g, "");
-const flag = (b: boolean | undefined) => (b === undefined ? "" : b ? "1" : "0");
+const optionalFlag = (b: boolean | undefined) =>
+  b === undefined ? "" : b ? "1" : "0";
 const diff = (d: Difficulty | undefined) => (d ? d[0] : "");
 
 function serialize({ settings: s, players, questions }: SharedSetup): string {
@@ -59,9 +50,9 @@ function serialize({ settings: s, players, questions }: SharedSetup): string {
     s.startingMoney,
     s.diceCount,
     s.passStartBonus,
-    flag(s.passStartQuiz),
+    optionalFlag(s.passStartQuiz),
     s.passStartQuizBonus ?? "",
-    flag(s.differentiated),
+    optionalFlag(s.differentiated),
     END_CODE[ec.type],
     endValue,
     players.length,
@@ -84,13 +75,6 @@ function serialize({ settings: s, players, questions }: SharedSetup): string {
   return [head, ...playerRows, ...questionRows].join(RS);
 }
 
-function fail(): never {
-  throw new Error("bad share payload");
-}
-function num(s: string | undefined): number {
-  const n = Number(s);
-  return s === undefined || s === "" || !Number.isFinite(n) ? fail() : n;
-}
 const optFlag = (s: string) => (s === "" ? undefined : s === "1");
 const optDiff = (s: string | undefined) =>
   s ? DIFFICULTIES.find((d) => d[0] === s) : undefined;
@@ -159,40 +143,5 @@ function parse(text: string): SharedSetup {
   return { settings, players, questions };
 }
 
-async function pipe(
-  bytes: Uint8Array<ArrayBuffer>,
-  stream: GenericTransformStream,
-) {
-  const out = new Blob([bytes]).stream().pipeThrough(stream);
-  return new Uint8Array(await new Response(out).arrayBuffer());
-}
-
-/** 回傳放在 # 後面的字串（含 setup= 前綴） */
-export async function encodeSetup(setup: SharedSetup): Promise<string> {
-  const text = new TextEncoder().encode(serialize(setup));
-  const packed = await pipe(text, new CompressionStream("deflate-raw"));
-  // 不用 fromCharCode(...packed)：題庫大時展開參數會爆 call stack
-  let bin = "";
-  for (const b of packed) bin += String.fromCharCode(b);
-  const b64 = btoa(bin);
-  return (
-    SHARE_KEY + b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
-  );
-}
-
-/** 連結是別人給的，壞掉或格式不對一律回 null，不讓它弄壞老師本機的設定 */
-export async function decodeSetup(hash: string): Promise<SharedSetup | null> {
-  const raw = hash.replace(/^#/, "");
-  if (!raw.startsWith(SHARE_KEY)) return null;
-  try {
-    const b64 = raw
-      .slice(SHARE_KEY.length)
-      .replace(/-/g, "+")
-      .replace(/_/g, "/");
-    const packed = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-    const text = await pipe(packed, new DecompressionStream("deflate-raw"));
-    return parse(new TextDecoder().decode(text));
-  } catch {
-    return null;
-  }
-}
+export const monopolyShare = defineCodec(serialize, parse);
+export const { encode: encodeSetup, decode: decodeSetup } = monopolyShare;

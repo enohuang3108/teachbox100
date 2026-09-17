@@ -1,5 +1,6 @@
 "use client";
 
+import { useSharedSetup } from "@/lib/share/useSharedSetup";
 import { pages, type PageWithKey } from "@/app/pages.config";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
 import { SettingsButton } from "@/components/atoms/SettingsButton";
@@ -22,6 +23,10 @@ export default function IchibanPage() {
   // 介紹頁 →（開始使用）設定 →（開始）撕票；撕票時按設定再打開同一個對話框
   const [entered, setEntered] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  useSharedSetup("ichiban", ({ prizes }) => {
+    useIchibanStore.getState().setPrizes(prizes);
+    setSettingsOpen(true);
+  });
   const sound = useIchibanStore((s) => s.sound);
   const setSound = useIchibanStore((s) => s.setSound);
   const actions = (

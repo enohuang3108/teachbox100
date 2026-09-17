@@ -6,7 +6,6 @@ import { POST } from "./route";
 const allowCreate = vi.fn();
 const createShortLink = vi.fn();
 vi.mock("@/lib/short-link", () => ({
-  SHARE_UNITS: ["monopoly"],
   allowCreate: (...a: unknown[]) => allowCreate(...a),
   createShortLink: (...a: unknown[]) => createShortLink(...a),
 }));
@@ -47,14 +46,20 @@ describe("POST /api/share", () => {
   // 表格在收集測試時就建好，那時 validHash 還沒算出來，所以每列給函式、跑的時候才取值
   it.each([
     ["不是 JSON", () => "{"],
-    ["未知單元", () => ({ unit: "wheel", hash: validHash })],
+    ["未知單元", () => ({ unit: "timer", hash: validHash })],
+    ["單元和內容對不上", () => ({ unit: "wheel", hash: validHash })],
     ["壞掉的 payload", () => ({ unit: "monopoly", hash: "setup=AAAA" })],
-    [
-      "超過 64KB",
-      () => ({ unit: "monopoly", hash: "setup=" + "A".repeat(64_001) }),
-    ],
   ])("%s 回 400，不碰 Redis", async (_, body) => {
     expect((await post(body())).status).toBe(400);
+    expect(allowCreate).not.toHaveBeenCalled();
+  });
+
+  it("超過 64KB 回 413，不碰 Redis", async () => {
+    const res = await post({
+      unit: "monopoly",
+      hash: "setup=" + "A".repeat(64_001),
+    });
+    expect(res.status).toBe(413);
     expect(allowCreate).not.toHaveBeenCalled();
   });
 

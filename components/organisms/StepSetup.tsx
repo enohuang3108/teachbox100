@@ -3,7 +3,8 @@
 import { Button } from "@/components/atoms/shadcn/button";
 import { DialogTitle } from "@/components/atoms/shadcn/dialog";
 import { cn } from "@/lib/utils";
-import { Check, type LucideIcon } from "lucide-react";
+import { ShareDialog, type ShareConfig } from "./ShareDialog";
+import { Check, Share2, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 
 const PRESS =
@@ -32,17 +33,18 @@ export function StepSetup({
   blocker,
   startLabel,
   onStart,
-  secondary,
+  share,
 }: {
   title: string;
   steps: SetupStep[];
   blocker?: string | null;
   startLabel: string;
   onStart: () => void;
-  /** 最後一步才出現在開始鈕左邊的次要動作（例：分享設定：設定還沒填完不該分享） */
-  secondary?: React.ReactNode;
+  /** 給了就在最後一步的開始鈕左邊放「分享設定」；設定還沒填完（有 blocker）不能分享 */
+  share?: ShareConfig;
 }) {
   const [stepKey, setStepKey] = useState(steps[0].key);
+  const [shareOpen, setShareOpen] = useState(false);
   const index = Math.max(
     0,
     steps.findIndex((s) => s.key === stepKey),
@@ -122,7 +124,17 @@ export function StepSetup({
             )}
           </p>
           <div className="ml-auto flex gap-2">
-            {isLast && secondary}
+            {isLast && share && (
+              <Button
+                variant="ghost"
+                className={cn("rounded-full", PRESS)}
+                disabled={!!blocker}
+                onClick={() => setShareOpen(true)}
+              >
+                <Share2 className="size-4" aria-hidden />
+                分享設定
+              </Button>
+            )}
             {index > 0 && (
               <Button
                 variant="ghost"
@@ -151,6 +163,9 @@ export function StepSetup({
           </div>
         </footer>
       </div>
+      {shareOpen && share && (
+        <ShareDialog share={share} onClose={() => setShareOpen(false)} />
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useSharedSetup } from "@/lib/share/useSharedSetup";
 import { pages, type PageWithKey } from "@/app/pages.config";
 import { RefreshCWIcon } from "@/components/atoms/ani-icons/refresh-cw";
 import { SettingsButton } from "@/components/atoms/SettingsButton";
@@ -30,6 +31,10 @@ export default function WheelPage() {
   // 介紹頁 →（開始）設定 →（開始）轉盤；轉盤裡按設定再打開同一個對話框
   const [entered, setEntered] = useState(false);
   const [setupOpen, setSetupOpen] = useState(false);
+  useSharedSetup("wheel", (setup) => {
+    useWheelStore.setState(setup);
+    setSetupOpen(true);
+  });
   const { text, removeOnPick, sound, setSound } = useWheelStore();
   const entries = parseEntries(text);
   const wheel = useWheel(entries, sound, removeOnPick);

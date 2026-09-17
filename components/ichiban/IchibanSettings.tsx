@@ -53,6 +53,7 @@ export function IchibanSettings({ onStart }: { onStart: () => void }) {
       title="一番賞設定"
       blocker={incomplete ? "每個獎項都要有內容，數量至少 1" : null}
       startLabel="開始"
+      share={{ unit: "ichiban", setup: { prizes: draft } }}
       onStart={() => {
         setPrizes(draft);
         onStart();

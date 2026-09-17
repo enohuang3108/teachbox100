@@ -8,7 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/atoms/shadcn/dialog";
-import { encodeSetup, type SharedSetup } from "@/lib/monopoly/share";
+import {
+  encodeFor,
+  sharePath,
+  type SetupOf,
+  type ShareUnit,
+} from "@/lib/share/units";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
@@ -20,33 +25,46 @@ type Short =
   | { state: "ok"; url: string; expiresAt: number }
   | { state: "failed"; reason: string };
 
+export type ShareConfig = {
+  [K in ShareUnit]: { unit: K; setup: SetupOf<K> };
+}[ShareUnit];
+
 /**
  * 按分享才掛載（`{open && <ShareDialog />}`）：掛載時編碼、建短連結，
  * 每次打開都是新的狀態，沒按分享就不佔 Redis 額度。
  */
 export function ShareDialog({
+  share,
   onClose,
-  setup,
 }: {
+  share: ShareConfig;
   onClose: () => void;
-  setup: SharedSetup;
 }) {
   const [long, setLong] = useState("");
   const [short, setShort] = useState<Short>({ state: "loading" });
   // 取打開那一刻的設定；視窗開著時設定不會變
-  const [snapshot] = useState(setup);
+  const [snapshot] = useState(share);
 
   useEffect(() => {
     let alive = true;
-    encodeSetup(snapshot).then(async (hash) => {
+    const { unit, setup } = snapshot;
+    encodeFor(unit, setup as never).then(async (hash) => {
       if (!alive) return;
-      setLong(`${location.origin}${location.pathname}#${hash}`);
+      setLong(`${location.origin}${sharePath(unit)}#${hash}`);
       try {
         const res = await fetch("/api/share", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ unit: "monopoly", hash }),
+          body: JSON.stringify({ unit, hash }),
         });
+        if (res.status === 413) {
+          if (alive)
+            setShort({
+              state: "failed",
+              reason: "內容太大（例如放了圖片），請用完整連結",
+            });
+          return;
+        }
         if (res.status === 429) {
           if (alive)
             setShort({
@@ -83,7 +101,7 @@ export function ShareDialog({
         <DialogHeader>
           <DialogTitle>分享設定</DialogTitle>
           <DialogDescription>
-            打開連結會帶入同樣的設定、玩家與題目。
+            打開連結會帶入同樣的設定，對方確認後就能開始。
           </DialogDescription>
         </DialogHeader>
         <LinkRow

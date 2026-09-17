@@ -1,5 +1,6 @@
 "use client";
 
+import { useSharedSetup } from "@/lib/share/useSharedSetup";
 import { pages, type PageWithKey } from "@/app/pages.config";
 import { RefreshCWIcon } from "@/components/atoms/ani-icons/refresh-cw";
 import { SettingsButton } from "@/components/atoms/SettingsButton";
@@ -36,6 +37,10 @@ export default function GachaPage() {
   // 介紹頁 →（開始使用）設定 →（開始）扭蛋機；扭蛋機裡按設定再打開同一個對話框
   const [entered, setEntered] = useState(false);
   const [setupOpen, setSetupOpen] = useState(false);
+  useSharedSetup("gacha", (setup) => {
+    useGachaStore.setState(setup);
+    setSetupOpen(true);
+  });
   const { text, sound, setSound, putBack } = useGachaStore();
   const [round, setRound] = useState(0);
   const [picked, setPicked] = useState<string[]>([]);

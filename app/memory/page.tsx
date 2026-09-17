@@ -1,5 +1,6 @@
 "use client";
 
+import { useSharedSetup } from "@/lib/share/useSharedSetup";
 import { pages, type PageWithKey } from "@/app/pages.config";
 import { RefreshCWIcon } from "@/components/atoms/ani-icons/refresh-cw";
 import { SettingsButton } from "@/components/atoms/SettingsButton";
@@ -54,6 +55,10 @@ export default function MemoryPage() {
   // 介紹頁 →（開始使用）設定 →（開始遊戲）盤面；盤面裡按設定再打開同一個對話框
   const [entered, setEntered] = useState(false);
   const [setupOpen, setSetupOpen] = useState(false);
+  useSharedSetup("memory", (setup) => {
+    useMemoryStore.setState(setup);
+    setSetupOpen(true);
+  });
   const [confirmLeave, setConfirmLeave] = useState(false);
   const { deck, preview, sound, setSound } = useMemoryStore();
   const game = useMemoryGame(deck, preview, sound);

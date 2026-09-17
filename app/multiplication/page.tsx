@@ -1,5 +1,6 @@
 "use client";
 
+import { useSharedSetup } from "@/lib/share/useSharedSetup";
 import { pages, type PageWithKey } from "@/app/pages.config";
 import { SettingsButton } from "@/components/atoms/SettingsButton";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
@@ -29,6 +30,13 @@ export default function MultiplicationPage() {
   // 介紹頁 →（開始使用）設定 →（開始練習）作答；作答中按設定再打開同一個對話框
   const [entered, setEntered] = useState(false);
   const [setupOpen, setSetupOpen] = useState(false);
+  useSharedSetup("multiplication", (setup) => {
+    useMultiplicationStore.setState({
+      tables: [...setup.tables].sort((a, b) => a - b),
+      count: setup.count,
+    });
+    setSetupOpen(true);
+  });
   // 每次按開始都換一輪，同樣的設定也從第 1 題重來
   const [round, setRound] = useState(0);
   const { tables, count, sound, setSound } = useMultiplicationStore();

@@ -23,9 +23,15 @@ const chip = (active: boolean) =>
     active ? "border-ink ring-1 ring-ink" : "border-border hover:border-ink/30"
   }`;
 
+const parseNames = (text: string) =>
+  text
+    .split("\n")
+    .map((n) => n.trim())
+    .filter(Boolean);
+
 /** 開始前的設定旅程：組別 → 外觀。放在 DialogContent 裡用，介紹頁與頂列的設定鈕共用 */
 export function SetupPanel({ onStart }: { onStart: () => void }) {
-  const { teams, tone, hueSeed, setTeamCount, setNames, setTone } =
+  const { teams, tone, hueSeed, step, setTeamCount, setNames, setTone } =
     useScoreboardStore();
   const [draft, setDraft] = useState(() => teams.map((t) => t.name).join("\n"));
   const linked = useBuzzStore((s) => s.code !== null);
@@ -40,10 +46,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
   };
 
   const applyNames = () => {
-    const names = draft
-      .split("\n")
-      .map((n) => n.trim())
-      .filter(Boolean);
+    const names = parseNames(draft);
     if (names.length < MIN_TEAMS) return;
     setNames(names);
     setCountText(String(useScoreboardStore.getState().teams.length));
@@ -53,6 +56,11 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
     <StepSetup
       title="計分板設定"
       startLabel="開始計分"
+      share={{
+        unit: "scoreboard",
+        // 分享的是框裡正在打的名單，還沒失焦套用的也算
+        setup: { names: parseNames(draft), step, tone, hueSeed },
+      }}
       onStart={() => {
         // textarea 沒失焦就直接按開始，名單也要吃進去
         if (!linked) applyNames();

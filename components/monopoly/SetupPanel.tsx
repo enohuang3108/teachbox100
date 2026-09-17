@@ -38,7 +38,6 @@ import {
   Library,
   Plus,
   Repeat,
-  Share2,
   SlidersHorizontal,
   Timer,
   Trophy,
@@ -49,7 +48,6 @@ import {
 import { useEffect, useState } from "react";
 import { PASS_START_QUIZ_BONUS } from "@/lib/monopoly/rules";
 import { StepSetup, type SetupStep } from "@/components/organisms/StepSetup";
-import { ShareDialog } from "./ShareDialog";
 import { CharacterPicker } from "./CharacterPicker";
 import { ColorPicker } from "./ColorPicker";
 
@@ -253,7 +251,6 @@ export function SetupPanel() {
   const [errors, setErrors] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
 
   const playerCount = draftSettings.playerCount;
 
@@ -858,31 +855,18 @@ export function SetupPanel() {
         steps={steps}
         blocker={blocker}
         startLabel="開始遊戲"
-        secondary={
-          <Button
-            variant="ghost"
-            className={cn("rounded-full", PRESS)}
-            disabled={!bankDone}
-            onClick={() => setShareOpen(true)}
-          >
-            <Share2 className="size-4" aria-hidden />
-            分享設定
-          </Button>
-        }
+        share={{
+          unit: "monopoly",
+          setup: {
+            settings: draftSettings,
+            players: draftPlayers,
+            questions: source === "default" ? null : draftQuestions,
+          },
+        }}
         onStart={() =>
           begin(source === "default" ? DEFAULT_QUESTIONS : undefined)
         }
       />
-      {shareOpen && (
-        <ShareDialog
-          onClose={() => setShareOpen(false)}
-          setup={{
-            settings: draftSettings,
-            players: draftPlayers,
-            questions: source === "default" ? null : draftQuestions,
-          }}
-        />
-      )}
     </>
   );
 }

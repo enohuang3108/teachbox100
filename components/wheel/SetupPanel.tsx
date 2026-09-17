@@ -19,6 +19,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
       title="轉盤設定"
       blocker={error}
       startLabel="開始"
+      share={{ unit: "wheel", setup: { text, removeOnPick } }}
       onStart={onStart}
       steps={[
         {
