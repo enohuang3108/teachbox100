@@ -7,7 +7,9 @@ import {
   getFaqSchema,
   getHubSchema,
 } from "@/lib/jsonld";
+import { getCoverPresentation } from "@/lib/cover-presentation";
 import { buildMetadata } from "@/lib/seo";
+import { getUnitIllustrationSrc } from "@/lib/unit-illustration";
 import { pageSeo } from "@/lib/seo-content";
 import type { Metadata } from "next";
 import { Link } from "next-view-transitions";
@@ -62,6 +64,8 @@ export default function CoinHubPage() {
           <ol className="mt-6 flex flex-col gap-4">
             {steps.map((step, i) => {
               const page = pages[step.pageKey];
+              const src = getUnitIllustrationSrc(page);
+              const cover = getCoverPresentation(src);
               return (
                 <li key={step.pageKey}>
                   <Link
@@ -69,15 +73,21 @@ export default function CoinHubPage() {
                     prefetch={true}
                     className="bg-card group flex gap-4 rounded-[1.25rem] p-3 ring-1 ring-black/[0.06] transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-[2px] hover:shadow-[0_8px_24px_-6px_rgb(2_13_21/0.14)] active:scale-[0.99]"
                   >
-                    <div className="bg-sand relative hidden aspect-[4/3] w-40 shrink-0 overflow-hidden rounded-[0.875rem] sm:block">
+                    <div
+                      className={`relative hidden aspect-[4/3] w-40 shrink-0 overflow-hidden rounded-[0.875rem] sm:block ${cover.imageContainerClassName}`}
+                    >
                       <Image
                         fill
-                        src={page.imageSrc}
-                        blurDataURL={page.blurDataURL}
-                        placeholder="blur"
+                        src={src}
+                        blurDataURL={
+                          cover.placeholder === "blur"
+                            ? page.blurDataURL
+                            : undefined
+                        }
+                        placeholder={cover.placeholder}
                         sizes="160px"
                         alt=""
-                        className="object-cover"
+                        className={cover.imageClassName}
                       />
                     </div>
                     <div className="flex flex-1 flex-col justify-center py-1 pr-2">
