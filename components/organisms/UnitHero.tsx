@@ -29,7 +29,7 @@ export function UnitHero({
   return (
     <section className="mx-auto flex w-full max-w-4xl flex-col items-center gap-8 pt-8 md:flex-row md:pt-16">
       <div className="flex-1 space-y-4">
-        <p className="text-h1 text-balance text-ink">{page.headline ?? page.description}</p>
+        <p className="text-h1 text-balance text-ink">{page.slogan}</p>
         <p className="text-body text-muted-foreground">{intro}</p>
         <Button
           size="lg"

@@ -82,7 +82,7 @@ export function getLearningResourceSchema(pageKey: string): JsonLdSchema {
     "@context": "https://schema.org",
     "@type": "LearningResource",
     "name": page.title,
-    "description": page.description,
+    "description": seo?.description ?? page.slogan,
     "url": `${BASE_URL}${page.path}`,
     "image": `${BASE_URL}${page.imageSrc}`,
     "inLanguage": "zh-TW",

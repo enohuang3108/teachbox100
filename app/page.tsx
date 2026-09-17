@@ -128,7 +128,7 @@ export default function Home() {
                 imageSrc={getUnitIllustrationSrc(page)}
                 blurDataURL={page.blurDataURL}
                 cardTitle={page.title}
-                cardDescription={page.description}
+                cardDescription={page.slogan}
               />
             ))}
           </div>

@@ -62,7 +62,7 @@ export default function DrawHubPage() {
                     imageSrc={page.imageSrc}
                     blurDataURL={page.blurDataURL}
                     cardTitle={page.title}
-                    cardDescription={page.description}
+                    cardDescription={page.slogan}
                     link={page.path}
                     index={i}
                   />
