@@ -74,12 +74,6 @@ const nextConfig = {
     // 關掉最佳化換來「圖片能離線」，對教室情境划算。
     unoptimized: true,
   },
-  // 轉盤搬進 /draw 底下；舊網址已被收錄，301 過去
-  async redirects() {
-    return [
-      { source: "/wheel", destination: "/draw/wheel", permanent: true },
-    ];
-  },
   async rewrites() {
     // Only enable PostHog rewrites if we have a PostHog key
     if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) {

@@ -1,21 +1,17 @@
 import { pages, type PageKey, type PageWithKey } from "@/app/pages.config";
+import { SlidersHorizontal } from "lucide-react";
+import { useState } from "react";
 import { CircleHelpIcon } from "../atoms/ani-icons/CircleHelpIcon";
 import { RefreshCWIcon } from "../atoms/ani-icons/refresh-cw";
 import { SettingsGearIcon } from "../atoms/ani-icons/settings-gear";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "../atoms/shadcn/dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "../molecules/sheet";
 import {
   Tooltip,
   TooltipContent,
@@ -23,6 +19,7 @@ import {
   TooltipTrigger,
 } from "../atoms/shadcn/tooltip";
 import { FullscreenButton } from "../atoms/FullscreenButton";
+import { StepSetup } from "../organisms/StepSetup";
 import { GAME_STAGE_ID, PageTemplate } from "./PageTemplate";
 
 /**
@@ -65,6 +62,9 @@ export const GamePageTemplate = ({
   const pageInfo: PageWithKey = { ...pages[page], key: page };
 
   const btn = ACTION_BTN;
+  // 介紹頁 →（開始練習）設定 →（開始練習）出題；頂列的設定鈕再打開同一個對話框
+  const [entered, setEntered] = useState(false);
+  const [setupOpen, setSetupOpen] = useState(false);
 
   const actions = (
     // delayDuration：第一顆要等一下才跳，避免滑過去就一堆泡泡。
@@ -78,19 +78,14 @@ export const GamePageTemplate = ({
           onClick={resetGame}
         />
       </Tip>
-      <Sheet>
-        <Tip label="設定">
-          <SheetTrigger aria-label="設定" className="rounded-full">
-            <SettingsGearIcon className={btn} size={20} />
-          </SheetTrigger>
-        </Tip>
-        <SheetContent className="overflow-y-auto">
-          <SheetHeader className="text-left">
-            <SheetTitle>設定</SheetTitle>
-            {settings}
-          </SheetHeader>
-        </SheetContent>
-      </Sheet>
+      <Tip label="設定">
+        <SettingsGearIcon
+          className={btn}
+          size={20}
+          aria-label="設定"
+          onClick={() => setSetupOpen(true)}
+        />
+      </Tip>
       {tips && (
         <Dialog>
           <Tip label="提示">
@@ -114,8 +109,52 @@ export const GamePageTemplate = ({
   );
 
   return (
-    <PageTemplate page={pageInfo} actions={actions}>
-      {children}
-    </PageTemplate>
+    <>
+      <PageTemplate
+        page={pageInfo}
+        actions={actions}
+        landing={{
+          startLabel: "開始練習",
+          onStart: () => setSetupOpen(true),
+          entered,
+        }}
+      >
+        {children}
+      </PageTemplate>
+
+      {/* 放在 PageTemplate 外面：介紹頁階段 children 不渲染，設定要在那時就能開 */}
+      <Dialog open={setupOpen} onOpenChange={setSetupOpen}>
+        <DialogContent className="max-w-4xl gap-0 overflow-hidden p-0 sm:rounded-[1.5rem]">
+          <StepSetup
+            title={`${pageInfo.title}設定`}
+            startLabel="開始練習"
+            onStart={() => {
+              resetGame();
+              setSetupOpen(false);
+              setEntered(true);
+            }}
+            steps={[
+              {
+                key: "rules",
+                label: "出題",
+                icon: SlidersHorizontal,
+                summary: "練習中也能再改",
+                content: (
+                  <section className="space-y-5">
+                    <header>
+                      <h3 className="text-h3 text-ink">怎麼出題？</h3>
+                      <DialogDescription className="mt-1">
+                        練習中按右上角的設定也能再改。
+                      </DialogDescription>
+                    </header>
+                    <div className="flex flex-col gap-6">{settings}</div>
+                  </section>
+                ),
+              },
+            ]}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

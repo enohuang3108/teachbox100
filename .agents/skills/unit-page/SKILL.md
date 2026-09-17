@@ -56,7 +56,7 @@ sitemap 與 llms.txt 自動展開 `pages` 與 `hubs`，不必改。`app/sitemap.
 
 實例：計時器、噪音計。
 
-要先設定才能開始的頁，`landing.entered` 交給頁面控制：`onStart` 打開設定 Dialog，設定裡按開始才 `setEntered(true)`。Dialog 要放在 `PageTemplate` **外面** —— 介紹頁階段 children 不渲染。實例：轉盤（`app/draw/wheel/page.tsx`）。大富翁走 `MonopolyGate`（在 layout 裡）組同一套。
+要先設定才能開始的頁，`landing.entered` 交給頁面控制：`onStart` 打開設定 Dialog，設定裡按開始才 `setEntered(true)`。Dialog 要放在 `PageTemplate` **外面** —— 介紹頁階段 children 不渲染。實例：轉盤（`app/draw/wheel/page.tsx`）。`GamePageTemplate` 內建同一套（設定只有一站「出題」，塞 `settings` 陣列），金錢五頁與時鐘不必自己組。大富翁走 `MonopolyGate`（在 layout 裡）組同一套。
 
 ### 設定 → 開始
 

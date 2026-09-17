@@ -132,7 +132,7 @@ export default function CoinIntroductionPage() {
   };
 
   return (
-    <PageTemplate page={page}>
+    <PageTemplate page={page} landing={{ startLabel: "開始認識" }}>
       <div className="container mx-auto flex flex-col items-center gap-8 p-4">
         <TooltipProvider>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
