@@ -3,7 +3,7 @@
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { FitText } from "./FitText";
 import NextImage from "next/image";
-import { memo, type ReactNode } from "react";
+import { memo, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { BOARD } from "@/lib/monopoly/board";
 import { isProperty, type Player, type Tile } from "@/lib/monopoly/types";
 import { PlayerAvatar } from "./Avatar";
@@ -291,10 +291,10 @@ export function Board({
           })}
 
           <div
-            className="relative m-1 flex items-center justify-center rounded-[1rem] bg-sand/60 p-3 ring-1 ring-ink/[0.05]"
+            className="relative m-1 flex items-center justify-center overflow-hidden rounded-[1rem] bg-sand/60 p-3 ring-1 ring-ink/[0.05]"
             style={{ gridColumn: "2 / 12", gridRow: "2 / 7" }}
           >
-            {center}
+            <FitBox>{center}</FitBox>
           </div>
 
           {/* 房子覆蓋層：擁有的土地在靠近中心的內側邊緣放上玩家顏色的房子 */}
@@ -400,6 +400,57 @@ export function Board({
         </div>
       </LayoutGroup>
       <span className="sr-only">目前玩家：{players[currentIndex]?.name}</span>
+    </div>
+  );
+}
+
+/**
+ * 中央的玩家卡與骰子是照投影尺寸排的；手機直拿時棋盤縮得很小，
+ * 整塊等比縮到塞得進中央格，不讓它壓到外圈地產格。
+ */
+function FitBox({ children }: { children: ReactNode }) {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState({ width: 0, scale: 1 });
+
+  useLayoutEffect(() => {
+    const box = boxRef.current;
+    const inner = innerRef.current;
+    if (!box || !inner) return;
+    // 寬度照中央格給（玩家清單照常換行），只有高度塞不下才等比縮；
+    // 縮了之後把排版寬度放大回去，縮完剛好填滿中央格的寬
+    const measure = () => {
+      const bw = box.clientWidth;
+      const bh = box.clientHeight;
+      const h = inner.offsetHeight;
+      if (!bw || !bh || !h) return;
+      setFit((prev) => {
+        const scale = Math.min(1, bh / h);
+        const width = bw / scale;
+        return Math.abs(scale - prev.scale) < 0.01 && Math.abs(width - prev.width) < 1
+          ? prev
+          : { width, scale };
+      });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(box);
+    ro.observe(inner);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div ref={boxRef} className="flex h-full w-full items-center justify-center">
+      <div
+        ref={innerRef}
+        className="shrink-0"
+        style={{
+          width: fit.width || undefined,
+          transform: `scale(${fit.scale})`,
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }

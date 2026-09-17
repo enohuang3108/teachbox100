@@ -49,7 +49,7 @@ export default function DiceScene({ values, onComplete, still = false }: { value
       renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.shadowMap.type = THREE.PCFShadowMap;
       renderer.setClearColor(0, 0);
       container.appendChild(renderer.domElement);
       const scene = new THREE.Scene();
@@ -102,7 +102,7 @@ export default function DiceScene({ values, onComplete, still = false }: { value
     }).catch(() => { if (!disposed) { setFailed(true); finish(); } });
     return () => {
       disposed = true; cancelAnimationFrame(frame); observer?.disconnect();
-      renderer?.dispose(); renderer?.domElement.remove();
+      renderer?.dispose(); renderer?.forceContextLoss(); renderer?.domElement.remove();
       ground?.geometry.dispose();
       if (ground?.material instanceof THREE.Material) ground.material.dispose();
     };

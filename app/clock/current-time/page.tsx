@@ -1,6 +1,7 @@
 "use client";
 
 import Clock, { type ClockTime } from "@/components/atoms/Clock";
+import { useStoredState } from "@/lib/hooks/useStoredState";
 import TimeSlider from "@/components/atoms/TimeSlider";
 import { Label } from "@/components/atoms/shadcn/label";
 import { Switch } from "@/components/atoms/shadcn/switch";
@@ -25,8 +26,8 @@ export default function CurrentTimePage() {
   const [answer, setAnswer] = useState<ClockTime>(defaultAnswer);
   const [selectedAnswer, setSelectedAnswer] = useState<ClockTime>(defaultAnswer);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [is24HourClock, setIs24HourClock] = useState<boolean>(false);
-  const [showMinuteSlider, setShowMinuteSlider] = useState<boolean>(true);
+  const [is24HourClock, setIs24HourClock] = useStoredState("clockIs24Hour", false);
+  const [showMinuteSlider, setShowMinuteSlider] = useStoredState("clockShowMinuteSlider", true);
 
   useEffect(() => {
     resetTime();

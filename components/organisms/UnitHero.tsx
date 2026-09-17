@@ -4,6 +4,7 @@ import type { Page } from "@/app/pages.config";
 import { Button } from "@/components/atoms/shadcn/button";
 import { getUnitIllustrationSrc } from "@/lib/unit-illustration";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 /**
  * 單元的介紹頁頭：一句話定位、說明、開始鈕、去背插圖。
@@ -21,6 +22,10 @@ export function UnitHero({
   startLabel: string;
   onStart: () => void;
 }) {
+  // 按鈕是 SSR 出來的，JS 還沒接上前點了沒反應；接上前先 disabled，看得出「還不能按」
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+
   return (
     <section className="mx-auto flex w-full max-w-4xl flex-col items-center gap-8 pt-8 md:flex-row md:pt-16">
       <div className="flex-1 space-y-4">
@@ -30,6 +35,7 @@ export function UnitHero({
           size="lg"
           className="rounded-full px-10 text-base font-bold transition-transform duration-press ease-out active:scale-[0.97]"
           onClick={onStart}
+          disabled={!hydrated}
         >
           {startLabel}
         </Button>

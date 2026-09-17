@@ -24,7 +24,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/atoms/shadcn/tooltip";
-import { PageTemplate } from "@/components/templates/PageTemplate";
+import { FullscreenButton } from "@/components/atoms/FullscreenButton";
+import { ACTION_BTN, Tip } from "@/components/templates/GamePageTemplate";
+import {
+  GAME_STAGE_ID,
+  PageTemplate,
+} from "@/components/templates/PageTemplate";
 import { useState } from "react";
 
 // 定義要介紹的面額
@@ -132,7 +137,17 @@ export default function CoinIntroductionPage() {
   };
 
   return (
-    <PageTemplate page={page} landing={{ startLabel: "開始認識" }}>
+    <PageTemplate
+      page={page}
+      landing={{ startLabel: "開始認識" }}
+      actions={
+        <TooltipProvider delayDuration={350} skipDelayDuration={600}>
+          <Tip label="全螢幕">
+            <FullscreenButton targetId={GAME_STAGE_ID} className={ACTION_BTN} />
+          </Tip>
+        </TooltipProvider>
+      }
+    >
       <div className="container mx-auto flex flex-col items-center gap-8 p-4">
         <TooltipProvider>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -146,11 +161,7 @@ export default function CoinIntroductionPage() {
                           <CardHeader className="pb-3">
                           </CardHeader>
                           <CardContent className="flex flex-col items-center gap-3">
-                            <div className="relative">
-                              <Coin coinValue={item} />
-                              {/* 光暈效果 */}
-                              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
-                            </div>
+                            <Coin coinValue={item} />
                             <div className="text-center">
                               <CardTitle className="text-xl">{item} 元</CardTitle>
                             </div>
@@ -168,8 +179,8 @@ export default function CoinIntroductionPage() {
                     </DialogTitle>
                     <div className="flex h-full flex-col lg:flex-row">
                       {/* 硬幣展示區 */}
-                      <div className="flex flex-1 items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4 sm:p-6 lg:p-8">
-                        <Card className="flex flex-col w-full max-w-[350px] bg-card/80 backdrop-blur">
+                      <div className="flex flex-1 items-center justify-center bg-paper p-4 sm:p-6 lg:p-8">
+                        <Card className="flex flex-col w-full max-w-[350px] bg-card">
                           <CardHeader className="text-center pb-3 sm:pb-6">
                             <CardTitle className="text-xl sm:text-2xl">新臺幣 {item} 元</CardTitle>
                           </CardHeader>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import { useIchibanStore } from "./store";
 import { shouldPlayTearTick, tearSoundSegment } from "./tear";
 
 function makeClickNoise(context: AudioContext) {
@@ -24,6 +25,7 @@ export function useTearSound() {
   }, []);
 
   const playTooth = useCallback(() => {
+    if (!useIchibanStore.getState().sound) return;
     const context = getContext();
     if (!context) return;
     const now = context.currentTime;

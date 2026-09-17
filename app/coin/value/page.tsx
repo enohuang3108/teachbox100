@@ -1,5 +1,6 @@
 "use client";
 
+import { useStoredState } from "@/lib/hooks/useStoredState";
 import { AnswerMethod } from "@/components/molecules/setting/AnswerMethod";
 import { AvailableCoins } from "@/components/molecules/setting/AvailableCoins";
 import { CoinsOrder } from "@/components/molecules/setting/CoinsOrder";
@@ -17,7 +18,7 @@ import { useEffect, useState } from "react";
 export default function CoinGamePage() {
   const [coins, setCoins] = useState<CoinType[]>([]);
   const [totalValue, setTotalValue] = useState(0);
-  const [answerMethod, setAnswerMethod] = useState("digit");
+  const [answerMethod, setAnswerMethod] = useStoredState("coinValueAnswerMethod", "digit");
   const [userAnswer, setUserAnswer] = useState("");
   const [choices, setChoices] = useState<number[]>([]);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);

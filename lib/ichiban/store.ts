@@ -19,6 +19,8 @@ interface IchibanStore {
   /** 確認抽出輪播上第 ticketIndex 張票：從卡池移除並記入已抽張數。 */
   confirmDraw: (ticketIndex: number) => void;
   restoreDefaults: () => void;
+  sound: boolean;
+  setSound: (sound: boolean) => void;
 }
 
 /** 洗好的卡池依序輪四套票色；之後只刪不重排，顏色就跟著票走 */
@@ -31,6 +33,8 @@ export const useIchibanStore = create<IchibanStore>()(
       prizes: defaultIchibanPrizes(),
       drawn: [],
       ...fresh(buildTicketPool(defaultIchibanPrizes())),
+      sound: true,
+      setSound: (sound) => set({ sound }),
       // 改獎項設定等於換一套籤，已抽張數歸零、卡池重洗。
       setPrizes: (prizes) => {
         const normalized = normalizePrizes(prizes);

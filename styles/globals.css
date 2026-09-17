@@ -909,3 +909,8 @@
     animation: none;
   }
 }
+
+/* 一番賞畫布左右各多撐 30%（留給飛出去的封條），超出視窗的部分裁掉，手機才不會出現橫向捲動 */
+main:has(> #game-stage[data-unit="ichiban"]) {
+  overflow-x: clip;
+}

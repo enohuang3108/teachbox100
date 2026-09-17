@@ -31,6 +31,15 @@ describe("nextOrder", () => {
 });
 
 describe("addPlayer", () => {
+  it("格子的主人還在線時，別人拿他的 uid 不能搶走格子", () => {
+    expect(addPlayer([a, b], "evil", { uid: "u-a", name: "假的" }, new Set(["a", "b"]))).toEqual([a, b]);
+  });
+
+  it("加入人數到 40 就不再多開格子", () => {
+    const full = Array.from({ length: 40 }, (_, i) => ({ id: `p${i}`, uid: `u${i}`, name: `${i}` }));
+    expect(addPlayer(full, "x", { uid: "u-x", name: "x" })).toBe(full);
+  });
+
   it("新的裝置排到最後面", () => {
     expect(addPlayer([a], "b", { uid: "u-b", name: "小華" })).toEqual([a, b]);
   });

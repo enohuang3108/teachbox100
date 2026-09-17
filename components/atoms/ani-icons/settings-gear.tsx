@@ -60,6 +60,16 @@ const SettingsGearIcon = forwardRef<
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      // 頂列當按鈕用：讀螢幕器與鍵盤要認得它是按鈕（同 refresh-cw）
+      {...(props.onClick && {
+        role: "button",
+        tabIndex: 0,
+        onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
+          if (e.key !== "Enter" && e.key !== " ") return;
+          e.preventDefault();
+          e.currentTarget.click();
+        },
+      })}
       {...props}
     >
       <motion.svg

@@ -384,9 +384,6 @@ export default function MonopolyGame() {
                 <Target className="h-4 w-4" />${ec.amount.toLocaleString()}
               </div>
             )}
-            <span data-fs-hide>
-              <AudioSettings />
-            </span>
             <Tip label="重新開始">
               <button
                 type="button"
@@ -398,6 +395,10 @@ export default function MonopolyGame() {
                 <RotateCcw className="h-5 w-5" />
               </button>
             </Tip>
+            {/* 順序照全站約定：重新開始 → 音效 → 全螢幕；設定在重新開始後的設定頁 */}
+            <span data-fs-hide>
+              <AudioSettings />
+            </span>
             {/* 放最後一顆：跟其他遊戲頁一樣，全螢幕在最右邊 */}
             <Tip label="全螢幕">
               <FullscreenButton

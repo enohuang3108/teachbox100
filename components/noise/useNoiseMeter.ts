@@ -15,8 +15,11 @@ export function useNoiseMeter() {
   const streamRef = useRef<MediaStream | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
   const rafRef = useRef(0);
+  // 每次 start／stop 都換一代：等權限時離開頁面或又按一次，晚到的 stream 認得出自己過期了
+  const genRef = useRef(0);
 
   const stop = useCallback(() => {
+    genRef.current++;
     cancelAnimationFrame(rafRef.current);
     streamRef.current?.getTracks().forEach((t) => t.stop());
     ctxRef.current?.close();
@@ -31,6 +34,8 @@ export function useNoiseMeter() {
       setState("unsupported");
       return;
     }
+    stop();
+    const gen = genRef.current;
     setState("starting");
     try {
       // 關掉自動增益與降噪，不然瀏覽器會替我們「修正」音量，讀數就不老實了
@@ -41,6 +46,10 @@ export function useNoiseMeter() {
           autoGainControl: false,
         },
       });
+      if (gen !== genRef.current) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
       const ctx = new AudioContext();
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 2048;
@@ -60,9 +69,9 @@ export function useNoiseMeter() {
       };
       rafRef.current = requestAnimationFrame(tick);
     } catch {
-      setState("denied");
+      if (gen === genRef.current) setState("denied");
     }
-  }, []);
+  }, [stop]);
 
   useEffect(() => stop, [stop]);
 

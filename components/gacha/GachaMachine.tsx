@@ -123,6 +123,8 @@ function StillCapsule({ color }: { color: string }) {
       shared.top.dispose();
       shared.seam.dispose();
       renderer.dispose();
+      // dispose 不會放掉 GL context；每揭曉一顆開一個，累積超過瀏覽器上限時主畫面的會被收掉，扭蛋整箱消失
+      renderer.forceContextLoss();
       renderer.domElement.remove();
     };
   }, [color]);
@@ -497,6 +499,7 @@ export function GachaMachine({
       Composite.clear(engine.world, false);
       Engine.clear(engine);
       renderer.dispose();
+      renderer.forceContextLoss();
       canvas.remove();
     };
   }, [draw, labels]);

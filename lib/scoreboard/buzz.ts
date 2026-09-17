@@ -158,15 +158,34 @@ async function connect(code: string, host: boolean) {
   mySelfId = selfId;
   const r = joinRoom({ appId: APP_ID }, roomId(code));
 
+  // 學生端認定的老師：第一個推狀態來的 peer。其他同房的人推的一律不理，
+  // 免得同學自己送假的「開放搶答／名次」給全班；老師斷線才重新認。
+  let hostPeer: string | null = null;
   const state = r.makeAction<{ open: boolean; order: Buzzer[] }>("state", {
-    // 學生端才聽：老師把開放狀態與按鈴順序整包推過來
-    onMessage: host ? undefined : (s) => set({ open: s.open, order: s.order }),
+    onMessage: host
+      ? undefined
+      : (s, { peerId }) => {
+          hostPeer ??= peerId;
+          if (peerId === hostPeer) set({ open: s.open, order: s.order });
+        },
   });
+
+  // 被擋下的報到（格子主人的舊連線還沒斷）先記著，舊連線一離開就補收。
+  // 手機息屏重連時，新連線常常比舊連線的斷線通知先到。
+  const pending = new Map<string, { peerId: string; payload: JoinPayload }>();
+  const admit = (peerId: string, payload: JoinPayload) => {
+    const before = get().players;
+    const after = addPlayer(before, peerId, payload, new Set(Object.keys(r.getPeers())));
+    if (after === before && before.some((p) => p.uid === String(payload.uid)))
+      pending.set(String(payload.uid), { peerId, payload });
+    else pending.delete(String(payload.uid));
+    set({ players: after });
+  };
 
   const join = r.makeAction<JoinPayload>("join", {
     onMessage: host
       ? (payload, { peerId }) =>
-          set((s) => ({ players: addPlayer(s.players, peerId, payload) }))
+          admit(peerId, payload)
       : undefined,
   });
 
@@ -184,11 +203,14 @@ async function connect(code: string, host: boolean) {
   if (host) {
     const broadcast = () => {
       const { open, order } = get();
-      state.send({ open, order });
+      // uid 是學生認回格子的憑據，不能廣播出去給全班拿去冒用
+      state.send({ open, order: order.map((b) => ({ ...b, uid: "" })) });
     };
     // state 變動就同步給全班；新 peer 先立刻拿當前狀態，再短暫補送一次。
     unbroadcast = useBuzzStore.subscribe(broadcast);
     r.onPeerJoin = () => synchronizeNewPeer(broadcast);
+    r.onPeerLeave = () =>
+      pending.forEach(({ peerId, payload }) => admit(peerId, payload));
     // 刻意不處理 onPeerLeave：手機息屏、切 App 都會斷線，格子不能因此消失。
     // 學生重連時用名字認回同一格（見 addPlayer），分數才留得住。
   } else {
@@ -201,7 +223,10 @@ async function connect(code: string, host: boolean) {
       sync();
       if (myName) join.send({ uid: myUid(), name: myName });
     };
-    r.onPeerLeave = sync;
+    r.onPeerLeave = (peerId) => {
+      if (peerId === hostPeer) hostPeer = null;
+      sync();
+    };
   }
 
   room = {
@@ -229,16 +254,25 @@ export interface JoinPayload {
  * 與名字，保住他在名單裡的順位——順位就是計分板上的格子，換位置分數會跟著跑掉。
  * 不用名字認人：同名的兩個學生會互相擠掉，被擠掉的那個按鈴老師端不會顯示。
  */
+export const MAX_PLAYERS = 40;
+
 export function addPlayer(
   players: Buzzer[],
   peerId: string,
   raw: JoinPayload,
+  /** 目前還連著的 peer；格子的主人還在線時，別人拿同一個 uid 來不能搶走 */
+  online: Set<string> = new Set(),
 ): Buzzer[] {
   const name = String(raw.name).trim().slice(0, 12) || "同學";
   const uid = String(raw.uid);
-  return players.some((p) => p.uid === uid)
-    ? players.map((p) => (p.uid === uid ? { ...p, id: peerId, name } : p))
-    : [...players, { id: peerId, uid, name }];
+  const owner = players.find((p) => p.uid === uid);
+  if (owner) {
+    if (owner.id !== peerId && online.has(owner.id)) return players;
+    return players.map((p) => (p === owner ? { ...p, id: peerId, name } : p));
+  }
+  // 計分板上限 40 組
+  if (!uid || players.length >= MAX_PLAYERS) return players;
+  return [...players, { id: peerId, uid, name }];
 }
 
 /**
