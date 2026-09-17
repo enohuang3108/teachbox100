@@ -18,6 +18,8 @@ async function unitHrefs(page: Page, selector: string) {
  * 若新增單元卻漏掛，或任何連結變成壞路徑，這個測試會失敗。
  */
 test("首頁列出分類與獨立單元，分類頁列出旗下所有單元", async ({ page }) => {
+  // 一個測試裡冷編譯三個路由；全套平行跑時 dev server 同時在編別的頁，30 秒不夠
+  test.slow();
   // 路由是否可編譯由 pnpm build 保護；這裡只驗證公開入口。
   // 不逐頁導航進每個單元，避免 Next 開發伺服器第一次編譯所有路由時，
   // 讓測試把編譯時間誤判成產品失敗。
