@@ -267,7 +267,7 @@ export const pageSeo: Record<string, PageSeo> = {
   },
   wheel: {
     teaches: "課堂隨機選人、分組與抽題的工具",
-    title: "抽籤轉盤 | 上課點名、分組、抽題",
+    title: "抽籤轉盤 | 線上抽籤",
     description:
       "把班級名單或任何選項貼上去，按一下就轉出結果。抽過的可以設定自動拿掉，上課點名、分組、抽題、抽獎勵都能用。",
     faq: [
@@ -319,7 +319,7 @@ export const pageSeo: Record<string, PageSeo> = {
   },
   gacha: {
     teaches: "課堂隨機選人、分組與抽題的工具，由學生自己挑一顆扭蛋揭曉",
-    title: "扭蛋機 | 學生自己挑的線上抽籤",
+    title: "扭蛋機 | 線上抽籤",
     description:
       "貼上班級名單，每個人會變成一顆漂在箱子裡的扭蛋。學生自己撥一撥、挑一顆打開，才知道抽到誰，抽過的會記在旁邊。點名、分組、抽題、抽獎勵都能用。",
     faq: [
@@ -355,7 +355,7 @@ export const pageSeo: Record<string, PageSeo> = {
   },
   ichiban: {
     teaches: "透過互動票券進行課堂獎勵抽獎與結果揭曉",
-    title: "一番賞抽獎 | 上課發獎勵用",
+    title: "一番賞 | 線上抽籤",
     description:
       "老師自己設 A 賞到 M 賞的獎品和張數，洗好的籤會排成一圈票券。學生挑一張，沿著封條親手撕開看獎項。抽走的籤會拿掉，還剩幾張一看就知道。",
     faq: [
