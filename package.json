@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "prepare": "git config core.hooksPath .githooks",
     "build": "next build",
     "seo:snapshot": "node scripts/seo-snapshot.mjs",
     "seo:indexnow": "node scripts/indexnow.mjs",
@@ -19,6 +20,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:workflow": "node --test scripts/verify-change.test.mjs",
+    "verify:change": "node scripts/verify-change.mjs",
     "audit:fix": "pnpm audit || pnpm audit --fix=override; pnpm install --lockfile-only && (git diff --quiet pnpm-workspace.yaml pnpm-lock.yaml || (git add pnpm-workspace.yaml pnpm-lock.yaml && git commit -m 'chore(deps): apply pnpm audit override fixes'))"
     
   },

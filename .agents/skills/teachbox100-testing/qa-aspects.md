@@ -1,4 +1,4 @@
-# qa-run 的 sub agent 面向
+# QA sub agent 面向
 
 主 agent 派工時讀。每個面向一個 sub agent：`security` 用 `model: "opus"`，其他面向用 `model: "sonnet"`。
 sub agent **只收證據、不判 pass／fail** —— brief 裡明寫這句，並要求它照「觀察紀錄」格式回報。

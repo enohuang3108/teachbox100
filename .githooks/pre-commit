@@ -1,0 +1,46 @@
+#!/bin/bash
+# Proof gate：動到產品程式碼就必須有這次 HEAD 的 verify:change receipt，且 receipt 對應的
+# 程式碼沒有在證明之後又被改。
+#
+# 寫成 git hook 而不是 Claude Code / Codex 各自的 agent hook，因為 git commit 是
+# 兩個 agent 與人類唯一的共同入口，一份規則三邊同時生效。
+#
+# 真的要跳過：git commit --no-verify
+set -e
+
+# 與 scripts/verify-change.mjs 的 CODE_PATHS 逐字一致，兩邊要一起改。
+# 排除測試檔：寫測試是讓 seam 變 red 的那一步，不需要先有 proof。
+CODE_PATHS=(app lib components hooks ':(exclude)*.test.ts' ':(exclude)*.test.tsx' ':(exclude)*.spec.ts' ':(exclude)*.spec.tsx')
+
+head=$(git rev-parse HEAD 2>/dev/null) || exit 0
+receipt=".agents/verification/${head:0:12}.json"
+
+# 這次 commit 完全沒動到產品程式碼（純文件、設定、測試檔）就不需要 proof。
+git diff --cached --quiet -- "${CODE_PATHS[@]}" && exit 0
+
+fail() {
+  {
+    echo ""
+    echo "擋下 commit：這次改到產品程式碼，但沒有對得上的 proof。"
+    echo "$1"
+    echo ""
+    echo "先跑（矩陣列見 docs/testing.md）："
+    echo "  pnpm verify:change -- --matrix \"<列名>\" --behavior \"<公開行為>\" --seam unit -- pnpm test <測試檔>"
+    echo ""
+    echo "真的要跳過：git commit --no-verify"
+    echo ""
+  } >&2
+  exit 1
+}
+
+[ -f "$receipt" ] || fail "找不到 $receipt"
+
+recorded=$(sed -n 's/.*"codeDiffHash": *"\([^"]*\)".*/\1/p' "$receipt")
+[ -n "$recorded" ] || fail "$receipt 沒有 codeDiffHash，請重跑 pnpm verify:change"
+
+# proof 當下的程式碼 diff 與現在的比對。用 hash 而不是檔案時間，因為 macOS bash 的
+# -nt 只有秒級解析度，同一秒內的編輯會漏掉。
+current=$(git diff --binary HEAD -- "${CODE_PATHS[@]}" | shasum -a 256 | cut -d' ' -f1)
+[ "$recorded" = "$current" ] || fail "proof 跑完後程式碼又改了（$recorded != $current）"
+
+exit 0

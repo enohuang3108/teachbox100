@@ -1,4 +1,4 @@
-# qa-run 格式
+# QA 格式
 
 ## Case 檔 `docs/qa/cases/<unit>.md`
 
