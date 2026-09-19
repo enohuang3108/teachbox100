@@ -80,42 +80,62 @@ export function BuzzPanel() {
         <DialogTrigger asChild>
           <Button className="self-start">秀出 QR code</Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle>掃描加入搶答</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col items-center gap-4 pb-2">
-            {/* 先佔滿位子，QR 生好再淡入，對話框不會先小後大跳一下 */}
-            <div className="bg-ink/[0.04] aspect-square w-full max-w-[min(70vh,28rem)] overflow-hidden rounded-2xl">
-              {qr && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={qr}
-                  alt={`加入搶答的 QR code，房號 ${code}`}
-                  className="animate-in fade-in size-full duration-200 ease-out"
-                />
-              )}
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <span className="text-ink-soft text-sm">
-                掃不到就直接開網址、輸入房號
-              </span>
-              <span className="text-ink text-4xl leading-none font-bold tracking-[0.25em] tabular-nums">
-                {code}
-              </span>
-              <span className="text-ink-soft/70 text-xs break-all">{url}</span>
-            </div>
+          <div className="flex flex-col gap-4 pb-2">
             <RelayNote relay={relay} />
-            {/* 老師開著 QR 等人進來，就是盯這個數字；名單放小字在下面 */}
-            <div className="border-ink/10 flex w-full flex-col items-center gap-1 border-t pt-4">
-              <span className="text-ink text-xl font-semibold tabular-nums">
-                已加入 {players.length} 人
-              </span>
-              {players.length > 0 && (
-                <span className="text-ink-soft text-center text-sm leading-[1.75]">
-                  {players.map((p) => p.name).join("、")}
+            {/* 投影時左邊給全班掃，右邊讓老師確認誰進來了，兩件事同時看得到。
+                手機或窄視窗堆疊成一欄，QR 仍然在最上面。 */}
+            <div className="flex flex-col gap-6 sm:flex-row sm:gap-8">
+              <div className="flex shrink-0 flex-col items-center gap-1 sm:flex-1">
+                {/* 先佔滿位子，QR 生好再淡入，對話框不會先小後大跳一下 */}
+                <div className="bg-ink/[0.04] mb-3 aspect-square w-full max-w-[min(60vh,22rem)] overflow-hidden rounded-2xl">
+                  {qr && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={qr}
+                      alt={`加入搶答的 QR code，房號 ${code}`}
+                      className="animate-in fade-in size-full duration-200 ease-out"
+                    />
+                  )}
+                </div>
+                <span className="text-ink-soft text-sm">
+                  掃不到就直接開網址、輸入房號
                 </span>
-              )}
+                <span className="text-ink text-4xl leading-none font-bold tracking-[0.25em] tabular-nums">
+                  {code}
+                </span>
+                <span className="text-ink-soft/70 text-xs break-all">{url}</span>
+              </div>
+
+              {/* 老師開著 QR 等人進來，就是盯這個數字 */}
+              <div className="border-ink/10 flex min-w-0 flex-col gap-3 border-t pt-4 sm:flex-1 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-8">
+                <span className="text-ink text-center text-xl font-semibold tabular-nums sm:text-left">
+                  已加入 {players.length} 人
+                </span>
+                {players.length === 0 ? (
+                  <p className="text-ink-soft text-center text-sm leading-[1.75] sm:text-left">
+                    還沒有人加入。請學生掃左邊的 QR code，填名字後按加入。
+                  </p>
+                ) : (
+                  /* 40 人的名單在對話框裡放不下，超過就讓它自己捲 */
+                  <ul className="grid max-h-[min(50vh,22rem)] grid-cols-2 gap-x-4 gap-y-1 overflow-y-auto">
+                    {players.map((p, i) => (
+                      <li
+                        key={p.uid}
+                        className="text-ink flex min-w-0 items-baseline gap-2 text-base leading-[1.75]"
+                      >
+                        <span className="text-ink-soft/70 shrink-0 text-xs tabular-nums">
+                          {i + 1}
+                        </span>
+                        <span className="truncate">{p.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
           </div>
         </DialogContent>
