@@ -11,6 +11,15 @@ export default defineConfig({
     baseURL: `http://127.0.0.1:${port}`,
     trace: "on-first-retry",
   },
+  expect: {
+    toHaveScreenshot: {
+      // 字體 hinting 與抗鋸齒在不同機器上差一兩個像素，1% 以下不算退化
+      maxDiffPixelRatio: 0.01,
+      animations: "disabled",
+      caret: "hide",
+      scale: "css",
+    },
+  },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
     { name: "mobile", use: { ...devices["Pixel 5"] } },
