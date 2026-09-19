@@ -8,8 +8,34 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/atoms/shadcn/dialog";
-import { renewCode, useBuzzStore } from "@/lib/scoreboard/buzz";
+import {
+  renewCode,
+  useBuzzStore,
+  type RelayStatus,
+} from "@/lib/scoreboard/buzz";
 import { useEffect, useState } from "react";
+
+/**
+ * 房間到底有沒有真的開起來。trystero 的 joinRoom() 不等配對伺服器回應就回傳，
+ * 所以房號和 QR 一定會出現 —— 連不上時老師只會看到「已加入 0 人」，
+ * 分不出是學生還沒掃、還是自己這邊根本沒開成。這一行就是講出差別。
+ *
+ * 也別再叫老師「連到同一個 Wi-Fi」：學校的 Wi-Fi 常開用戶端隔離，
+ * 同網段反而互通不了，那時候正確的指示是相反的（改用行動網路）。
+ */
+function RelayNote({ relay }: { relay: RelayStatus }) {
+  if (relay === "up") return null;
+  return relay === "connecting" ? (
+    <p className="text-ink-soft text-center text-sm leading-[1.6]">
+      正在連上配對伺服器…
+    </p>
+  ) : (
+    <p className="bg-danger-soft text-danger-ink rounded-xl px-3 py-2 text-center text-sm leading-[1.6]">
+      連不上配對伺服器，學生現在加不進來。請確認這台電腦的網路，
+      或改用手機熱點再打開一次。
+    </p>
+  );
+}
 
 /** 已經自動彈過 QR 的房號 */
 let shownFor: string | null = null;
@@ -18,6 +44,7 @@ let shownFor: string | null = null;
 export function BuzzPanel() {
   const code = useBuzzStore((s) => s.code);
   const players = useBuzzStore((s) => s.players);
+  const relay = useBuzzStore((s) => s.relay);
   const [qr, setQr] = useState<string | null>(null);
   const [showQr, setShowQr] = useState(false);
 
@@ -78,9 +105,7 @@ export function BuzzPanel() {
               </span>
               <span className="text-ink-soft/70 text-xs break-all">{url}</span>
             </div>
-            <p className="text-ink-soft text-center text-sm leading-[1.6]">
-              請確認老師與學生的裝置連到同一個 Wi-Fi，再掃 QR code 加入。
-            </p>
+            <RelayNote relay={relay} />
             {/* 老師開著 QR 等人進來，就是盯這個數字；名單放小字在下面 */}
             <div className="border-ink/10 flex w-full flex-col items-center gap-1 border-t pt-4">
               <span className="text-ink text-xl font-semibold tabular-nums">
@@ -95,6 +120,8 @@ export function BuzzPanel() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <RelayNote relay={relay} />
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <span className="text-ink text-lg font-bold tracking-[0.2em] tabular-nums">

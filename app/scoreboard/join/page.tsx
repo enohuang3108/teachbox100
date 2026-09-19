@@ -21,7 +21,7 @@ export default function JoinPage() {
   const [busy, setBusy] = useState(false);
   /** 這台裝置已經有另一個分頁在搶答 */
   const [taken, setTaken] = useState(false);
-  const { open, order, connected } = useBuzzStore();
+  const { open, order, connected, relay } = useBuzzStore();
   const rank = joined ? myRank(order) : 0;
 
   useEffect(() => {
@@ -46,6 +46,20 @@ export default function JoinPage() {
     window.addEventListener("beforeunload", confirmLeaving);
     return () => window.removeEventListener("beforeunload", confirmLeaving);
   }, [joined]);
+
+  /**
+   * 配對伺服器通了、卻一直連不上老師。多半是兩邊的網路擋掉了裝置直連
+   * （學校網路常見），光說「正在連上老師」學生只會一直等。
+   */
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (!joined || connected) {
+      setSlow(false);
+      return;
+    }
+    const timer = setTimeout(() => setSlow(true), 15000);
+    return () => clearTimeout(timer);
+  }, [joined, connected]);
 
   const join = async (c = code, n = name) => {
     const room = c.trim().toUpperCase();
@@ -160,11 +174,23 @@ export default function JoinPage() {
                 "已經加入了，等老師出題。這一頁先別關掉"}
         </p>
       ) : (
-        /* 斷線通常幾秒內自己接回來；接不回來就重新整理，名字會自動帶回去 */
+        /* 斷線通常幾秒內自己接回來。接不回來時，講出最可能的原因跟下一步，
+           不然學生只能一直盯著同一句話等。 */
         <div className="flex flex-col items-center gap-2">
-          <p className="text-ink-soft text-center text-base leading-[1.75]">
-            正在連上老師…斷線會自動重連，等太久就按下面
-          </p>
+          {relay === "down" ? (
+            <p className="bg-danger-soft text-danger-ink rounded-xl px-3 py-2 text-center text-base leading-[1.75]">
+              連不上配對伺服器。這個網路可能擋住了，改用手機的行動網路試試。
+            </p>
+          ) : slow ? (
+            <p className="bg-warning-soft text-warning-ink rounded-xl px-3 py-2 text-center text-base leading-[1.75]">
+              一直連不到老師。先確認房號 {code} 沒打錯、老師已經打開連線；
+              都對的話改用手機的行動網路試試。
+            </p>
+          ) : (
+            <p className="text-ink-soft text-center text-base leading-[1.75]">
+              正在連上老師…斷線會自動重連，等太久就按下面
+            </p>
+          )}
           <Button variant="outline" onClick={() => location.reload()}>
             重新連線
           </Button>

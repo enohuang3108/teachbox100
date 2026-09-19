@@ -22,8 +22,8 @@ test("live: 學生按鈴會顯示在老師端", async ({ browser }) => {
 
   try {
     await teacher.goto("/scoreboard");
-    await teacher.getByRole("button", { name: "設定" }).click();
-    await teacher.getByText("連線搶答").locator("..").getByRole("switch").click();
+    await teacher.getByRole("button", { name: "開始使用" }).click();
+    await teacher.getByRole("switch", { name: /連線搶答/ }).click();
     const qr = teacher.locator('img[alt^="加入搶答的 QR code，房號 "]');
     await expect(qr).toBeVisible({ timeout: 20_000 });
     const code = (await qr.getAttribute("alt"))!.match(/房號 (\w{4})$/)![1];
@@ -33,9 +33,10 @@ test("live: 學生按鈴會顯示在老師端", async ({ browser }) => {
     await student.getByRole("button", { name: "加入" }).click();
     await expect(teacher.getByText("已加入 1 人", { exact: true })).toBeVisible({ timeout: 20_000 });
 
-    // 關掉 QR 對話框與設定面板，才點得到計分板上的搶答控制列
+    // 關掉 QR 對話框，再走完設定流程進計分板，才點得到搶答控制列
     await teacher.locator('[role="dialog"] button:has-text("Close")').last().click();
-    await teacher.locator('[role="dialog"] button:has-text("Close")').last().click();
+    await teacher.getByRole("button", { name: "下一步" }).click();
+    await teacher.getByRole("button", { name: "開始計分" }).click();
     await expect(teacher.locator('[role="dialog"]')).toHaveCount(0, { timeout: 5_000 });
     const start = teacher.getByRole("button", { name: "開始搶答" });
     await expect(start).toBeVisible({ timeout: 10_000 });
@@ -63,8 +64,8 @@ test("live: 同名的兩個學生各佔一格，先加入的按鈴也顯示", as
   const students = [] as { ctx: Awaited<ReturnType<typeof browser.newContext>>; page: typeof teacher }[];
   try {
     await teacher.goto("/scoreboard");
-    await teacher.getByRole("button", { name: "設定" }).click();
-    await teacher.getByText("連線搶答").locator("..").getByRole("switch").click();
+    await teacher.getByRole("button", { name: "開始使用" }).click();
+    await teacher.getByRole("switch", { name: /連線搶答/ }).click();
     const qr = teacher.locator('img[alt^="加入搶答的 QR code，房號 "]');
     await expect(qr).toBeVisible({ timeout: 20_000 });
     const code = (await qr.getAttribute("alt"))!.match(/房號 (\w{4})$/)![1];
@@ -80,9 +81,9 @@ test("live: 同名的兩個學生各佔一格，先加入的按鈴也顯示", as
     }
     await expect(teacher.getByText("已加入 2 人", { exact: true })).toBeVisible({ timeout: 25_000 });
 
-    const close = teacher.locator('[role="dialog"] button:has-text("Close")');
-    await close.last().click();
-    await close.last().click();
+    await teacher.locator('[role="dialog"] button:has-text("Close")').last().click();
+    await teacher.getByRole("button", { name: "下一步" }).click();
+    await teacher.getByRole("button", { name: "開始計分" }).click();
     await teacher.getByRole("button", { name: "開始搶答" }).click();
 
     // 先加入的那個按鈴：舊版用名字認人時會被第二個小明擠掉，這裡就會是空的
@@ -106,8 +107,8 @@ test("live: 同一個瀏覽器開第二個分頁會被擋住", async ({ browser 
   });
   try {
     await teacher.goto("/scoreboard");
-    await teacher.getByRole("button", { name: "設定" }).click();
-    await teacher.getByText("連線搶答").locator("..").getByRole("switch").click();
+    await teacher.getByRole("button", { name: "開始使用" }).click();
+    await teacher.getByRole("switch", { name: /連線搶答/ }).click();
     const qr = teacher.locator('img[alt^="加入搶答的 QR code，房號 "]');
     await expect(qr).toBeVisible({ timeout: 20_000 });
     const code = (await qr.getAttribute("alt"))!.match(/房號 (\w{4})$/)![1];

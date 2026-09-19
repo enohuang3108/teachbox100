@@ -26,8 +26,8 @@ test("live: 學生加入會在五秒內顯示於老師端", async ({ browser }) 
   try {
     await teacher.goto("/");
     await teacher.goto("/scoreboard");
-    await teacher.getByRole("button", { name: "設定" }).click();
-    const linkSwitch = teacher.getByText("連線搶答").locator("..").getByRole("switch");
+    await teacher.getByRole("button", { name: "開始使用" }).click();
+    const linkSwitch = teacher.getByRole("switch", { name: /連線搶答/ });
     await linkSwitch.click();
 
     const qr = teacher.locator('img[alt^="加入搶答的 QR code，房號 "]');
@@ -38,7 +38,7 @@ test("live: 學生加入會在五秒內顯示於老師端", async ({ browser }) 
     await student.getByRole("textbox", { name: "你的名字" }).fill("本機測試");
     const started = performance.now();
     await student.getByRole("button", { name: "加入" }).click();
-    await expect(teacher.getByText("已加入 1 人")).toBeVisible({ timeout: 15_000 });
+    await expect(teacher.getByText("已加入 1 人", { exact: true })).toBeVisible({ timeout: 15_000 });
     const elapsed = performance.now() - started;
     test.info().annotations.push({ type: "join-ms", description: `${Math.round(elapsed)}` });
     expect(elapsed).toBeLessThan(5_000);

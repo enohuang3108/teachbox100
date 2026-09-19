@@ -4,6 +4,8 @@ import {
   nextOrder,
   synchronizeNewPeer,
   STATE_RETRY_MS,
+  relayStatus,
+  RELAY_TIMEOUT_MS,
 } from "./buzz";
 
 const a = { id: "a", uid: "u-a", name: "小明" };
@@ -87,5 +89,32 @@ describe("synchronizeNewPeer", () => {
     expect(sent).toEqual(["state"]);
     expect(scheduled).toHaveLength(1);
     expect(scheduled[0].delay).toBe(STATE_RETRY_MS);
+  });
+});
+
+describe("relayStatus", () => {
+  const OPEN = 1;
+  const CONNECTING = 0;
+
+  it("有一台連上就算通", () => {
+    expect(
+      relayStatus({ a: { readyState: CONNECTING }, b: { readyState: OPEN } }, 0),
+    ).toBe("up");
+  });
+
+  it("還在連的時候不急著判死", () => {
+    expect(relayStatus({ a: { readyState: CONNECTING } }, 3000)).toBe(
+      "connecting",
+    );
+  });
+
+  it("等超過時限都沒通就是連不上", () => {
+    expect(relayStatus({ a: { readyState: CONNECTING } }, RELAY_TIMEOUT_MS)).toBe(
+      "down",
+    );
+  });
+
+  it("一台 socket 都沒有，等到時限一樣是連不上", () => {
+    expect(relayStatus({}, RELAY_TIMEOUT_MS)).toBe("down");
   });
 });

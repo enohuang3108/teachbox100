@@ -27,9 +27,18 @@ export interface BuzzStore {
   players: Buzzer[];
   /** 學生端：現在有沒有連到老師。斷線時手機上要看得出來 */
   connected: boolean;
+  /**
+   * 配對伺服器的狀態。trystero 的 joinRoom() 不等 relay 連上就回傳，所以「開好房」
+   * 不代表房間真的存在 —— relay 全被擋掉時，老師這邊房號和 QR 一樣照常顯示，
+   * 學生卻永遠進不來。要真的去問 socket 才知道。
+   */
+  relay: RelayStatus;
   /** 按鈴順序，先到先排 */
   order: Buzzer[];
 }
+
+/** connecting = 還在連；up = 至少一台通了；down = 全連不上 */
+export type RelayStatus = "connecting" | "up" | "down";
 
 export const useBuzzStore = create<BuzzStore>(() => ({
   code: null,
@@ -37,6 +46,7 @@ export const useBuzzStore = create<BuzzStore>(() => ({
   players: [],
   order: [],
   connected: false,
+  relay: "connecting",
 }));
 
 const set = useBuzzStore.setState;
@@ -97,6 +107,27 @@ export function claimDevice(): Promise<boolean> {
 }
 
 const APP_ID = "teachbox100-scoreboard";
+
+/**
+ * 配對用的 nostr relay。trystero 內建 24 台，實測有 10 台已經死掉或改成要驗證，
+ * 而它預設只隨機挑 5 台，抽到地雷就卡在配對。這裡改成指定實測活著的幾台並全部用上，
+ * 任何一台通得了就配對得成。
+ *
+ * relay 只轉加密過的連線名片，搶答封包是裝置直連，不經過它們。
+ *
+ * 挑的時候要測「寫得進去」而不是「連得上」：有些 relay 連線與查詢都正常，
+ * 送 event 才回 restricted（要付費）或 blocked（不收短暫訊息），
+ * 而配對正是在送 event。scripts/probe-relays.mjs 測的就是寫入。
+ * 這些都是別人的公開伺服器，會陸續死掉，連不上時回去跑那支換一批。
+ */
+const RELAYS = [
+  "wss://nostr-01.yakihonne.com",
+  "wss://bucket.coracle.social",
+  "wss://purplerelay.com",
+  "wss://nos.lol",
+  "wss://relay.snort.social",
+  "wss://relay.primal.net",
+];
 const roomId = (code: string) => `${APP_ID}-${code}`;
 
 /** 房間 + 三個 action 的 sender，主機與學生共用同一份形狀 */
@@ -140,6 +171,34 @@ const loadSignaling = () =>
   (signalingModule ??= import("trystero/nostr"));
 export const warmSignaling = () => void loadSignaling();
 
+/**
+ * 幾秒都沒有任何一台 relay 接受連線，就當作連不上。校園防火牆擋掉對外的
+ * WebSocket 時就是這個狀況：房號看起來開好了，其實一張配對名片都沒送出去。
+ */
+export const RELAY_TIMEOUT_MS = 8000;
+
+export function relayStatus(
+  sockets: Record<string, { readyState: number }>,
+  elapsedMs: number,
+): RelayStatus {
+  const OPEN = 1;
+  if (Object.values(sockets).some((s) => s.readyState === OPEN)) return "up";
+  return elapsedMs >= RELAY_TIMEOUT_MS ? "down" : "connecting";
+}
+
+/**
+ * relay 沒有連上／斷掉的事件可以訂閱，只能自己看 socket。一秒一次夠用了，
+ * 這個狀態只是拿來決定畫面上要顯示哪一句話。
+ */
+let relayTimer: ReturnType<typeof setInterval> | null = null;
+function watchRelays(getSockets: () => Record<string, WebSocket>) {
+  const startedAt = Date.now();
+  const tick = () =>
+    set({ relay: relayStatus(getSockets(), Date.now() - startedAt) });
+  tick();
+  relayTimer = setInterval(tick, 1000);
+}
+
 /** 立即送一次；部分瀏覽器的 data channel 剛打開時再補一次，避免漏掉狀態。 */
 export const STATE_RETRY_MS = 150;
 export function synchronizeNewPeer(
@@ -154,9 +213,14 @@ export function synchronizeNewPeer(
 // trystero 只在瀏覽器跑得動（WebRTC），動態載入避免進到 SSR 與首屏 bundle
 async function connect(code: string, host: boolean) {
   hushCloseNoise();
-  const { joinRoom, selfId } = await loadSignaling();
+  const { joinRoom, selfId, getRelaySockets } = await loadSignaling();
   mySelfId = selfId;
-  const r = joinRoom({ appId: APP_ID }, roomId(code));
+  set({ relay: "connecting" });
+  watchRelays(getRelaySockets);
+  const r = joinRoom(
+    { appId: APP_ID, relayConfig: { urls: RELAYS, redundancy: RELAYS.length } },
+    roomId(code),
+  );
 
   // 學生端認定的老師：第一個推狀態來的 peer。其他同房的人推的一律不理，
   // 免得同學自己送假的「開放搶答／名次」給全班；老師斷線才重新認。
@@ -315,7 +379,8 @@ export async function openRoom() {
   rememberCode(code);
   // QR 出現前老師端已經加入 signaling room；學生掃得很快也不會先連到空房。
   await connect(code, true);
-  set({ code, open: false, players: [], order: [], connected: true });
+  // connected 是學生端在用的（有沒有連到老師）；老師端看的是 relay 狀態
+  set({ code, open: false, players: [], order: [] });
   // 開房就清空格子：接下來幾組由誰連進來決定
   useScoreboardStore.setState({ teams: [] });
   unsync = syncTeams();
@@ -336,7 +401,16 @@ export function closeRoom() {
   unsync = unbroadcast = null;
   room?.leave();
   room = null;
-  set({ code: null, open: false, players: [], order: [], connected: false });
+  if (relayTimer) clearInterval(relayTimer);
+  relayTimer = null;
+  set({
+    code: null,
+    open: false,
+    players: [],
+    order: [],
+    connected: false,
+    relay: "connecting",
+  });
 }
 
 /** 開放／關閉搶答。開放時順便清掉上一題的順序 */

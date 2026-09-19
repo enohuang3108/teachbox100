@@ -36,6 +36,8 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
   const [draft, setDraft] = useState(() => teams.map((t) => t.name).join("\n"));
   const linked = useBuzzStore((s) => s.code !== null);
   const [linking, setLinking] = useState(false);
+  /** 開房失敗（連線模組載不下來）。不講的話開關只會自己彈回去，老師不知道發生什麼事 */
+  const [linkError, setLinkError] = useState(false);
 
   const [countText, setCountText] = useState(String(teams.length));
   const applyCount = (n: number) => {
@@ -102,12 +104,24 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
                     disabled={linking}
                     className="mt-0.5"
                     onCheckedChange={async (v) => {
-                      if (!v) return closeRoom();
+                      if (!v) {
+                        setLinkError(false);
+                        return closeRoom();
+                      }
                       setLinking(true);
-                      await openRoom().finally(() => setLinking(false));
+                      setLinkError(false);
+                      // 連線模組是動態載入的，老師電腦離線或網路不穩就會失敗
+                      await openRoom()
+                        .catch(() => setLinkError(true))
+                        .finally(() => setLinking(false));
                     }}
                   />
                 </label>
+                {linkError && (
+                  <p className="rounded-xl bg-danger-soft px-3 py-2 text-caption text-danger-ink">
+                    連線功能載入失敗，請確認這台電腦連得上網路，再打開一次。
+                  </p>
+                )}
                 <BuzzPanel />
               </div>
 
