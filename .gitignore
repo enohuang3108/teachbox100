@@ -7,6 +7,8 @@
 /.next/
 /.next-e2e/
 /.next-build/
+# NEXT_DIST_DIR 另開的建置目錄（e2e、預覽各一台時）
+/.next-*/
 /out/
 
 # production
