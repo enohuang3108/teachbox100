@@ -28,6 +28,21 @@ const samples: { [K in ShareUnit]: SetupOf<K> } = {
     tone: "pastel",
     hueSeed: 123.4,
   },
+  "quiz-territory": {
+    cap: "normal",
+    names: ["藍隊", "紅隊"],
+    bank: [
+      {
+        id: "q0",
+        type: "choice",
+        text: "台灣最高的山是哪一座？",
+        options: ["玉山", "雪山"],
+        answer: "玉山",
+        difficulty: "easy",
+      },
+      { id: "q1", type: "boolean", text: "蝙蝠是鳥類。", answer: "否" },
+    ],
+  },
 };
 
 describe.each(Object.keys(samples) as ShareUnit[])("%s 分享連結", (unit) => {

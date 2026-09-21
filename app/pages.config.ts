@@ -190,6 +190,16 @@ const pagesConfig = {
     intro:
       "今天只想練 7 的乘法？那就只勾 7。錯的選項都是孩子常犯的錯，練完一輪就知道哪幾題還沒背熟。",
   },
+  "quiz-territory": {
+    path: "/quiz/territory",
+    imageSrc: "/images/covers/warm/quiz-territory.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afbv5f7//wAAAAAAAAkGA/8BAgMHCPr29gQFAwEECAUA//8A/v7f6PW9urcfGxc3NjUE3On1l7vg9Pv+OjAiNBX8kZOYOTUvOj09BO/1+7nV7gP7+DG1kiNTN/4EAeDg4QMCAQQvHxDKiUv829PxjfXy/gNwbGn06+v8+voB+PHlAwEB/gEB/gQHAP38CAQDAAMD+vb2QItHiHmiHmgAAAAASUVORK5CYII=",
+    title: "領地戰",
+    slogan: "兩隊搶答，看哪隊先佔領整個畫面",
+    intro:
+      "全班分成藍紅兩隊。畫面出一題，兩邊都能搶著按，答對可以占領領地，題目越難佔領得越多，吃光對方的一隊贏。",
+  },
 } satisfies Record<string, Page>;
 
 export type PageKey = keyof typeof pagesConfig;

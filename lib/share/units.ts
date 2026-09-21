@@ -5,6 +5,7 @@ import { multiplicationShare } from "@/lib/math/share";
 import { memoryShare } from "@/lib/memory/share";
 import { monopolyShare } from "@/lib/monopoly/share";
 import { scoreboardShare } from "@/lib/scoreboard/share";
+import { territoryShare } from "@/lib/territory/share";
 import { wheelShare } from "@/lib/wheel/share";
 import type { ShareCodec } from "./codec";
 
@@ -20,6 +21,7 @@ export const SHARE_CODECS = {
   memory: memoryShare,
   multiplication: multiplicationShare,
   scoreboard: scoreboardShare,
+  "quiz-territory": territoryShare,
 };
 
 export type ShareUnit = keyof typeof SHARE_CODECS;

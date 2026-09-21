@@ -83,6 +83,16 @@ export const useSound = () => {
     ui.play("bonus", { volume: sfxVolume });
   }, [sfxVolume]);
 
+  /** 出題前倒數的每一拍（3、2、1） */
+  const playCountdownTick = useCallback(() => {
+    ui.play("progress-step", { volume: sfxVolume });
+  }, [sfxVolume]);
+
+  /** 倒數結束、題目出現 */
+  const playGoSound = useCallback(() => {
+    ui.play("start", { volume: sfxVolume });
+  }, [sfxVolume]);
+
   return {
     playCorrectSound,
     playWrongSound,
@@ -90,6 +100,8 @@ export const useSound = () => {
     playAddSound,
     playSubtractSound,
     playBonusSound,
+    playCountdownTick,
+    playGoSound,
     playDiceSound,
     playMoneySound,
     playJailSound,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseQuestions, type RawRow } from "./excel";
+import { aiQuestionPrompt, parseQuestions, type RawRow } from "./excel";
 
 const choiceRow: RawRow = {
   題型: "選擇",
@@ -132,5 +132,22 @@ describe("parseQuestions", () => {
   it("缺少正確答案 → 錯誤", () => {
     const r = parseQuestions([{ 題型: "簡答", 題目: "x", 正確答案: "" }]);
     expect(r.ok).toBe(false);
+  });
+});
+
+describe("AI 提示詞", () => {
+  it("預設請 AI 出三種題型", () => {
+    const p = aiQuestionPrompt();
+    expect(p).toContain("「選擇」「是非」「簡答」");
+    expect(p).toContain("簡答題：選項欄位留空");
+    expect(p).toContain("6. 難度");
+  });
+
+  it("關掉簡答時整份提示詞不出現簡答，編號也接得起來", () => {
+    const p = aiQuestionPrompt({ allowShort: false });
+    expect(p).not.toContain("簡答");
+    expect(p).toContain("「選擇」「是非」其中之一");
+    expect(p).toContain("4. 解析");
+    expect(p).toContain("5. 難度");
   });
 });

@@ -25,7 +25,8 @@ export interface SetupStep {
 /**
  * 開始前的設定旅程，放在 DialogContent 裡用（`max-w-4xl gap-0 overflow-hidden p-0`）。
  * 左側步驟側欄隨時可跳、每站底下寫目前設定；右側捲動內容；底部固定列左邊一句總結，
- * 右邊上一步／下一步，最後一站才是開始。blocker 有值時總結換成紅字原因並擋住開始。
+ * 右邊上一步／下一步，最後一站才是開始。blocker 有值時總結換成紅字原因並擋住開始；
+ * 空字串只擋不講 —— 老師還沒動手（例如還沒選檔）時，先別對他亮紅字。
  */
 export function StepSetup({
   title,
@@ -49,6 +50,7 @@ export function StepSetup({
     0,
     steps.findIndex((s) => s.key === stepKey),
   );
+  const blocked = blocker != null;
   const current = steps[index];
   const isLast = index === steps.length - 1;
 
@@ -128,7 +130,7 @@ export function StepSetup({
               <Button
                 variant="ghost"
                 className={cn("rounded-full", PRESS)}
-                disabled={!!blocker}
+                disabled={blocked}
                 onClick={() => setShareOpen(true)}
               >
                 <Share2 className="size-4" aria-hidden />
@@ -147,7 +149,7 @@ export function StepSetup({
             {isLast ? (
               <Button
                 className={cn("rounded-full px-6 font-bold", PRESS)}
-                disabled={!!blocker}
+                disabled={blocked}
                 onClick={onStart}
               >
                 {startLabel}

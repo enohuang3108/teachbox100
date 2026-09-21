@@ -914,3 +914,50 @@
 main:has(> #game-stage[data-unit="ichiban"]) {
   overflow-x: clip;
 }
+
+/* 領地戰：暈開時一格換色的時長。換色是局面本身，降低動態效果時照樣保留 */
+#game-stage[data-unit="quiz-territory"] {
+  --territory-fill: 480ms;
+}
+
+/* 出題前的 3、2、1：每個數字從大一點縮回來落定，像被敲下去 */
+@keyframes territory-count {
+  from {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.territory-count {
+  animation: territory-count 320ms var(--ease-out) both;
+}
+/* 降低動態效果：只淡入，不縮放 */
+@keyframes territory-count-fade {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .territory-count {
+    animation-name: territory-count-fade;
+  }
+}
+
+/* 棋盤比例在開局時取自螢幕，全螢幕就讓它吃滿整個畫面，不縮放、不留邊 */
+#game-stage[data-unit="quiz-territory"]:fullscreen {
+  padding: 0;
+}
+#game-stage[data-unit="quiz-territory"]:fullscreen > [data-stage-inner] {
+  --fs-scale: 1;
+  max-width: none;
+}
+/* 模板在 stage-inner 與棋盤之間還包一層，百分比高度傳不下來，直接吃視窗高 */
+#game-stage[data-unit="quiz-territory"]:fullscreen [data-territory-board] {
+  aspect-ratio: auto !important;
+  height: 100dvh;
+  border: 0;
+  border-radius: 0;
+}
