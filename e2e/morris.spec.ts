@@ -38,6 +38,9 @@ test("圈叉搶答會鎖場下棋、暫停答錯冷卻並可手動和局", async
   await expect(page.getByText("準備出題", { exact: true })).toHaveCount(2);
   await expect(page.getByText("1", { exact: true })).toBeVisible({ timeout: 4_000 });
   await expect(page.getByText(/^測試題目 /).first()).toBeVisible({ timeout: 2_000 });
+  const initialGrid = await page.locator("[data-morris-grid]").boundingBox();
+  expect(initialGrid).not.toBeNull();
+  expect(initialGrid!.width).toBeCloseTo(initialGrid!.height, 1);
   await expect(page.getByText("先連成三枚的一隊獲勝", { exact: true })).toHaveCount(0);
   await expect(page.getByText("紅隊 ○　藍隊 ×", { exact: true })).toHaveCount(0);
 
@@ -50,6 +53,10 @@ test("圈叉搶答會鎖場下棋、暫停答錯冷卻並可手動和局", async
   await expect(page.locator('[data-morris-answers="red"]')).toHaveClass(/opacity-40/);
   await expect(page.locator('[data-morris-cell][data-action-hint="true"]')).toHaveCount(9);
   await page.getByRole("button", { name: "空格 1", exact: true }).click();
+  const gridAfterPiece = await page.locator("[data-morris-grid]").boundingBox();
+  expect(gridAfterPiece).not.toBeNull();
+  expect(gridAfterPiece!.width).toBeCloseTo(initialGrid!.width, 1);
+  expect(gridAfterPiece!.height).toBeCloseTo(initialGrid!.height, 1);
 
   await expect(page.getByText("答錯了，2 秒後換題", { exact: true })).toBeVisible({
     timeout: 1_500,

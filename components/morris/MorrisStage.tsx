@@ -115,7 +115,7 @@ function QuestionLane({
       <header className="relative flex min-h-20 items-center justify-center border-b border-border pb-2">
         <Mark
           side={side}
-          className={cn("size-16", acting && "morris-breathe")}
+          className={cn("size-16", acting && "morris-action-mark")}
         />
         <span className="text-caption absolute top-0 right-0 text-muted-foreground tabular-nums">
           {Math.min(lane.index + (question ? 1 : 0), lane.queue.length)} / {lane.queue.length}
@@ -253,8 +253,11 @@ function Board({
         ) : null}
       </div>
 
-      <div className="relative aspect-square w-full max-w-[22rem]">
-        <div className="grid h-full grid-cols-3 gap-2 rounded-2xl bg-paper p-2">
+      <div className="relative aspect-square w-[min(100%,22rem)] flex-none">
+        <div
+          data-morris-grid
+          className="grid size-full grid-cols-3 grid-rows-3 gap-2 rounded-2xl bg-paper p-2"
+        >
           {state.board.map((cell, index) => {
             const selected = state.selectedFrom === index;
             const winning = state.winningLine?.includes(index);
@@ -283,13 +286,21 @@ function Board({
                 disabled={state.phase !== "move"}
                 onClick={() => game.chooseCell(index)}
                 className={cn(
-                  "grid min-h-0 place-items-center rounded-xl bg-secondary transition-[transform,background-color,box-shadow] duration-press ease-out active:scale-[0.97] disabled:pointer-events-none",
-                  hinted && "morris-breathe ring-4 ring-warning",
+                  "relative isolate grid size-full min-h-0 min-w-0 place-items-center overflow-hidden rounded-xl bg-secondary transition-[transform,background-color,box-shadow] duration-press ease-out active:scale-[0.97] disabled:pointer-events-none",
+                  hinted && "morris-action-cell",
                   selected && "ring-4 ring-warning",
                   winning && "bg-warning-soft ring-4 ring-warning",
                 )}
               >
-                {cell && <Mark side={cell} className="size-[58%]" />}
+                {cell && (
+                  <Mark
+                    side={cell}
+                    className={cn(
+                      "pointer-events-none absolute z-10 size-[58%]",
+                      hintPiece && "morris-action-mark",
+                    )}
+                  />
+                )}
               </button>
             );
           })}

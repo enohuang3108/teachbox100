@@ -963,22 +963,49 @@ main:has(> #game-stage[data-unit="ichiban"]) {
 }
 
 /* 圈叉搶答同樣以投影為主；全螢幕時左右題目與中央棋盤吃滿視窗。 */
-@keyframes morris-breathe {
+@keyframes morris-cue-breathe {
   0%,
   100% {
-    opacity: 0.52;
+    opacity: var(--morris-cue-low, 0.58);
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes morris-cue-fade {
+  0%,
+  100% {
+    opacity: var(--morris-cue-low, 0.58);
   }
   50% {
     opacity: 1;
   }
 }
-.morris-breathe {
-  animation: morris-breathe 1100ms var(--ease-in-out) infinite;
+.morris-action-mark {
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation: morris-cue-breathe 1200ms var(--ease-in-out) infinite;
+}
+.morris-action-cell::after {
+  --morris-cue-low: 0.28;
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border: 3px solid var(--warning);
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--warning) 20%, transparent);
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation: morris-cue-breathe 1200ms var(--ease-in-out) infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .morris-breathe {
-    animation: none;
-    opacity: 1;
+  .morris-action-mark,
+  .morris-action-cell::after {
+    animation-name: morris-cue-fade;
   }
 }
 
