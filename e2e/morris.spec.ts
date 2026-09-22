@@ -95,6 +95,21 @@ test("圈叉搶答會鎖場下棋、暫停答錯冷卻並可手動和局", async
   await page.getByRole("button", { name: "結束本局", exact: true }).click();
   await page.getByRole("dialog").getByRole("button", { name: "結束本局" }).click();
   await expect(page.getByText("和局", { exact: true })).toBeVisible();
+  const resultDialog = page.getByRole("dialog", { name: "和局", exact: true });
+  const resultTitle = resultDialog.locator("[data-morris-result-title]");
+  const stageBox = await page.locator("[data-morris-board]").boundingBox();
+  const dialogBox = await resultDialog.boundingBox();
+  expect(stageBox).not.toBeNull();
+  expect(dialogBox).not.toBeNull();
+  expect(dialogBox!.x + dialogBox!.width / 2).toBeCloseTo(
+    stageBox!.x + stageBox!.width / 2,
+    0,
+  );
+  expect(dialogBox!.y + dialogBox!.height / 2).toBeCloseTo(
+    stageBox!.y + stageBox!.height / 2,
+    0,
+  );
+  await expect(resultTitle).toHaveCSS("font-size", /(?:4[0-9]|[5-9][0-9]|[1-9][0-9]{2,})px/);
   await expect(page.getByRole("button", { name: "再玩一次", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "設定", exact: true })).toBeVisible();
 });

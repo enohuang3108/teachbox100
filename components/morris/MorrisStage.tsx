@@ -55,9 +55,17 @@ export function MorrisStage({
       </div>
 
       {state.phase === "over" && (
-        <div className="absolute inset-x-3 bottom-3 z-10 flex justify-center md:inset-x-[29%] md:bottom-[1.5cqw]">
-          <div className="w-full rounded-2xl border border-ink bg-card px-5 py-4 text-center shadow-lg">
-            <p className="text-h2 text-ink">
+        <div className="absolute inset-0 z-10 grid place-items-center bg-paper/80 p-4">
+          <dialog
+            open
+            aria-labelledby="morris-result-title"
+            className="relative m-0 w-[min(100%,36rem)] rounded-2xl border-2 border-ink bg-card px-6 py-8 text-center text-ink shadow-lg md:px-10 md:py-10"
+          >
+            <p
+              id="morris-result-title"
+              data-morris-result-title
+              className="text-display text-balance text-ink"
+            >
               {state.result === "draw" ? (
                 "和局"
               ) : (
@@ -67,7 +75,7 @@ export function MorrisStage({
                 </>
               )}
             </p>
-            <div className="mt-3 flex justify-center gap-2">
+            <div className="mt-6 flex justify-center gap-2">
               <Button onClick={game.restart} className="rounded-full active:scale-[0.97]">
                 再玩一次
               </Button>
@@ -79,7 +87,7 @@ export function MorrisStage({
                 設定
               </Button>
             </div>
-          </div>
+          </dialog>
         </div>
       )}
     </div>
