@@ -963,6 +963,25 @@ main:has(> #game-stage[data-unit="ichiban"]) {
 }
 
 /* 圈叉搶答同樣以投影為主；全螢幕時左右題目與中央棋盤吃滿視窗。 */
+@keyframes morris-breathe {
+  0%,
+  100% {
+    opacity: 0.52;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.morris-breathe {
+  animation: morris-breathe 1100ms var(--ease-in-out) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .morris-breathe {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 #game-stage[data-unit="quiz-morris"]:fullscreen {
   padding: 0;
 }

@@ -101,6 +101,8 @@ function QuestionLane({
   const question = lane.current;
   const disabled = state.phase !== "quiz" || lane.cooldown > 0;
   const answered = lane.feedback;
+  const acting = state.phase === "move" && state.movingSide === side;
+  const lockedOut = state.phase === "move" && state.movingSide !== side;
 
   return (
     <section
@@ -110,12 +112,12 @@ function QuestionLane({
         SIDE_BORDER[side],
       )}
     >
-      <header className="flex items-center justify-between gap-2 border-b border-border pb-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <Mark side={side} className="size-6 shrink-0" />
-          <h2 className={cn("truncate text-h3", SIDE_COLOR[side])}>{name}</h2>
-        </div>
-        <span className="text-caption shrink-0 text-muted-foreground tabular-nums">
+      <header className="relative flex min-h-20 items-center justify-center border-b border-border pb-2">
+        <Mark
+          side={side}
+          className={cn("size-16", acting && "morris-breathe")}
+        />
+        <span className="text-caption absolute top-0 right-0 text-muted-foreground tabular-nums">
           {Math.min(lane.index + (question ? 1 : 0), lane.queue.length)} / {lane.queue.length}
         </span>
       </header>
@@ -140,10 +142,18 @@ function QuestionLane({
         <LaneMessage title="等對方換題" body="下一題和對方相同，稍等一下。" />
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
-          <p className="mt-4 text-center text-[clamp(1rem,2cqw,1.6rem)] leading-[1.55] font-bold text-balance text-ink">
-            {question.text}
-          </p>
-          <div className="mt-4 grid flex-1 content-center gap-2">
+          <div className="flex min-h-0 flex-1 items-center justify-center px-2 py-4">
+            <p className="text-center text-[clamp(1rem,2cqw,1.6rem)] leading-[1.55] font-bold text-balance text-ink">
+              {question.text}
+            </p>
+          </div>
+          <div
+            data-morris-answers={side}
+            className={cn(
+              "grid shrink-0 gap-2 pb-2 transition-opacity duration-hover",
+              lockedOut && "opacity-40",
+            )}
+          >
             {optionsOf(question).map((option, index) => {
               const isAnswer = option === question.answer;
               const isPicked = option === answered?.choice;
@@ -166,7 +176,7 @@ function QuestionLane({
                   className={cn(
                     "min-h-12 touch-manipulation rounded-xl border-2 px-3 py-2 text-base font-bold break-words shadow-sm",
                     "transition-[transform,background-color,border-color] duration-press ease-out active:scale-[0.97] disabled:pointer-events-none",
-                    !answered && cn(SIDE_BORDER[side], "bg-popover text-ink"),
+                    !answered && cn(SIDE_BORDER[side], "bg-paper text-ink"),
                     answered && isAnswer && "border-success bg-success-soft text-success-ink",
                     answered && isPicked && !isAnswer && "border-danger bg-danger-soft text-danger-ink",
                     answered && !isAnswer && !isPicked && "border-border bg-muted text-muted-foreground",
@@ -240,25 +250,41 @@ function Board({
           </p>
         ) : state.phase === "ready" ? (
           <p className="text-h3 text-ink">READY?</p>
-        ) : (
-          <p className="text-body font-semibold text-muted-foreground">先連成三枚的一隊獲勝</p>
-        )}
+        ) : null}
       </div>
 
       <div className="relative aspect-square w-full max-w-[22rem]">
-        <div className="grid h-full grid-cols-3 gap-2 rounded-2xl bg-ink p-2">
+        <div className="grid h-full grid-cols-3 gap-2 rounded-2xl bg-paper p-2">
           {state.board.map((cell, index) => {
             const selected = state.selectedFrom === index;
             const winning = state.winningLine?.includes(index);
+            const hintPlacement =
+              state.phase === "move" && Boolean(moving) && !relocating && cell === null;
+            const hintPiece =
+              state.phase === "move" &&
+              Boolean(moving) &&
+              relocating &&
+              state.selectedFrom === null &&
+              cell === moving;
+            const hintDestination =
+              state.phase === "move" &&
+              Boolean(moving) &&
+              relocating &&
+              state.selectedFrom !== null &&
+              cell === null;
+            const hinted = hintPlacement || hintPiece || hintDestination;
             return (
               <button
                 key={index}
+                data-morris-cell={index}
+                data-action-hint={hinted || undefined}
                 type="button"
                 aria-label={cell ? `${nameOf(cell)}的棋` : `空格 ${index + 1}`}
                 disabled={state.phase !== "move"}
                 onClick={() => game.chooseCell(index)}
                 className={cn(
-                  "grid min-h-0 place-items-center rounded-xl bg-card transition-[transform,background-color,box-shadow] duration-press ease-out active:scale-[0.97] disabled:pointer-events-none",
+                  "grid min-h-0 place-items-center rounded-xl bg-secondary transition-[transform,background-color,box-shadow] duration-press ease-out active:scale-[0.97] disabled:pointer-events-none",
+                  hinted && "morris-breathe ring-4 ring-warning",
                   selected && "ring-4 ring-warning",
                   winning && "bg-warning-soft ring-4 ring-warning",
                 )}
@@ -270,9 +296,6 @@ function Board({
         </div>
         {state.winningLine && <WinningStroke line={state.winningLine} />}
       </div>
-      <p className="mt-3 text-caption text-center text-muted-foreground">
-        紅隊 ○　藍隊 ×
-      </p>
     </section>
   );
 }
