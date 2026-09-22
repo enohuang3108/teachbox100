@@ -43,6 +43,21 @@ const samples: { [K in ShareUnit]: SetupOf<K> } = {
       { id: "q1", type: "boolean", text: "蝙蝠是鳥類。", answer: "否" },
     ],
   },
+  "quiz-morris": {
+    cap: "normal",
+    names: ["紅隊", "藍隊"],
+    bank: [
+      {
+        id: "q0",
+        type: "choice",
+        text: "哪一個是水果？",
+        options: ["蘋果", "鉛筆"],
+        answer: "蘋果",
+        difficulty: "easy",
+      },
+      { id: "q1", type: "boolean", text: "鯨魚是魚類。", answer: "否" },
+    ],
+  },
 };
 
 describe.each(Object.keys(samples) as ShareUnit[])("%s 分享連結", (unit) => {

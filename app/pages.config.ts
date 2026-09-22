@@ -200,6 +200,16 @@ const pagesConfig = {
     intro:
       "全班分成藍紅兩隊。畫面出一題，兩邊都能搶著按，答對可以占領領地，題目越難佔領得越多，吃光對方的一隊贏。",
   },
+  "quiz-morris": {
+    path: "/quiz/morris",
+    imageSrc: "/images/covers/warm/quiz-morris.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAn0lEQVR4nAXBQQqCUBAA0JlxdCEUZlFQUBTeIIjO0bZlV+oAXaBLRLRqFVRqtCgQ2oSCif7P50/vYV1k1loLSCgEyC4TOVprFpHz5Volt3dpwyjiJg864XIxJwvYPFNUTasbfPLfdrc/HE+u57FD8Cq0H/YHbHxdTieje5wqpZgA2rOIxEj1HQ97m/UqiR+ey1gXGTtkrQgSIKAIERlj/l1IRozXOapcAAAAAElFTkSuQmCC",
+    title: "圈叉搶答",
+    slogan: "兩隊各答各的，搶先把三枚棋連成線",
+    intro:
+      "紅藍兩隊各自看題、各自作答，答對就能在中央九宮格放下一枚棋。三枚棋都上場後還能搬動位置，先連成橫線、直線或斜線的一隊獲勝。",
+  },
 } satisfies Record<string, Page>;
 
 export type PageKey = keyof typeof pagesConfig;

@@ -1,0 +1,308 @@
+"use client";
+
+import { Button } from "@/components/atoms/shadcn/button";
+import {
+  countPieces,
+  optionsOf,
+  type Lane,
+  type Side,
+} from "@/lib/morris/game";
+import { cn } from "@/lib/utils";
+import { Circle, X } from "lucide-react";
+import type { MorrisGame } from "./useMorrisGame";
+
+const SIDE_COLOR: Record<Side, string> = {
+  red: "text-brand-red",
+  blue: "text-brand-blue",
+};
+const SIDE_BORDER: Record<Side, string> = {
+  red: "border-brand-red",
+  blue: "border-brand-blue",
+};
+
+export function MorrisStage({
+  game,
+  names,
+  onSettings,
+}: {
+  game: MorrisGame;
+  names: [string, string];
+  onSettings: () => void;
+}) {
+  const { state } = game;
+  const nameOf = (side: Side) =>
+    side === "red" ? names[0] || "紅隊" : names[1] || "藍隊";
+
+  return (
+    <div
+      data-morris-board
+      className="@container relative min-h-[52rem] w-full overflow-hidden rounded-2xl border border-border bg-paper md:aspect-video md:min-h-0"
+    >
+      <div className="grid h-full gap-3 p-3 md:grid-cols-[minmax(0,1fr)_minmax(15rem,0.92fr)_minmax(0,1fr)] md:gap-[1.2cqw] md:p-[1.2cqw]">
+        <QuestionLane
+          side="red"
+          name={nameOf("red")}
+          lane={state.lanes.red}
+          game={game}
+        />
+        <Board game={game} nameOf={nameOf} />
+        <QuestionLane
+          side="blue"
+          name={nameOf("blue")}
+          lane={state.lanes.blue}
+          game={game}
+        />
+      </div>
+
+      {state.phase === "over" && (
+        <div className="absolute inset-x-3 bottom-3 z-10 flex justify-center md:inset-x-[29%] md:bottom-[1.5cqw]">
+          <div className="w-full rounded-2xl border border-ink bg-card px-5 py-4 text-center shadow-lg">
+            <p className="text-h2 text-ink">
+              {state.result === "draw" ? (
+                "和局"
+              ) : (
+                <>
+                  <span className={SIDE_COLOR[state.result!]}>{nameOf(state.result!)}</span>
+                  獲勝！
+                </>
+              )}
+            </p>
+            <div className="mt-3 flex justify-center gap-2">
+              <Button onClick={game.restart} className="rounded-full active:scale-[0.97]">
+                再玩一次
+              </Button>
+              <Button
+                variant="outline"
+                onClick={onSettings}
+                className="rounded-full active:scale-[0.97]"
+              >
+                設定
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function QuestionLane({
+  side,
+  name,
+  lane,
+  game,
+}: {
+  side: Side;
+  name: string;
+  lane: Lane;
+  game: MorrisGame;
+}) {
+  const { state } = game;
+  const question = lane.current;
+  const disabled = state.phase !== "quiz" || lane.cooldown > 0;
+  const answered = lane.feedback;
+
+  return (
+    <section
+      aria-label={`${name}題目`}
+      className={cn(
+        "flex min-h-0 flex-col rounded-2xl border-[3px] bg-card p-4 shadow-sm md:p-[1.2cqw]",
+        SIDE_BORDER[side],
+      )}
+    >
+      <header className="flex items-center justify-between gap-2 border-b border-border pb-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <Mark side={side} className="size-6 shrink-0" />
+          <h2 className={cn("truncate text-h3", SIDE_COLOR[side])}>{name}</h2>
+        </div>
+        <span className="text-caption shrink-0 text-muted-foreground tabular-nums">
+          {Math.min(lane.index + (question ? 1 : 0), lane.queue.length)} / {lane.queue.length}
+        </span>
+      </header>
+
+      {state.phase === "ready" ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+          <p className="text-body text-muted-foreground">站到自己的題目旁，準備好再按。</p>
+          <Button
+            size="lg"
+            disabled={state.ready[side]}
+            onClick={() => game.markReady(side)}
+            className="h-auto rounded-full px-6 py-4 transition-transform duration-press ease-out active:scale-[0.97]"
+          >
+            {state.ready[side] ? `${name}準備好了 ✓` : `${name}準備好了`}
+          </Button>
+        </div>
+      ) : state.phase === "countdown" ? (
+        <LaneMessage title="準備出題" body="倒數結束後，兩隊會同時看到第一題。" />
+      ) : lane.exhausted ? (
+        <LaneMessage title="題目已答完" body="等待另一隊完成題庫。" />
+      ) : lane.waiting || !question ? (
+        <LaneMessage title="等對方換題" body="下一題和對方相同，稍等一下。" />
+      ) : (
+        <div className="flex min-h-0 flex-1 flex-col">
+          <p className="mt-4 text-center text-[clamp(1rem,2cqw,1.6rem)] leading-[1.55] font-bold text-balance text-ink">
+            {question.text}
+          </p>
+          <div className="mt-4 grid flex-1 content-center gap-2">
+            {optionsOf(question).map((option, index) => {
+              const isAnswer = option === question.answer;
+              const isPicked = option === answered?.choice;
+              return (
+                <button
+                  key={`${option}-${index}`}
+                  type="button"
+                  disabled={disabled}
+                  aria-label={`${name}選 ${option}`}
+                  onPointerDown={(event) => {
+                    if (event.button !== 0) return;
+                    event.preventDefault();
+                    game.answer(side, option);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter" && event.key !== " ") return;
+                    event.preventDefault();
+                    game.answer(side, option);
+                  }}
+                  className={cn(
+                    "min-h-12 touch-manipulation rounded-xl border-2 px-3 py-2 text-base font-bold break-words shadow-sm",
+                    "transition-[transform,background-color,border-color] duration-press ease-out active:scale-[0.97] disabled:pointer-events-none",
+                    !answered && cn(SIDE_BORDER[side], "bg-popover text-ink"),
+                    answered && isAnswer && "border-success bg-success-soft text-success-ink",
+                    answered && isPicked && !isAnswer && "border-danger bg-danger-soft text-danger-ink",
+                    answered && !isAnswer && !isPicked && "border-border bg-muted text-muted-foreground",
+                    state.phase === "move" && !answered && "border-border bg-muted text-muted-foreground",
+                  )}
+                >
+                  {option}
+                </button>
+              );
+            })}
+          </div>
+          {answered && (
+            <div
+              aria-live="assertive"
+              className={cn(
+                "mt-3 rounded-xl px-3 py-2 text-sm",
+                answered.correct
+                  ? "bg-success-soft text-success-ink"
+                  : "bg-danger-soft text-danger-ink",
+              )}
+            >
+              <p className="font-bold">
+                {answered.correct
+                  ? "答對了，取得一個棋步！"
+                  : `答錯了，${lane.cooldown} 秒後換題`}
+              </p>
+              <p className="mt-1">答案：{question.answer}</p>
+              {question.explanation && <p className="mt-1">{question.explanation}</p>}
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function LaneMessage({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center text-center">
+      <p className="text-h3 text-ink">{title}</p>
+      <p className="mt-2 text-body text-muted-foreground">{body}</p>
+    </div>
+  );
+}
+
+function Board({
+  game,
+  nameOf,
+}: {
+  game: MorrisGame;
+  nameOf: (side: Side) => string;
+}) {
+  const { state } = game;
+  const moving = state.movingSide;
+  const relocating = moving ? countPieces(state.board, moving) >= 3 : false;
+
+  return (
+    <section className="order-first flex min-h-0 flex-col items-center justify-center rounded-2xl bg-muted p-4 md:order-none md:p-[1.2cqw]">
+      <div className="mb-3 min-h-12 text-center">
+        {state.phase === "countdown" && state.countdown !== null ? (
+          <p
+            key={state.countdown}
+            aria-live="assertive"
+            className="font-display text-[clamp(3rem,8cqw,6rem)] leading-none font-extrabold text-ink"
+          >
+            {state.countdown}
+          </p>
+        ) : state.phase === "move" && moving ? (
+          <p className={cn("text-h3", SIDE_COLOR[moving])}>
+            {nameOf(moving)}，{relocating ? "選一枚棋，再選空格" : "選一個空格放棋"}
+          </p>
+        ) : state.phase === "ready" ? (
+          <p className="text-h3 text-ink">READY?</p>
+        ) : (
+          <p className="text-body font-semibold text-muted-foreground">先連成三枚的一隊獲勝</p>
+        )}
+      </div>
+
+      <div className="relative aspect-square w-full max-w-[22rem]">
+        <div className="grid h-full grid-cols-3 gap-2 rounded-2xl bg-ink p-2">
+          {state.board.map((cell, index) => {
+            const selected = state.selectedFrom === index;
+            const winning = state.winningLine?.includes(index);
+            return (
+              <button
+                key={index}
+                type="button"
+                aria-label={cell ? `${nameOf(cell)}的棋` : `空格 ${index + 1}`}
+                disabled={state.phase !== "move"}
+                onClick={() => game.chooseCell(index)}
+                className={cn(
+                  "grid min-h-0 place-items-center rounded-xl bg-card transition-[transform,background-color,box-shadow] duration-press ease-out active:scale-[0.97] disabled:pointer-events-none",
+                  selected && "ring-4 ring-warning",
+                  winning && "bg-warning-soft ring-4 ring-warning",
+                )}
+              >
+                {cell && <Mark side={cell} className="size-[58%]" />}
+              </button>
+            );
+          })}
+        </div>
+        {state.winningLine && <WinningStroke line={state.winningLine} />}
+      </div>
+      <p className="mt-3 text-caption text-center text-muted-foreground">
+        紅隊 ○　藍隊 ×
+      </p>
+    </section>
+  );
+}
+
+function Mark({ side, className }: { side: Side; className?: string }) {
+  return side === "red" ? (
+    <Circle aria-hidden strokeWidth={3.5} className={cn(SIDE_COLOR.red, className)} />
+  ) : (
+    <X aria-hidden strokeWidth={3.5} className={cn(SIDE_COLOR.blue, className)} />
+  );
+}
+
+function WinningStroke({ line }: { line: number[] }) {
+  const point = (index: number) => ({
+    x: (index % 3) * 33.333 + 16.666,
+    y: Math.floor(index / 3) * 33.333 + 16.666,
+  });
+  const from = point(line[0]);
+  const to = point(line[2]);
+  return (
+    <svg aria-hidden className="pointer-events-none absolute inset-0 size-full" viewBox="0 0 100 100">
+      <line
+        x1={from.x}
+        y1={from.y}
+        x2={to.x}
+        y2={to.y}
+        stroke="var(--ink)"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}

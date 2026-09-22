@@ -32,6 +32,8 @@ test("首頁列出分類與獨立單元，分類頁列出旗下所有單元", as
     "/monopoly",
     "/multiplication",
     "/noise",
+    "/quiz/morris",
+    "/quiz/territory",
     "/scoreboard",
     "/timer",
   ]);
