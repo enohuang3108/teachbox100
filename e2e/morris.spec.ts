@@ -32,6 +32,23 @@ test("圈叉搶答會鎖場下棋、暫停答錯冷卻並可手動和局", async
   await page.getByRole("button", { name: "下一步", exact: true }).click();
   await page.getByRole("button", { name: "開始比賽", exact: true }).click();
 
+  await expect(page.getByText("站到自己的題目旁，準備好再按。", { exact: true })).toHaveCount(0);
+  const readyLabel = page.locator("[data-morris-ready-label]");
+  const readyGrid = page.locator("[data-morris-grid]");
+  await expect(readyLabel).toHaveText("READY?");
+  const readyLabelBox = await readyLabel.boundingBox();
+  const readyGridBox = await readyGrid.boundingBox();
+  expect(readyLabelBox).not.toBeNull();
+  expect(readyGridBox).not.toBeNull();
+  expect(readyLabelBox!.x + readyLabelBox!.width / 2).toBeCloseTo(
+    readyGridBox!.x + readyGridBox!.width / 2,
+    0,
+  );
+  expect(readyLabelBox!.y + readyLabelBox!.height / 2).toBeCloseTo(
+    readyGridBox!.y + readyGridBox!.height / 2,
+    0,
+  );
+
   await page.getByRole("button", { name: "紅隊準備好了", exact: true }).click();
   await page.getByRole("button", { name: "藍隊準備好了", exact: true }).click();
   await expect(page.getByText(/^測試題目 /)).toHaveCount(0);
@@ -48,6 +65,9 @@ test("圈叉搶答會鎖場下棋、暫停答錯冷卻並可手動和局", async
   await expect(page.getByText("答錯了，3 秒後換題", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "藍隊選 正確", exact: true }).click();
+  const correctFeedback = page.locator('[data-morris-feedback="correct"]');
+  await expect(correctFeedback.getByText("正確", { exact: true })).toBeVisible();
+  await expect(correctFeedback.getByText("取得一個棋步", { exact: true })).toBeVisible();
   await expect(page.getByText("藍隊，選一個空格放棋", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "紅隊選 正確", exact: true })).toBeDisabled();
   await expect(page.locator('[data-morris-answers="red"]')).toHaveClass(/opacity-40/);

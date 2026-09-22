@@ -8,7 +8,7 @@ import {
   type Side,
 } from "@/lib/morris/game";
 import { cn } from "@/lib/utils";
-import { Circle, X } from "lucide-react";
+import { Check, Circle, X } from "lucide-react";
 import type { MorrisGame } from "./useMorrisGame";
 
 const SIDE_COLOR: Record<Side, string> = {
@@ -103,6 +103,7 @@ function QuestionLane({
   const answered = lane.feedback;
   const acting = state.phase === "move" && state.movingSide === side;
   const lockedOut = state.phase === "move" && state.movingSide !== side;
+  const ready = state.phase === "ready";
 
   return (
     <section
@@ -112,104 +113,138 @@ function QuestionLane({
         SIDE_BORDER[side],
       )}
     >
-      <header className="relative flex min-h-20 items-center justify-center border-b border-border pb-2">
-        <Mark
-          side={side}
-          className={cn("size-16", acting && "morris-action-mark")}
-        />
-        <span className="text-caption absolute top-0 right-0 text-muted-foreground tabular-nums">
-          {Math.min(lane.index + (question ? 1 : 0), lane.queue.length)} / {lane.queue.length}
-        </span>
-      </header>
-
-      {state.phase === "ready" ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-          <p className="text-body text-muted-foreground">站到自己的題目旁，準備好再按。</p>
+      {ready ? (
+        <div className="relative flex min-h-0 flex-1 flex-col items-center text-center">
+          <span className="text-caption absolute top-0 right-0 text-muted-foreground tabular-nums">
+            {Math.min(lane.index + (question ? 1 : 0), lane.queue.length)} / {lane.queue.length}
+          </span>
+          <div className="flex min-h-0 flex-1 items-center justify-center">
+            <Mark side={side} className="size-[clamp(5rem,8cqw,8rem)]" />
+          </div>
           <Button
             size="lg"
             disabled={state.ready[side]}
             onClick={() => game.markReady(side)}
-            className="h-auto rounded-full px-6 py-4 transition-transform duration-press ease-out active:scale-[0.97]"
+            className="mb-[6%] h-auto rounded-full px-6 py-4 transition-transform duration-press ease-out active:scale-[0.97]"
           >
             {state.ready[side] ? `${name}準備好了 ✓` : `${name}準備好了`}
           </Button>
         </div>
-      ) : state.phase === "countdown" ? (
-        <LaneMessage title="準備出題" body="倒數結束後，兩隊會同時看到第一題。" />
-      ) : lane.exhausted ? (
-        <LaneMessage title="題目已答完" body="等待另一隊完成題庫。" />
-      ) : lane.waiting || !question ? (
-        <LaneMessage title="等對方換題" body="下一題和對方相同，稍等一下。" />
       ) : (
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex min-h-0 flex-1 items-center justify-center px-2 py-4">
-            <p className="text-center text-[clamp(1rem,2cqw,1.6rem)] leading-[1.55] font-bold text-balance text-ink">
-              {question.text}
-            </p>
-          </div>
-          <div
-            data-morris-answers={side}
-            className={cn(
-              "grid shrink-0 gap-2 pb-2 transition-opacity duration-hover",
-              lockedOut && "opacity-40",
-            )}
-          >
-            {optionsOf(question).map((option, index) => {
-              const isAnswer = option === question.answer;
-              const isPicked = option === answered?.choice;
-              return (
-                <button
-                  key={`${option}-${index}`}
-                  type="button"
-                  disabled={disabled}
-                  aria-label={`${name}選 ${option}`}
-                  onPointerDown={(event) => {
-                    if (event.button !== 0) return;
-                    event.preventDefault();
-                    game.answer(side, option);
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key !== "Enter" && event.key !== " ") return;
-                    event.preventDefault();
-                    game.answer(side, option);
-                  }}
-                  className={cn(
-                    "min-h-12 touch-manipulation rounded-xl border-2 px-3 py-2 text-base font-bold break-words shadow-sm",
-                    "transition-[transform,background-color,border-color] duration-press ease-out active:scale-[0.97] disabled:pointer-events-none",
-                    !answered && cn(SIDE_BORDER[side], "bg-paper text-ink"),
-                    answered && isAnswer && "border-success bg-success-soft text-success-ink",
-                    answered && isPicked && !isAnswer && "border-danger bg-danger-soft text-danger-ink",
-                    answered && !isAnswer && !isPicked && "border-border bg-muted text-muted-foreground",
-                    state.phase === "move" && !answered && "border-border bg-muted text-muted-foreground",
-                  )}
-                >
-                  {option}
-                </button>
-              );
-            })}
-          </div>
-          {answered && (
-            <div
-              aria-live="assertive"
-              className={cn(
-                "mt-3 rounded-xl px-3 py-2 text-sm",
-                answered.correct
-                  ? "bg-success-soft text-success-ink"
-                  : "bg-danger-soft text-danger-ink",
+        <>
+          <header className="relative flex min-h-20 items-center justify-center border-b border-border pb-2">
+            <Mark
+              side={side}
+              className={cn("size-16", acting && "morris-action-mark")}
+            />
+            <span className="text-caption absolute top-0 right-0 text-muted-foreground tabular-nums">
+              {Math.min(lane.index + (question ? 1 : 0), lane.queue.length)} / {lane.queue.length}
+            </span>
+          </header>
+
+          {state.phase === "countdown" ? (
+            <LaneMessage title="準備出題" body="倒數結束後，兩隊會同時看到第一題。" />
+          ) : lane.exhausted ? (
+            <LaneMessage title="題目已答完" body="等待另一隊完成題庫。" />
+          ) : lane.waiting || !question ? (
+            <LaneMessage title="等對方換題" body="下一題和對方相同，稍等一下。" />
+          ) : (
+            <div className="flex min-h-0 flex-1 flex-col">
+              <div className="flex min-h-0 flex-1 items-center justify-center px-2 py-4">
+                <p className="text-center text-[clamp(1rem,2cqw,1.6rem)] leading-[1.55] font-bold text-balance text-ink">
+                  {question.text}
+                </p>
+              </div>
+              <div
+                data-morris-answers={side}
+                className={cn(
+                  "grid shrink-0 gap-2 pb-2 transition-opacity duration-hover",
+                  lockedOut && "opacity-40",
+                )}
+              >
+                {optionsOf(question).map((option, index) => {
+                  const isAnswer = option === question.answer;
+                  const isPicked = option === answered?.choice;
+                  return (
+                    <button
+                      key={`${option}-${index}`}
+                      type="button"
+                      disabled={disabled}
+                      aria-label={`${name}選 ${option}`}
+                      onPointerDown={(event) => {
+                        if (event.button !== 0) return;
+                        event.preventDefault();
+                        game.answer(side, option);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key !== "Enter" && event.key !== " ") return;
+                        event.preventDefault();
+                        game.answer(side, option);
+                      }}
+                      className={cn(
+                        "min-h-12 touch-manipulation rounded-xl border-2 px-3 py-2 text-base font-bold break-words shadow-sm",
+                        "transition-[transform,background-color,border-color] duration-press ease-out active:scale-[0.97] disabled:pointer-events-none",
+                        !answered && cn(SIDE_BORDER[side], "bg-paper text-ink"),
+                        answered && isAnswer && "border-success bg-success-soft text-success-ink",
+                        answered && isPicked && !isAnswer && "border-danger bg-danger-soft text-danger-ink",
+                        answered && !isAnswer && !isPicked && "border-border bg-muted text-muted-foreground",
+                        state.phase === "move" && !answered && "border-border bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {option}
+                    </button>
+                  );
+                })}
+              </div>
+              {answered && (
+                <AnswerFeedback
+                  correct={answered.correct}
+                  cooldown={lane.cooldown}
+                  answer={question.answer}
+                  explanation={question.explanation}
+                />
               )}
-            >
-              <p className="font-bold">
-                {answered.correct
-                  ? "答對了，取得一個棋步！"
-                  : `答錯了，${lane.cooldown} 秒後換題`}
-              </p>
-              <p className="mt-1">答案：{question.answer}</p>
-              {question.explanation && <p className="mt-1">{question.explanation}</p>}
             </div>
           )}
-        </div>
+        </>
       )}
     </section>
+  );
+}
+
+function AnswerFeedback({
+  correct,
+  cooldown,
+  answer,
+  explanation,
+}: {
+  correct: boolean;
+  cooldown: number;
+  answer: string;
+  explanation?: string;
+}) {
+  return (
+    <div
+      data-morris-feedback={correct ? "correct" : "incorrect"}
+      aria-live="assertive"
+      className="mt-3 border-t border-border pt-3"
+    >
+      <div className="flex items-center gap-2">
+        {correct ? (
+          <Check aria-hidden className="size-5 shrink-0 text-success" strokeWidth={3} />
+        ) : (
+          <X aria-hidden className="size-5 shrink-0 text-danger" strokeWidth={3} />
+        )}
+        <p className={cn("text-body", correct ? "text-success-ink" : "text-danger-ink")}>
+          {correct ? "正確" : `答錯了，${cooldown} 秒後換題`}
+        </p>
+        {correct && (
+          <p className="text-caption ml-auto text-muted-foreground">取得一個棋步</p>
+        )}
+      </div>
+      <p className="text-caption mt-2 text-muted-foreground">答案：{answer}</p>
+      {explanation && <p className="text-caption mt-1 text-muted-foreground">{explanation}</p>}
+    </div>
   );
 }
 
@@ -248,8 +283,6 @@ function Board({
           <p className={cn("text-h3", SIDE_COLOR[moving])}>
             {nameOf(moving)}，{relocating ? "選一枚棋，再選空格" : "選一個空格放棋"}
           </p>
-        ) : state.phase === "ready" ? (
-          <p className="text-h3 text-ink">READY?</p>
         ) : null}
       </div>
 
@@ -305,6 +338,14 @@ function Board({
             );
           })}
         </div>
+        {state.phase === "ready" && (
+          <p
+            data-morris-ready-label
+            className="pointer-events-none absolute inset-0 z-10 grid place-items-center text-[clamp(2.5rem,5cqw,4.5rem)] leading-none font-extrabold text-ink"
+          >
+            READY?
+          </p>
+        )}
         {state.winningLine && <WinningStroke line={state.winningLine} />}
       </div>
     </section>
