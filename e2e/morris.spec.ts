@@ -48,6 +48,12 @@ test("圈叉搶答會鎖場下棋、暫停答錯冷卻並可手動和局", async
     readyGridBox!.y + readyGridBox!.height / 2,
     0,
   );
+  const redReadyBox = await page
+    .getByRole("button", { name: "紅隊準備好了", exact: true })
+    .boundingBox();
+  expect(redReadyBox).not.toBeNull();
+  expect(redReadyBox!.width).toBeGreaterThanOrEqual(160);
+  expect(redReadyBox!.height).toBeGreaterThanOrEqual(56);
 
   await page.getByRole("button", { name: "紅隊準備好了", exact: true }).click();
   await page.getByRole("button", { name: "藍隊準備好了", exact: true }).click();

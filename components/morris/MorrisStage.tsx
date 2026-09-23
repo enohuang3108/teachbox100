@@ -133,7 +133,7 @@ function QuestionLane({
             size="lg"
             disabled={state.ready[side]}
             onClick={() => game.markReady(side)}
-            className="mb-[6%] h-auto rounded-full px-6 py-4 transition-transform duration-press ease-out active:scale-[0.97]"
+            className="text-body-lg mb-[6%] h-auto min-h-14 min-w-40 rounded-full px-8 py-4 transition-transform duration-press ease-out active:scale-[0.97]"
           >
             {state.ready[side] ? `${name}準備好了 ✓` : `${name}準備好了`}
           </Button>
