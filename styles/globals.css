@@ -967,7 +967,7 @@ main:has(> #game-stage[data-unit="ichiban"]) {
   0%,
   100% {
     opacity: var(--morris-cue-low, 0.58);
-    transform: scale(0.95);
+    transform: scale(var(--morris-cue-scale, 0.95));
   }
   50% {
     opacity: 1;
@@ -988,6 +988,25 @@ main:has(> #game-stage[data-unit="ichiban"]) {
   will-change: transform, opacity;
   animation: morris-cue-breathe 1200ms var(--ease-in-out) infinite;
 }
+.morris-action-lane[data-morris-lane="red"] {
+  --morris-lane-color: var(--brand-red);
+}
+.morris-action-lane[data-morris-lane="blue"] {
+  --morris-lane-color: var(--brand-blue);
+}
+.morris-action-lane::after {
+  --morris-cue-low: 0.45;
+  --morris-cue-scale: 0.992;
+  content: "";
+  position: absolute;
+  inset: -3px;
+  pointer-events: none;
+  border: 3px solid var(--morris-lane-color);
+  border-radius: inherit;
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation: morris-cue-breathe 1200ms var(--ease-in-out) infinite;
+}
 .morris-action-cell::after {
   --morris-cue-low: 0.28;
   content: "";
@@ -1004,6 +1023,7 @@ main:has(> #game-stage[data-unit="ichiban"]) {
 }
 @media (prefers-reduced-motion: reduce) {
   .morris-action-mark,
+  .morris-action-lane::after,
   .morris-action-cell::after {
     animation-name: morris-cue-fade;
   }

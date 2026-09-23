@@ -116,9 +116,11 @@ function QuestionLane({
   return (
     <section
       aria-label={`${name}題目`}
+      data-morris-lane={side}
       className={cn(
-        "flex min-h-0 flex-col rounded-2xl border-[3px] bg-card p-4 shadow-sm md:p-[1.2cqw]",
+        "relative flex min-h-0 flex-col rounded-2xl border-[3px] bg-card p-4 shadow-sm md:p-[1.2cqw]",
         SIDE_BORDER[side],
+        acting && "morris-action-lane border-transparent",
       )}
     >
       {ready ? (
