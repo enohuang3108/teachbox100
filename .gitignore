@@ -63,3 +63,6 @@ storybook-static/
 # QA 截圖只留本機（每輪上百張），報告 md 進版控
 /docs/qa/reports/assets/
 .agents/verification/
+
+# Sentry Config File
+.env.sentry-build-plugin

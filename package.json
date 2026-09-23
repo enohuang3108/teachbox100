@@ -23,7 +23,6 @@
     "test:workflow": "node --test scripts/verify-change.test.mjs",
     "verify:change": "node scripts/verify-change.mjs",
     "audit:fix": "pnpm audit || pnpm audit --fix=override; pnpm install --lockfile-only && (git diff --quiet pnpm-workspace.yaml pnpm-lock.yaml || (git add pnpm-workspace.yaml pnpm-lock.yaml && git commit -m 'chore(deps): apply pnpm audit override fixes'))"
-    
   },
   "dependencies": {
     "@animateicons/react": "^0.5.0",
@@ -56,6 +55,7 @@
     "@radix-ui/react-toggle": "^1.1.18",
     "@radix-ui/react-toggle-group": "^1.1.19",
     "@radix-ui/react-tooltip": "^1.2.16",
+    "@sentry/nextjs": "^10.75.2",
     "@serwist/next": "^9.5.12",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/howler": "^2.2.13",

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import * as Sentry from "@sentry/nextjs";
 import { useScoreboardStore } from "./store";
 
 /**
@@ -195,9 +196,27 @@ export function relayStatus(
  */
 let relayTimer: ReturnType<typeof setInterval> | null = null;
 function watchRelays(getSockets: () => Record<string, WebSocket>) {
+  if (relayTimer) clearInterval(relayTimer);
   const startedAt = Date.now();
-  const tick = () =>
-    set({ relay: relayStatus(getSockets(), Date.now() - startedAt) });
+  let reportedDown = false;
+  const tick = () => {
+    const sockets = getSockets();
+    const status = relayStatus(sockets, Date.now() - startedAt);
+    set({ relay: status });
+    if (status === "up") reportedDown = false;
+    if (status === "down" && !reportedDown) {
+      reportedDown = true;
+      Sentry.captureMessage("Scoreboard signaling relays unavailable", {
+        level: "warning",
+        tags: { feature: "scoreboard-buzz", phase: "relay-connect" },
+        extra: {
+          elapsedMs: Date.now() - startedAt,
+          relayCount: Object.keys(sockets).length,
+          socketStates: Object.values(sockets).map((socket) => socket.readyState),
+        },
+      });
+    }
+  };
   tick();
   relayTimer = setInterval(tick, 1000);
 }
@@ -224,14 +243,27 @@ export function isConnectedToHost(
 // trystero 只在瀏覽器跑得動（WebRTC），動態載入避免進到 SSR 與首屏 bundle
 async function connect(code: string, host: boolean) {
   hushCloseNoise();
-  const { joinRoom, selfId, getRelaySockets } = await loadSignaling();
-  mySelfId = selfId;
-  set({ relay: "connecting" });
-  watchRelays(getRelaySockets);
-  const r = joinRoom(
-    { appId: APP_ID, relayConfig: { urls: RELAYS, redundancy: RELAYS.length } },
-    roomId(code),
-  );
+  let phase: "load-signaling" | "join-room" = "load-signaling";
+  let r: ReturnType<Awaited<ReturnType<typeof loadSignaling>>["joinRoom"]>;
+  try {
+    const { joinRoom, selfId, getRelaySockets } = await loadSignaling();
+    mySelfId = selfId;
+    set({ relay: "connecting" });
+    watchRelays(getRelaySockets);
+    phase = "join-room";
+    r = joinRoom(
+      { appId: APP_ID, relayConfig: { urls: RELAYS, redundancy: RELAYS.length } },
+      roomId(code),
+    );
+  } catch (error) {
+    Sentry.withScope((scope) => {
+      scope.setTag("feature", "scoreboard-buzz");
+      scope.setTag("phase", phase);
+      scope.setTag("role", host ? "host" : "player");
+      Sentry.captureException(error);
+    });
+    throw error;
+  }
 
   // 學生端認定的老師：第一個推狀態來的 peer。其他同房的人推的一律不理，
   // 免得同學自己送假的「開放搶答／名次」給全班；老師斷線才重新認。

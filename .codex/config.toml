@@ -1,0 +1,5 @@
+[mcp_servers.sentry]
+url = "https://mcp.sentry.dev/mcp"
+
+[mcp_servers.sentry.tools.execute_sentry_tool]
+approval_mode = "approve"
