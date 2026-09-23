@@ -157,7 +157,7 @@ function Crown() {
  * 沒用這個功能的老師看到的計分板跟以前一模一樣。
  */
 function BuzzBar() {
-  const { code, open, order } = useBuzzStore();
+  const { code, enabled, open, order } = useBuzzStore();
   const { playBonusSound } = useSound();
   const sound = useScoreboardStore((s) => s.sound);
 
@@ -167,7 +167,7 @@ function BuzzBar() {
     [sound, playBonusSound],
   );
 
-  if (!code) return null;
+  if (!enabled || !code) return null;
 
   return (
     <div className="flex w-full flex-col items-center gap-3">

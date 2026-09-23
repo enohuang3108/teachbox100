@@ -22,6 +22,8 @@ export interface Buzzer {
 export interface BuzzStore {
   /** 四碼房間代號；null = 沒開房 */
   code: string | null;
+  /** 老師目前有沒有啟用連線模式；關掉時保留資料通道，之後可用原房號恢復 */
+  enabled: boolean;
   /** 開放搶答中；老師按「開始搶答」才放行，避免上一題的手殘按到下一題 */
   open: boolean;
   players: Buzzer[];
@@ -42,6 +44,7 @@ export type RelayStatus = "connecting" | "up" | "down";
 
 export const useBuzzStore = create<BuzzStore>(() => ({
   code: null,
+  enabled: false,
   open: false,
   players: [],
   order: [],
@@ -210,6 +213,14 @@ export function synchronizeNewPeer(
   schedule(send, STATE_RETRY_MS);
 }
 
+/** 學生只有認得的老師仍在 peer 清單裡才算連線；其他學生不算。 */
+export function isConnectedToHost(
+  hostPeer: string | null,
+  peers: Record<string, unknown>,
+) {
+  return hostPeer !== null && Object.hasOwn(peers, hostPeer);
+}
+
 // trystero 只在瀏覽器跑得動（WebRTC），動態載入避免進到 SSR 與首屏 bundle
 async function connect(code: string, host: boolean) {
   hushCloseNoise();
@@ -230,7 +241,14 @@ async function connect(code: string, host: boolean) {
       ? undefined
       : (s, { peerId }) => {
           hostPeer ??= peerId;
-          if (peerId === hostPeer) set({ open: s.open, order: s.order });
+          if (peerId !== hostPeer) return;
+          set({
+            connected: isConnectedToHost(hostPeer, r.getPeers()),
+            open: s.open,
+            order: s.order,
+          });
+          // 暫停期間才打開舊 QR 的學生尚未被老師收進名單；恢復廣播時補報到。
+          if (myName) void join.send({ uid: myUid(), name: myName });
         },
   });
 
@@ -238,11 +256,16 @@ async function connect(code: string, host: boolean) {
   // 手機息屏重連時，新連線常常比舊連線的斷線通知先到。
   const pending = new Map<string, { peerId: string; payload: JoinPayload }>();
   const admit = (peerId: string, payload: JoinPayload) => {
+    if (!get().enabled) return;
     const before = get().players;
     const after = addPlayer(before, peerId, payload, new Set(Object.keys(r.getPeers())));
-    if (after === before && before.some((p) => p.uid === String(payload.uid)))
-      pending.set(String(payload.uid), { peerId, payload });
-    else pending.delete(String(payload.uid));
+    if (after === before) {
+      const owner = before.find((p) => p.uid === String(payload.uid));
+      if (owner && owner.id !== peerId)
+        pending.set(String(payload.uid), { peerId, payload });
+      return;
+    }
+    pending.delete(String(payload.uid));
     set({ players: after });
   };
 
@@ -282,7 +305,8 @@ async function connect(code: string, host: boolean) {
     // 等老師那端真的連上再送一次（斷線重連也走這條）。
     // 斷線（息屏、切 App、換網路）之後 trystero 會自己重新配對，
     // 這裡只負責在重新連上時補送一次報到，並把狀態反映到畫面上。
-    const sync = () => set({ connected: Object.keys(r.getPeers()).length > 0 });
+    const sync = () =>
+      set({ connected: isConnectedToHost(hostPeer, r.getPeers()) });
     r.onPeerJoin = () => {
       sync();
       if (myName) join.send({ uid: myUid(), name: myName });
@@ -290,6 +314,7 @@ async function connect(code: string, host: boolean) {
     r.onPeerLeave = (peerId) => {
       if (peerId === hostPeer) hostPeer = null;
       sync();
+      if (!hostPeer) set({ open: false });
     };
   }
 
@@ -332,6 +357,7 @@ export function addPlayer(
   const owner = players.find((p) => p.uid === uid);
   if (owner) {
     if (owner.id !== peerId && online.has(owner.id)) return players;
+    if (owner.id === peerId && owner.name === name) return players;
     return players.map((p) => (p === owner ? { ...p, id: peerId, name } : p));
   }
   // 計分板上限 40 組
@@ -374,13 +400,21 @@ const syncTeams = () =>
 
 /** 老師端：開房。回傳四碼代號 */
 export async function openRoom() {
-  if (get().code) return get().code!;
+  // 關閉開關只是暫停：資料通道與名單仍在，重新打開便能沿用原房號立即恢復。
+  if (room && get().code) {
+    const code = get().code!;
+    set({ enabled: true, open: false, order: [] });
+    const players = get().players;
+    if (players.length)
+      useScoreboardStore.getState().setNames(players.map((p) => p.name));
+    return code;
+  }
   const code = savedCode() ?? makeCode();
   rememberCode(code);
   // QR 出現前老師端已經加入 signaling room；學生掃得很快也不會先連到空房。
   await connect(code, true);
   // connected 是學生端在用的（有沒有連到老師）；老師端看的是 relay 狀態
-  set({ code, open: false, players: [], order: [] });
+  set({ code, enabled: true, open: false, players: [], order: [] });
   // 開房就清空格子：接下來幾組由誰連進來決定
   useScoreboardStore.setState({ teams: [] });
   unsync = syncTeams();
@@ -389,13 +423,19 @@ export async function openRoom() {
 
 /** 換一個房號：舊房號作廢，還連著的學生要重掃。用在換班上課 */
 export async function renewCode() {
-  const wasOpen = get().code !== null;
-  closeRoom();
+  const wasOpen = get().enabled;
+  destroyRoom();
   rememberCode(makeCode());
   if (wasOpen) await openRoom();
 }
 
+/** 老師關掉開關時只暫停，讓原本的手機之後能用同一房號繼續。 */
 export function closeRoom() {
+  set({ enabled: false, open: false, order: [] });
+}
+
+/** 換房號才真的拆掉 WebRTC 房間。 */
+function destroyRoom() {
   unsync?.();
   unbroadcast?.();
   unsync = unbroadcast = null;
@@ -405,6 +445,7 @@ export function closeRoom() {
   relayTimer = null;
   set({
     code: null,
+    enabled: false,
     open: false,
     players: [],
     order: [],
@@ -422,7 +463,7 @@ export const clearOrder = () => set({ order: [] });
 /** 學生端：加入房間並報到 */
 export async function joinAsPlayer(code: string, name: string) {
   const r = room ?? (await connect(code, false));
-  set({ code });
+  set({ code, enabled: true });
   r.sendJoin(name);
 }
 

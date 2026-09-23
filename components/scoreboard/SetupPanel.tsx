@@ -10,6 +10,7 @@ import {
   toneStyle,
 } from "@/lib/scoreboard/store";
 import { Switch } from "@/components/atoms/shadcn/switch";
+import { Badge } from "@/components/atoms/shadcn/badge";
 import { DialogDescription } from "@/components/atoms/shadcn/dialog";
 import { StepSetup } from "@/components/organisms/StepSetup";
 import { Palette, Users } from "lucide-react";
@@ -34,7 +35,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
   const { teams, tone, hueSeed, step, setTeamCount, setNames, setTone } =
     useScoreboardStore();
   const [draft, setDraft] = useState(() => teams.map((t) => t.name).join("\n"));
-  const linked = useBuzzStore((s) => s.code !== null);
+  const linked = useBuzzStore((s) => s.enabled);
   const [linking, setLinking] = useState(false);
   /** 開房失敗（連線模組載不下來）。不講的話開關只會自己彈回去，老師不知道發生什麼事 */
   const [linkError, setLinkError] = useState(false);
@@ -88,16 +89,17 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
                   htmlFor="scoreboard-buzz"
                   className="flex cursor-pointer items-start justify-between gap-4"
                 >
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-ink">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-ink">
                       連線搶答
-                    </span>
+                      <Badge variant="secondary">BETA</Badge>
+                    </div>
                     <span className="mt-0.5 block text-caption text-muted-foreground">
                       {linked
                         ? "格數由連線人數決定，學生的名字就是格名。"
                         : "學生掃 QR 加入，手機上只有一顆搶答鈕；組數改由連線人數決定。"}
                     </span>
-                  </span>
+                  </div>
                   <Switch
                     id="scoreboard-buzz"
                     checked={linked}

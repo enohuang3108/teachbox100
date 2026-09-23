@@ -6,6 +6,7 @@ import {
   STATE_RETRY_MS,
   relayStatus,
   RELAY_TIMEOUT_MS,
+  isConnectedToHost,
 } from "./buzz";
 
 const a = { id: "a", uid: "u-a", name: "小明" };
@@ -51,6 +52,13 @@ describe("addPlayer", () => {
       { ...a, id: "a2" },
       b,
     ]);
+  });
+
+  it("同一條連線重複報到不產生新狀態", () => {
+    const players = [a, b];
+    expect(addPlayer(players, "a", { uid: "u-a", name: "小明" })).toBe(
+      players,
+    );
   });
 
   it("同名的兩個學生各佔一格：不然被擠掉的那個按鈴老師端不會顯示", () => {
@@ -116,5 +124,16 @@ describe("relayStatus", () => {
 
   it("一台 socket 都沒有，等到時限一樣是連不上", () => {
     expect(relayStatus({}, RELAY_TIMEOUT_MS)).toBe("down");
+  });
+});
+
+describe("isConnectedToHost", () => {
+  it("只連到另一位學生不算連上老師", () => {
+    expect(isConnectedToHost(null, { student: {} })).toBe(false);
+  });
+
+  it("認定的老師仍在 peer 清單才算連線", () => {
+    expect(isConnectedToHost("teacher", { teacher: {}, student: {} })).toBe(true);
+    expect(isConnectedToHost("teacher", { student: {} })).toBe(false);
   });
 });

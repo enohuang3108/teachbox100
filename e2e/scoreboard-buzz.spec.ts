@@ -134,3 +134,63 @@ test("live: 同一個瀏覽器開第二個分頁會被擋住", async ({ browser 
     await studentContext.close();
   }
 });
+
+test("live: 老師關閉再重開連線後，兩支手機會重新加入並能搶答", async ({ browser }) => {
+  test.setTimeout(90_000);
+  const teacherContext = await browser.newContext();
+  const studentContexts = await Promise.all([
+    browser.newContext({ viewport: { width: 393, height: 852 } }),
+    browser.newContext({ viewport: { width: 393, height: 852 } }),
+  ]);
+  const teacher = await teacherContext.newPage();
+  const students = await Promise.all(studentContexts.map((context) => context.newPage()));
+  teacher.setDefaultTimeout(15_000);
+  students.forEach((student) => student.setDefaultTimeout(15_000));
+
+  try {
+    await teacher.goto("/scoreboard");
+    await teacher.getByRole("button", { name: "開始使用" }).click();
+    const linkSwitch = teacher.getByRole("switch", { name: /連線搶答/ });
+    await linkSwitch.click();
+    const qr = teacher.locator('img[alt^="加入搶答的 QR code，房號 "]');
+    await expect(qr).toBeVisible({ timeout: 20_000 });
+    const code = (await qr.getAttribute("alt"))!.match(/房號 (\w{4})$/)![1];
+
+    await Promise.all(
+      students.map(async (student, index) => {
+        await student.goto(`/scoreboard/join#${code}`);
+        await student.getByRole("textbox", { name: "你的名字" }).fill(`學生${index + 1}`);
+        await student.getByRole("button", { name: "加入" }).click();
+      }),
+    );
+    await expect(teacher.getByText("已加入 2 人", { exact: true })).toBeVisible({
+      timeout: 25_000,
+    });
+
+    await teacher
+      .getByRole("dialog", { name: "掃描加入搶答" })
+      .getByRole("button", { name: "Close" })
+      .click();
+    await expect(qr).not.toBeVisible();
+    await linkSwitch.click();
+    await expect(linkSwitch).not.toBeChecked();
+    await linkSwitch.click();
+    await expect(linkSwitch).toBeChecked();
+    await expect(teacher.getByText(/^已加入 2 人/)).toBeVisible({
+      timeout: 25_000,
+    });
+
+    await teacher.getByRole("button", { name: "下一步" }).click();
+    await teacher.getByRole("button", { name: "開始計分" }).click();
+    await teacher.getByRole("button", { name: "開始搶答" }).click();
+    const buzzers = students.map((student) => student.getByRole("button", { name: "搶答" }));
+    await Promise.all(buzzers.map((button) => expect(button).toBeEnabled({ timeout: 15_000 })));
+    await Promise.all(buzzers.map((button) => button.click()));
+    await expect(teacher.locator("[data-score-root] ol li")).toHaveCount(2, {
+      timeout: 10_000,
+    });
+  } finally {
+    await teacherContext.close();
+    await Promise.all(studentContexts.map((context) => context.close()));
+  }
+});

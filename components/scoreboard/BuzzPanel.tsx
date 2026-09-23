@@ -43,6 +43,7 @@ let shownFor: string | null = null;
 /** 開了連線之後才出現：QR、房號、已報到的名單 */
 export function BuzzPanel() {
   const code = useBuzzStore((s) => s.code);
+  const enabled = useBuzzStore((s) => s.enabled);
   const players = useBuzzStore((s) => s.players);
   const relay = useBuzzStore((s) => s.relay);
   const [qr, setQr] = useState<string | null>(null);
@@ -70,7 +71,7 @@ export function BuzzPanel() {
     };
   }, [code]);
 
-  if (!code) return null;
+  if (!enabled || !code) return null;
   const url = `${location.origin}/scoreboard/join#${code}`;
 
   return (
