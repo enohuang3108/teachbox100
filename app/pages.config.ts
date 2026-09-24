@@ -201,7 +201,7 @@ const pagesConfig = {
       "全班分成藍紅兩隊。畫面出一題，兩邊都能搶著按，答對可以占領領地，題目越難佔領得越多，吃光對方的一隊贏。",
   },
   morse: {
-    path: "/morse",
+    path: "/ultimate-password",
     imageSrc: "/images/covers/warm/morse.webp",
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afry5v/++gEBAwAEC//otf304Qkmafz7+gL//voB6LAAAwn/+OkB6bIJAtvk17j9AQcEBgYK9hhdCPjf9/sAydkL7+bOoMLea2sGAeXgz9Tj6jEQ4g8SHvYLN0hGRgECArGtowLZ496+xayTv9v4+BoQDwI3NTAGBAEICAgB/vXq+/z78PPvEQoOAQgH2tnc+fn5LzEvbK1MgAx6lX0AAAAASUVORK5CYII=",

@@ -8,7 +8,7 @@ const pages = [
   "/coin/buy",
   "/coin/change",
   "/clock/current-time",
-  "/morse",
+  "/ultimate-password",
 ];
 
 for (const path of pages) {
@@ -25,9 +25,13 @@ for (const path of pages) {
   });
 }
 
-test("/morse 先選題庫與難度，再答題縮小範圍並顯示答案", async ({ page }) => {
+test("/ultimate-password 先選題庫與難度，再答題縮小範圍並顯示答案", async ({ page }) => {
   await page.addInitScript(() => { Math.random = () => 0.11; });
-  await page.goto("/morse");
+  await page.goto("/ultimate-password");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    /\/ultimate-password$/,
+  );
   await page.getByRole("button", { name: "開始練習" }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByText("要用哪份題庫？")).toBeVisible();
