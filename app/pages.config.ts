@@ -202,7 +202,8 @@ const pagesConfig = {
   },
   morse: {
     path: "/ultimate-password",
-    imageSrc: "/images/covers/warm/morse.webp",
+    imageSrc: "/images/covers/warm/ultimate-password-unlocked.png",
+    illustrationSrc: "/images/covers/warm/ultimate-password-unlocked.png",
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afry5v/++gEBAwAEC//otf304Qkmafz7+gL//voB6LAAAwn/+OkB6bIJAtvk17j9AQcEBgYK9hhdCPjf9/sAydkL7+bOoMLea2sGAeXgz9Tj6jEQ4g8SHvYLN0hGRgECArGtowLZ496+xayTv9v4+BoQDwI3NTAGBAEICAgB/vXq+/z78PPvEQoOAQgH2tnc+fn5LzEvbK1MgAx6lX0AAAAASUVORK5CYII=",
     title: "終極密碼",
