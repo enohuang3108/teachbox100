@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { drawQuestion, isValidGuess, nextRange, playableQuestions, resolveGuess, resolveRoundGuess, startRound } from "./game";
 
-describe("morse number game", () => {
+describe("ultimate password game", () => {
   it("wrong guesses narrow the range around the numeric answer", () => {
     expect(nextRange(30, 72)).toEqual({ low: 31, high: 100 });
     expect(nextRange(80, 72, { low: 31, high: 100 })).toEqual({ low: 31, high: 79 });

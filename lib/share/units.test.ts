@@ -43,7 +43,7 @@ const samples: { [K in ShareUnit]: SetupOf<K> } = {
       { id: "q1", type: "boolean", text: "蝙蝠是鳥類。", answer: "否" },
     ],
   },
-  morse: {
+  "ultimate-password": {
     cap: "easy",
     bank: [
       {

@@ -587,7 +587,7 @@ export const pageSeo: Record<string, PageSeo> = {
       },
     ],
   },
-  morse: {
+  "ultimate-password": {
     teaches: "回答課堂題目，並透過輪流猜數字練習範圍推理",
     title: "終極密碼 | 輪流猜 1 到 100",
     description:

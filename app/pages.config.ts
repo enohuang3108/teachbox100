@@ -200,7 +200,7 @@ const pagesConfig = {
     intro:
       "全班分成藍紅兩隊。畫面出一題，兩邊都能搶著按，答對可以占領領地，題目越難佔領得越多，吃光對方的一隊贏。",
   },
-  morse: {
+  "ultimate-password": {
     path: "/ultimate-password",
     imageSrc: "/images/covers/warm/ultimate-password-unlocked.png",
     illustrationSrc: "/images/covers/warm/ultimate-password-unlocked.png",

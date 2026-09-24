@@ -1,7 +1,7 @@
 "use client";
 
-import { MorseGame } from "@/components/morse/MorseGame";
+import { UltimatePasswordGame } from "@/components/ultimate-password/UltimatePasswordGame";
 
-export default function MorsePage() {
-  return <MorseGame />;
+export default function UltimatePasswordPage() {
+  return <UltimatePasswordGame />;
 }

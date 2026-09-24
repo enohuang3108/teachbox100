@@ -1,7 +1,7 @@
 import type { Question } from "@/lib/questions/types";
 
 /** 內建題庫：答案都是數字或是非，老師不匯入也能直接玩 */
-export const MORSE_QUESTIONS: Question[] = [
+export const ULTIMATE_PASSWORD_QUESTIONS: Question[] = [
   {
     id: "m1",
     type: "choice",

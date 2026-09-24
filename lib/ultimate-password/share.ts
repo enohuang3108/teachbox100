@@ -4,14 +4,14 @@ import { DIFFICULTIES } from "@/lib/questions/types";
 import { defineCodec, fail, RS, US } from "@/lib/share/codec";
 
 /** bank 為 null 代表用內建題庫，連結就不用塞整份題目 */
-export interface MorseSetup {
+export interface UltimatePasswordSetup {
   bank: Question[] | null;
   cap: Difficulty;
 }
 
 const VERSION = "1";
 
-export const morseShare = defineCodec<MorseSetup>(
+export const ultimatePasswordShare = defineCodec<UltimatePasswordSetup>(
   (s) =>
     [
       [VERSION, s.cap[0], s.bank ? "c" : "d"].join(US),

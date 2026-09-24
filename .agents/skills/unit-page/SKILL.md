@@ -158,7 +158,7 @@ payload 放 `#` 不放 query：不送到伺服器、沒有長度上限。壓縮�
 
 ### store
 
-`lib/<game>/store.ts`，一律 `create()(persist(..., { name: "<kebab-name>" }))`，一頁一個 localStorage key。存什麼、不存什麼見下面的約定表；計分板的分數與一番賞的卡池是刻意的例外，兩者的 FAQ 都有說明。終極密碼的進行中局面另開一個 store 存 `sessionStorage`（`lib/morse/store.ts` 的 `useMorseProgress`）：投影時誤按重新整理接著玩、直接回到遊戲不經過介紹頁，關掉分頁才清空。改過持久化結構才需要 `version` + `migrate`。
+`lib/<game>/store.ts`，一律 `create()(persist(..., { name: "<kebab-name>" }))`，一頁一個 localStorage key。存什麼、不存什麼見下面的約定表；計分板的分數與一番賞的卡池是刻意的例外，兩者的 FAQ 都有說明。終極密碼的進行中局面另開一個 store 存 `sessionStorage`（`lib/ultimate-password/store.ts` 的 `useUltimatePasswordProgress`）：投影時誤按重新整理接著玩、直接回到遊戲不經過介紹頁，關掉分頁才清空。改過持久化結構才需要 `version` + `migrate`。
 
 音效開關是 `sound: boolean` + `setSound`，由 `SoundToggleButton` 驅動。
 

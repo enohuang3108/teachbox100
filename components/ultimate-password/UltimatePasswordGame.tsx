@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/atoms/shadcn/dialog";
 import { TooltipProvider } from "@/components/atoms/shadcn/tooltip";
-import { SetupPanel } from "@/components/morse/SetupPanel";
+import { SetupPanel } from "@/components/ultimate-password/SetupPanel";
 import { ACTION_BTN, Tip } from "@/components/templates/GamePageTemplate";
 import {
   GAME_STAGE_ID,
@@ -26,9 +26,9 @@ import {
   drawQuestion,
   resolveRoundGuess,
   startRound,
-} from "@/lib/morse/game";
-import { MORSE_QUESTIONS } from "@/lib/morse/questions";
-import { useMorseProgress, useMorseStore } from "@/lib/morse/store";
+} from "@/lib/ultimate-password/game";
+import { ULTIMATE_PASSWORD_QUESTIONS } from "@/lib/ultimate-password/questions";
+import { useUltimatePasswordProgress, useUltimatePasswordStore } from "@/lib/ultimate-password/store";
 import { useSharedSetup } from "@/lib/share/useSharedSetup";
 import { playableOf } from "@/lib/territory/rules";
 import {
@@ -51,23 +51,23 @@ type AnswerFeedback = {
 const CORRECT_FEEDBACK_MS = 1000;
 const WRONG_FEEDBACK_MS = 1200;
 
-const pageInfo: PageWithKey = { ...pages.morse, key: "morse" };
+const pageInfo: PageWithKey = { ...pages["ultimate-password"], key: "ultimate-password" };
 
-export function MorseGame() {
+export function UltimatePasswordGame() {
   // persist 要等 client 才有資料；SEO 區塊在 PageTemplate 裡照常 SSR，只擋遊戲本體
   const [hydrated, setHydrated] = useState(false);
   const [entered, setEntered] = useState(false);
   useEffect(() => {
     setHydrated(true);
     // 重新整理時這一局還在，直接回到遊戲，不經過介紹頁
-    if (useMorseProgress.getState().round) setEntered(true);
+    if (useUltimatePasswordProgress.getState().round) setEntered(true);
   }, []);
   const [setupOpen, setSetupOpen] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
 
-  const { bank, useDefault, cap, sound, setSound } = useMorseStore();
-  useSharedSetup("morse", (setup) => {
-    useMorseStore.setState({
+  const { bank, useDefault, cap, sound, setSound } = useUltimatePasswordStore();
+  useSharedSetup("ultimate-password", (setup) => {
+    useUltimatePasswordStore.setState({
       bank: setup.bank ?? [],
       useDefault: setup.bank === null,
       cap: setup.cap,
@@ -79,8 +79,8 @@ export function MorseGame() {
   const playCorrectSound = () => sound && sfx.playCorrectSound();
   const playWrongSound = () => sound && sfx.playWrongSound();
   const { question, round, answerAccepted, numberGuess, answerNumber } =
-    useMorseProgress();
-  const patch = useMorseProgress.setState;
+    useUltimatePasswordProgress();
+  const patch = useUltimatePasswordProgress.setState;
   const setNumberGuess = (numberGuess: number) => patch({ numberGuess });
   const [selectedAnswer, setSelectedAnswer] = useState("");
   const [message, setMessage] = useState("");
@@ -99,7 +99,7 @@ export function MorseGame() {
 
   const range = round?.range ?? { low: 1, high: 100 };
   const playable = useMemo(
-    () => playableOf(useDefault ? MORSE_QUESTIONS : bank, cap),
+    () => playableOf(useDefault ? ULTIMATE_PASSWORD_QUESTIONS : bank, cap),
     [useDefault, bank, cap],
   );
 
@@ -247,14 +247,14 @@ export function MorseGame() {
           <section className="relative isolate mx-auto flex min-h-[min(72svh,680px)] w-full max-w-5xl flex-col items-center gap-8 text-center">
             {feedback && (
               <div
-                className="morse-fb absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-paper/85 px-4"
+                className="password-fb absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-paper/85 px-4"
                 data-kind={feedback.kind}
                 data-animated={feedback.animated || undefined}
                 style={{ animationDuration: `${feedback.duration}ms` }}
               >
                 <output
                   aria-label={`${feedback.title}${feedback.title.endsWith("！") ? "" : "，"}${feedback.detail}`}
-                  className="morse-fb-card relative flex w-full max-w-xl flex-col items-center rounded-[2rem] border-4 border-(--fb) bg-card px-8 pb-9 pt-7 shadow-[0_10px_0_var(--fb)]"
+                  className="password-fb-card relative flex w-full max-w-xl flex-col items-center rounded-[2rem] border-4 border-(--fb) bg-card px-8 pb-9 pt-7 shadow-[0_10px_0_var(--fb)]"
                 >
                   <span
                     aria-hidden="true"
@@ -269,12 +269,12 @@ export function MorseGame() {
                       ].flatMap((color, i) => [
                         <i
                           key={i}
-                          className={`morse-fb-ray ${color}`}
+                          className={`password-fb-ray ${color}`}
                           style={{ "--i": i } as CSSProperties}
                         />,
                         <i
                           key={i + 4}
-                          className={`morse-fb-ray ${color}`}
+                          className={`password-fb-ray ${color}`}
                           style={{ "--i": i + 4 } as CSSProperties}
                         />,
                       ])}
@@ -288,7 +288,7 @@ export function MorseGame() {
                     >
                       {feedback.kind === "correct" ? (
                         <circle
-                          className="morse-fb-stroke"
+                          className="password-fb-stroke"
                           cx="50"
                           cy="50"
                           r="38"
@@ -298,12 +298,12 @@ export function MorseGame() {
                       ) : (
                         <>
                           <path
-                            className="morse-fb-stroke"
+                            className="password-fb-stroke"
                             d="M18 18 82 82"
                             pathLength={1}
                           />
                           <path
-                            className="morse-fb-stroke"
+                            className="password-fb-stroke"
                             d="M82 18 18 82"
                             pathLength={1}
                           />
@@ -321,13 +321,13 @@ export function MorseGame() {
               </div>
             )}
             {answerNumber !== null ? (
-              <div className="morse-win-enter relative my-auto flex w-full max-w-3xl flex-col items-center overflow-hidden rounded-3xl border-2 border-success bg-card px-6 py-12 shadow-sm sm:py-16">
+              <div className="password-win-enter relative my-auto flex w-full max-w-3xl flex-col items-center overflow-hidden rounded-3xl border-2 border-success bg-card px-6 py-12 shadow-sm sm:py-16">
                 <output className="sr-only">
                   破解成功！正確密碼是 {answerNumber}
                 </output>
                 <div
                   aria-hidden="true"
-                  className="morse-paper-field absolute inset-0 pointer-events-none"
+                  className="password-paper-field absolute inset-0 pointer-events-none"
                 >
                   <span className="bg-brand-yellow" />
                   <span className="bg-brand-red" />
@@ -341,7 +341,7 @@ export function MorseGame() {
                   正確密碼是
                 </p>
                 <p
-                  className="morse-number-enter mt-2 text-[clamp(5rem,18vw,11rem)] font-black leading-none tabular-nums text-success-ink"
+                  className="password-number-enter mt-2 text-[clamp(5rem,18vw,11rem)] font-black leading-none tabular-nums text-success-ink"
                   aria-label={`數字答案 ${answerNumber}`}
                 >
                   {answerNumber}
@@ -362,7 +362,7 @@ export function MorseGame() {
                         {question.text}
                       </h2>
                       {answerAccepted && (
-                        <output className="morse-answer-enter mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-2xl bg-success-soft px-5 py-3 text-success-ink">
+                        <output className="password-answer-enter mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-2xl bg-success-soft px-5 py-3 text-success-ink">
                           <span className="text-body-lg font-bold">
                             ✓ 答對了，來猜密碼！
                           </span>
@@ -416,7 +416,7 @@ export function MorseGame() {
                     </div>
                   )}
                   {answerAccepted && question && (
-                    <div className="morse-answer-enter w-full space-y-4">
+                    <div className="password-answer-enter w-full space-y-4">
                       <div className="flex items-center gap-3">
                         <Button
                           type="button"

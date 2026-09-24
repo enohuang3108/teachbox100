@@ -15,9 +15,9 @@ import {
 } from "@/components/atoms/shadcn/tabs";
 import { QuestionPreview } from "@/components/organisms/QuestionPreview";
 import { StepSetup, type SetupStep } from "@/components/organisms/StepSetup";
-import { playableQuestions } from "@/lib/morse/game";
-import { MORSE_QUESTIONS } from "@/lib/morse/questions";
-import { useMorseStore } from "@/lib/morse/store";
+import { playableQuestions } from "@/lib/ultimate-password/game";
+import { ULTIMATE_PASSWORD_QUESTIONS } from "@/lib/ultimate-password/questions";
+import { useUltimatePasswordStore } from "@/lib/ultimate-password/store";
 import {
   aiQuestionPrompt,
   buildTemplateBlob,
@@ -42,13 +42,13 @@ const OPTS = { allowShort: false };
 
 export function SetupPanel({ onStart }: { onStart: () => void }) {
   const { bank, useDefault, cap, setBank, setUseDefault, setCap } =
-    useMorseStore();
+    useUltimatePasswordStore();
   const [errors, setErrors] = useState<string[]>([]);
   const [skipped, setSkipped] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const playable = playableOf(useDefault ? MORSE_QUESTIONS : bank, cap);
+  const playable = playableOf(useDefault ? ULTIMATE_PASSWORD_QUESTIONS : bank, cap);
 
   async function readFile(file: File | undefined) {
     if (!file) return;
@@ -101,7 +101,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
       label: "題庫",
       icon: Library,
       summary: useDefault
-        ? `內建題庫 ${MORSE_QUESTIONS.length} 題`
+        ? `內建題庫 ${ULTIMATE_PASSWORD_QUESTIONS.length} 題`
         : bank.length > 0
           ? `自訂 ${bank.length} 題`
           : "尚未匯入",
@@ -129,7 +129,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="default">
-              <QuestionPreview questions={MORSE_QUESTIONS} />
+              <QuestionPreview questions={ULTIMATE_PASSWORD_QUESTIONS} />
             </TabsContent>
             <TabsContent value="custom" className="space-y-3">
               <label
@@ -232,14 +232,14 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
             className="flex flex-wrap gap-2"
           >
             {DIFFICULTIES.map((d) => (
-              <label key={d} className="group" htmlFor={`morse-cap-${d}`}>
+              <label key={d} className="group" htmlFor={`password-cap-${d}`}>
                 <span
                   className={cn(
                     "flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 transition-colors duration-hover",
                     SELECTED_OPTION,
                   )}
                 >
-                  <RadioGroupItem value={d} id={`morse-cap-${d}`} />
+                  <RadioGroupItem value={d} id={`password-cap-${d}`} />
                   <span className="text-sm font-medium">
                     {DIFFICULTY_CAP_LABEL[d]}
                   </span>
@@ -260,7 +260,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
       startLabel="開始遊戲"
       onStart={onStart}
       share={{
-        unit: "morse",
+        unit: "ultimate-password",
         setup: { bank: useDefault ? null : bank, cap },
       }}
     />

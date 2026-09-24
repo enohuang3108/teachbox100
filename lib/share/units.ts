@@ -3,7 +3,7 @@ import { gachaShare } from "@/lib/gacha/share";
 import { ichibanShare } from "@/lib/ichiban/share";
 import { multiplicationShare } from "@/lib/math/share";
 import { memoryShare } from "@/lib/memory/share";
-import { morseShare } from "@/lib/morse/share";
+import { ultimatePasswordShare } from "@/lib/ultimate-password/share";
 import { monopolyShare } from "@/lib/monopoly/share";
 import { scoreboardShare } from "@/lib/scoreboard/share";
 import { territoryShare } from "@/lib/territory/share";
@@ -23,7 +23,7 @@ export const SHARE_CODECS = {
   multiplication: multiplicationShare,
   scoreboard: scoreboardShare,
   "quiz-territory": territoryShare,
-  morse: morseShare,
+  "ultimate-password": ultimatePasswordShare,
 };
 
 export type ShareUnit = keyof typeof SHARE_CODECS;
