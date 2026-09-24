@@ -203,11 +203,12 @@ const pagesConfig = {
   morse: {
     path: "/morse",
     imageSrc: "/images/covers/warm/morse.webp",
-    blurDataURL: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afry5v/++gEBAwAEC//otf304Qkmafz7+gL//voB6LAAAwn/+OkB6bIJAtvk17j9AQcEBgYK9hhdCPjf9/sAydkL7+bOoMLea2sGAeXgz9Tj6jEQ4g8SHvYLN0hGRgECArGtowLZ496+xayTv9v4+BoQDwI3NTAGBAEICAgB/vXq+/z78PPvEQoOAQgH2tnc+fn5LzEvbK1MgAx6lX0AAAAASUVORK5CYII=",
-    title: "摩斯密碼猜數字",
-    slogan: "解讀密碼，輪流猜中 1 到 100",
-    intro: "畫面會用摩斯密碼藏起一個 1 到 100 的數字。學生一次一人輪流猜，猜錯就縮小範圍並換下一位，直到全班一起找到答案。",
-    guide: "先解讀摩斯密碼，再輸入你猜的數字。",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afry5v/++gEBAwAEC//otf304Qkmafz7+gL//voB6LAAAwn/+OkB6bIJAtvk17j9AQcEBgYK9hhdCPjf9/sAydkL7+bOoMLea2sGAeXgz9Tj6jEQ4g8SHvYLN0hGRgECArGtowLZ496+xayTv9v4+BoQDwI3NTAGBAEICAgB/vXq+/z78PPvEQoOAQgH2tnc+fn5LzEvbK1MgAx6lX0AAAAASUVORK5CYII=",
+    title: "終極密碼",
+    slogan: "回答題目，輪流猜 1 到 100",
+    intro:
+      "畫面會顯示課堂的題目。學生一人一次輪流猜，畫面依猜測提示可能的範圍，直到全班一起找到答案。",
   },
 } satisfies Record<string, Page>;
 
