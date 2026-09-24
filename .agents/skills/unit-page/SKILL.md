@@ -27,8 +27,11 @@ sitemap 與 llms.txt 自動展開 `pages` 與 `hubs`，不必改。`app/sitemap.
 
 | 頁型 | 用什麼 | 實例 |
 |---|---|---|
-| 出題型教材 | `GamePageTemplate` | 金錢六頁、時鐘 |
+| 出題型教材，設定只有一站、不記住不分享 | `GamePageTemplate` | 金錢六頁、時鐘 |
+| 題庫型遊戲（老師匯入題目） | `PageTemplate` ＋ 自己的 `SetupPanel`（`StepSetup`） | 領地戰、終極密碼 |
 | 自訂操作的教材 | `PageTemplate` ＋ 自拼 `TooltipProvider` | 轉盤、扭蛋機、一番賞、翻牌、九九乘法、計時器、噪音計 |
+
+`GamePageTemplate` 把 `settings` 全塞進一站「出題」、自己再套一層 h3，開始鈕寫死「開始練習」，也沒有 blocker、store、分享。設定超過一站、要記住或要分享，就不要硬塞進它 —— 照領地戰自己組。
 | 分類頁 hub | 兩者都不用，手寫版型 | `app/draw/page.tsx`、`app/coin/page.tsx` |
 
 `PageTemplate` 的順序：三段 JSON-LD → `PageTitleBar` → `#game-stage`（帶 `data-unit={key}`）→ `data-stage-inner` → children → `UnitSeoSection`。傳了 `landing` 時換成下面「介紹頁」的順序。
@@ -75,11 +78,11 @@ const [mode, setMode] = useState<"setup" | "play">("setup");
 
 配合介紹頁時，設定放進 Dialog，外殼一律用 `StepSetup`（`components/organisms/StepSetup.tsx`）：給 `steps`（每站 `label`／`icon`／`summary`／`done?`／`content`）、`blocker`、`startLabel`、`onStart`，它負責左側步驟側欄、捲動內容、底部固定列（一句總結＋上一步／下一步，最後一站才是開始、`blocker` 有值就擋住並顯示原因）。`DialogContent` 固定 `max-w-4xl gap-0 overflow-hidden p-0`。每站內容自己帶 `h3` ＋ `DialogDescription`。實例：大富翁（題庫／玩家／規則）、轉盤（名單／玩法）、翻翻配對（牌組／玩法）、計分板（組別／外觀）。
 
-互斥選項用 `Tabs`（有各自內容）或長得一樣的 radiogroup（純單選）。載入慢的遊戲在開 Dialog 時背景預載程式碼與素材（`lib/monopoly/preload.ts`），按開始就不用等。
+互斥選項用 `Tabs`（有各自內容）或長得一樣的 radiogroup（純單選）。radiogroup 一律 `RadioGroup` ＋ `SELECTED_OPTION` 的膠囊，不手寫 `<label>` 配 `border-primary`。側欄的 `summary` 要短到不被截斷（「困難以下・12 題」，不寫「可出」）。載入慢的遊戲在開 Dialog 時背景預載程式碼與素材（`lib/monopoly/preload.ts`），按開始就不用等。
 
 ### 分享連結
 
-老師設定完，把設定（名單、牌組、題目…）分享給別的老師。有 `StepSetup` 設定的單元都要有：大富翁、轉盤、扭蛋機、一番賞、翻翻配對、九九乘法、計分板。金錢與時鐘的難度設定不持久化，不分享。
+老師設定完，把設定（名單、牌組、題目…）分享給別的老師。有 `StepSetup` 設定的單元都要有：大富翁、轉盤、扭蛋機、一番賞、翻翻配對、九九乘法、計分板、領地戰、終極密碼。金錢與時鐘的難度設定不持久化，不分享。
 
 **兩種連結，同一份 payload：**
 
@@ -142,9 +145,20 @@ payload 放 `#` 不放 query：不送到伺服器、沒有長度上限。壓縮�
 
 `FullscreenButton` 量 `[data-stage-inner]` 算出 `--fs-scale` 等比縮放；per-unit 微調在 `styles/globals.css` 用 `#game-stage[data-unit="..."]`。不支援 element fullscreen（iOS Safari）時那顆鈕不渲染，不給壞掉的按鈕。
 
+### 題庫
+
+匯入 Excel 題目的單元（大富翁、領地戰、終極密碼）長一樣，新單元照 `components/territory/SetupPanel.tsx` 抄：
+
+- 第一站「題庫」：`Tabs` 內建／自訂，內建給 `QuestionPreview`。
+- 拖放區整塊是 `<label>`（點哪裡都能選檔），帶 `Upload` icon 與 `transition-[background-color,border-color]`。
+- 「下載題庫範本」帶 `Download` icon，換成「已複製提示詞」時兩段字疊在同一格，寬度不跳。
+- 題型不合的題目不退件，匯入時略過並用 warning 講幾題；解析錯誤清單加 `max-h-40 overflow-y-auto`。
+- blocker：內建題庫抽不到題講原因；自訂還沒選檔用空字串（擋住但不亮紅字）。
+- 第二站放難度上限，與題庫分開。
+
 ### store
 
-`lib/<game>/store.ts`，一律 `create()(persist(..., { name: "<kebab-name>" }))`，一頁一個 localStorage key。存什麼、不存什麼見下面的約定表；計分板的分數與一番賞的卡池是刻意的例外，兩者的 FAQ 都有說明。改過持久化結構才需要 `version` + `migrate`。
+`lib/<game>/store.ts`，一律 `create()(persist(..., { name: "<kebab-name>" }))`，一頁一個 localStorage key。存什麼、不存什麼見下面的約定表；計分板的分數與一番賞的卡池是刻意的例外，兩者的 FAQ 都有說明。終極密碼的進行中局面另開一個 store 存 `sessionStorage`（`lib/morse/store.ts` 的 `useMorseProgress`）：投影時誤按重新整理接著玩、直接回到遊戲不經過介紹頁，關掉分頁才清空。改過持久化結構才需要 `version` + `migrate`。
 
 音效開關是 `sound: boolean` + `setSound`，由 `SoundToggleButton` 驅動。
 
@@ -156,7 +170,7 @@ payload 放 `#` 不放 query：不送到伺服器、沒有長度上限。壓縮�
 |---|---|
 | 知道自己在哪 | 教材頁、分類頁與滿版遊戲都有麵包屑，一路點得回分類頁與首頁。學生專用畫面（搶答）刻意不給，那支手機只有一個任務 |
 | 內容自己決定 | 名單、牌組、題庫、獎項、金額範圍由老師自訂，不寫死在程式裡 |
-| 設定會記住 | 老師調過的設定留在這台裝置，下次打開還在；學生玩到一半的進度重整就沒了 |
+| 設定會記住 | 老師調過的設定留在這台裝置，下次打開還在；學生玩到一半的進度重整就沒了（終極密碼例外：局面存 sessionStorage，重整接著玩） |
 | 回得去 | 「恢復預設名單／牌組」與「全部放回」是固定字眼，頂列 `aria-label`、剩餘數、抽完提示三處用同一個詞 |
 | 有聲音就能關 | 會發出聲音的頁就給一顆開關，放頂列。開關本身也是設定，一樣要被記住 |
 | 沒有壓力 | 教材類不計時、不計分、不排名、不扣分。答錯停留得比答對久，並把正解標出來，鼓勵重試 |

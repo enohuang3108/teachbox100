@@ -43,6 +43,19 @@ const samples: { [K in ShareUnit]: SetupOf<K> } = {
       { id: "q1", type: "boolean", text: "蝙蝠是鳥類。", answer: "否" },
     ],
   },
+  morse: {
+    cap: "easy",
+    bank: [
+      {
+        id: "q0",
+        type: "choice",
+        text: "一打雞蛋有幾顆？",
+        options: ["6", "12"],
+        answer: "12",
+        difficulty: "easy",
+      },
+    ],
+  },
 };
 
 describe.each(Object.keys(samples) as ShareUnit[])("%s 分享連結", (unit) => {
