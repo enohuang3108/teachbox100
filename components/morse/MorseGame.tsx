@@ -27,9 +27,19 @@ import {
 } from "@/lib/questions/types";
 import { playableOf } from "@/lib/territory/rules";
 import { drawQuestion as pickQuestion, playableQuestions, resolveRoundGuess, startRound, type Round } from "@/lib/morse/game";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 type Source = "default" | "custom";
+type AnswerFeedback = {
+  kind: "correct" | "wrong";
+  title: string;
+  detail: string;
+  animated: boolean;
+  duration: number;
+};
+
+const CORRECT_FEEDBACK_MS = 1000;
+const WRONG_FEEDBACK_MS = 1200;
 
 const MORSE_QUESTIONS: Question[] = [
   {
@@ -142,6 +152,12 @@ export function MorseGame() {
   const [errors, setErrors] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [feedback, setFeedback] = useState<AnswerFeedback | null>(null);
+  const answerTransitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (answerTransitionTimer.current) clearTimeout(answerTransitionTimer.current);
+  }, []);
 
   const activeBank = source === "default" ? MORSE_QUESTIONS : bank;
   const range = round?.range ?? { low: 1, high: 100 };
@@ -160,6 +176,9 @@ export function MorseGame() {
   );
 
   const resetGame = useCallback(() => {
+    if (answerTransitionTimer.current) clearTimeout(answerTransitionTimer.current);
+    answerTransitionTimer.current = null;
+    setFeedback(null);
     setQuestion(drawQuestion(playable));
     setSelectedAnswer("");
     setAnswerAccepted(false);
@@ -168,6 +187,23 @@ export function MorseGame() {
     setAnswerNumber(null);
     setMessage("");
   }, [drawQuestion, playable]);
+
+  function showFeedback(
+    nextFeedback: AnswerFeedback,
+    onFinish: () => void,
+    delay = 0,
+  ) {
+    const reveal = () => {
+      setFeedback(nextFeedback);
+      answerTransitionTimer.current = setTimeout(() => {
+        onFinish();
+        setFeedback(null);
+        answerTransitionTimer.current = null;
+      }, nextFeedback.duration);
+    };
+    if (delay) answerTransitionTimer.current = setTimeout(reveal, delay);
+    else reveal();
+  }
 
   async function readFile(file?: File) {
     if (!file) return;
@@ -202,7 +238,8 @@ export function MorseGame() {
       .catch(() => {});
   }
 
-  function submit(value: number) {
+  function submit(value: number, pointerActivated: boolean) {
+    if (feedback) return;
     if (!question || !round) {
       setMessage(`請猜 ${range.low} 到 ${range.high} 之間的整數。`);
       return;
@@ -220,29 +257,49 @@ export function MorseGame() {
     }
     playWrongSound();
     const next = result.round.range;
-    setRound(result.round);
-    setSelectedAnswer("");
-    setAnswerAccepted(false);
-    setQuestion(drawQuestion(playable));
-    setMessage(`答錯了，數字在 ${next.low} 到 ${next.high} 之間。已換下一題。`);
+    showFeedback({
+      kind: "wrong",
+      title: "沒猜中",
+      detail: `密碼在 ${next.low} 到 ${next.high} 之間`,
+      animated: pointerActivated,
+      duration: WRONG_FEEDBACK_MS,
+    }, () => {
+      setRound(result.round);
+      setSelectedAnswer("");
+      setAnswerAccepted(false);
+      setQuestion(drawQuestion(playable));
+      setMessage("");
+    });
   }
 
-  function checkQuestionAnswer(value: string) {
-    if (!question) return;
+  function checkQuestionAnswer(value: string, pointerActivated: boolean) {
+    if (!question || selectedAnswer) return;
     setSelectedAnswer(value);
     if (value === question.answer) {
       playCorrectSound();
-      setAnswerAccepted(true);
       setMessage("");
+      showFeedback({
+        kind: "correct",
+        title: "答對了！",
+        detail: `正確答案：${question.answer}`,
+        animated: pointerActivated,
+        duration: CORRECT_FEEDBACK_MS,
+      }, () => setAnswerAccepted(true), pointerActivated ? 160 : 0);
       return;
     }
     playWrongSound();
-    setSelectedAnswer("");
-    setAnswerAccepted(false);
-    setQuestion(drawQuestion(playable));
-    setMessage(
-      `答錯了，數字在 ${range.low} 到 ${range.high} 之間。已換下一題。`,
-    );
+    showFeedback({
+      kind: "wrong",
+      title: "答錯了",
+      detail: `正確答案：${question.answer}`,
+      animated: pointerActivated,
+      duration: WRONG_FEEDBACK_MS,
+    }, () => {
+      setSelectedAnswer("");
+      setAnswerAccepted(false);
+      setQuestion(drawQuestion(playable));
+      setMessage("");
+    }, pointerActivated ? 160 : 0);
   }
 
   const settings = [
@@ -344,126 +401,182 @@ export function MorseGame() {
 
   return (
     <GamePageTemplate page="morse" settings={settings} resetGame={resetGame}>
-      <section className="mx-auto flex min-h-[min(72svh,680px)] w-full max-w-5xl flex-col items-center gap-8 text-center">
-        <div className="w-full space-y-4">
-          {question ? (
-            <div className="rounded-3xl border-2 border-ink/10 bg-card px-8 py-7 shadow-sm">
-              <h2 className="text-hero text-foreground">{question.text}</h2>
+      <section className="relative isolate mx-auto flex min-h-[min(72svh,680px)] w-full max-w-5xl flex-col items-center gap-8 text-center">
+        {feedback && (
+          <div
+            className="morse-fb absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-paper/85 px-4"
+            data-kind={feedback.kind}
+            data-animated={feedback.animated || undefined}
+            style={{ animationDuration: `${feedback.duration}ms` }}
+          >
+            <output
+              aria-label={`${feedback.title}${feedback.title.endsWith("！") ? "" : "，"}${feedback.detail}`}
+              className="morse-fb-card relative flex w-full max-w-xl flex-col items-center rounded-[2rem] border-4 border-(--fb) bg-card px-8 pb-9 pt-7 shadow-[0_10px_0_var(--fb)]"
+            >
+              <span aria-hidden="true" className="relative grid size-32 place-items-center">
+                {feedback.kind === "correct" &&
+                  ["bg-brand-yellow", "bg-brand-red", "bg-brand-blue", "bg-brand-green"].flatMap((color, i) => [
+                    <i key={i} className={`morse-fb-ray ${color}`} style={{ "--i": i } as CSSProperties} />,
+                    <i key={i + 4} className={`morse-fb-ray ${color}`} style={{ "--i": i + 4 } as CSSProperties} />,
+                  ])}
+                <svg viewBox="0 0 100 100" className="size-full overflow-visible" fill="none" stroke="var(--fb)" strokeWidth="14" strokeLinecap="round">
+                  {feedback.kind === "correct" ? (
+                    <circle className="morse-fb-stroke" cx="50" cy="50" r="38" pathLength={1} transform="rotate(-90 50 50)" />
+                  ) : (
+                    <>
+                      <path className="morse-fb-stroke" d="M18 18 82 82" pathLength={1} />
+                      <path className="morse-fb-stroke" d="M82 18 18 82" pathLength={1} />
+                    </>
+                  )}
+                </svg>
+              </span>
+              <span className="mt-3 block text-[clamp(3rem,8vw,5.5rem)] font-black leading-tight text-(--fb-ink)">{feedback.title}</span>
+              <span className="mt-2 block text-[clamp(1.5rem,4vw,2.75rem)] font-bold leading-snug text-foreground">{feedback.detail}</span>
+            </output>
+          </div>
+        )}
+        {answerNumber !== null ? (
+          <div className="morse-win-enter relative my-auto flex w-full max-w-3xl flex-col items-center overflow-hidden rounded-3xl border-2 border-success bg-card px-6 py-12 shadow-sm sm:py-16">
+            <output className="sr-only">破解成功！正確密碼是 {answerNumber}</output>
+            <div aria-hidden="true" className="morse-paper-field absolute inset-0 pointer-events-none">
+              <span className="bg-brand-yellow" />
+              <span className="bg-brand-red" />
+              <span className="bg-brand-blue" />
+              <span className="bg-brand-green" />
+              <span className="bg-brand-yellow" />
+              <span className="bg-brand-blue" />
             </div>
-          ) : (
-            <p className="rounded-2xl bg-warning-soft px-5 py-4 text-warning-ink">
-              目前題庫沒有符合難度的題目，請調整設定。
-            </p>
-          )}
-          <p className="text-h2 font-semibold text-muted-foreground">
-            目前密碼範圍：{range.low} 到 {range.high}
-          </p>
-        </div>
-
-        <div className="flex w-full flex-1 flex-col items-center justify-end gap-6 pb-2">
-          {message && (
-            <p
-              aria-live="polite"
-              className="text-body-lg font-bold text-foreground"
-            >
-              {message}
-            </p>
-          )}
-          {answerNumber !== null && (
-            <p
-              className="text-display text-primary"
-              aria-label={`數字答案 ${answerNumber}`}
-            >
+            <p className="text-h2 text-success-ink">破解成功！</p>
+            <p className="mt-6 text-body-lg text-muted-foreground">正確密碼是</p>
+            <p className="morse-number-enter mt-2 text-[clamp(5rem,18vw,11rem)] font-black leading-none tabular-nums text-success-ink" aria-label={`數字答案 ${answerNumber}`}>
               {answerNumber}
             </p>
-          )}
-          {!answerAccepted &&
-            answerNumber === null &&
-            question &&
-            (question.type === "choice" ? (
-              <div className="grid w-full gap-4 sm:grid-cols-2">
-                {question.options?.map((option) => (
-                  <Button
-                    key={option}
-                    type="button"
-                    variant={selectedAnswer === option ? "default" : "outline"}
-                    className="min-h-24 whitespace-normal !text-hero"
-                    onClick={() => checkQuestionAnswer(option)}
-                  >
-                    {option}
-                  </Button>
-                ))}
-              </div>
-            ) : (
-              <div className="grid w-full grid-cols-2 gap-4">
-                {["是", "否"].map((option) => (
-                  <Button
-                    key={option}
-                    type="button"
-                    variant={selectedAnswer === option ? "default" : "outline"}
-                    className="min-h-24 !text-hero"
-                    onClick={() => checkQuestionAnswer(option)}
-                  >
-                    {option}
-                  </Button>
-                ))}
-              </div>
-            ))}
-          {answerAccepted && answerNumber === null && question && (
+            <Button className="relative mt-10 h-14 px-8 text-h3 transition-transform duration-press ease-out active:scale-[0.97]" onClick={resetGame}>
+              再玩一局
+            </Button>
+          </div>
+        ) : (
+          <div className="contents" inert={feedback !== null}>
             <div className="w-full space-y-4">
-              <div className="flex items-center gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="size-16 text-3xl"
-                  aria-label="減少 1"
-                  disabled={numberGuess <= 1}
-                  onClick={() =>
-                    setNumberGuess((value) => Math.max(1, value - 1))
-                  }
-                >
-                  −
-                </Button>
-                <TickSlider
-                  value={numberGuess}
-                  onChange={setNumberGuess}
-                  min={1}
-                  max={100}
-                  step={1}
-                  tickEvery={5}
-                  majorEvery={20}
-                  tickStart={0}
-                  label="選擇數字"
-                  className="flex-1"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="size-16 text-3xl"
-                  aria-label="增加 1"
-                  disabled={numberGuess >= 100}
-                  onClick={() =>
-                    setNumberGuess((value) => Math.min(100, value + 1))
-                  }
-                >
-                  +
-                </Button>
-              </div>
-              <div className="pt-4">
-                <Button
-                  type="button"
-                  size="lg"
-                  className="mx-auto h-16 w-1/2 rounded-xl !text-h2"
-                  onClick={() => submit(numberGuess)}
-                >
-                  確認密碼
-                </Button>
-              </div>
+              {question ? (
+                <div className="rounded-3xl border-2 border-ink/10 bg-card px-8 py-7 shadow-sm">
+                  <h2 className="text-hero text-foreground">{question.text}</h2>
+                  {answerAccepted && (
+                    <output className="morse-answer-enter mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-2xl bg-success-soft px-5 py-3 text-success-ink">
+                      <span className="text-body-lg font-bold">✓ 答對了，來猜密碼！</span>
+                      <span className="text-body-lg font-bold">正確答案：{question.answer}</span>
+                    </output>
+                  )}
+                </div>
+              ) : (
+                <p className="rounded-2xl bg-warning-soft px-5 py-4 text-warning-ink">
+                  目前題庫沒有符合難度的題目，請調整設定。
+                </p>
+              )}
+              <p className="text-h2 font-semibold text-muted-foreground">
+                目前密碼範圍：{range.low} 到 {range.high}
+              </p>
             </div>
-          )}
-        </div>
+
+            <div className="flex w-full flex-1 flex-col items-center justify-end gap-6 pb-2">
+              {message && (
+                <p
+                  aria-live="polite"
+                  className="text-body-lg font-bold text-foreground"
+                >
+                  {message}
+                </p>
+              )}
+              {!answerAccepted &&
+                question &&
+                (question.type === "choice" ? (
+                  <div className="grid w-full gap-4 sm:grid-cols-2">
+                    {question.options?.map((option) => (
+                      <Button
+                        key={option}
+                        type="button"
+                        variant="outline"
+                        disabled={!!selectedAnswer}
+                        className={`min-h-24 whitespace-normal !text-hero transition-[background-color,color,opacity,transform] duration-press ease-out active:scale-[0.97] ${selectedAnswer === option ? "!border-success !bg-success-soft !text-success-ink disabled:opacity-100" : selectedAnswer ? "opacity-40" : ""}`}
+                        onClick={(event) => checkQuestionAnswer(option, event.detail !== 0)}
+                      >
+                        {selectedAnswer === option && "✓ "}{option}
+                      </Button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid w-full grid-cols-2 gap-4">
+                    {["是", "否"].map((option) => (
+                      <Button
+                        key={option}
+                        type="button"
+                        variant="outline"
+                        disabled={!!selectedAnswer}
+                        className={`min-h-24 !text-hero transition-[background-color,color,opacity,transform] duration-press ease-out active:scale-[0.97] ${selectedAnswer === option ? "!border-success !bg-success-soft !text-success-ink disabled:opacity-100" : selectedAnswer ? "opacity-40" : ""}`}
+                        onClick={(event) => checkQuestionAnswer(option, event.detail !== 0)}
+                      >
+                        {selectedAnswer === option && "✓ "}{option}
+                      </Button>
+                    ))}
+                  </div>
+                ))}
+              {answerAccepted && question && (
+                <div className="morse-answer-enter w-full space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="size-16 text-3xl"
+                      aria-label="減少 1"
+                      disabled={numberGuess <= 1}
+                      onClick={() =>
+                        setNumberGuess((value) => Math.max(1, value - 1))
+                      }
+                    >
+                      −
+                    </Button>
+                    <TickSlider
+                      value={numberGuess}
+                      onChange={setNumberGuess}
+                      min={1}
+                      max={100}
+                      step={1}
+                      tickEvery={5}
+                      majorEvery={20}
+                      tickStart={0}
+                      label="選擇數字"
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="size-16 text-3xl"
+                      aria-label="增加 1"
+                      disabled={numberGuess >= 100}
+                      onClick={() =>
+                        setNumberGuess((value) => Math.min(100, value + 1))
+                      }
+                    >
+                      +
+                    </Button>
+                  </div>
+                  <div className="pt-4">
+                    <Button
+                      type="button"
+                      size="lg"
+                      className="mx-auto h-16 w-1/2 rounded-xl !text-h2"
+                      onClick={(event) => submit(numberGuess, event.detail !== 0)}
+                    >
+                      確認密碼
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </section>
     </GamePageTemplate>
   );

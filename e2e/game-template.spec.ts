@@ -40,8 +40,13 @@ test("/ultimate-password 先選題庫與難度，再答題縮小範圍並顯示�
   await expect(page.getByRole("heading", { name: "一打雞蛋有幾顆？" })).toBeVisible();
   await expect(page.getByText("目前密碼範圍：1 到 100")).toBeVisible();
   await page.getByRole("button", { name: "12", exact: true }).click();
+  await expect(page.getByRole("status", { name: "答對了！正確答案：12" })).toBeVisible();
+  await expect(page.getByText("正確答案：12")).toBeVisible();
+  await expect(page.getByText("答對了，來猜密碼！")).toBeVisible();
   await page.getByRole("button", { name: "確認密碼" }).click();
+  await expect(page.getByRole("status", { name: "沒猜中，密碼在 1 到 49 之間" })).toBeVisible();
   await expect(page.getByText("目前密碼範圍：1 到 49")).toBeVisible();
+  await expect(page.getByText("正確答案：12")).toHaveCount(0);
   await page.getByRole("button", { name: "12", exact: true }).click();
   const slider = page.getByRole("slider", { name: "選擇數字" });
   await expect(slider).toHaveAttribute("aria-valuemin", "1");
@@ -55,4 +60,18 @@ test("/ultimate-password 先選題庫與難度，再答題縮小範圍並顯示�
   await expect(slider).toHaveAttribute("aria-valuenow", "12");
   await page.getByRole("button", { name: "確認密碼" }).click();
   await expect(page.getByLabel("數字答案 12")).toBeVisible();
+  await expect(page.getByText("破解成功！", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "一打雞蛋有幾顆？" })).toHaveCount(0);
+  await page.getByRole("button", { name: "再玩一局" }).click();
+  await expect(page.getByText("目前密碼範圍：1 到 100")).toBeVisible();
+});
+
+test("/ultimate-password 答錯題目先揭曉正解，再換題", async ({ page }) => {
+  await page.addInitScript(() => { Math.random = () => 0.11; });
+  await page.goto("/ultimate-password");
+  await page.getByRole("button", { name: "開始練習" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "開始練習" }).click();
+  await page.getByRole("button", { name: "10", exact: true }).click();
+  await expect(page.getByRole("status", { name: "答錯了，正確答案：12" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "12", exact: true })).toBeVisible();
 });
