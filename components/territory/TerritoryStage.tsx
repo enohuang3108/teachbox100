@@ -106,15 +106,26 @@ export function TerritoryStage({
           </p>
         )}
         {game.countdown !== null && !over && (
-          // 倒數時題目還沒出，數字獨占畫面中央；換數字時重新進場
-          <p
-            key={game.countdown}
-            aria-live="assertive"
-            className="territory-count font-display text-ink col-span-full row-span-full self-center justify-self-center text-[clamp(5rem,20cqw,18rem)] leading-none font-extrabold tabular-nums"
-            style={HALO}
-          >
-            {game.countdown}
-          </p>
+          // 倒數時題目還沒出，數字獨占畫面中央、換數字時重新進場；下面先講這題值幾分，兩隊邊數邊盤算
+          <div className="col-span-full row-span-full flex flex-col items-center gap-[1.5cqw] self-center justify-self-center">
+            <p
+              key={game.countdown}
+              aria-live="assertive"
+              className="territory-count font-display text-ink text-[clamp(5rem,20cqw,18rem)] leading-none font-extrabold tabular-nums"
+              style={HALO}
+            >
+              {game.countdown}
+            </p>
+            {game.upcoming && (
+              <p
+                key={game.upcoming.id}
+                className="quiz-enter font-display text-ink text-[clamp(1.25rem,3.2cqw,3.25rem)] leading-none font-extrabold"
+                style={HALO}
+              >
+                {cellValue(game.upcoming)} 分題
+              </p>
+            )}
+          </div>
         )}
         {question && !over ? (
           <>

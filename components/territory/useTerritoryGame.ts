@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { defaultRng } from "@/lib/monopoly/rng";
 import type { Difficulty, Question } from "@/lib/questions/types";
 import {
-  cellCount,
+  boardCells,
   drawQuestions,
   gridFor,
   leaderOf,
@@ -14,13 +14,13 @@ import {
   winnerOf,
   type Board,
   type Side,
+  type BoardSize,
 } from "@/lib/territory/rules";
 
 /** 結算後停留多久再出下一題。答錯留久一點，好讓兩隊看清楚正解 */
 const PAUSE_CORRECT = 1400;
 const PAUSE_WRONG = 2200;
 /** 每題出現前的倒數，從幾開始、一拍多久 */
-const COUNTDOWN_FROM = 3;
 const COUNTDOWN_BEAT = 1000;
 const NOT_READY: Record<Side, boolean> = { left: false, right: false };
 
@@ -42,6 +42,8 @@ export interface TerritoryGame {
   question: Question | null;
   /** 出題前的倒數 3、2、1；null 代表題目已經出來，或兩隊還沒都準備好 */
   countdown: number | null;
+  /** 倒數中的下一題：題目還藏著，但先讓兩隊知道這題值幾分 */
+  upcoming: Question | null;
   /** 開局前兩隊各按一次「準備好了」，都按了才開始倒數 */
   ready: Record<Side, boolean>;
   markReady: (side: Side) => void;
@@ -64,6 +66,9 @@ const screenAspect = () =>
 export function useTerritoryGame(
   bank: Question[],
   cap: Difficulty,
+  /** 每題開搶前從幾開始倒數 */
+  countdownFrom: number,
+  size: BoardSize,
   onResult?: (correct: boolean) => void,
 ): TerritoryGame {
   const [queue, setQueue] = useState<Question[]>([]);
@@ -85,7 +90,7 @@ export function useTerritoryGame(
     const q = drawQuestions(bank, cap, defaultRng);
     // 棋盤比例開局就定下來，中途切全螢幕只縮放、不重排，局面才不會亂
     const a = screenAspect();
-    const { cols, rows } = gridFor(cellCount(q.length), a);
+    const { cols, rows } = gridFor(boardCells(size, q.length), a);
     setQueue(q);
     setIndex(0);
     // 新的一局先等兩隊都按「準備好了」，倒數由 markReady 啟動
@@ -99,7 +104,7 @@ export function useTerritoryGame(
     setSettling(false);
     setOver(false);
     setWinner(null);
-  }, [bank, cap]);
+  }, [bank, cap, size]);
 
   useEffect(restart, [restart]);
 
@@ -126,10 +131,10 @@ export function useTerritoryGame(
     setReady((r) => {
       if (r[side]) return r;
       const next = { ...r, [side]: true };
-      if (next.left && next.right) setCountdown(COUNTDOWN_FROM);
+      if (next.left && next.right) setCountdown(countdownFrom);
       return next;
     });
-  }, []);
+  }, [countdownFrom]);
 
   // 準備與倒數中都不給題目，兩隊同時看到、同時開搶
   const question =
@@ -148,8 +153,8 @@ export function useTerritoryGame(
     setSettling(false);
     setLockedOut(null);
     setIndex((i) => i + 1);
-    setCountdown(COUNTDOWN_FROM);
-  }, []);
+    setCountdown(countdownFrom);
+  }, [countdownFrom]);
 
   const answer = useCallback(
     (side: Side, choice: string) => {
@@ -199,6 +204,7 @@ export function useTerritoryGame(
       question,
       // 最後一題結算完、還沒宣布結束的那一拍，不要冒出一個「3」
       countdown: index < queue.length ? countdown : null,
+      upcoming: countdown !== null && !over ? (queue[index] ?? null) : null,
       ready,
       markReady,
       lockedOut,

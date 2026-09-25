@@ -31,6 +31,8 @@ const samples: { [K in ShareUnit]: SetupOf<K> } = {
   "quiz-territory": {
     cap: "normal",
     names: ["藍隊", "紅隊"],
+    countdown: 5,
+    size: "large",
     bank: [
       {
         id: "q0",

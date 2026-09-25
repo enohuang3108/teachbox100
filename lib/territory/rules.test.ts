@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Question } from "@/lib/questions/types";
 import {
+  boardCells,
   cellCount,
   countOf,
   gridFor,
@@ -144,4 +145,13 @@ it("只收選擇與是非，並套難度上限", () => {
   ];
   expect(playableOf(bank).map((x) => x.id)).toEqual(["a", "c"]);
   expect(playableOf(bank, "easy").map((x) => x.id)).toEqual(["a"]);
+});
+
+describe("boardCells", () => {
+  it("自動照題數算，指定大小就用固定格數", () => {
+    expect(boardCells("auto", 20)).toBe(cellCount(20));
+    expect(boardCells("small", 80)).toBe(12);
+    expect(boardCells("medium", 5)).toBe(20);
+    expect(boardCells("large", 5)).toBe(35);
+  });
 });

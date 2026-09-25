@@ -28,8 +28,19 @@ import {
   DIFFICULTY_CAP_LABEL,
   type Difficulty,
 } from "@/lib/questions/types";
-import { cellCount, gridFor, playableOf } from "@/lib/territory/rules";
-import { DEFAULT_NAMES, useTerritoryStore } from "@/lib/territory/store";
+import {
+  BOARD_SIZES,
+  boardCells,
+  gridFor,
+  playableOf,
+  type BoardSize,
+} from "@/lib/territory/rules";
+import {
+  COUNTDOWNS,
+  DEFAULT_NAMES,
+  useTerritoryStore,
+  type Countdown,
+} from "@/lib/territory/store";
 import { SELECTED_OPTION } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
 import { Download, Library, SlidersHorizontal, Upload } from "lucide-react";
@@ -46,10 +57,14 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
     useDefault,
     cap,
     names,
+    countdown,
+    size,
     setBank,
     setUseDefault,
     setCap,
     setName,
+    setCountdown,
+    setSize,
   } = useTerritoryStore();
   const [errors, setErrors] = useState<string[]>([]);
   const [skipped, setSkipped] = useState(0);
@@ -60,10 +75,13 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
   // 只有能自動判對錯的題目才進得了這個單元，難度上限也在這裡先套用
   const playable = playableOf(active, cap);
   // 跟開局用同一個螢幕比例算，這裡寫的就是全螢幕時會看到的棋盤
-  const grid = gridFor(
-    cellCount(playable.length),
-    window.screen.width / window.screen.height,
-  );
+  const aspect = window.screen.width / window.screen.height;
+  const grid = gridFor(boardCells(size, playable.length), aspect);
+  // 選項直接寫這台螢幕會排成幾乘幾，老師不用猜「小」有多小
+  const gridLabel = (s: BoardSize) => {
+    const g = gridFor(boardCells(s, playable.length), aspect);
+    return `${g.cols}×${g.rows}`;
+  };
 
   async function readFile(file: File | undefined) {
     if (!file) return;
@@ -236,7 +254,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
       key: "rules",
       label: "玩法",
       icon: SlidersHorizontal,
-      summary: `${playable.length} 題・棋盤 ${grid.cols}×${grid.rows}`,
+      summary: `${playable.length} 題・棋盤 ${grid.cols}×${grid.rows}・倒數 ${countdown} 秒`,
       content: (
         <section className="space-y-6">
           <header>
@@ -274,6 +292,25 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
               label: DIFFICULTY_CAP_LABEL[d],
             }))}
           />
+
+          <Field
+            label="場地大小"
+            hint="自動會照題數決定"
+            value={size}
+            onChange={(v) => setSize(v as BoardSize)}
+            options={(Object.keys(BOARD_SIZES) as BoardSize[]).map((s) => ({
+              value: s,
+              label: `${BOARD_SIZES[s].label}・${gridLabel(s)}`,
+            }))}
+          />
+
+          <Field
+            label="每題倒數"
+            hint="倒數完才出題，兩隊同時開搶"
+            value={String(countdown)}
+            onChange={(v) => setCountdown(Number(v) as Countdown)}
+            options={COUNTDOWNS.map((c) => ({ value: String(c), label: `${c} 秒` }))}
+          />
         </section>
       ),
     },
@@ -292,6 +329,8 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
           bank: useDefault ? null : bank,
           cap,
           names,
+          countdown,
+          size,
         },
       }}
     />

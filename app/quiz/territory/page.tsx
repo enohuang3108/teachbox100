@@ -42,7 +42,7 @@ export default function TerritoryPage() {
   const [setupOpen, setSetupOpen] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
 
-  const { bank, useDefault, cap, names, sound, setSound } =
+  const { bank, useDefault, cap, names, countdown, size, sound, setSound } =
     useTerritoryStore();
   useSharedSetup("quiz-territory", (setup) => {
     useTerritoryStore.setState({
@@ -50,6 +50,8 @@ export default function TerritoryPage() {
       useDefault: setup.bank === null,
       cap: setup.cap,
       names: setup.names,
+      countdown: setup.countdown,
+      size: setup.size,
     });
     setSetupOpen(true);
   });
@@ -59,6 +61,8 @@ export default function TerritoryPage() {
   const game = useTerritoryGame(
     useDefault ? DEFAULT_QUESTIONS : bank,
     cap,
+    countdown,
+    size,
     (correct) => {
       if (!sound) return;
       if (correct) playCorrectSound();

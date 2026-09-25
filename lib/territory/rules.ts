@@ -48,6 +48,19 @@ export function cellCount(questions: number): number {
   return Math.max(6, Math.round(4 * (Math.sqrt(0.7 * questions + 1) - 1)));
 }
 
+/** 場地大小：自動照題數算，其他是固定的目標格數；排成幾乘幾照螢幕比例挑，設定畫面直接顯示結果 */
+export const BOARD_SIZES = {
+  auto: { label: "自動", cells: null },
+  small: { label: "小", cells: 12 },
+  medium: { label: "中", cells: 20 },
+  large: { label: "大", cells: 35 },
+} as const;
+export type BoardSize = keyof typeof BOARD_SIZES;
+
+export function boardCells(size: BoardSize, questions: number): number {
+  return BOARD_SIZES[size].cells ?? cellCount(questions);
+}
+
 /**
  * 棋盤鋪滿畫面（寬 / 高 = aspect），所以能選的只有行列數：
  * 格數不少於 n、最多多 25%，行列都至少 3（5×2 那種長條像走廊，兩隊一下就撞上），
