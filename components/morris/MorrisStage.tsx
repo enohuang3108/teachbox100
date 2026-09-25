@@ -149,10 +149,10 @@ function QuestionLane({
         </div>
       ) : (
         <>
-          <header className="relative flex min-h-20 items-center justify-center border-b border-border pb-2">
+          <header className="relative flex min-h-14 items-center justify-center border-b border-border pb-2">
             <Mark
               side={side}
-              className={cn("size-16", acting && "morris-action-mark")}
+              className={cn("size-12", acting && "morris-action-mark")}
             />
             <span className="text-caption absolute top-0 right-0 text-muted-foreground tabular-nums">
               {Math.min(lane.index + (question ? 1 : 0), lane.queue.length)} / {lane.queue.length}
@@ -168,7 +168,7 @@ function QuestionLane({
           ) : (
             <div className="flex min-h-0 flex-1 flex-col">
               <div className="flex min-h-0 flex-1 items-center justify-center px-2 py-4">
-                <p className="text-center text-[clamp(1rem,2cqw,1.6rem)] leading-[1.55] font-bold text-balance text-ink">
+                <p className="text-center text-[clamp(1.1rem,2.3cqw,2rem)] leading-[1.55] font-bold text-balance text-ink">
                   {question.text}
                 </p>
               </div>
@@ -176,6 +176,8 @@ function QuestionLane({
                 data-morris-answers={side}
                 className={cn(
                   "grid shrink-0 gap-2 pb-2 transition-opacity duration-hover",
+                  // 短選項排成兩欄，高度讓給題目；長選項一行一個才不會斷得亂七八糟
+                  optionsOf(question).every((option) => option.length <= 6) && "grid-cols-2",
                   lockedOut && "opacity-40",
                 )}
               >
@@ -199,11 +201,11 @@ function QuestionLane({
                         game.answer(side, option);
                       }}
                       className={cn(
-                        "min-h-12 touch-manipulation rounded-xl border-2 px-3 py-2 text-base font-bold break-words shadow-sm",
+                        "min-h-14 touch-manipulation rounded-xl border-2 px-3 py-2 text-[clamp(1rem,1.5cqw,1.35rem)] font-bold break-words shadow-sm",
                         "transition-[transform,background-color,border-color] duration-press ease-out active:scale-[0.97] disabled:pointer-events-none",
                         !answered && cn(SIDE_BORDER[side], "bg-paper text-ink"),
                         answered && isAnswer && "border-success bg-success-soft text-success-ink",
-                        answered && isPicked && !isAnswer && "border-danger bg-danger-soft text-danger-ink",
+                        answered && isPicked && !isAnswer && "quiz-shake border-danger bg-danger-soft text-danger-ink",
                         answered && !isAnswer && !isPicked && "border-border bg-muted text-muted-foreground",
                         state.phase === "move" && !answered && "border-border bg-muted text-muted-foreground",
                       )}
@@ -213,14 +215,16 @@ function QuestionLane({
                   );
                 })}
               </div>
-              {answered && (
-                <AnswerFeedback
-                  correct={answered.correct}
-                  cooldown={lane.cooldown}
-                  answer={question.answer}
-                  explanation={question.explanation}
-                />
-              )}
+              {/* 回饋的位置先留好，答題後題目與選項不會被往上擠 */}
+              <div className="min-h-[5.5rem]">
+                {answered && (
+                  <AnswerFeedback
+                    correct={answered.correct}
+                    cooldown={lane.cooldown}
+                    explanation={question.explanation}
+                  />
+                )}
+              </div>
             </div>
           )}
         </>
@@ -229,22 +233,21 @@ function QuestionLane({
   );
 }
 
+/** 正解已經由轉綠的選項標出來，這裡只講接下來會怎樣，再補解析 */
 function AnswerFeedback({
   correct,
   cooldown,
-  answer,
   explanation,
 }: {
   correct: boolean;
   cooldown: number;
-  answer: string;
   explanation?: string;
 }) {
   return (
     <div
       data-morris-feedback={correct ? "correct" : "incorrect"}
       aria-live="assertive"
-      className="mt-3 border-t border-border pt-3"
+      className="quiz-enter mt-3 border-t border-border pt-3"
     >
       <div className="flex items-center gap-2">
         {correct ? (
@@ -259,8 +262,7 @@ function AnswerFeedback({
           <p className="text-caption ml-auto text-muted-foreground">取得一個棋步</p>
         )}
       </div>
-      <p className="text-caption mt-2 text-muted-foreground">答案：{answer}</p>
-      {explanation && <p className="text-caption mt-1 text-muted-foreground">{explanation}</p>}
+      {explanation && <p className="text-caption mt-2 text-muted-foreground">{explanation}</p>}
     </div>
   );
 }
@@ -292,7 +294,7 @@ function Board({
           <p
             key={state.countdown}
             aria-live="assertive"
-            className="font-display text-[clamp(3rem,8cqw,6rem)] leading-none font-extrabold text-ink"
+            className="territory-count font-display text-[clamp(3rem,8cqw,6rem)] leading-none font-extrabold text-ink"
           >
             {state.countdown}
           </p>
@@ -344,9 +346,10 @@ function Board({
               >
                 {cell && (
                   <Mark
+                    key={cell}
                     side={cell}
                     className={cn(
-                      "pointer-events-none absolute z-10 size-[58%]",
+                      "territory-count pointer-events-none absolute z-10 size-[58%]",
                       hintPiece && "morris-action-mark",
                     )}
                   />
