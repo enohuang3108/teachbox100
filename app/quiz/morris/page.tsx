@@ -107,7 +107,7 @@ export default function MorrisPage() {
         }}
       >
         {hydrated && (
-          <MorrisStage game={game} names={names} onSettings={() => setSetupOpen(true)} />
+          <MorrisStage game={game} names={names} sound={sound} onSettings={() => setSetupOpen(true)} />
         )}
       </PageTemplate>
 
@@ -186,13 +186,11 @@ function useGameSounds(
     playCorrectSound,
     playWrongSound,
     playAddSound,
-    playBonusSound,
     playCountdownTick,
     playGoSound,
   } = useSound();
   const previousCountdown = useRef<number | null>(null);
   const previousBoard = useRef(state.board);
-  const previousResult = useRef(state.result);
   const previousFeedback = useRef({
     red: state.lanes.red.feedback,
     blue: state.lanes.blue.feedback,
@@ -231,10 +229,4 @@ function useGameSounds(
     previousBoard.current = state.board;
     if (enabled && changed && state.board.some(Boolean)) playAddSound();
   }, [enabled, state.board, playAddSound]);
-
-  useEffect(() => {
-    const changed = previousResult.current !== state.result;
-    previousResult.current = state.result;
-    if (enabled && changed && state.result && state.result !== "draw") playBonusSound();
-  }, [enabled, state.result, playBonusSound]);
 }

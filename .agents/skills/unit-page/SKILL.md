@@ -175,6 +175,7 @@ payload 放 `#` 不放 query：不送到伺服器、沒有長度上限。壓縮�
 | 揭曉一個大數字（數字砸下、震一下） | `components/organisms/SlamCelebration.tsx`，有 story |
 | 破解：鎖搖晃後炸開 | `components/ultimate-password/WinCelebration.tsx` |
 | 分隊對戰：隊旗插進棋盤 | `components/territory/VictoryOverlay.tsx` |
+| 分隊對戰：中央畫出獲勝隊的記號 | `components/morris/MorrisVictory.tsx` |
 
 慶祝的寫法：
 

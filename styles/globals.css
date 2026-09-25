@@ -1128,6 +1128,28 @@ main:has(> #game-stage[data-unit="ichiban"]) {
   .cheer-pop { animation: none; }
 }
 
+/* 圈叉搶答獲勝（MorrisVictory）：遮罩淡入、大圈叉畫出來，畫完是 --hit（元件的 HIT_MS）；基底都是最後的樣子 */
+@keyframes morris-win-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.morris-win-fade { animation: morris-win-fade var(--duration-enter) var(--ease-out) both; }
+@keyframes morris-win-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+/* 大圈叉一筆一筆畫出來，畫完（--hit）才炸紙屑 */
+.morris-win-mark :is(circle, line) {
+  stroke-dasharray: 1;
+  animation: morris-win-draw 380ms var(--ease-out) 120ms both;
+}
+.morris-win-mark line + line { animation-delay: 300ms; }
+@media (prefers-reduced-motion: reduce) {
+  .morris-win-fade, .morris-win-mark :is(circle, line) {
+    animation: none;
+  }
+}
+
 /* 出題前的 3、2、1：每個數字從大一點縮回來落定，像被敲下去 */
 @keyframes territory-count {
   from {

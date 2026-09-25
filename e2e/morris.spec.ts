@@ -127,3 +127,32 @@ test("圈叉搶答會鎖場下棋、暫停答錯冷卻並可手動和局", async
   await expect(page.getByRole("button", { name: "再玩一次", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "設定", exact: true })).toBeVisible();
 });
+
+test("圈叉搶答連線獲勝時畫出大圈叉並貼上獲勝紙膠帶", async ({ page }) => {
+  await page.addInitScript((questions) => {
+    localStorage.setItem(
+      "morris-game",
+      JSON.stringify({
+        state: { bank: questions, useDefault: false, cap: "hard", names: ["紅隊", "藍隊"], sound: false },
+        version: 0,
+      }),
+    );
+  }, bank);
+
+  await page.goto("/quiz/morris");
+  await page.getByRole("button", { name: "開始使用", exact: true }).click();
+  await page.getByRole("button", { name: "下一步", exact: true }).click();
+  await page.getByRole("button", { name: "開始比賽", exact: true }).click();
+  await page.getByRole("button", { name: "紅隊準備好了", exact: true }).click();
+  await page.getByRole("button", { name: "藍隊準備好了", exact: true }).click();
+
+  for (const cell of [1, 5, 9]) {
+    await page.getByRole("button", { name: "藍隊選 正確", exact: true }).click({ timeout: 6_000 });
+    await page.getByRole("button", { name: `空格 ${cell}`, exact: true }).click();
+  }
+
+  await expect(page.getByText("藍隊 獲勝！", { exact: true })).toBeVisible();
+  await expect(page.locator(".morris-win-mark line")).toHaveCount(2);
+  await page.getByRole("button", { name: "再玩一次", exact: true }).click();
+  await expect(page.getByText("藍隊 獲勝！", { exact: true })).toHaveCount(0);
+});

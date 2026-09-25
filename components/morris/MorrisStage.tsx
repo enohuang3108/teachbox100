@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/shadcn/button";
+import { MorrisVictory } from "./MorrisVictory";
 import {
   countPieces,
   optionsOf,
@@ -23,10 +24,12 @@ const SIDE_BORDER: Record<Side, string> = {
 export function MorrisStage({
   game,
   names,
+  sound,
   onSettings,
 }: {
   game: MorrisGame;
   names: [string, string];
+  sound: boolean;
   onSettings: () => void;
 }) {
   const { state } = game;
@@ -54,7 +57,18 @@ export function MorrisStage({
         />
       </div>
 
-      {state.phase === "over" && (
+      {state.phase === "over" && state.result && state.result !== "draw" && (
+        <div className="absolute inset-0 z-10">
+          <MorrisVictory
+            winner={state.result}
+            winnerName={nameOf(state.result)}
+            sound={sound}
+            onRestart={game.restart}
+            onSettings={onSettings}
+          />
+        </div>
+      )}
+      {state.phase === "over" && state.result === "draw" && (
         <div className="absolute inset-0 z-10 grid place-items-center bg-paper/80 p-4">
           <dialog
             open
@@ -66,14 +80,7 @@ export function MorrisStage({
               data-morris-result-title
               className="text-display text-balance text-ink"
             >
-              {state.result === "draw" ? (
-                "和局"
-              ) : (
-                <>
-                  <span className={SIDE_COLOR[state.result!]}>{nameOf(state.result!)}</span>
-                  獲勝！
-                </>
-              )}
+              和局
             </p>
             <div className="mt-6 flex justify-center gap-2">
               <Button onClick={game.restart} className="rounded-full active:scale-[0.97]">
