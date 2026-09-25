@@ -99,9 +99,15 @@ export const useSound = () => {
     window.setTimeout(() => ui.play("achievement", { volume: sfxVolume }), 120);
   }, [sfxVolume]);
 
+  /** 一局分出勝負 */
+  const playVictorySound = useCallback(() => {
+    ui.play("achievement", { volume: sfxVolume });
+  }, [sfxVolume]);
+
   return {
     playCorrectSound,
     playUnlockSound,
+    playVictorySound,
     playWrongSound,
     playSpinLoop,
     playAddSound,

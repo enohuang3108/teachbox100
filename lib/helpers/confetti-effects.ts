@@ -140,17 +140,39 @@ export function originOf(el: Element | null): Point {
   };
 }
 
-export function paperBurst(fire: Fire, origin: Point, count = 200, spread = 120) {
-  fire({ ...PAPER_CONFETTI, particleCount: count, spread, startVelocity: 55, origin });
+export function paperBurst(
+  fire: Fire,
+  origin: Point,
+  count = 200,
+  spread = 120,
+  colors: string[] = PAPER_CONFETTI.colors,
+) {
+  fire({ ...PAPER_CONFETTI, colors, particleCount: count, spread, startVelocity: 55, origin });
 }
 
-/** 左右兩門砲連發；回傳 interval id 讓呼叫端清掉 */
-export function paperCannons(fire: Fire, ms: number) {
+/** 兩側（或指定一側）的砲連發；回傳 interval id 讓呼叫端清掉 */
+export function paperCannons(
+  fire: Fire,
+  ms: number,
+  {
+    colors = PAPER_CONFETTI.colors,
+    sides = ["left", "right"],
+  }: { colors?: string[]; sides?: ("left" | "right")[] } = {},
+) {
   const end = Date.now() + ms;
   const id = setInterval(() => {
     if (Date.now() > end) return clearInterval(id);
-    fire({ ...PAPER_CONFETTI, particleCount: 7, angle: 60, spread: 55, startVelocity: 75, origin: { x: 0, y: 0.75 } });
-    fire({ ...PAPER_CONFETTI, particleCount: 7, angle: 120, spread: 55, startVelocity: 75, origin: { x: 1, y: 0.75 } });
+    for (const side of sides) {
+      fire({
+        ...PAPER_CONFETTI,
+        colors,
+        particleCount: sides.length === 1 ? 12 : 7,
+        angle: side === "left" ? 60 : 120,
+        spread: 55,
+        startVelocity: 75,
+        origin: { x: side === "left" ? 0 : 1, y: 0.75 },
+      });
+    }
   }, 60);
   return id;
 }

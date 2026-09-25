@@ -1077,6 +1077,47 @@ main:has(> #game-stage[data-unit="ichiban"]) {
   --territory-fill: 480ms;
 }
 
+/* 領地戰獲勝：隊旗掉下來插進棋盤。--hit 是旗子落地、紙屑炸開、音效響起的那一刻；
+   基底都是最後的樣子，降低動態效果時拿掉動畫就是結果 */
+@keyframes victory-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes victory-flag {
+  0% {
+    transform: translateY(-130cqh) rotate(-14deg);
+    animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.55);
+  }
+  70% {
+    transform: translateY(0) rotate(0) scale(1.06, 0.9);
+    animation-timing-function: var(--ease-out);
+  }
+  84% {
+    transform: translateY(-2.5cqh) scale(0.97, 1.04);
+    animation-timing-function: var(--ease-in-out);
+  }
+  93% { transform: translateY(0) scale(1.02, 0.98); }
+  100% { transform: none; }
+}
+.victory[data-kind="flag"] {
+  animation: stage-shake 360ms var(--ease-out) var(--hit);
+}
+/* 旗子斜斜掉下來、途中轉正，落地壓扁再彈一下站穩；--hit 對齊落地那一格（620ms 的 70%） */
+.victory-flag {
+  transform-origin: 20% 100%;
+  animation: victory-flag 620ms both;
+}
+.victory-tape {
+  transform: rotate(-2deg);
+  animation: tape-in 380ms var(--ease-out) calc(var(--hit) + 80ms) both;
+}
+.victory-late { animation: victory-rise 260ms var(--ease-out) calc(var(--hit) + 380ms) both; }
+@media (prefers-reduced-motion: reduce) {
+  .victory, .victory-flag, .victory-tape, .victory-late {
+    animation: none !important;
+  }
+}
+
 /* 出題前的 3、2、1：每個數字從大一點縮回來落定，像被敲下去 */
 @keyframes territory-count {
   from {
