@@ -116,7 +116,7 @@ export default function TerritoryPage() {
           entered,
         }}
       >
-        {hydrated && <TerritoryStage game={game} names={names} />}
+        {hydrated && <TerritoryStage game={game} names={names} sound={sound} />}
       </PageTemplate>
 
       {/* 放在 PageTemplate 外面：介紹頁階段 children 不渲染，設定要在那時就能開 */}

@@ -93,8 +93,21 @@ export const useSound = () => {
     ui.play("start", { volume: sfxVolume });
   }, [sfxVolume]);
 
+  /** 破解密碼：鎖打開，緊接一段完整的慶祝 */
+  const playUnlockSound = useCallback(() => {
+    ui.play("unlock", { volume: sfxVolume });
+    window.setTimeout(() => ui.play("achievement", { volume: sfxVolume }), 120);
+  }, [sfxVolume]);
+
+  /** 一局分出勝負 */
+  const playVictorySound = useCallback(() => {
+    ui.play("achievement", { volume: sfxVolume });
+  }, [sfxVolume]);
+
   return {
     playCorrectSound,
+    playUnlockSound,
+    playVictorySound,
     playWrongSound,
     playSpinLoop,
     playAddSound,

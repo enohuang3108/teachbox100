@@ -899,6 +899,145 @@
   animation: quiz-shake 320ms var(--ease-out);
 }
 
+@keyframes password-answer-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.password-answer-enter {
+  animation: password-answer-in var(--duration-enter) var(--ease-out) both;
+}
+
+@keyframes password-win-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.password-win-enter {
+  animation: password-win-in var(--duration-enter) var(--ease-out) both;
+}
+/* 「破解成功！」跟答題回饋同一條紙膠帶，黃色、拉得慢一點 */
+.password-win-tape {
+  transform: rotate(-2deg);
+  animation: password-tape-in 420ms var(--ease-out) both;
+}
+
+/* 共用慶祝 SlamCelebration：數字砸下來、整塊震一下、再貼一條紙膠帶 */
+@keyframes stage-shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-10px, 6px); }
+  40% { transform: translate(9px, -5px); }
+  60% { transform: translate(-6px, 3px); }
+  80% { transform: translate(3px, -2px); }
+}
+@keyframes slam-number {
+  0% { opacity: 0; transform: scale(3.2); }
+  80% { opacity: 1; transform: scale(0.94); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes tape-in {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+/* 砸下去要越來越快才有撞擊感，這裡刻意不用 ease-out */
+.slam-number { animation: slam-number 280ms cubic-bezier(0.55, 0, 0.8, 0.2) both; }
+.slam-celebration { animation: stage-shake 360ms var(--ease-out) 270ms; }
+.slam-tape {
+  transform: rotate(-2deg);
+  animation: tape-in 420ms var(--ease-out) 760ms both;
+}
+
+/* 破解成功：鎖越搖越兇、在 --open 炸開（鎖扣飛走、鎖身裂兩半），密碼從中間彈出來。
+   --open 要跟 WinCelebration.tsx 的 OPEN_MS 一致。基底都是最後的樣子，降低動態效果時拿掉動畫就是結果 */
+.password-win {
+  --open: 820ms;
+  animation: stage-shake 380ms var(--ease-out) var(--open);
+}
+@keyframes unlock-tension {
+  0% { transform: none; }
+  20% { transform: rotate(-2deg); }
+  30% { transform: rotate(2deg); }
+  45% { transform: rotate(-4deg) scale(1.02); }
+  55% { transform: rotate(4deg) scale(1.03); }
+  70% { transform: rotate(-6deg) scale(1.05); }
+  80% { transform: rotate(6deg) scale(1.06); }
+  90% { transform: rotate(-7deg) scale(1.08); }
+  100% { transform: scale(1.1); }
+}
+@keyframes unlock-fly {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translate(40px, -200px) rotate(200deg); }
+}
+@keyframes unlock-half-l {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translate(-160px, 80px) rotate(-35deg); }
+}
+@keyframes unlock-half-r {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translate(160px, 80px) rotate(35deg); }
+}
+@keyframes unlock-reveal {
+  0% { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 1; transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.unlock-tension { animation: unlock-tension var(--open) linear both; }
+.unlock-fly,
+.unlock-half-l,
+.unlock-half-r {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.unlock-fly { animation: unlock-fly 520ms var(--ease-out) var(--open) both; }
+.unlock-half-l { animation: unlock-half-l 600ms var(--ease-out) var(--open) both; }
+.unlock-half-r { animation: unlock-half-r 600ms var(--ease-out) var(--open) both; }
+.unlock-reveal { animation: unlock-reveal 420ms var(--ease-out) var(--open) both; }
+.password-win .unlock-late { animation-delay: calc(var(--open) + 260ms); }
+
+/* 答題回饋：斜貼的紙膠帶從左拉開、同時畫圈或打叉。答錯不搖，停得比答對久就夠了 */
+.password-fb[data-kind="correct"] {
+  --fb: var(--success);
+}
+.password-fb[data-kind="wrong"] {
+  --fb: var(--danger);
+}
+@keyframes password-fb-screen {
+  0% { opacity: 0; }
+  10%, 86% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes password-tape-in {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes password-fb-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+.password-tape {
+  transform: rotate(-2deg);
+}
+.password-fb-stroke {
+  stroke-dasharray: 1;
+}
+.password-fb[data-animated] {
+  animation: password-fb-screen 1s linear both;
+}
+.password-fb[data-animated] .password-tape {
+  animation: password-tape-in 340ms var(--ease-out) both;
+}
+.password-fb[data-animated] .password-fb-stroke {
+  stroke-dashoffset: 1;
+  animation: password-fb-draw 260ms var(--ease-out) 200ms forwards;
+}
+.password-fb[data-animated] .password-fb-stroke + .password-fb-stroke {
+  animation-delay: 380ms;
+}
+
+@keyframes password-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* 位移拿掉，淡入留著 —— 顏色與透明度是在傳達「這是新的一題」，不是裝飾 */
   .quiz-enter {
@@ -907,6 +1046,24 @@
   }
   .quiz-shake {
     animation: none;
+  }
+  .password-answer-enter,
+  .password-win-enter,
+  .password-win-tape {
+    animation: password-fade-in var(--duration-exit) var(--ease-out) both;
+  }
+  .slam-number, .slam-celebration, .unlock-tension, .unlock-fly,
+  .unlock-half-l, .unlock-half-r, .unlock-reveal, .password-win {
+    animation: none !important;
+  }
+  .slam-tape {
+    animation: password-fade-in var(--duration-exit) var(--ease-out) both;
+  }
+  /* 回饋照樣淡入淡出，拉膠帶與畫線收掉 */
+  .password-fb[data-animated] .password-tape,
+  .password-fb[data-animated] .password-fb-stroke {
+    animation: none;
+    stroke-dashoffset: 0;
   }
 }
 
@@ -918,6 +1075,57 @@ main:has(> #game-stage[data-unit="ichiban"]) {
 /* 領地戰：暈開時一格換色的時長。換色是局面本身，降低動態效果時照樣保留 */
 #game-stage[data-unit="quiz-territory"] {
   --territory-fill: 480ms;
+}
+
+/* 領地戰獲勝：隊旗掉下來插進棋盤。--hit 是旗子落地、紙屑炸開、音效響起的那一刻；
+   基底都是最後的樣子，降低動態效果時拿掉動畫就是結果 */
+@keyframes victory-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes victory-flag {
+  0% {
+    transform: translateY(-130cqh) rotate(-14deg);
+    animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.55);
+  }
+  70% {
+    transform: translateY(0) rotate(0) scale(1.06, 0.9);
+    animation-timing-function: var(--ease-out);
+  }
+  84% {
+    transform: translateY(-2.5cqh) scale(0.97, 1.04);
+    animation-timing-function: var(--ease-in-out);
+  }
+  93% { transform: translateY(0) scale(1.02, 0.98); }
+  100% { transform: none; }
+}
+.victory[data-kind="flag"] {
+  animation: stage-shake 360ms var(--ease-out) var(--hit);
+}
+/* 旗子斜斜掉下來、途中轉正，落地壓扁再彈一下站穩；--hit 對齊落地那一格（620ms 的 70%） */
+.victory-flag {
+  transform-origin: 20% 100%;
+  animation: victory-flag 620ms both;
+}
+.victory-tape {
+  transform: rotate(-2deg);
+  animation: tape-in 380ms var(--ease-out) calc(var(--hit) + 80ms) both;
+}
+.victory-late { animation: victory-rise 260ms var(--ease-out) calc(var(--hit) + 380ms) both; }
+@media (prefers-reduced-motion: reduce) {
+  .victory, .victory-flag, .victory-tape, .victory-late {
+    animation: none !important;
+  }
+}
+
+/* 九九乘法結算（FinishCelebration）：分數跳完停住時彈一下。--hit 由元件依分數算出 */
+@keyframes cheer-pop {
+  0%, 100% { transform: none; }
+  40% { transform: scale(1.15); }
+}
+.cheer-pop { animation: cheer-pop 320ms var(--ease-out) var(--hit); }
+@media (prefers-reduced-motion: reduce) {
+  .cheer-pop { animation: none; }
 }
 
 /* 出題前的 3、2、1：每個數字從大一點縮回來落定，像被敲下去 */

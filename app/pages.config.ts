@@ -210,6 +210,17 @@ const pagesConfig = {
     intro:
       "紅藍兩隊各自看題、各自作答，答對就能在中央九宮格放下一枚棋。三枚棋都上場後還能搬動位置，先連成橫線、直線或斜線的一隊獲勝。",
   },
+  "ultimate-password": {
+    path: "/ultimate-password",
+    imageSrc: "/images/covers/warm/ultimate-password-unlocked.png",
+    illustrationSrc: "/images/covers/warm/ultimate-password-unlocked.png",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afry5v/++gEBAwAEC//otf304Qkmafz7+gL//voB6LAAAwn/+OkB6bIJAtvk17j9AQcEBgYK9hhdCPjf9/sAydkL7+bOoMLea2sGAeXgz9Tj6jEQ4g8SHvYLN0hGRgECArGtowLZ496+xayTv9v4+BoQDwI3NTAGBAEICAgB/vXq+/z78PPvEQoOAQgH2tnc+fn5LzEvbK1MgAx6lX0AAAAASUVORK5CYII=",
+    title: "終極密碼",
+    slogan: "回答題目，輪流猜 1 到 100",
+    intro:
+      "畫面會顯示課堂的題目。學生一人一次輪流猜，畫面依猜測提示可能的範圍，直到全班一起找到答案。",
+  },
 } satisfies Record<string, Page>;
 
 export type PageKey = keyof typeof pagesConfig;

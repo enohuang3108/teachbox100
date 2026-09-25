@@ -5,6 +5,7 @@ import { MetadataRoute } from "next";
 // 內容實際更動時再改這個日期。用 new Date() 會讓每次爬取都宣稱「剛更新」，
 // 是假訊號，反而降低 lastmod 的可信度。
 const LAST_MODIFIED = new Date("2026-09-16");
+const ULTIMATE_PASSWORD_LAST_MODIFIED = new Date("2026-09-24");
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
@@ -28,7 +29,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
     ...Object.values(pages).map((page) => ({
       url: `${SITE_URL}${page.path}`,
-      lastModified: LAST_MODIFIED,
+      lastModified:
+        page.path === "/ultimate-password"
+          ? ULTIMATE_PASSWORD_LAST_MODIFIED
+          : LAST_MODIFIED,
       changeFrequency: "monthly" as const,
       priority: 0.8,
     })),

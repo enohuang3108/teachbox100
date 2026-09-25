@@ -82,3 +82,11 @@ export function verdict(correct: number, total: number): string {
   if (rate >= 0.5) return "有進步空間，挑答錯的那幾格再練一輪吧。";
   return "先從一段乘法表開始，練熟一段再加下一段。";
 }
+
+/** 結算的慶祝：不管幾分都給一句鼓勵，答對八成以上才撒紙屑，全對再加兩側的砲 */
+export function celebration(correct: number, total: number) {
+  const rate = total ? correct / total : 0;
+  const label =
+    rate === 1 ? "全對！" : rate >= 0.8 ? "好厲害！" : rate >= 0.5 ? "有進步！" : "繼續加油！";
+  return { label, confetti: rate >= 0.8, cannons: rate === 1 };
+}

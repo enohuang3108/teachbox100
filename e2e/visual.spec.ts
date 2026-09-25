@@ -35,6 +35,7 @@ const UNITS: Record<string, { start: string; setup: boolean }> = {
   multiplication: { start: "開始使用", setup: true },
   "quiz-territory": { start: "開始使用", setup: true },
   "quiz-morris": { start: "開始使用", setup: true },
+  "ultimate-password": { start: "開始使用", setup: true },
 };
 
 // 新增單元卻沒補上面這張表，就不會有基準線 —— 在這裡擋下來，而不是悄悄少拍一張

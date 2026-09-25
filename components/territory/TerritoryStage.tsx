@@ -1,7 +1,6 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { Button } from "@/components/atoms/shadcn/button";
 import { DIFFICULTY_LABEL, difficultyOf, type Question } from "@/lib/questions/types";
 import {
   cellValue,
@@ -12,15 +11,12 @@ import {
 } from "@/lib/territory/rules";
 import { cn } from "@/lib/utils";
 import type { TerritoryGame } from "./useTerritoryGame";
+import { VictoryOverlay } from "./VictoryOverlay";
 
 const OWNER_BG: Record<"left" | "right" | "none", string> = {
   left: "bg-brand-blue",
   right: "bg-brand-red",
   none: "bg-sand",
-};
-const SIDE_TEXT: Record<Side, string> = {
-  left: "text-brand-blue",
-  right: "text-brand-red",
 };
 /** 答案鈕白底、粗的隊色框，學生一眼看得出哪一排是自己的 */
 const PAD_BORDER: Record<Side, string> = {
@@ -43,9 +39,11 @@ const HALO: CSSProperties = {
 export function TerritoryStage({
   game,
   names,
+  sound,
 }: {
   game: TerritoryGame;
   names: [string, string];
+  sound: boolean;
 }) {
   const { board, question, over, winner, aspect } = game;
   const nameOf = (side: Side) =>
@@ -145,34 +143,18 @@ export function TerritoryStage({
       </div>
 
       {over && (
-        <div className="absolute inset-0 grid place-items-center p-[4cqw]">
-          <div className="quiz-enter flex flex-col items-center gap-[2cqw] rounded-[2cqw] bg-card px-[5cqw] py-[3.5cqw] text-center shadow-lg">
-            <p className="font-display text-ink text-[clamp(1.5rem,5cqw,4.5rem)] font-extrabold">
-              {winner ? (
-                <>
-                  <span className={SIDE_TEXT[winner]}>{nameOf(winner)}</span>
-                  獲勝！
-                </>
-              ) : (
-                "平手！"
-              )}
-            </p>
-            {/* 吃光時棋盤已經說明一切；題目出完才需要講是比格數分的勝負 */}
-            {!(winner && countOf(board, winner === "left" ? "right" : "left") === 0) && (
-              <p className="text-muted-foreground text-[clamp(1rem,1.8cqw,1.75rem)] font-bold tabular-nums">
-                題目出完：{nameOf("left")} {countOf(board, "left")} 格，
-                {nameOf("right")} {countOf(board, "right")} 格
-              </p>
-            )}
-            <Button
-              size="lg"
-              className="h-auto rounded-full px-[3cqw] py-[1cqw] text-[clamp(1rem,1.8cqw,1.75rem)] transition-transform duration-press ease-out active:scale-[0.97]"
-              onClick={game.restart}
-            >
-              再來一局
-            </Button>
-          </div>
-        </div>
+        <VictoryOverlay
+          winner={winner}
+          winnerName={winner ? nameOf(winner) : ""}
+          detail={
+            // 吃光時棋盤已經說明一切；題目出完才需要講是比格數分的勝負
+            winner && countOf(board, winner === "left" ? "right" : "left") === 0
+              ? null
+              : `題目出完：${nameOf("left")} ${countOf(board, "left")} 格，${nameOf("right")} ${countOf(board, "right")} 格`
+          }
+          sound={sound}
+          onRestart={game.restart}
+        />
       )}
     </div>
   );

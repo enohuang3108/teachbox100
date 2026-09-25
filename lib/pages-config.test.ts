@@ -21,3 +21,12 @@ describe("Ichiban Kuji cover", () => {
     ).toBe(true);
   });
 });
+
+describe("Ultimate Password cover", () => {
+  it("uses the new transparent unlock artwork on the page and home card", () => {
+    const cover = "/images/covers/warm/ultimate-password-unlocked.png";
+    expect(pages["ultimate-password"].imageSrc).toBe(cover);
+    expect(pages["ultimate-password"].illustrationSrc).toBe(cover);
+    expect(existsSync(join(process.cwd(), "public", cover.slice(1)))).toBe(true);
+  });
+});
