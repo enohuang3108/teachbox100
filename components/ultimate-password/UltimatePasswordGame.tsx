@@ -15,7 +15,12 @@ import {
   DialogTitle,
 } from "@/components/atoms/shadcn/dialog";
 import { TooltipProvider } from "@/components/atoms/shadcn/tooltip";
+import {
+  FeedbackOverlay,
+  type AnswerFeedback,
+} from "@/components/ultimate-password/FeedbackOverlay";
 import { SetupPanel } from "@/components/ultimate-password/SetupPanel";
+import { WinCelebration } from "@/components/ultimate-password/WinCelebration";
 import { ACTION_BTN, Tip } from "@/components/templates/GamePageTemplate";
 import {
   GAME_STAGE_ID,
@@ -37,16 +42,7 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
 } from "react";
-
-type AnswerFeedback = {
-  kind: "correct" | "wrong";
-  title: string;
-  detail: string;
-  animated: boolean;
-  duration: number;
-};
 
 const CORRECT_FEEDBACK_MS = 1000;
 const WRONG_FEEDBACK_MS = 1200;
@@ -140,7 +136,7 @@ export function UltimatePasswordGame() {
       return;
     }
     if (result.correct) {
-      playCorrectSound();
+      // 音效交給破解動畫：搖晃的滴答、炸開的開鎖聲
       patch({ answerNumber: round.secret });
       setMessage("");
       return;
@@ -245,107 +241,15 @@ export function UltimatePasswordGame() {
       >
         {hydrated && (
           <section className="relative isolate mx-auto flex min-h-[min(72svh,680px)] w-full max-w-5xl flex-col items-center gap-8 text-center">
-            {feedback && (
-              <div
-                className="password-fb absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-paper/85 px-4"
-                data-kind={feedback.kind}
-                data-animated={feedback.animated || undefined}
-                style={{ animationDuration: `${feedback.duration}ms` }}
-              >
-                <output
-                  aria-label={`${feedback.title}${feedback.title.endsWith("！") ? "" : "，"}${feedback.detail}`}
-                  className="password-fb-card relative flex w-full max-w-xl flex-col items-center rounded-[2rem] border-4 border-(--fb) bg-card px-8 pb-9 pt-7 shadow-[0_10px_0_var(--fb)]"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="relative grid size-32 place-items-center"
-                  >
-                    {feedback.kind === "correct" &&
-                      [
-                        "bg-brand-yellow",
-                        "bg-brand-red",
-                        "bg-brand-blue",
-                        "bg-brand-green",
-                      ].flatMap((color, i) => [
-                        <i
-                          key={i}
-                          className={`password-fb-ray ${color}`}
-                          style={{ "--i": i } as CSSProperties}
-                        />,
-                        <i
-                          key={i + 4}
-                          className={`password-fb-ray ${color}`}
-                          style={{ "--i": i + 4 } as CSSProperties}
-                        />,
-                      ])}
-                    <svg
-                      viewBox="0 0 100 100"
-                      className="size-full overflow-visible"
-                      fill="none"
-                      stroke="var(--fb)"
-                      strokeWidth="14"
-                      strokeLinecap="round"
-                    >
-                      {feedback.kind === "correct" ? (
-                        <circle
-                          className="password-fb-stroke"
-                          cx="50"
-                          cy="50"
-                          r="38"
-                          pathLength={1}
-                          transform="rotate(-90 50 50)"
-                        />
-                      ) : (
-                        <>
-                          <path
-                            className="password-fb-stroke"
-                            d="M18 18 82 82"
-                            pathLength={1}
-                          />
-                          <path
-                            className="password-fb-stroke"
-                            d="M82 18 18 82"
-                            pathLength={1}
-                          />
-                        </>
-                      )}
-                    </svg>
-                  </span>
-                  <span className="mt-3 block text-[clamp(3rem,8vw,5.5rem)] font-black leading-tight text-(--fb-ink)">
-                    {feedback.title}
-                  </span>
-                  <span className="mt-2 block text-[clamp(1.5rem,4vw,2.75rem)] font-bold leading-snug text-foreground">
-                    {feedback.detail}
-                  </span>
-                </output>
-              </div>
-            )}
+            {feedback && <FeedbackOverlay feedback={feedback} />}
             {answerNumber !== null ? (
-              <div className="password-win-enter relative my-auto flex w-full max-w-3xl flex-col items-center overflow-hidden rounded-3xl border-2 border-success bg-card px-6 py-12 shadow-sm sm:py-16">
+              <div className="password-win-enter relative my-auto flex w-full flex-col items-center py-8">
                 <output className="sr-only">
                   破解成功！正確密碼是 {answerNumber}
                 </output>
-                <div
-                  aria-hidden="true"
-                  className="password-paper-field absolute inset-0 pointer-events-none"
-                >
-                  <span className="bg-brand-yellow" />
-                  <span className="bg-brand-red" />
-                  <span className="bg-brand-blue" />
-                  <span className="bg-brand-green" />
-                  <span className="bg-brand-yellow" />
-                  <span className="bg-brand-blue" />
+                <div aria-label={`數字答案 ${answerNumber}`} className="w-full">
+                  <WinCelebration secret={answerNumber} sound={sound} />
                 </div>
-                <p className="text-h2 text-success-ink">破解成功！</p>
-                <p className="mt-6 text-body-lg text-muted-foreground">
-                  正確密碼是
-                </p>
-                <p
-                  className="password-number-enter mt-2 text-[clamp(5rem,18vw,11rem)] font-black leading-none tabular-nums text-success-ink"
-                  aria-label={`數字答案 ${answerNumber}`}
-                >
-                  {answerNumber}
-                </p>
                 <Button
                   className="relative mt-10 h-14 px-8 text-h3 transition-transform duration-press ease-out active:scale-[0.97]"
                   onClick={resetGame}

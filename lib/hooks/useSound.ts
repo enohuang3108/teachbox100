@@ -93,8 +93,15 @@ export const useSound = () => {
     ui.play("start", { volume: sfxVolume });
   }, [sfxVolume]);
 
+  /** 破解密碼：鎖打開，緊接一段完整的慶祝 */
+  const playUnlockSound = useCallback(() => {
+    ui.play("unlock", { volume: sfxVolume });
+    window.setTimeout(() => ui.play("achievement", { volume: sfxVolume }), 120);
+  }, [sfxVolume]);
+
   return {
     playCorrectSound,
+    playUnlockSound,
     playWrongSound,
     playSpinLoop,
     playAddSound,

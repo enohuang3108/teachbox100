@@ -156,6 +156,12 @@ payload 放 `#` 不放 query：不送到伺服器、沒有長度上限。壓縮�
 - blocker：內建題庫抽不到題講原因；自訂還沒選檔用空字串（擋住但不亮紅字）。
 - 第二站放難度上限，與題庫分開。
 
+### 慶祝特效
+
+- 紙屑一律走 `StageConfetti`（`components/organisms/StageConfetti.tsx`）：canvas portal 進 `#game-stage`，全螢幕投影時也看得到，降低動態效果時不噴。直接呼叫 `canvas-confetti` 會掛在 body，全螢幕時被擋在外面。顏色與砲的寫法在 `lib/helpers/confetti-effects.ts`（`paperBurst`／`paperCannons`／`originOf`）。
+- 揭曉一個大數字可以直接用 `SlamCelebration`（數字砸下、震一下、紙屑、紙膠帶），有 story。
+- e2e 或截圖腳本用 `addInitScript` 把 `Math.random` 固定成常數時，每片紙屑的隨機值都一樣，會疊成一片 —— 那是測試的假象，不是壞掉。要看紙屑就別固定亂數，改寫 store 決定答案。
+
 ### store
 
 `lib/<game>/store.ts`，一律 `create()(persist(..., { name: "<kebab-name>" }))`，一頁一個 localStorage key。存什麼、不存什麼見下面的約定表；計分板的分數與一番賞的卡池是刻意的例外，兩者的 FAQ 都有說明。終極密碼的進行中局面另開一個 store 存 `sessionStorage`（`lib/ultimate-password/store.ts` 的 `useUltimatePasswordProgress`）：投影時誤按重新整理接著玩、直接回到遊戲不經過介紹頁，關掉分頁才清空。改過持久化結構才需要 `version` + `migrate`。

@@ -1,4 +1,5 @@
 import confetti from "canvas-confetti";
+import { BRAND } from "@/lib/design-tokens";
 
 // Realistic Look 特效
 export const realisticEffect = () => {
@@ -114,3 +115,42 @@ export const getRandomConfettiEffect = () => {
   const randomEffect = effects[Math.floor(Math.random() * effects.length)];
   return randomEffect;
 };
+
+/*
+ * 紙屑：品牌四色＋米白的紙片，給 StageConfetti 的 fire 用（全螢幕時也看得到）。
+ * origin 是整個螢幕的比例座標，originOf 把某個元素的中心換算過去。
+ */
+
+type Fire = confetti.CreateTypes;
+type Point = { x: number; y: number };
+
+export const PAPER_CONFETTI = {
+  colors: [BRAND.yellow, BRAND.red, BRAND.blue, BRAND.green, BRAND.paperWarm],
+  scalar: 1.3,
+  ticks: 260,
+  gravity: 0.9,
+};
+
+export function originOf(el: Element | null): Point {
+  if (!el) return { x: 0.5, y: 0.5 };
+  const r = el.getBoundingClientRect();
+  return {
+    x: (r.left + r.width / 2) / window.innerWidth,
+    y: (r.top + r.height / 2) / window.innerHeight,
+  };
+}
+
+export function paperBurst(fire: Fire, origin: Point, count = 200, spread = 120) {
+  fire({ ...PAPER_CONFETTI, particleCount: count, spread, startVelocity: 55, origin });
+}
+
+/** 左右兩門砲連發；回傳 interval id 讓呼叫端清掉 */
+export function paperCannons(fire: Fire, ms: number) {
+  const end = Date.now() + ms;
+  const id = setInterval(() => {
+    if (Date.now() > end) return clearInterval(id);
+    fire({ ...PAPER_CONFETTI, particleCount: 7, angle: 60, spread: 55, startVelocity: 75, origin: { x: 0, y: 0.75 } });
+    fire({ ...PAPER_CONFETTI, particleCount: 7, angle: 120, spread: 55, startVelocity: 75, origin: { x: 1, y: 0.75 } });
+  }, 60);
+  return id;
+}

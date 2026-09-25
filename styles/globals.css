@@ -908,102 +908,129 @@
 }
 
 @keyframes password-win-in {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .password-win-enter {
   animation: password-win-in var(--duration-enter) var(--ease-out) both;
 }
-.password-number-enter {
-  animation: password-answer-in var(--duration-enter) var(--ease-out) both;
+/* 「破解成功！」跟答題回饋同一條紙膠帶，黃色、拉得慢一點 */
+.password-win-tape {
+  transform: rotate(-2deg);
+  animation: password-tape-in 420ms var(--ease-out) both;
 }
 
-@keyframes password-paper-out {
-  from { opacity: 0; transform: translate(0, 8px) rotate(0deg); }
-  25% { opacity: 1; }
-  to { opacity: 0; transform: translate(var(--paper-x), var(--paper-y)) rotate(var(--paper-turn)); }
+/* 共用慶祝 SlamCelebration：數字砸下來、整塊震一下、再貼一條紙膠帶 */
+@keyframes stage-shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-10px, 6px); }
+  40% { transform: translate(9px, -5px); }
+  60% { transform: translate(-6px, 3px); }
+  80% { transform: translate(3px, -2px); }
 }
-.password-paper-field span {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 12px;
-  height: 18px;
-  border-radius: 3px;
-  animation: password-paper-out 700ms var(--ease-out) 120ms both;
+@keyframes slam-number {
+  0% { opacity: 0; transform: scale(3.2); }
+  80% { opacity: 1; transform: scale(0.94); }
+  100% { opacity: 1; transform: scale(1); }
 }
-.password-paper-field span:nth-child(1) { --paper-x: -180px; --paper-y: -110px; --paper-turn: -35deg; }
-.password-paper-field span:nth-child(2) { --paper-x: -105px; --paper-y: -150px; --paper-turn: 28deg; }
-.password-paper-field span:nth-child(3) { --paper-x: 130px; --paper-y: -130px; --paper-turn: 42deg; }
-.password-paper-field span:nth-child(4) { --paper-x: 190px; --paper-y: -60px; --paper-turn: -25deg; }
-.password-paper-field span:nth-child(5) { --paper-x: -155px; --paper-y: 100px; --paper-turn: 30deg; }
-.password-paper-field span:nth-child(6) { --paper-x: 155px; --paper-y: 90px; --paper-turn: -40deg; }
+@keyframes tape-in {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+/* 砸下去要越來越快才有撞擊感，這裡刻意不用 ease-out */
+.slam-number { animation: slam-number 280ms cubic-bezier(0.55, 0, 0.8, 0.2) both; }
+.slam-celebration { animation: stage-shake 360ms var(--ease-out) 270ms; }
+.slam-tape {
+  transform: rotate(-2deg);
+  animation: tape-in 420ms var(--ease-out) 760ms both;
+}
 
-/* 答題回饋：Switch 式的貼紙卡 —— 彈出、畫圈或打叉、答對噴一圈彩條，答錯搖頭 */
+/* 破解成功：鎖越搖越兇、在 --open 炸開（鎖扣飛走、鎖身裂兩半），密碼從中間彈出來。
+   --open 要跟 WinCelebration.tsx 的 OPEN_MS 一致。基底都是最後的樣子，降低動態效果時拿掉動畫就是結果 */
+.password-win {
+  --open: 820ms;
+  animation: stage-shake 380ms var(--ease-out) var(--open);
+}
+@keyframes unlock-tension {
+  0% { transform: none; }
+  20% { transform: rotate(-2deg); }
+  30% { transform: rotate(2deg); }
+  45% { transform: rotate(-4deg) scale(1.02); }
+  55% { transform: rotate(4deg) scale(1.03); }
+  70% { transform: rotate(-6deg) scale(1.05); }
+  80% { transform: rotate(6deg) scale(1.06); }
+  90% { transform: rotate(-7deg) scale(1.08); }
+  100% { transform: scale(1.1); }
+}
+@keyframes unlock-fly {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translate(40px, -200px) rotate(200deg); }
+}
+@keyframes unlock-half-l {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translate(-160px, 80px) rotate(-35deg); }
+}
+@keyframes unlock-half-r {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translate(160px, 80px) rotate(35deg); }
+}
+@keyframes unlock-reveal {
+  0% { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 1; transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.unlock-tension { animation: unlock-tension var(--open) linear both; }
+.unlock-fly,
+.unlock-half-l,
+.unlock-half-r {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.unlock-fly { animation: unlock-fly 520ms var(--ease-out) var(--open) both; }
+.unlock-half-l { animation: unlock-half-l 600ms var(--ease-out) var(--open) both; }
+.unlock-half-r { animation: unlock-half-r 600ms var(--ease-out) var(--open) both; }
+.unlock-reveal { animation: unlock-reveal 420ms var(--ease-out) var(--open) both; }
+.password-win .unlock-late { animation-delay: calc(var(--open) + 260ms); }
+
+/* 答題回饋：斜貼的紙膠帶從左拉開、同時畫圈或打叉。答錯不搖，停得比答對久就夠了 */
 .password-fb[data-kind="correct"] {
   --fb: var(--success);
-  --fb-ink: var(--success-ink);
 }
 .password-fb[data-kind="wrong"] {
   --fb: var(--danger);
-  --fb-ink: var(--danger-ink);
 }
 @keyframes password-fb-screen {
   0% { opacity: 0; }
   10%, 86% { opacity: 1; }
   100% { opacity: 0; }
 }
-@keyframes password-fb-pop {
-  0% { opacity: 0; transform: scale(0.95) translateY(12px); }
-  60% { opacity: 1; transform: scale(1.04) translateY(0); }
-  100% { opacity: 1; transform: scale(1); }
-}
-@keyframes password-fb-shake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-14px) rotate(-1.5deg); }
-  40% { transform: translateX(11px) rotate(1deg); }
-  60% { transform: translateX(-7px); }
-  80% { transform: translateX(4px); }
+@keyframes password-tape-in {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
 }
 @keyframes password-fb-draw {
   from { stroke-dashoffset: 1; }
   to { stroke-dashoffset: 0; }
 }
-@keyframes password-fb-ray {
-  0% { opacity: 0; transform: rotate(calc(var(--i) * 45deg)) translateY(-54px) scaleY(1.4); }
-  25% { opacity: 1; }
-  100% { opacity: 0; transform: rotate(calc(var(--i) * 45deg)) translateY(-96px) scaleY(0.4); }
+.password-tape {
+  transform: rotate(-2deg);
 }
 .password-fb-stroke {
   stroke-dasharray: 1;
 }
-.password-fb-ray {
-  position: absolute;
-  left: calc(50% - 5px);
-  top: calc(50% - 12px);
-  width: 10px;
-  height: 24px;
-  border-radius: 999px;
-  opacity: 0;
-}
 .password-fb[data-animated] {
   animation: password-fb-screen 1s linear both;
 }
-.password-fb[data-animated] .password-fb-card {
-  animation: password-fb-pop 320ms var(--ease-out) both;
-}
-.password-fb[data-animated][data-kind="wrong"] .password-fb-card {
-  animation: password-fb-pop 320ms var(--ease-out) both, password-fb-shake 380ms var(--ease-out) 540ms;
+.password-fb[data-animated] .password-tape {
+  animation: password-tape-in 340ms var(--ease-out) both;
 }
 .password-fb[data-animated] .password-fb-stroke {
   stroke-dashoffset: 1;
-  animation: password-fb-draw 260ms var(--ease-out) 120ms forwards;
+  animation: password-fb-draw 260ms var(--ease-out) 200ms forwards;
 }
 .password-fb[data-animated] .password-fb-stroke + .password-fb-stroke {
-  animation-delay: 300ms;
-}
-.password-fb[data-animated] .password-fb-ray {
-  animation: password-fb-ray 520ms var(--ease-out) 300ms both;
+  animation-delay: 380ms;
 }
 
 @keyframes password-fade-in {
@@ -1022,20 +1049,21 @@
   }
   .password-answer-enter,
   .password-win-enter,
-  .password-number-enter {
+  .password-win-tape {
     animation: password-fade-in var(--duration-exit) var(--ease-out) both;
   }
-  .password-paper-field {
-    display: none;
+  .slam-number, .slam-celebration, .unlock-tension, .unlock-fly,
+  .unlock-half-l, .unlock-half-r, .unlock-reveal, .password-win {
+    animation: none !important;
   }
-  /* 回饋卡照樣淡入淡出，彈跳、搖頭、畫線、彩條都收掉 */
-  .password-fb[data-animated] .password-fb-card,
+  .slam-tape {
+    animation: password-fade-in var(--duration-exit) var(--ease-out) both;
+  }
+  /* 回饋照樣淡入淡出，拉膠帶與畫線收掉 */
+  .password-fb[data-animated] .password-tape,
   .password-fb[data-animated] .password-fb-stroke {
     animation: none;
     stroke-dashoffset: 0;
-  }
-  .password-fb-ray {
-    display: none;
   }
 }
 
