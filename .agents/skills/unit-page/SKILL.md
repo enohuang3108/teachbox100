@@ -156,11 +156,36 @@ payload 放 `#` 不放 query：不送到伺服器、沒有長度上限。壓縮�
 - blocker：內建題庫抽不到題講原因；自訂還沒選檔用空字串（擋住但不亮紅字）。
 - 第二站放難度上限，與題庫分開。
 
-### 慶祝特效
+### 答題回饋與慶祝
 
+回饋分兩層，各自照下面挑。
+
+**每一題的回饋看節奏，一個單元只走一個管道**（投影畫面兩處講同一件事是噪音）：
+
+| 節奏 | 回饋 | 例子 |
+|---|---|---|
+| 快：一題幾秒、連續作答 | 按鈕本身變色 —— 正解轉綠、選錯轉紅加 `quiz-shake`，自己跳下一題。不噴紙屑、不彈卡 | 九九乘法 `components/multiplication/Quiz.tsx` |
+| 慢：全班盯著一題揭曉 | 中央斜貼的紙膠帶回饋卡；按鈕按下後只 `disabled`（`disabled:opacity-100` 保持外觀） | 終極密碼 `FeedbackOverlay.tsx` |
+
+**結算一定要有慶祝** —— 一輪、一局、一次破關結束的那個畫面，每個單元都要有。挑一個既有的改：
+
+| 結算 | 元件 |
+|---|---|
+| 練習結束，分數從 0 跳上去 | `components/multiplication/FinishCelebration.tsx` |
+| 揭曉一個大數字（數字砸下、震一下） | `components/organisms/SlamCelebration.tsx`，有 story |
+| 破解：鎖搖晃後炸開 | `components/ultimate-password/WinCelebration.tsx` |
+| 分隊對戰：隊旗插進棋盤 | `components/territory/VictoryOverlay.tsx` |
+
+慶祝的寫法：
+
+- **紙膠帶一定貼、一句依得分的鼓勵**，低分也給（「繼續加油！」）。紙屑留給表現好的：九九乘法答對八成以上才噴、全對再加兩側的砲。
+- **對著一個落定的時刻排**：元件算出 `--hit` 傳進 CSS，彈跳、紙屑、`playVictorySound`、紙膠帶都對齊它。
+- **基底就是最後的樣子**，`prefers-reduced-motion` 時拿掉動畫就是結果；跳分這類 JS 時序直接顯示終值。
 - 紙屑一律走 `StageConfetti`（`components/organisms/StageConfetti.tsx`）：canvas portal 進 `#game-stage`，全螢幕投影時也看得到，降低動態效果時不噴。直接呼叫 `canvas-confetti` 會掛在 body，全螢幕時被擋在外面。顏色與砲的寫法在 `lib/helpers/confetti-effects.ts`（`paperBurst`／`paperCannons`／`originOf`）。
-- 揭曉一個大數字可以直接用 `SlamCelebration`（數字砸下、震一下、紙屑、紙膠帶），有 story。
+- 動畫帶 `transform` 的大數字會疊到上方的可點元素上擋住點擊；上方有按鈕或 tab 時給它 `relative z-10`。
 - e2e 或截圖腳本用 `addInitScript` 把 `Math.random` 固定成常數時，每片紙屑的隨機值都一樣，會疊成一片 —— 那是測試的假象，不是壞掉。要看紙屑就別固定亂數，改寫 store 決定答案。
+
+完成＝全螢幕下看得到結算慶祝、亮暗兩色的字都讀得清楚、開了減少動態效果仍直接看到結果。
 
 ### store
 

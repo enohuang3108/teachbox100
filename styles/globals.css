@@ -1118,6 +1118,16 @@ main:has(> #game-stage[data-unit="ichiban"]) {
   }
 }
 
+/* 九九乘法結算（FinishCelebration）：分數跳完停住時彈一下。--hit 由元件依分數算出 */
+@keyframes cheer-pop {
+  0%, 100% { transform: none; }
+  40% { transform: scale(1.15); }
+}
+.cheer-pop { animation: cheer-pop 320ms var(--ease-out) var(--hit); }
+@media (prefers-reduced-motion: reduce) {
+  .cheer-pop { animation: none; }
+}
+
 /* 出題前的 3、2、1：每個數字從大一點縮回來落定，像被敲下去 */
 @keyframes territory-count {
   from {

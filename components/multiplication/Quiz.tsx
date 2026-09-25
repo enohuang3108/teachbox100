@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/shadcn/button";
-import { realisticEffect } from "@/lib/helpers/confetti-effects";
+import { FinishCelebration } from "@/components/multiplication/FinishCelebration";
 import { useSound } from "@/lib/hooks/useSound";
 import {
   makeNextQuestion,
@@ -64,7 +64,6 @@ export function Quiz({
         setIndex((i) => i + 1);
         if (done) {
           setFinished(true);
-          if (right && correct + 1 === count) realisticEffect();
         } else {
           nextQuestion();
         }
@@ -116,10 +115,11 @@ export function Quiz({
       <>
       {log}
       <div className="flex flex-col items-center gap-6 text-center">
-        <p className="text-muted-foreground text-lg">答對了</p>
-        <p className="font-display text-ink text-6xl font-black tabular-nums">
-          {correct} / {count}
-        </p>
+        <FinishCelebration
+          correct={correct}
+          count={count}
+          sound={soundOn}
+        />
         <p className="text-ink-soft text-lg">{verdict(correct, count)}</p>
         <div className="flex gap-2">
           <Button variant="outline" onClick={onQuit}>

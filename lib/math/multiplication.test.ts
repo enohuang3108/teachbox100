@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { makeNextQuestion, makeQuestion, OPTION_COUNT, TABLES } from "./multiplication";
+import { celebration, makeNextQuestion, makeQuestion, OPTION_COUNT, TABLES } from "./multiplication";
 
 /** 走遍 0..1 的固定序列，讓出題結果可重現 */
 const seq = (values: number[]) => {
@@ -48,5 +48,15 @@ describe("makeNextQuestion", () => {
   it("只剩一種可能的題目時仍會回傳（不會無限重試）", () => {
     const q = makeNextQuestion([2], { a: 2, b: 2, answer: 4, options: [] }, seq([0.1]));
     expect(q.a).toBe(2);
+  });
+});
+
+describe("celebration", () => {
+  it("每個分數都有鼓勵，八成以上才撒紙屑、全對才加砲", () => {
+    expect(celebration(10, 10)).toEqual({ label: "全對！", confetti: true, cannons: true });
+    expect(celebration(8, 10)).toEqual({ label: "好厲害！", confetti: true, cannons: false });
+    expect(celebration(7, 10)).toEqual({ label: "有進步！", confetti: false, cannons: false });
+    expect(celebration(0, 10)).toEqual({ label: "繼續加油！", confetti: false, cannons: false });
+    expect(celebration(0, 0).confetti).toBe(false);
   });
 });
