@@ -1193,70 +1193,70 @@ main:has(> #game-stage[data-unit="ichiban"]) {
 }
 
 /* 圈叉搶答同樣以投影為主；全螢幕時左右題目與中央棋盤吃滿視窗。 */
-@keyframes morris-cue-breathe {
-  0%,
-  100% {
-    opacity: var(--morris-cue-low, 0.58);
-    transform: scale(var(--morris-cue-scale, 0.95));
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-@keyframes morris-cue-fade {
-  0%,
-  100% {
-    opacity: var(--morris-cue-low, 0.58);
-  }
-  50% {
-    opacity: 1;
-  }
-}
-.morris-action-mark {
-  transform-origin: center;
-  will-change: transform, opacity;
-  animation: morris-cue-breathe 1200ms var(--ease-in-out) infinite;
-}
 .morris-action-lane[data-morris-lane="red"] {
   --morris-lane-color: var(--brand-red);
 }
 .morris-action-lane[data-morris-lane="blue"] {
   --morris-lane-color: var(--brand-blue);
 }
+/* 下棋那一隊的題目區外面多一圈隊色，靜態的 */
 .morris-action-lane::after {
-  --morris-cue-low: 0.45;
-  --morris-cue-scale: 0.992;
   content: "";
   position: absolute;
   inset: -3px;
   pointer-events: none;
-  border: 3px solid var(--morris-lane-color);
+  border: 6px solid var(--morris-lane-color);
   border-radius: inherit;
-  transform-origin: center;
-  will-change: transform, opacity;
-  animation: morris-cue-breathe 1200ms var(--ease-in-out) infinite;
 }
-.morris-action-cell::after {
-  --morris-cue-low: 0.28;
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  border: 3px solid var(--warning);
-  border-radius: inherit;
-  background: color-mix(in srgb, var(--warning) 20%, transparent);
-  transform-origin: center;
-  will-change: transform, opacity;
-  animation: morris-cue-breathe 1200ms var(--ease-in-out) infinite;
+/* 下棋的那一隊：棋盤外框、可下的空格浮出的淡記號、可搬的棋的外框都用那一隊的顏色 */
+[data-morris-grid][data-mover="red"] {
+  --morris-lane-color: var(--brand-red);
+}
+[data-morris-grid][data-mover="blue"] {
+  --morris-lane-color: var(--brand-blue);
+}
+.morris-grid-active {
+  box-shadow: 0 0 0 4px var(--morris-lane-color);
+}
+/* 淡記號一起慢慢浮上來又退下，全部同一拍；只動透明度，不縮放、不發光 */
+@keyframes morris-ghost-tide {
+  0%, 100% { opacity: 0.12; }
+  35% { opacity: 0.38; }
+}
+.morris-ghost-mark {
+  opacity: 0.2;
+  animation: morris-ghost-tide 2400ms var(--ease-in-out) infinite;
+}
+/* hover 只染格子，不碰淡記號的動畫 —— 停掉再重播會跟其他格對不上拍 */
+@media (hover: hover) and (pointer: fine) {
+  [data-morris-grid][data-mover] button:has(> .morris-ghost-mark):hover {
+    background-color: color-mix(in srgb, var(--morris-lane-color) 14%, var(--secondary));
+  }
+}
+/* 可以搬的棋：輕輕跳一下、落地壓扁再站穩，全部同一拍。
+   用跳不用轉 —— 圓圈轉起來看不出來，紅隊的棋會像沒在動 */
+@keyframes morris-pick-hop {
+  0%, 55%, 100% { transform: none; }
+  68% { transform: translateY(-12%); }
+  80% { transform: translateY(0) scale(1.08, 0.9); }
+  90% { transform: scale(0.97, 1.03); }
+}
+.morris-pick-mark {
+  transform-origin: 50% 100%;
+  animation: morris-pick-hop 1600ms var(--ease-in-out) infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .morris-action-mark,
-  .morris-action-lane::after,
-  .morris-action-cell::after {
-    animation-name: morris-cue-fade;
+  .morris-ghost-mark, .morris-pick-mark {
+    animation: none;
   }
+}
+.morris-pick-cell {
+  box-shadow: inset 0 0 0 3px var(--morris-lane-color);
+}
+/* 選起來要搬的棋：抬起來一點 */
+.morris-selected-cell {
+  transform: translateY(-4%) scale(1.04);
+  box-shadow: inset 0 0 0 3px var(--morris-lane-color), 0 10px 20px -8px color-mix(in srgb, var(--ink) 40%, transparent);
 }
 
 #game-stage[data-unit="quiz-morris"]:fullscreen {

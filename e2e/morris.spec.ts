@@ -78,11 +78,6 @@ test("圈叉搶答會鎖場下棋、暫停答錯冷卻並可手動和局", async
   const blueLane = page.locator('[data-morris-lane="blue"]');
   await expect(blueLane).toHaveClass(/morris-action-lane/);
   await expect(page.locator('[data-morris-lane="red"]')).not.toHaveClass(/morris-action-lane/);
-  await expect
-    .poll(() =>
-      blueLane.evaluate((element) => getComputedStyle(element, "::after").animationName),
-    )
-    .toContain("morris-cue-breathe");
   await expect(page.getByRole("button", { name: "紅隊選 正確", exact: true })).toBeDisabled();
   await expect(page.locator('[data-morris-answers="red"]')).toHaveClass(/opacity-40/);
   await expect(page.locator('[data-morris-cell][data-action-hint="true"]')).toHaveCount(9);
