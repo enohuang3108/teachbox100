@@ -62,3 +62,5 @@
 | 2026-09-29 | 2026-08-30 ~ 2026-09-27 | 19/22 | 29 | 130 | 10 | 7.7 | 線上扭蛋機 |
 
 2026-09-24 的詳細檢查與待辦：[SEO 現況紀錄](2026-09-24-audit.md)。
+
+2026-09-29 已處理（`ce7f922` 部署）：`/draw/lottery` 308 轉到 `/draw/gacha`；首頁卡片依搜尋點擊排序；轉盤 title 與 FAQ 補座號、分組；IndexNow 送出 23 頁；GSC 對 `/ultimate-password`、`/draw`、`/timer`、`/multiplication` 要求建立索引。複查：一週後看收錄數（當時 19/23），兩到四週後看 `/draw/wheel` 排名（當時 5.6）與 `/draw/lottery` 曝光是否轉到 `/draw/gacha`。
