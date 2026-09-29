@@ -221,6 +221,26 @@ const pagesConfig = {
     intro:
       "畫面會顯示課堂的題目。學生一人一次輪流猜，畫面依猜測提示可能的範圍，直到全班一起找到答案。",
   },
+  ladder: {
+    path: "/draw/ladder",
+    imageSrc: "/images/covers/warm/ladder.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/AfDs5AMD/f/8+gMDCQcHBvr6+gkKCvj39wT38fH75dz9Fhf8AAcMCQiusbQTEhFUU08CAAUC/QgPB+jsCAQC09XXkJOYycvOAgUGBAD///cKCwUHBf3f30VCPy0tK8fIy/Pv8AQCAQIHAgD4Bg4NGPj/+PAsLCwaFxYBAgIB9u/k////AQECAQD7AAAB9vf7AwMCCgoKoWc9uM2rM0wAAAAASUVORK5CYII=",
+    title: "爬格子",
+    slogan: "沿著格子爬下去，看停在哪",
+    intro:
+      "每個人選一條線，從上面爬下去，遇到橫線就轉彎，最後停在哪個結果就是誰的。可以寫好打掃工作、獎品或題目，也能直接幫全班分組，一次最多 30 人。",
+  },
+  dice: {
+    path: "/dice",
+    imageSrc: "/images/covers/warm/dice.webp",
+    blurDataURL:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Affw5QD//wD57QAHEQcICvX19QwODvj29gIA//8BBgn/3pj88d3U2N+Xm6CxsrUDBAQCAQQE++rnAh1nBRUq2tnWhouRyszQBAgIAvfb2fBeTrFgcSxut9b6HCslILu/w+zo6QQABwgHHR/5/Rjq9vv2+PlOS0fx9/0HCAcB+PTp//j4AAQE4u33Fg0FBAL/AwMFBQUEZeNJLxExVMAAAAAASUVORK5CYII=",
+    title: "骰子",
+    slogan: "一次擲一到六顆，也能自訂文字",
+    intro:
+      "玩大富翁、比大小、練加法都用得到。一次最多擲六顆，擲完幫你算好總和；也可以把六個面改成「跳三下」「唱首歌」，變成上課用的活動骰子。",
+  },
 } satisfies Record<string, Page>;
 
 export type PageKey = keyof typeof pagesConfig;
@@ -251,13 +271,13 @@ export const hubs: Record<string, Hub> = {
     path: "/draw",
     // 畫面上就叫「抽籤」；「線上抽籤」這個搜尋字留在 pageSeo.draw.title 的 <title> 裡
     title: "抽籤",
-    slogan: "轉盤、扭蛋機、一番賞，三種抽法",
+    slogan: "轉盤、扭蛋機、一番賞、爬格子，四種抽法",
     intro:
-      "點名、分組、抽題，老師幾乎天天都要隨機選人。這裡有三種抽法，差在誰來選、結果怎麼打開。轉盤最快，貼上名單按一下，幾秒就停，一節課要抽好幾次的時候用它。扭蛋機會把名單變成一箱扭蛋，請學生上來自己挑一顆，打開才知道是誰。一番賞是老師先設好獎項，學生挑一張票親手撕開，適合拿來發獎勵。轉盤和扭蛋機的名單格式一樣，一行一個，最多 60 個，可以直接複製過去用。投影在電子白板上也看得清楚。",
+      "點名、分組、抽題，老師幾乎天天都要隨機選人。這裡有四種抽法，差在誰來選、結果怎麼打開。轉盤最快，貼上名單按一下，幾秒就停，一節課要抽好幾次的時候用它。扭蛋機會把名單變成一箱扭蛋，請學生上來自己挑一顆，打開才知道是誰。一番賞是老師先設好獎項，學生挑一張票親手撕開，適合拿來發獎勵。爬格子讓每個人沿著自己的線爬下去，一次把全班對到工作或組別，分組最方便。四種的名單格式都一樣，一行一個，可以直接複製過去用。投影在電子白板上也看得清楚。",
     imageSrc: "/images/covers/warm/wheel-v2.webp",
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afbv4QEBAf/9/gYSEOng1/n18x8rN/nw8AH58eP9/PwGEBDpo7QC53cFDPP07XAYdW0E8vT1iY2XNjUlQt+L8t3n/A0KAPeD/+42Av39/LK1ut7b2Qsn8QMODf0CEA4sAAH+8wL//gAuKSNMVlzw3Wz+9vIKE+XozFEAFD4B9/Di9vb3AwQDCAoO/+zBAPz0ABNDAAMDerRNsypywywAAAAASUVORK5CYII=",
-    children: ["wheel", "gacha", "ichiban"],
+    children: ["wheel", "gacha", "ichiban", "ladder"],
   },
   coin: {
     path: "/coin",

@@ -10,7 +10,7 @@ import { hubs, pages } from "../app/pages.config";
  * 一律不進來 —— 它們的行為由既有的 e2e 與單元測試保護。
  *
  * 這批測試保護的是跨單元的版型一致：麵包屑、大標、說明段落、FAQ 與設定站的排版
- * 在 18 個單元之間長得一樣，桌機與手機都讀得完。
+ * 在 21 個單元之間長得一樣，桌機與手機都讀得完。
  */
 
 /** 介紹頁上那顆 CTA 的文字；`setup` 指按下去會不會開設定 Dialog。 */
@@ -36,6 +36,8 @@ const UNITS: Record<string, { start: string; setup: boolean }> = {
   "quiz-territory": { start: "開始使用", setup: true },
   "quiz-morris": { start: "開始使用", setup: true },
   "ultimate-password": { start: "開始使用", setup: true },
+  ladder: { start: "開始使用", setup: true },
+  dice: { start: "開始使用", setup: true },
 };
 
 // 新增單元卻沒補上面這張表，就不會有基準線 —— 在這裡擋下來，而不是悄悄少拍一張

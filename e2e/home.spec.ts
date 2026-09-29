@@ -27,6 +27,7 @@ test("首頁列出分類與獨立單元，分類頁列出旗下所有單元", as
   expect(await unitHrefs(page, '#games a[href^="/"]')).toEqual([
     "/clock/current-time",
     "/coin",
+    "/dice",
     "/draw",
     "/memory",
     "/monopoly",
@@ -43,6 +44,7 @@ test("首頁列出分類與獨立單元，分類頁列出旗下所有單元", as
   expect(await unitHrefs(page, "main ul a[href^=\"/draw/\"]")).toEqual([
     "/draw/gacha",
     "/draw/ichiban",
+    "/draw/ladder",
     "/draw/wheel",
   ]);
 

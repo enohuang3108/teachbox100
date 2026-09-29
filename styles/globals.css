@@ -587,6 +587,12 @@
   background-size: 32px 32px;
 }
 
+/* 爬格子 30 條線、骰子 6 顆都要橫向空間，舞台不受 max-w-4xl 限制，左右留給紀錄欄與右下角按鈕 */
+#game-stage[data-unit="ladder"],
+#game-stage[data-unit="dice"] {
+  max-width: none;
+}
+
 /*
  * 計分板全螢幕是投影用的，卡片要鋪滿整個畫面。
  * 40 張卡撐出來的高度會讓 --fs-scale 把整塊等比縮小，於是左右多出一大片留白——

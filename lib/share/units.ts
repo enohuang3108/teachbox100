@@ -1,6 +1,8 @@
 import { pages } from "@/app/pages.config";
+import { diceShare } from "@/lib/dice/share";
 import { gachaShare } from "@/lib/gacha/share";
 import { ichibanShare } from "@/lib/ichiban/share";
+import { ladderShare } from "@/lib/ladder/share";
 import { multiplicationShare } from "@/lib/math/share";
 import { memoryShare } from "@/lib/memory/share";
 import { ultimatePasswordShare } from "@/lib/ultimate-password/share";
@@ -26,6 +28,8 @@ export const SHARE_CODECS = {
   "quiz-territory": territoryShare,
   "quiz-morris": morrisShare,
   "ultimate-password": ultimatePasswordShare,
+  dice: diceShare,
+  ladder: ladderShare,
 };
 
 export type ShareUnit = keyof typeof SHARE_CODECS;

@@ -5,7 +5,7 @@ import { useAudioStore } from "@/lib/monopoly/audio";
 
 // 答對／答錯改用 uisfx 合成音（minimal pack），不再抓 mp3。
 // createUISFX 有 typeof window 守衛、AudioContext 延遲建立，模組層級建立在 SSR 下安全。
-const ui = createUISFX({ pack: "minimal", volume: 1 });
+export const ui = createUISFX({ pack: "minimal", volume: 1 });
 
 // 音檔版本：更換同名音檔後 bump 此值，強制瀏覽器重新抓取（避免吃到舊快取）
 const V = "2";

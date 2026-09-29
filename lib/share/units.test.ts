@@ -12,6 +12,14 @@ const samples: { [K in ShareUnit]: SetupOf<K> } = {
   },
   wheel: { text: "小明\n小華\n\n阿美", removeOnPick: true },
   gacha: { text: "蘋果\n香蕉", putBack: false },
+  ladder: {
+    names: "小明\n小華\n小美",
+    mode: "groups",
+    results: "掃地\n擦黑板",
+    groupCount: 3,
+    hideResults: false,
+  },
+  dice: { count: 3, mode: "text", faces: ["跳三下", "拍手", "唱歌", "", "轉圈", "再擲"] },
   ichiban: { prizes: defaultIchibanPrizes() },
   memory: {
     preview: true,
