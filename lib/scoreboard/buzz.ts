@@ -298,7 +298,7 @@ async function connect(code: string, host: boolean) {
       return;
     }
     pending.delete(String(payload.uid));
-    set({ players: after });
+    set({ players: after, order: rebindOrder(get().order, after) });
   };
 
   const join = r.makeAction<JoinPayload>("join", {
@@ -395,6 +395,11 @@ export function addPlayer(
   // 計分板上限 40 組
   if (!uid || players.length >= MAX_PLAYERS) return players;
   return [...players, { id: peerId, uid, name }];
+}
+
+/** 學生重連換了 peer id，已按到的名次也要跟著認回同一台裝置。 */
+export function rebindOrder(order: Buzzer[], players: Buzzer[]): Buzzer[] {
+  return order.map((entry) => players.find((player) => player.uid === entry.uid) ?? entry);
 }
 
 /**

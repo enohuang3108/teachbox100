@@ -25,3 +25,10 @@ test("設定獎項內容後，撕開票券會顯示兩行設定值", async ({ pa
     timeout: 2_000,
   });
 });
+
+test("一番賞主畫面不會超出視窗寬度", async ({ page }) => {
+  await page.goto("/draw/ichiban", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "開始使用" }).click();
+  await page.getByRole("button", { name: "開始", exact: true }).click();
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});

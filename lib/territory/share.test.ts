@@ -17,7 +17,11 @@ describe("territoryShare", () => {
     expect(setup?.names).toEqual(["藍隊", "紅隊"]);
   });
 
-  it("倒數只收 3 或 5 秒，其他值當壞連結", async () => {
+  it("倒數收 3、4、5 秒，其他值當壞連結", async () => {
+    for (const seconds of [3, 4, 5]) {
+      const valid = await raw.encode(["1", "h", "藍隊", "紅隊", "d", String(seconds)].join(US));
+      expect((await territoryShare.decode("#" + valid))?.countdown).toBe(seconds);
+    }
     const hash = await raw.encode(["1", "h", "藍隊", "紅隊", "d", "7"].join(US));
     expect(await territoryShare.decode("#" + hash)).toBeNull();
   });

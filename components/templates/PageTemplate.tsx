@@ -83,7 +83,10 @@ export const PageTemplate = ({
       )}
       {/* 扣掉 PageTitleBar 的 h-16，短頁面才不會多出一截捲動 */}
       {entered && (
-        <main className="flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center p-4 md:p-8">
+        <main
+          className="flex min-h-[calc(100svh-4rem)] flex-col items-center p-4 md:p-8"
+          style={{ justifyContent: "safe center" }}
+        >
           {/* 全螢幕只吃這一塊：頂列與下面的 SEO／FAQ 不在子樹裡，自然不會出現 */}
           <div
             id={GAME_STAGE_ID}

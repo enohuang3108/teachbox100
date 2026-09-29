@@ -194,3 +194,87 @@ test("live: 老師關閉再重開連線後，兩支手機會重新加入並能�
     await Promise.all(studentContexts.map((context) => context.close()));
   }
 });
+
+test("live: 一支學生端離線再連回，原有搶答名次仍保留", async ({ browser }) => {
+  test.setTimeout(120_000);
+  const teacherContext = await browser.newContext();
+  const studentContexts = await Promise.all([
+    browser.newContext({ viewport: { width: 393, height: 852 } }),
+    browser.newContext({ viewport: { width: 393, height: 852 } }),
+  ]);
+  const teacher = await teacherContext.newPage();
+  const students = await Promise.all(studentContexts.map((context) => context.newPage()));
+  try {
+    await teacher.goto("/scoreboard");
+    await teacher.getByRole("button", { name: "開始使用" }).click();
+    await teacher.getByRole("switch", { name: /連線搶答/ }).click();
+    const qr = teacher.locator('img[alt^="加入搶答的 QR code，房號 "]');
+    await expect(qr).toBeVisible({ timeout: 20_000 });
+    const code = (await qr.getAttribute("alt"))!.match(/房號 (\w{4})$/)![1];
+
+    await Promise.all(students.map(async (student, index) => {
+      await student.goto(`/scoreboard/join#${code}`);
+      await student.getByRole("textbox", { name: "你的名字" }).fill(`學生${index + 1}`);
+      await student.getByRole("button", { name: "加入" }).click();
+    }));
+    await expect(teacher.getByText("已加入 2 人", { exact: true })).toBeVisible({ timeout: 25_000 });
+    await teacher.getByRole("dialog", { name: "掃描加入搶答" })
+      .getByRole("button", { name: "Close" }).click();
+    await teacher.getByRole("button", { name: "下一步" }).click();
+    await teacher.getByRole("button", { name: "開始計分" }).click();
+    await teacher.getByRole("button", { name: "開始搶答" }).click();
+    await expect(students[0].getByRole("button", { name: "搶答" })).toBeEnabled({ timeout: 15_000 });
+    await students[0].getByRole("button", { name: "搶答" }).click();
+    await expect(students[0].getByRole("button", { name: "第一個" })).toBeVisible();
+
+    await studentContexts[0].setOffline(true);
+    await students[0].close();
+    await studentContexts[0].setOffline(false);
+    students[0] = await studentContexts[0].newPage();
+    await students[0].goto(`/scoreboard/join#${code}`, { waitUntil: "domcontentloaded" });
+    await expect(students[0].getByRole("button", { name: "第一個" })).toBeVisible({ timeout: 25_000 });
+    await expect(teacher.locator("[data-score-root] ol li")).toHaveCount(1);
+    await expect(students[1].getByRole("button", { name: "搶答" })).toBeEnabled();
+  } finally {
+    await Promise.allSettled([teacherContext.close(), ...studentContexts.map((context) => context.close())]);
+  }
+});
+
+test("live: 老師更換房號後舊學生看到斷線提示，新房號能重新加入", async ({ browser }) => {
+  test.setTimeout(90_000);
+  const teacherContext = await browser.newContext();
+  const studentContext = await browser.newContext({ viewport: { width: 393, height: 852 } });
+  const teacher = await teacherContext.newPage();
+  let student = await studentContext.newPage();
+  try {
+    await teacher.goto("/scoreboard");
+    await teacher.getByRole("button", { name: "開始使用" }).click();
+    await teacher.getByRole("switch", { name: /連線搶答/ }).click();
+    const qr = teacher.locator('img[alt^="加入搶答的 QR code，房號 "]');
+    await expect(qr).toBeVisible({ timeout: 20_000 });
+    const oldCode = (await qr.getAttribute("alt"))!.match(/房號 (\w{4})$/)![1];
+    await student.goto(`/scoreboard/join#${oldCode}`);
+    await student.getByRole("textbox", { name: "你的名字" }).fill("小明");
+    await student.getByRole("button", { name: "加入" }).click();
+    await expect(teacher.getByText("已加入 1 人", { exact: true })).toBeVisible({ timeout: 25_000 });
+    await expect(student.getByText("已經加入了，等老師出題。這一頁先別關掉")).toBeVisible();
+
+    await teacher.getByRole("dialog", { name: "掃描加入搶答" })
+      .getByRole("button", { name: "Close" }).click();
+    await teacher.getByRole("button", { name: "重新建立房間" }).click();
+    await expect(qr).toBeVisible({ timeout: 20_000 });
+    const newCode = (await qr.getAttribute("alt"))!.match(/房號 (\w{4})$/)![1];
+    expect(newCode).not.toBe(oldCode);
+    await expect(teacher.getByRole("dialog", { name: "掃描加入搶答" })
+      .getByText("已加入 0 人", { exact: true })).toBeVisible();
+    await expect(student.getByRole("button", { name: "重新連線" })).toBeVisible({ timeout: 20_000 });
+
+    await student.close();
+    student = await studentContext.newPage();
+    await student.goto(`/scoreboard/join#${newCode}`, { waitUntil: "domcontentloaded" });
+    await expect(teacher.getByRole("dialog", { name: "掃描加入搶答" })
+      .getByText("已加入 1 人", { exact: true })).toBeVisible({ timeout: 25_000 });
+  } finally {
+    await Promise.allSettled([teacherContext.close(), studentContext.close()]);
+  }
+});

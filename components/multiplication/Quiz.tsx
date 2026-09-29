@@ -75,7 +75,7 @@ export function Quiz({
   const log = (
     <aside
       aria-label="作答紀錄"
-      className="fixed top-20 left-4 z-(--z-sticky) w-64 rounded-3xl bg-card/90 px-5 pt-5 pb-4 shadow-sm backdrop-blur-[2px] [#game-stage:fullscreen_&]:top-4"
+      className="mb-8 w-full max-w-xl rounded-3xl bg-card px-5 pt-5 pb-4 shadow-sm lg:fixed lg:top-20 lg:left-4 lg:z-(--z-sticky) lg:mb-0 lg:w-64 [#game-stage:fullscreen_&]:top-4"
     >
       <h2 className="font-display text-2xl font-extrabold text-ink">
         作答紀錄

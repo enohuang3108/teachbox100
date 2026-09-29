@@ -8,7 +8,7 @@
 - 步驟:
   1. 開 /draw/gacha
   2. 開始使用 → 名單 小明、小華 → 下一步 → 開始
-- 預期: 還剩 2 / 2 顆，扭蛋在箱中漂浮
+- 預期: 桌機紀錄顯示還剩 2 / 2 顆；手機預設收起紀錄，按鈕顯示紀錄 0 / 2；扭蛋在箱中漂浮
 - issues: —
 
 ## GACHA-002 挑球揭曉、收進紀錄、全部放回
@@ -41,5 +41,16 @@
 - 前置: 名單 30 人開局
 - 步驟:
   1. 手機寬度連續抽到剩 0 顆
-- 預期: 每一抽扭蛋都在，console 無 Too many active WebGL contexts
+- 預期: 每一抽扭蛋都在，最後一顆能從畫面直接點開；紀錄可收放，console 無 Too many active WebGL contexts
+- issues: —
+
+## GACHA-005 分享名單設定
+- smoke: false
+- viewport: desktop, mobile
+- auto: manual —— `lib/share/units.test.ts` 保護編解碼，跨分頁套用設定尚無瀏覽器斷言
+- 前置: 清掉 localStorage
+- 步驟:
+  1. 輸入兩個不同名字，在設定最後一站按「分享設定」並複製完整連結
+  2. 用新分頁開完整連結
+- 預期: 設定自動打開並帶入相同名單；顯示載入提示，網址 hash 被清掉
 - issues: —

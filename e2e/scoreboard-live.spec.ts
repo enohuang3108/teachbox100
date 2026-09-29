@@ -36,10 +36,27 @@ test("live: 學生加入會在五秒內顯示於老師端", async ({ browser }) 
 
     await student.goto(`/scoreboard/join#${code}`);
     await student.getByRole("textbox", { name: "你的名字" }).fill("本機測試");
-    const started = performance.now();
+    await teacher.evaluate(() => {
+      const state = window as unknown as { qaSeenAt?: number };
+      const observer = new MutationObserver(() => {
+        if (document.body.textContent?.includes("已加入 1 人")) {
+          state.qaSeenAt ??= Date.now();
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.body, { subtree: true, childList: true, characterData: true });
+    });
+    await student.getByRole("button", { name: "加入" }).evaluate((button) => {
+      button.addEventListener("click", () => {
+        (window as unknown as { qaJoinAt: number }).qaJoinAt = Date.now();
+      }, { capture: true, once: true });
+    });
     await student.getByRole("button", { name: "加入" }).click();
     await expect(teacher.getByText("已加入 1 人", { exact: true })).toBeVisible({ timeout: 15_000 });
-    const elapsed = performance.now() - started;
+    const seenAt = await teacher.evaluate(() => (window as unknown as { qaSeenAt: number }).qaSeenAt);
+    const joinAt = await student.evaluate(() => (window as unknown as { qaJoinAt: number }).qaJoinAt);
+    const elapsed = seenAt - joinAt;
+    expect(elapsed).toBeGreaterThanOrEqual(0);
     test.info().annotations.push({ type: "join-ms", description: `${Math.round(elapsed)}` });
     expect(elapsed).toBeLessThan(5_000);
   } catch (error) {

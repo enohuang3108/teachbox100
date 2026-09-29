@@ -25,21 +25,21 @@
 - 預期: 重整後回到介紹頁；設定 Dialog 仍是剛才改過的值
 - issues: —
 
-## COINBUY-003 拖放商品到購物車
+## COINBUY-003 桌機拖放、手機點選商品到購物車
 - smoke: False
 - viewport: desktop, mobile
-- auto: manual —— 拖放手感
+- auto: e2e/coin-buy-cart.spec.ts
 - 前置: 進入作答
 - 步驟:
-  1. 把一個商品拖進購物車
+  1. 桌機把一個商品拖進購物車；手機點選商品
   2. 付款
-- 預期: 商品進購物車，金額加總正確
+- 預期: 兩種操作都把商品放進購物車，金額加總正確；手機畫面明示可點選，不要求觸控 HTML 拖放
 - issues: —
 
 ## COINBUY-004 進介紹頁不預載 3D 模型
 - smoke: false
 - viewport: desktop
-- auto: manual —— 量 network
+- auto: e2e/coin-preload.spec.ts
 - 前置: 清快取
 - 步驟:
   1. 開 /coin/buy，停在介紹頁

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   addPlayer,
+  rebindOrder,
   nextOrder,
   synchronizeNewPeer,
   STATE_RETRY_MS,
@@ -81,6 +82,15 @@ describe("addPlayer", () => {
     expect(addPlayer([a], "a2", { uid: "u-a", name: "阿明" })).toEqual([
       { id: "a2", uid: "u-a", name: "阿明" },
     ]);
+  });
+});
+
+describe("rebindOrder", () => {
+  it("重連後把舊名次綁到新 peer，不能再次按鈴", () => {
+    const players = addPlayer([a, b], "a2", { uid: "u-a", name: "小明" });
+    const order = rebindOrder([a], players);
+    expect(order).toEqual([{ ...a, id: "a2" }]);
+    expect(nextOrder({ open: true, players, order }, "a2")).toBeNull();
   });
 });
 

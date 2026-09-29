@@ -28,7 +28,7 @@
 ## COINPAY-003 進介紹頁不預載 3D 模型
 - smoke: false
 - viewport: desktop
-- auto: manual —— 量 network
+- auto: e2e/coin-preload.spec.ts
 - 前置: 清快取
 - 步驟:
   1. 開 /coin/pay，停在介紹頁

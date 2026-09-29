@@ -14,7 +14,7 @@
 ## NOISE-002 真實麥克風音量反應與釋放
 - smoke: False
 - viewport: desktop, mobile
-- auto: manual —— 真實麥克風，agent 無法操作
+- auto: manual —— `e2e/noise-stream.spec.ts` 已用合成音訊驗刻度升降與音軌停止；真實麥克風及指示燈需實機
 - 前置: 清掉 localStorage
 - 步驟:
   1. 按噓並允許
@@ -26,7 +26,7 @@
 ## NOISE-003 權限詢問中離開頁面，麥克風會釋放
 - smoke: false
 - viewport: desktop, mobile
-- auto: manual —— 真實麥克風
+- auto: manual —— `e2e/noise-stream.spec.ts` 已驗延遲的 getUserMedia 回應在離頁後會停止音軌；系統權限視窗及真實指示燈需實機
 - 前置: 清網站權限
 - 步驟:
   1. 按噓，權限詢問出現時離開頁面

@@ -36,6 +36,7 @@ test("首頁列出分類與獨立單元，分類頁列出旗下所有單元", as
     "/quiz/territory",
     "/scoreboard",
     "/timer",
+    "/ultimate-password",
   ]);
 
   await page.goto("/draw");

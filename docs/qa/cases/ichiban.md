@@ -27,7 +27,7 @@
 ## ICHI-003 手機沒有橫向捲動
 - smoke: false
 - viewport: mobile
-- auto: manual —— 待寫 e2e（scrollWidth <= innerWidth）
+- auto: e2e/ichiban.spec.ts
 - 前置: ICHI-001 開局
 - 步驟:
   1. 390 寬進主畫面
@@ -38,10 +38,21 @@
 ## ICHI-004 撕票音效有開關並記住
 - smoke: false
 - viewport: desktop, mobile
-- auto: manual —— 音效
+- auto: e2e/ichiban-sound.spec.ts
 - 前置: ICHI-001 開局
 - 步驟:
   1. 頂列找音效開關並關閉
   2. 重整後再進來
-- 預期: 頂列有音效鈕，關閉後撕票無聲，重整後仍關閉
+- 預期: 頂列有音效鈕，開啟時撕票會觸發 Web Audio 音訊節點，關閉後不再觸發，重整後仍關閉；喇叭實際聽感另列 ICHI-002
+- issues: —
+
+## ICHI-005 分享獎項設定
+- smoke: false
+- viewport: desktop, mobile
+- auto: manual —— `lib/share/units.test.ts` 保護編解碼，跨分頁套用設定尚無瀏覽器斷言
+- 前置: 清掉 localStorage
+- 步驟:
+  1. 修改一個獎項名稱，在設定最後一站複製完整分享連結
+  2. 用新分頁開完整連結
+- 預期: 設定自動打開並帶入修改後的獎項；顯示載入提示，網址 hash 被清掉
 - issues: —

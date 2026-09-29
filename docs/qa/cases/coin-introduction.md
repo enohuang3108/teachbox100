@@ -3,7 +3,7 @@
 ## COININTRO-001 介紹頁 → 開始認識
 - smoke: True
 - viewport: desktop, mobile
-- auto: manual —— 待寫進 e2e
+- auto: e2e/coin-introduction.spec.ts
 - 前置: 清掉 localStorage
 - 步驟:
   1. 開 /coin/introduction

@@ -7,6 +7,7 @@ import { AvailableCoins } from "@/components/molecules/setting/AvailableCoins";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
 import { sumValues } from "@/lib/coin/game";
+import { useStoredState } from "@/lib/hooks/useStoredState";
 import type { Coin as CoinType } from "@/lib/types/types";
 import { getRandomFeedback } from "@/lib/utils/gameFeedback";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -18,7 +19,10 @@ function getRandomTargetCoin(gameCoins: CoinType[]): CoinType {
 export default function CoinEquivalentPage() {
   const initialEnabledCoinValues = [1, 5, 10, 50];
 
-  const [enabledCoins, setEnabledCoins] = useState(initialEnabledCoinValues);
+  const [enabledCoins, setEnabledCoins] = useStoredState(
+    "coinEquivalentEnabledCoins",
+    initialEnabledCoinValues,
+  );
 
   const gameCoins = useMemo(() => {
     let coins = AVAILABLE_COINS.filter((c) => enabledCoins.includes(c.value));

@@ -16,7 +16,7 @@
 ## COINEQ-002 設定會記住、重整回介紹頁
 - smoke: False
 - viewport: desktop, mobile
-- auto: manual —— 待寫進 e2e
+- auto: e2e/coin-equivalent-settings.spec.ts
 - 前置: 清掉 localStorage
 - 步驟:
   1. 開 /coin/equivalent → 開始練習 → 改一個設定值 → 開始練習

@@ -9,7 +9,7 @@
   1. 開 /
   2. 點「抽籤」分類卡
   3. 回首頁點「認識金錢」分類卡
-- 預期: 首頁 9 張入口卡；/draw 列 3 個、/coin 列 6 個單元；卡片封面圖都有載入
+- 預期: 首頁 12 張入口卡；/draw 列 3 個、/coin 列 6 個單元；卡片封面圖都有載入
 - issues: —
 
 ## HOME-002 每個單元頁都打得開
@@ -37,7 +37,7 @@
 ## HOME-004 介紹頁 JS 還沒載完就點開始
 - smoke: false
 - viewport: desktop, mobile
-- auto: manual —— 要控制點擊時機，待寫 e2e（domcontentloaded 後立刻點）
+- auto: e2e/slow-load.spec.ts
 - 前置: 清快取、慢速網路
 - 步驟:
   1. 開任一介紹頁，一出現按鈕就點「開始練習／開始使用」

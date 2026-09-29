@@ -44,6 +44,7 @@ export default function GachaPage() {
   const { text, sound, setSound, putBack } = useGachaStore();
   const [round, setRound] = useState(0);
   const [picked, setPicked] = useState<string[]>([]);
+  const [recordOpen, setRecordOpen] = useState(false);
   const [shake, setShake] = useState(0);
   const { playCorrectSound } = useSound();
 
@@ -55,13 +56,49 @@ export default function GachaPage() {
 
   const restoreAll = () => {
     setPicked([]);
+    setRecordOpen(false);
     setRound((r) => r + 1);
   };
 
   const onPick = (label: string) => {
     setPicked((p) => [...p, label]);
+    setRecordOpen(false);
     if (sound) playCorrectSound();
   };
+
+  const recordContent = (
+    <>
+      <h2 className="font-display text-2xl font-extrabold text-ink">
+        抽籤紀錄
+      </h2>
+      {!putBack && (
+        <p className="mt-0.5 text-caption text-ink-soft tabular-nums">
+          還剩 {labels.length - picked.length} / {labels.length} 顆
+        </p>
+      )}
+      {picked.length === 0 ? (
+        <p className="mt-3 text-caption text-ink-soft">
+          點一顆扭蛋打開。
+        </p>
+      ) : (
+        <ol className="mt-2 max-h-[40svh] divide-y divide-border overflow-y-auto">
+          {picked.map((label, index) => (
+            <li
+              key={index}
+              className="flex items-center justify-between gap-3 py-3"
+            >
+              <span className="shrink-0 text-sm text-ink-soft tabular-nums">
+                第 {index + 1} 顆
+              </span>
+              <span className="min-w-0 truncate text-sm font-bold text-ink">
+                {label}
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </>
+  );
 
   const actions = (
     <TooltipProvider delayDuration={350} skipDelayDuration={600}>
@@ -93,7 +130,7 @@ export default function GachaPage() {
         }}
       >
         {hydrated && (
-          // 箱子滿版貼著螢幕（頂列以下；全螢幕時整個畫面），紀錄浮在左上角
+          // 箱子滿版貼著螢幕；手機紀錄收起時不蓋住球池
           <StageFixed>
             <div className="fixed inset-x-0 top-16 bottom-0 [#game-stage:fullscreen_&]:top-0">
               <GachaMachine
@@ -107,38 +144,32 @@ export default function GachaPage() {
 
             <aside
               aria-label="已抽出的名單"
-              className="fixed top-20 left-4 z-(--z-sticky) w-64 rounded-3xl bg-card/90 px-5 pt-5 pb-4 shadow-sm backdrop-blur-[2px] [#game-stage:fullscreen_&]:top-4"
+              className="fixed top-20 left-4 z-(--z-sticky) hidden w-64 rounded-3xl bg-card/90 px-5 pt-5 pb-4 shadow-sm backdrop-blur-[2px] sm:block [#game-stage:fullscreen_&]:top-4"
             >
-              <h2 className="font-display text-2xl font-extrabold text-ink">
-                抽籤紀錄
-              </h2>
-              {!putBack && (
-                <p className="mt-0.5 text-caption text-ink-soft tabular-nums">
-                  還剩 {labels.length - picked.length} / {labels.length} 顆
-                </p>
-              )}
-              {picked.length === 0 ? (
-                <p className="mt-3 text-caption text-ink-soft">
-                  點一顆扭蛋打開。
-                </p>
-              ) : (
-                <ol className="mt-2 max-h-[40svh] divide-y divide-border overflow-y-auto">
-                  {picked.map((label, index) => (
-                    <li
-                      key={index}
-                      className="flex items-center justify-between gap-3 py-3"
-                    >
-                      <span className="shrink-0 text-sm text-ink-soft tabular-nums">
-                        第 {index + 1} 顆
-                      </span>
-                      <span className="min-w-0 truncate text-sm font-bold text-ink">
-                        {label}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              )}
+              {recordContent}
             </aside>
+
+            <div className="fixed top-20 left-4 z-(--z-sticky) sm:hidden [#game-stage:fullscreen_&]:top-4">
+              <Button
+                variant="outline"
+                aria-label={recordOpen ? "收起抽籤紀錄" : "查看抽籤紀錄"}
+                aria-expanded={recordOpen}
+                aria-controls="gacha-mobile-record"
+                onClick={() => setRecordOpen((open) => !open)}
+                className="rounded-full bg-card/95 px-4 shadow-sm"
+              >
+                紀錄 {picked.length}{putBack ? "" : ` / ${labels.length}`}
+              </Button>
+              {recordOpen && (
+                <aside
+                  id="gacha-mobile-record"
+                  aria-label="已抽出的名單"
+                  className="mt-2 w-64 rounded-3xl bg-card/95 px-5 pt-5 pb-4 shadow-sm backdrop-blur-[2px]"
+                >
+                  {recordContent}
+                </aside>
+              )}
+            </div>
 
             {/* 操作鈕跟計時器一樣固定在右下角直排，只有一顆搖一搖 */}
             <div className="fixed right-6 bottom-6 z-(--z-sticky) flex flex-col items-center gap-3">
