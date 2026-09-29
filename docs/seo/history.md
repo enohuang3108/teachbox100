@@ -1,6 +1,26 @@
 # SEO 數據紀錄
 
-每次改完 SEO 跑 `pnpm seo:snapshot`。Lighthouse 是模擬節流的實驗室數據，只有同裝置、同條件的結果適合比較；下表不是實際使用者的 Core Web Vitals。
+## 真實使用者效能（Sentry）
+
+判斷效能以這張表為準。資料來源是 Sentry 的 pageload span，也就是使用者瀏覽器實際量到的 Web Vitals。每次改完 SEO 或效能，就用 Sentry MCP 的 `search_events` 查一次，追加一列：
+
+- dataset `spans`，query `span.op:pageload environment:vercel-production`，period `30d`
+- fields：`transaction`、`count()`，以及 `measurements.lcp`、`measurements.inp`、`measurements.cls` 的 `p75(...)`
+- INP 要另外用 `environment:vercel-production has:measurements.inp` 查，pageload span 本身不帶 INP
+
+正式站的 environment 是 **`vercel-production`**。標成 `production` 的是本機 `next start` 與 QA build，TTFB 大約 10ms，還會出現沒部署的頁面，不能拿來判斷。樣本數低於 20 筆的頁只能看方向。CLS 剛好是 1 的頁要先打開單筆 trace 確認，可能是動畫被算進去。
+
+| 記錄日 | 區間 | 頁面 | 樣本 | LCP p75 | INP p75（樣本） | CLS p75 |
+|---|---|---|---:|---:|---:|---:|
+| 2026-09-29 | 30d | /draw/gacha | 25 | 1.2s | 136ms (11) | 1（待查） |
+| 2026-09-29 | 30d | / | 22 | 1.7s | 128ms (2) | - |
+| 2026-09-29 | 30d | /draw/wheel | 8 | 1.9s | 138ms (3) | 1（待查） |
+| 2026-09-29 | 30d | /memory | 4 | 1.6s | 592ms (2) | - |
+| 2026-09-29 | 30d | /quiz/territory | - | - | 748ms (4) | - |
+
+## 實驗室數據（Lighthouse）
+
+只在要找出**為什麼慢**的時候跑 `pnpm seo:snapshot`，排名與成效的判斷不用它。Lighthouse 是模擬節流，機器忙的時候 TBT 會暴增好幾倍，所以要在 load average 低的時候跑，同裝置、同條件的結果才能互相比較。
 
 | 日期 | 裝置 | 頁面 | Perf | FCP | LCP | TBT | CLS | 總 KB | 字型 KB | JS KB |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -28,6 +48,7 @@
 | 記錄日 | 資料區間 | 曝光 | 點擊 | CTR | 平均排名 |
 |---|---|---:|---:|---:|---:|
 | 2026-09-24 | 2026-08-25 ~ 2026-09-22 | 470 | 57 | 12.1% | 7.7 |
+| 2026-09-29 | 2026-08-30 ~ 2026-09-27 | 637 | 75 | 11.8% | 7.5 |
 
 ## 搜尋排名紀錄
 
@@ -38,5 +59,6 @@
 | 2026-09-08 | 2026-08-09 ~ 2026-09-06 | 12/15 | 0 | 0 | 0 | - | - |
 | 2026-09-10 | 2026-08-11 ~ 2026-09-08 | 14/19 | 1 | 1 | 1 | 2.0 | teach box |
 | 2026-09-24 | 2026-08-25 ~ 2026-09-22 | 17/22 | 16 | 60 | 4 | 8.0 | 翻牌抽籤 |
+| 2026-09-29 | 2026-08-30 ~ 2026-09-27 | 19/22 | 29 | 130 | 10 | 7.7 | 線上扭蛋機 |
 
 2026-09-24 的詳細檢查與待辦：[SEO 現況紀錄](2026-09-24-audit.md)。

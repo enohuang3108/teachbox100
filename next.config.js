@@ -76,6 +76,12 @@ const nextConfig = {
     // 關掉最佳化換來「圖片能離線」，對教室情境划算。
     unoptimized: true,
   },
+  async redirects() {
+    // 抽籤機改版成扭蛋機後換了網址，舊網址在 Google 還有曝光，轉過去承接排名
+    return [
+      { source: "/draw/lottery", destination: "/draw/gacha", permanent: true },
+    ];
+  },
   async rewrites() {
     // Only enable PostHog rewrites if we have a PostHog key
     if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) {

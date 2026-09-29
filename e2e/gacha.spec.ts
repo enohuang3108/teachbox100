@@ -103,3 +103,9 @@ test("手機連抽 30 顆後仍能抽最後一顆", async ({ page }, testInfo) =
   await expect(page.getByRole("complementary", { name: "已抽出的名單" })).toContainText("還剩 0 / 30 顆");
   expect(errors).toEqual([]);
 });
+
+test("舊的抽籤機網址永久轉到扭蛋機", async ({ request }) => {
+  const res = await request.get("/draw/lottery", { maxRedirects: 0 });
+  expect(res.status()).toBe(308);
+  expect(res.headers().location).toBe("/draw/gacha");
+});

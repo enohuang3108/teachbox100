@@ -14,6 +14,23 @@ import Image from "next/image";
 
 const CONTAINER = "mx-auto w-full max-w-[1200px] px-5 md:px-8";
 
+// 首頁卡片依 GSC 近 30 天搜尋點擊排序（同分比曝光），分類頁算旗下所有單元的總和。
+// 依據 2026-09-29 的數據（docs/seo/history.md）；沒列到的單元照 pages.config 順序排在後面。
+const HOME_ORDER = [
+  "draw",
+  "noise",
+  "memory",
+  "coin",
+  "clock-current-time",
+  "monopoly",
+  "quiz-territory",
+  "scoreboard",
+];
+const homeRank = (key: string) => {
+  const rank = HOME_ORDER.indexOf(key);
+  return rank === -1 ? HOME_ORDER.length : rank;
+};
+
 export default function Home() {
   const websiteSchema = getWebsiteSchema();
   const organizationSchema = getOrganizationSchema();
@@ -22,7 +39,7 @@ export default function Home() {
   const entries = [
     ...Object.entries(hubs),
     ...Object.entries(pages).filter(([key]) => !grouped.has(key)),
-  ];
+  ].sort(([a], [b]) => homeRank(a) - homeRank(b));
 
   return (
     <>

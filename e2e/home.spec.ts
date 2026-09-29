@@ -56,3 +56,18 @@ test("首頁列出分類與獨立單元，分類頁列出旗下所有單元", as
     "/coin/value",
   ]);
 });
+
+test("首頁卡片依搜尋流量排序，高流量的單元在前", async ({ page }) => {
+  await page.goto("/");
+  const hrefs = await page
+    .locator('#games a[href^="/"]')
+    .evaluateAll((links) => [...new Set(links.map((l) => l.getAttribute("href")))]);
+  expect(hrefs.slice(0, 6)).toEqual([
+    "/draw",
+    "/noise",
+    "/memory",
+    "/coin",
+    "/clock/current-time",
+    "/monopoly",
+  ]);
+});
