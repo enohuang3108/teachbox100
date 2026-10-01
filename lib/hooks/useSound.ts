@@ -12,15 +12,16 @@ const V = "2";
 const url = (name: string) => `/sounds/${name}.mp3?v=${V}`;
 
 // 各音效的基準音量（實際播放時再乘上使用者設定的音效音量）
-const diceSound = new Howl({ src: [url("dice")], volume: 0.6 });
-const moneySound = new Howl({ src: [url("money")], volume: 0.5 });
-const jailSound = new Howl({ src: [url("jail")], volume: 0.5 });
-
 const BASE_VOLUME = {
   dice: 0.6,
   money: 0.5,
   jail: 0.5,
 } as const;
+
+// 只有大富翁用得到：第一次播才建立。模組層級 new Howl 會讓每個用 useSound 的頁面一載入就抓 mp3
+const howls: Partial<Record<keyof typeof BASE_VOLUME, Howl>> = {};
+const howl = (name: keyof typeof BASE_VOLUME) =>
+  (howls[name] ??= new Howl({ src: [url(name)], volume: BASE_VOLUME[name] }));
 
 export const useSound = () => {
   const sfxVolume = useAudioStore((s) => s.sfxVolume);
@@ -29,9 +30,7 @@ export const useSound = () => {
   useEffect(() => {
     return () => {
       ui.stopAll();
-      diceSound.stop();
-      moneySound.stop();
-      jailSound.stop();
+      Object.values(howls).forEach((h) => h.stop());
     };
   }, []);
 
@@ -46,22 +45,28 @@ export const useSound = () => {
 
   // 延後 0.4 秒：對上 3D 骰子拋起後落地翻滾的那一刻，按下當下就響會比畫面早
   const playDiceSound = useCallback(() => {
+    // 按下當下就建立，這 0.4 秒剛好拿來抓檔；金錢、監獄在棋子走完後才響，順便先抓
+    const dice = howl("dice");
+    howl("money");
+    howl("jail");
     window.setTimeout(() => {
-      diceSound.volume(BASE_VOLUME.dice * sfxVolume);
-      diceSound.play();
+      dice.volume(BASE_VOLUME.dice * sfxVolume);
+      dice.play();
     }, 400);
   }, [sfxVolume]);
 
   // 金錢增加／減少共用同一音效
   const playMoneySound = useCallback(() => {
-    moneySound.volume(BASE_VOLUME.money * sfxVolume);
-    moneySound.play();
+    const money = howl("money");
+    money.volume(BASE_VOLUME.money * sfxVolume);
+    money.play();
   }, [sfxVolume]);
 
   // 被抓進監獄的警笛音效
   const playJailSound = useCallback(() => {
-    jailSound.volume(BASE_VOLUME.jail * sfxVolume);
-    jailSound.play();
+    const jail = howl("jail");
+    jail.volume(BASE_VOLUME.jail * sfxVolume);
+    jail.play();
   }, [sfxVolume]);
 
   /** 轉盤轉動中的迴圈音，回傳 handle 讓呼叫端在結果出來時 stop() */

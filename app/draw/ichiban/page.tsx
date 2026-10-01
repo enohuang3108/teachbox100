@@ -7,7 +7,6 @@ import { SettingsButton } from "@/components/atoms/SettingsButton";
 import { Dialog, DialogContent } from "@/components/atoms/shadcn/dialog";
 import { SoundToggleButton } from "@/components/atoms/SoundToggleButton";
 import { TooltipProvider } from "@/components/atoms/shadcn/tooltip";
-import { IchibanExperience } from "@/components/ichiban/IchibanExperience";
 import { IchibanSettings } from "@/components/ichiban/IchibanSettings";
 import { ACTION_BTN, Tip } from "@/components/templates/GamePageTemplate";
 import {
@@ -15,9 +14,19 @@ import {
   PageTemplate,
 } from "@/components/templates/PageTemplate";
 import { useIchibanStore } from "@/lib/ichiban/store";
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 const pageInfo: PageWithKey = { ...pages.ichiban, key: "ichiban" };
+
+// three.js 場景約 190 KB，介紹頁用不到；按下開始才載入
+const IchibanExperience = dynamic(
+  () =>
+    import("@/components/ichiban/IchibanExperience").then(
+      (m) => m.IchibanExperience,
+    ),
+  { ssr: false },
+);
 
 export default function IchibanPage() {
   // 介紹頁 →（開始使用）設定 →（開始）撕票；撕票時按設定再打開同一個對話框
