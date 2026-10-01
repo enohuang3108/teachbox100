@@ -117,7 +117,7 @@ export function HomeCatalog({ entries }: { entries: CatalogEntry[] }) {
                   還缺哪一件教具？
                 </span>
                 <span className="mt-1.5 block text-sm leading-[1.75] text-pretty text-muted-foreground">
-                  告訴阿黃你上課想用什麼，下一個單元可能就是你的點子。
+                  上課想用什麼，下一個單元可能就是你的點子。
                 </span>
               </span>
               <span className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-caption text-paper">
