@@ -1207,9 +1207,14 @@
   background-size: 32px 32px;
 }
 
-/* 爬格子 30 條線、骰子 6 顆都要橫向空間，舞台不受 max-w-4xl 限制，左右留給紀錄欄與右下角按鈕 */
+/* 爬格子 30 條線、骰子 6 顆都要橫向空間，舞台不受 max-w-4xl 限制，右邊留給右下角按鈕 */
 #game-stage[data-unit="ladder"],
 #game-stage[data-unit="dice"] {
+  max-width: none;
+}
+
+/* 爬格子投影時線要攤滿整個寬螢幕，不吃通用的 64rem 上限 */
+#game-stage[data-unit="ladder"]:fullscreen > [data-stage-inner] {
   max-width: none;
 }
 
