@@ -12,8 +12,8 @@ export type CatalogEntry = {
 
 /*
  * 「全部」時兩張卡橫跨兩欄，讓每種欄數的格線都剛好排滿、不留缺角：
- * sm 兩欄 → 抽籤跨欄；lg 三欄 → 抽籤、大富翁跨欄，意見卡補滿最後一列；
- * xl 四欄 → 同上，意見卡補最後一格。
+ * 兩欄 → 抽籤跨欄，意見卡補最後一格；lg 三欄 → 抽籤、大富翁跨欄，意見卡補最後一格；
+ * xl 四欄 → 同上，意見卡跨兩欄補滿最後一列。卡片數量變了要重算這裡。
  * 橫式卡跟同列的直式卡共用列高，所以插圖改成撐滿高度；抽籤在 sm 獨佔一列，沒有鄰居可撐，保留 4:3。
  */
 type Feature = {
@@ -105,7 +105,7 @@ export function HomeCatalog({ entries }: { entries: CatalogEntry[] }) {
       })}
 
       <li
-        className="card-enter col-span-2 lg:col-span-3 xl:col-span-1"
+        className="card-enter xl:col-span-2"
         style={{ animationDelay: `${8 * 40}ms` }}
       >
         <FeedbackButton

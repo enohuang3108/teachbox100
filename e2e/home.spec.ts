@@ -15,7 +15,6 @@ async function unitHrefs(page: Page, selector: string) {
 /**
  * 這不是逐像素快照，而是全站教材入口的合約：老師從首頁出發，兩步之內到得了每一個單元。
  * 首頁只露分類入口（抽籤、認識金錢），子單元收在分類頁裡，所以合約分兩段驗。
- * 例外：爬格子同時掛在抽籤分類與首頁。
  * 若新增單元卻漏掛，或任何連結變成壞路徑，這個測試會失敗。
  */
 test("首頁列出分類與獨立單元，分類頁列出旗下所有單元", async ({ page }) => {
@@ -29,7 +28,6 @@ test("首頁列出分類與獨立單元，分類頁列出旗下所有單元", as
     "/clock/current-time",
     "/coin",
     "/draw",
-    "/draw/ladder",
     "/memory",
     "/monopoly",
     "/multiplication",

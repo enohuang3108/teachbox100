@@ -38,12 +38,7 @@ export default function Home() {
   const websiteSchema = getWebsiteSchema();
   const organizationSchema = getOrganizationSchema();
   // hub 取代旗下子頁：首頁只露一張入口卡，權重集中到分類頁而不是散給六張教材卡
-  // 例外：爬格子分組太常用，除了抽籤分類也在首頁露一張卡
-  const grouped = new Set(
-    Object.values(hubs)
-      .flatMap((hub) => hub.children)
-      .filter((key) => key !== "ladder"),
-  );
+  const grouped = new Set(Object.values(hubs).flatMap((hub) => hub.children));
   const entries: CatalogEntry[] = [
     ...Object.entries(hubs),
     ...Object.entries(pages).filter(([key]) => !grouped.has(key)),
