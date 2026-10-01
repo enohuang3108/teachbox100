@@ -24,7 +24,7 @@
 | 2026-10-01 | 30d | /scoreboard | 10 | 1.8s | 170ms (3) | - |
 | 2026-10-01 | 30d | /monopoly | 6 | 1.3s | 258ms (5) | - |
 
-2026-10-01 檢查：各頁 LCP 都在 2.5 秒內。TTFB 偏高（/scoreboard p75 3.5s 全是同一台 Safari）是網路造成的，正式站各頁都是 `x-vercel-cache: HIT` 的靜態檔。CLS 的 1 都來自單筆樣本，其餘 pageload 沒帶 CLS，不能當結論。INP 依互動元素拆開看（fields 加 `span.description`）：扭蛋機「繼續抽」p75 336ms（4 筆），本機 4 倍 CPU 節流只量到 72–136ms，推測差在學校電腦的 GPU，還沒動。已處理：一番賞的 three.js 場景改成按開始才載入（首次載入 JS 543 → 369 kB）；大富翁的三個 mp3 改成第一次擲骰才抓，其他用 `useSound` 的頁面不再一載入就下載。
+2026-10-01 檢查：各頁 LCP 都在 2.5 秒內。TTFB 偏高（/scoreboard p75 3.5s 全是同一台 Safari）是網路造成的，正式站各頁都是 `x-vercel-cache: HIT` 的靜態檔。CLS 的 1 都來自單筆樣本，其餘 pageload 沒帶 CLS，不能當結論。INP 依互動元素拆開看（fields 加 `span.description`）：扭蛋機「繼續抽」p75 336ms（4 筆），本機 4 倍 CPU 節流只量到 72–136ms，推測差在學校電腦的 GPU，還沒動。已處理：一番賞的 three.js 場景改成按開始才載入（首次載入 JS 543 → 369 kB），場景 chunk 與 1.2 MB 票券模型在打開設定時先抓，按開始到票券畫出 770 → 455ms（M4 GPU、模擬 10 Mbps，量骨架屏淡出，不要用 Playwright waitFor 計時，它的輪詢間隔會拉到 1 秒）；大富翁的三個 mp3 改成第一次擲骰才抓，其他用 `useSound` 的頁面不再一載入就下載。
 
 ## 實驗室數據（Lighthouse）
 

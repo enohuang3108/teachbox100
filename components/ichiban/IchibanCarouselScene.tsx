@@ -1,5 +1,6 @@
 "use client";
 
+import { loadIchibanModel } from "@/lib/ichiban/carousel";
 import { fitPrizeTextSize, prizeRevealProgress } from "@/lib/ichiban/tear";
 import type { MotionValue } from "motion/react";
 import {
@@ -258,8 +259,12 @@ export function IchibanCarouselScene({
     const stopFocus = focus.on("change", applyRotation);
     const stopProgress = progress.on("change", applyProgress);
 
-    new GLTFLoader().load(
-      "/3d_model/ichiban-crayon.glb",
+    const fail = () => {
+      if (!disposed) onError();
+    };
+    loadIchibanModel().then((buffer) => new GLTFLoader().parse(
+      buffer,
+      "",
       (gltf) => {
         if (disposed) return;
         const items = Array.from({ length: count }, (_, index) => {
@@ -300,11 +305,8 @@ export function IchibanCarouselScene({
         fit();
         onReady();
       },
-      undefined,
-      () => {
-        if (!disposed) onError();
-      },
-    );
+      fail,
+    ), fail);
 
     return () => {
       disposed = true;

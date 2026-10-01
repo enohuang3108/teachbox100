@@ -13,18 +13,17 @@ import {
   GAME_STAGE_ID,
   PageTemplate,
 } from "@/components/templates/PageTemplate";
+import { loadIchibanModel } from "@/lib/ichiban/carousel";
 import { useIchibanStore } from "@/lib/ichiban/store";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const pageInfo: PageWithKey = { ...pages.ichiban, key: "ichiban" };
 
-// three.js 場景約 190 KB，介紹頁用不到；按下開始才載入
+// three.js 場景約 190 KB、票券模型 1.2 MB，介紹頁用不到；打開設定時才開始抓
+const loadExperience = () => import("@/components/ichiban/IchibanExperience");
 const IchibanExperience = dynamic(
-  () =>
-    import("@/components/ichiban/IchibanExperience").then(
-      (m) => m.IchibanExperience,
-    ),
+  () => loadExperience().then((m) => m.IchibanExperience),
   { ssr: false },
 );
 
@@ -36,6 +35,12 @@ export default function IchibanPage() {
     useIchibanStore.getState().setPrizes(prizes);
     setSettingsOpen(true);
   });
+  // 老師填設定的這段時間把場景抓好，按開始就不用等
+  useEffect(() => {
+    if (!settingsOpen || entered) return;
+    void loadExperience();
+    loadIchibanModel().catch(() => {});
+  }, [settingsOpen, entered]);
   const sound = useIchibanStore((s) => s.sound);
   const setSound = useIchibanStore((s) => s.setSound);
   const actions = (

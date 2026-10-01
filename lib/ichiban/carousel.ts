@@ -1,3 +1,15 @@
+let model: Promise<ArrayBuffer> | undefined;
+/** 票券的 3D 模型（1.2 MB）。頁面在設定階段先呼叫，場景掛上時拿同一個 promise，不重抓 */
+export function loadIchibanModel() {
+  model ??= fetch("/3d_model/ichiban-crayon.glb").then((r) => {
+    if (!r.ok) throw new Error(`ichiban model ${r.status}`);
+    return r.arrayBuffer();
+  });
+  // 失敗不留快取，下次掛上場景可以重試
+  model.catch(() => (model = undefined));
+  return model;
+}
+
 const DRAG_DEGREES_PER_PIXEL = 0.2;
 
 function normalizeIndex(index: number, count: number): number {
