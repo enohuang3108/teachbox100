@@ -232,7 +232,7 @@ const pagesConfig = {
       "每個人選一條線，從上面爬下去，遇到橫線就轉彎，最後停在哪個結果就是誰的。可以寫好打掃工作、獎品或題目，也能直接幫全班分組，一次最多 30 人。",
   },
   dice: {
-    path: "/dice",
+    path: "/draw/dice",
     imageSrc: "/images/covers/warm/dice.webp",
     blurDataURL:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Affw5QD//wD57QAHEQcICvX19QwODvj29gIA//8BBgn/3pj88d3U2N+Xm6CxsrUDBAQCAQQE++rnAh1nBRUq2tnWhouRyszQBAgIAvfb2fBeTrFgcSxut9b6HCslILu/w+zo6QQABwgHHR/5/Rjq9vv2+PlOS0fx9/0HCAcB+PTp//j4AAQE4u33Fg0FBAL/AwMFBQUEZeNJLxExVMAAAAAASUVORK5CYII=",
@@ -271,13 +271,13 @@ export const hubs: Record<string, Hub> = {
     path: "/draw",
     // 畫面上就叫「抽籤」；「線上抽籤」這個搜尋字留在 pageSeo.draw.title 的 <title> 裡
     title: "抽籤",
-    slogan: "轉盤、扭蛋機、一番賞、爬格子，四種抽法",
+    slogan: "轉盤、扭蛋機、一番賞、爬格子、骰子，五種抽法",
     intro:
-      "點名、分組、抽題，老師幾乎天天都要隨機選人。這裡有四種抽法，差在誰來選、結果怎麼打開。轉盤最快，貼上名單按一下，幾秒就停，一節課要抽好幾次的時候用它。扭蛋機會把名單變成一箱扭蛋，請學生上來自己挑一顆，打開才知道是誰。一番賞是老師先設好獎項，學生挑一張票親手撕開，適合拿來發獎勵。爬格子讓每個人沿著自己的線爬下去，一次把全班對到工作或組別，分組最方便。四種的名單格式都一樣，一行一個，可以直接複製過去用。投影在電子白板上也看得清楚。",
-    imageSrc: "/images/covers/warm/wheel-v2.webp",
+      "點名、分組、抽題，老師幾乎天天都要隨機選人。這裡有五種抽法，差在誰來選、結果怎麼打開。轉盤最快，貼上名單按一下，幾秒就停，一節課要抽好幾次的時候用它。扭蛋機會把名單變成一箱扭蛋，請學生上來自己挑一顆，打開才知道是誰。一番賞是老師先設好獎項，學生挑一張票親手撕開，適合拿來發獎勵。爬格子讓每個人沿著自己的線爬下去，一次把全班對到工作或組別，分組最方便。骰子不用名單，擲一到六顆抽座號、決定順序，也能把六個面改成活動。轉盤、扭蛋機、爬格子的名單格式都一樣，一行一個，可以直接複製過去用。投影在電子白板上也看得清楚。",
+    imageSrc: "/images/covers/warm/draw.webp",
     blurDataURL:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/Afbv4QEBAf/9/gYSEOng1/n18x8rN/nw8AH58eP9/PwGEBDpo7QC53cFDPP07XAYdW0E8vT1iY2XNjUlQt+L8t3n/A0KAPeD/+42Av39/LK1ut7b2Qsn8QMODf0CEA4sAAH+8wL//gAuKSNMVlzw3Wz+9vIKE+XozFEAFD4B9/Di9vb3AwQDCAoO/+zBAPz0ABNDAAMDerRNsypywywAAAAASUVORK5CYII=",
-    children: ["wheel", "gacha", "ichiban", "ladder"],
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAIAAABxZ0isAAAAoUlEQVR4nAGWAGn/AfTm3fbqywsYOOrx7SAiIf34+LjJ3TosHQT8x5H8spL/YYuQtOwWBvkOKD2Eo9F8XDoC/w4hCigw2un+y8zGz9jcMiUbQzAPLyQLAfPv6AwOAdjZ5qumlfP8A11RWRoG+fsPGQIBpJGIVHm04AjT0+arqr3l6ens+AP97eUB+NPBwtv19RQZIwTo9fr/JiUkBQYFBf/1tjpQBBkOMrgAAAAASUVORK5CYII=",
+    children: ["wheel", "gacha", "ichiban", "ladder", "dice"],
   },
   coin: {
     path: "/coin",

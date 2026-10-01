@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const FACES = ["跳三下", "拍手五下", "唱首歌", "學動物叫", "原地轉圈", "再擲一次"];
 
 test("設定三顆文字骰，擲出後每顆都是骰面上的字", async ({ page }) => {
-  await page.goto("/dice");
+  await page.goto("/draw/dice");
   await page.getByRole("button", { name: "開始使用" }).click();
   await page.getByText("3 顆", { exact: true }).click();
   await page.getByText("文字骰", { exact: true }).click();
@@ -20,7 +20,7 @@ test("設定三顆文字骰，擲出後每顆都是骰面上的字", async ({ pa
 });
 
 test("數字骰擲兩顆會顯示總和", async ({ page }) => {
-  await page.goto("/dice");
+  await page.goto("/draw/dice");
   await page.getByRole("button", { name: "開始使用" }).click();
   await page.getByText("2 顆", { exact: true }).click();
   await page.getByText("數字骰", { exact: true }).click();

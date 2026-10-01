@@ -12,7 +12,7 @@ const UPDATED: Record<string, Date> = {
   "/ultimate-password": new Date("2026-09-24"),
   "/draw": new Date("2026-09-29"),
   "/draw/ladder": new Date("2026-09-29"),
-  "/dice": new Date("2026-09-29"),
+  "/draw/dice": new Date("2026-09-29"),
 };
 const lastModified = (path: string) => UPDATED[path] ?? LAST_MODIFIED;
 
