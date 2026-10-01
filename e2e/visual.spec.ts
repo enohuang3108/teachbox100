@@ -15,9 +15,9 @@ import { hubs, pages } from "../app/pages.config";
 
 /** 介紹頁上那顆 CTA 的文字；`setup` 指按下去會不會開設定 Dialog。 */
 const UNITS: Record<string, { start: string; setup: boolean }> = {
-  // 按下「噓」會叫麥克風、計時器與認識新臺幣直接進工具，三者沒有設定站
+  // 按下「噓」會叫麥克風、認識新臺幣直接進工具，兩者沒有設定站
   "coin-introduction": { start: "開始認識", setup: false },
-  timer: { start: "開始使用", setup: false },
+  timer: { start: "開始使用", setup: true },
   noise: { start: "噓", setup: false },
 
   "coin-equivalent": { start: "開始練習", setup: true },

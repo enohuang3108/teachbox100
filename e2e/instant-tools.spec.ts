@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 test("計時器開始後可暫停，重設後回到可開始狀態", async ({ page }) => {
   await page.goto("/timer");
   await page.getByRole("button", { name: "開始使用" }).click();
+  await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "開始", exact: true }).click();
   await expect(page.getByRole("button", { name: "暫停", exact: true })).toBeVisible();
 

@@ -11,6 +11,16 @@ const samples: { [K in ShareUnit]: SetupOf<K> } = {
     questions: null,
   },
   wheel: { text: "小明\n小華\n\n阿美", removeOnPick: true },
+  timer: {
+    mode: "exam",
+    seconds: 600,
+    warnMin: 5,
+    date: "2026-10-02",
+    slots: [
+      { id: "s0", subject: "國文", start: "08:10", end: "09:00" },
+      { id: "s1", subject: "午休", start: "12:00", end: "13:00", rest: true },
+    ],
+  },
   gacha: { text: "蘋果\n香蕉", putBack: false },
   ladder: {
     names: "小明\n小華\n小美",

@@ -10,6 +10,7 @@ import { monopolyShare } from "@/lib/monopoly/share";
 import { morrisShare } from "@/lib/morris/share";
 import { scoreboardShare } from "@/lib/scoreboard/share";
 import { territoryShare } from "@/lib/territory/share";
+import { timerShare } from "@/lib/timer/share";
 import { wheelShare } from "@/lib/wheel/share";
 import type { ShareCodec } from "./codec";
 
@@ -30,6 +31,7 @@ export const SHARE_CODECS = {
   "ultimate-password": ultimatePasswordShare,
   dice: diceShare,
   ladder: ladderShare,
+  timer: timerShare,
 };
 
 export type ShareUnit = keyof typeof SHARE_CODECS;

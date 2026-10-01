@@ -1,18 +1,22 @@
 /** 計時器的純邏輯。倒數走 deadline 時間戳，不累加 tick —— 分頁被節流也不會走慢。 */
 
-export const PRESETS = [60, 180, 300, 600, 900, 1200, 1800, 2400, 3000] as const;
+export const PRESETS = [
+  60, 180, 300, 600, 900, 1200, 1800, 2400, 3000,
+] as const;
 
 /** 剩下不到這個秒數就進入警示配色與加速的節拍 */
 export const WARN_AT = 10;
 
 export const MAX_SECONDS = 99 * 60 + 59;
 
-/** 把秒數格式化成 MM:SS；負數一律當 0。超過 99 分就變三位數（考試模式排整個上午） */
+/** 把秒數格式化成 MM:SS；負數一律當 0。100 分鐘以上改 H:MM:SS（考試排整個上午、隔天開考的倒數） */
 export function formatTime(seconds: number): string {
   const s = Math.max(0, Math.ceil(seconds));
-  const mm = Math.floor(s / 60);
-  const ss = s % 60;
-  return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+  const p = (n: number) => String(n).padStart(2, "0");
+  if (s >= 100 * 60) {
+    return `${Math.floor(s / 3600)}:${p(Math.floor(s / 60) % 60)}:${p(s % 60)}`;
+  }
+  return `${p(Math.floor(s / 60))}:${p(s % 60)}`;
 }
 
 /** 進度環的比例：1 是滿的（剛開始），0 是走完 */

@@ -77,6 +77,16 @@ export function useTimer(soundOn: boolean) {
     setRunning(true);
   }, [total]);
 
+  /** 設定裡按開始：換成這個長度並立刻倒數 */
+  const begin = useCallback((s: number) => {
+    const v = Math.min(MAX_SECONDS, Math.max(0, s));
+    deadline.current = Date.now() + v * 1000;
+    setTotal(v);
+    setRemaining(v);
+    setDone(false);
+    setRunning(v > 0);
+  }, []);
+
   const reset = useCallback(() => {
     setRunning(false);
     setDone(false);
@@ -91,6 +101,7 @@ export function useTimer(soundOn: boolean) {
     start,
     pause,
     setSeconds,
+    begin,
     bump,
     reset,
     restart,

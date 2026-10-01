@@ -8,10 +8,13 @@ describe("formatTime", () => {
     expect(formatTime(600)).toBe("10:00");
   });
 
+  it("100 分鐘以上改成 H:MM:SS（隔天考試的倒數）", () => {
+    expect(formatTime(12 * 3600 + 15 * 60 + 1)).toBe("12:15:01");
+  });
+
   it("負數當成 0，超過上限夾住", () => {
     expect(formatTime(-3)).toBe("00:00");
-    expect(formatTime(MAX_SECONDS + 100)).toBe("101:39");
-    expect(formatTime(180 * 60)).toBe("180:00");
+    expect(formatTime(180 * 60)).toBe("3:00:00");
   });
 
   it("不足一秒仍顯示 00:01，歸零前不會提早跳 00:00", () => {
