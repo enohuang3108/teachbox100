@@ -1,13 +1,16 @@
 import { getUnitIllustrationSrc } from "@/lib/unit-illustration";
 import { hubs, pages } from "@/app/pages.config";
-import { BarkleyEyes } from "@/components/atoms/BarkleyEyes";
 import {
   FACT_BADGE,
   OfflineGuideDialog,
 } from "@/components/atoms/OfflineGuideDialog";
 import { PageDecor } from "@/components/atoms/PageDecor";
 import { ParallaxFallback } from "@/components/atoms/ParallaxFallback";
-import { ImageCard } from "@/components/molecules/ImageCard";
+import {
+  HomeCatalog,
+  type CatalogEntry,
+} from "@/components/home/HomeCatalog";
+import { HeroToolbox } from "@/components/home/HeroToolbox";
 import { getOrganizationSchema, getWebsiteSchema } from "@/lib/jsonld";
 import { Link } from "next-view-transitions";
 import Image from "next/image";
@@ -36,10 +39,18 @@ export default function Home() {
   const organizationSchema = getOrganizationSchema();
   // hub 取代旗下子頁：首頁只露一張入口卡，權重集中到分類頁而不是散給六張教材卡
   const grouped = new Set(Object.values(hubs).flatMap((hub) => hub.children));
-  const entries = [
+  const entries: CatalogEntry[] = [
     ...Object.entries(hubs),
     ...Object.entries(pages).filter(([key]) => !grouped.has(key)),
-  ].sort(([a], [b]) => homeRank(a) - homeRank(b));
+  ]
+    .sort(([a], [b]) => homeRank(a) - homeRank(b))
+    .map(([key, page]) => ({
+      key,
+      path: page.path,
+      title: page.title,
+      slogan: page.slogan,
+      art: getUnitIllustrationSrc(page),
+    }));
 
   return (
     <>
@@ -97,30 +108,9 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Barkley 疊在黃球前面；地面陰影讓他站得住，不會像浮在空中 */}
-            <div className="order-1 mx-auto w-full max-w-[340px] lg:order-2 lg:max-w-[440px]">
-              <div className="relative aspect-square">
-                <Image
-                  src="/images/decor/blob-yellow.webp"
-                  alt=""
-                  aria-hidden
-                  width={640}
-                  height={640}
-                  sizes="(max-width: 1024px) 60vw, 30vw"
-                  className="blob-float absolute top-[2%] right-[1%] w-[66%]"
-                  style={{ animationDuration: "24s", animationDelay: "-4s" }}
-                />
-                <div className="absolute bottom-[7%] left-1/2 h-[5%] w-[52%] -translate-x-1/2 rounded-[50%] bg-ink/10 blur-md" />
-                <Image
-                  src="/images/mascot/barkley.webp"
-                  alt="TeachBox100 吉祥物 Barkley"
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 80vw, 440px"
-                  className="relative object-contain"
-                />
-                <BarkleyEyes />
-              </div>
+            {/* 關著的教具箱，點一下打開 */}
+            <div className="order-1 mx-auto w-full max-w-[400px] lg:order-2 lg:max-w-none">
+              <HeroToolbox />
             </div>
           </div>
         </section>
@@ -136,19 +126,7 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-8 lg:grid-cols-3 xl:grid-cols-4">
-            {entries.map(([key, page], index) => (
-              <ImageCard
-                key={key}
-                index={index}
-                link={page.path}
-                imageSrc={getUnitIllustrationSrc(page)}
-                blurDataURL={page.blurDataURL}
-                cardTitle={page.title}
-                cardDescription={page.slogan}
-              />
-            ))}
-          </div>
+          <HomeCatalog entries={entries} />
         </section>
 
         {/* Footer */}

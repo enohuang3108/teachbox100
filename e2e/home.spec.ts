@@ -41,7 +41,7 @@ test("首頁列出分類與獨立單元，分類頁列出旗下所有單元", as
   ]);
 
   await page.goto("/draw");
-  expect(await unitHrefs(page, "main ul a[href^=\"/draw/\"]")).toEqual([
+  expect(await unitHrefs(page, 'main ul a[href^="/draw/"]')).toEqual([
     "/draw/gacha",
     "/draw/ichiban",
     "/draw/ladder",
@@ -49,7 +49,7 @@ test("首頁列出分類與獨立單元，分類頁列出旗下所有單元", as
   ]);
 
   await page.goto("/coin");
-  expect(await unitHrefs(page, "main ol a[href^=\"/coin/\"]")).toEqual([
+  expect(await unitHrefs(page, 'main ol a[href^="/coin/"]')).toEqual([
     "/coin/buy",
     "/coin/change",
     "/coin/equivalent",
@@ -63,7 +63,9 @@ test("首頁卡片依搜尋流量排序，高流量的單元在前", async ({ pa
   await page.goto("/");
   const hrefs = await page
     .locator('#games a[href^="/"]')
-    .evaluateAll((links) => [...new Set(links.map((l) => l.getAttribute("href")))]);
+    .evaluateAll((links) => [
+      ...new Set(links.map((l) => l.getAttribute("href"))),
+    ]);
   expect(hrefs.slice(0, 6)).toEqual([
     "/draw",
     "/noise",
@@ -72,4 +74,27 @@ test("首頁卡片依搜尋流量排序，高流量的單元在前", async ({ pa
     "/clock/current-time",
     "/monopoly",
   ]);
+});
+
+test("首頁教具箱一開始關著，點一下打開、再點一下關上，卡牆最後是意見卡", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const box = page.getByRole("button", { name: "打開教具箱" });
+  const hero = page.locator(".toolbox");
+  await expect(hero).toHaveAttribute("data-state", "closed");
+  await expect(page.getByAltText(/阿黃從打開的教具箱探出頭/)).toBeHidden();
+
+  await box.click();
+  await expect(hero).toHaveAttribute("data-state", "open");
+  await expect(page.getByAltText(/阿黃從打開的教具箱探出頭/)).toBeVisible();
+
+  await page.getByRole("button", { name: "關上教具箱" }).click();
+  await expect(hero).toHaveAttribute("data-state", "closed");
+  await expect(page.getByAltText(/阿黃從打開的教具箱探出頭/)).toBeHidden();
+  await expect(box).toBeVisible();
+
+  await expect(page.locator("#games li").last()).toContainText(
+    "還缺哪一件教具？",
+  );
 });

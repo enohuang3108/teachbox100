@@ -524,6 +524,594 @@
     animation: none;
   }
 
+  /*
+   * 首頁教具箱。節奏照卡通的三拍：預備（壓扁）→ 動作（箱蓋繞箱口翻開、阿黃彈出）→ 跟隨（回彈、前腳落下、教具飛出）。
+   * 每個方向用自己的 keyframes：同名動畫只換方向或延遲不會重播，狀態一切換就會直接跳到終點。
+   * 箱子圖層的座標都是 904×700，箱口在 y=444（63.4%），轉軸與縮放原點都對著它。
+   */
+  .toolbox-box {
+    transform-origin: 50% 98%;
+    perspective: 1100px;
+    perspective-origin: 50% 40%;
+  }
+
+  .tb-lid-open,
+  .tb-lid-closed {
+    transform-origin: 50% 63.4%;
+    backface-visibility: hidden;
+  }
+
+  .tb-lid-closed {
+    transition:
+      translate var(--duration-hover) var(--ease-out),
+      rotate var(--duration-hover) var(--ease-out);
+  }
+
+  .tb-dog,
+  .tb-tray {
+    transform-origin: 50% 63.4%;
+  }
+
+  /* 手臂的轉軸在肩膀（左 412,398／右 572,398），手掌繞著肩膀轉，永遠連著身體 */
+  .tb-arm-l {
+    transform-origin: 45.58% 56.86%;
+  }
+
+  .tb-arm-r {
+    transform-origin: 63.27% 56.86%;
+  }
+
+  /* 箱底以下裁掉，上面與左右放寬，阿黃彈過頭時耳朵不會被切 */
+  .toolbox-clip {
+    clip-path: inset(-30% -10% 1.4% -10%);
+  }
+
+  /* 還沒開過的箱子裡什麼都沒有；開過再關上的，靠收回動畫停在看不見的終點 */
+  .toolbox[data-state="closed"]:not([data-touched]) :is(.tb-lid-open, .tb-back, .tb-tray, .tb-dog, .tool-pop) {
+    visibility: hidden;
+  }
+
+  /* ---- 關著：每隔幾秒被裡面的阿黃頂一下，滑鼠移上去箱蓋掀一點 ---- */
+  .toolbox[data-state="closed"] .toolbox-box {
+    animation: tb-box-nudge 3.4s var(--ease-out) 1.2s infinite;
+  }
+
+  .toolbox[data-state="closed"] .tb-lid-closed {
+    animation: tb-lid-nudge 3.4s var(--ease-out) 1.2s infinite;
+  }
+
+  .toolbox[data-state="closed"] .toolbox-box:hover .tb-lid-closed {
+    translate: 0 -1.5%;
+    rotate: -1.5deg;
+  }
+
+  .toolbox[data-state="closed"] .toolbox-box:active {
+    animation: none;
+    transform: scale(1.04, 0.94);
+    transition: transform var(--duration-press) var(--ease-out);
+  }
+
+  @keyframes tb-box-nudge {
+    0%,
+    76%,
+    100% {
+      transform: none;
+    }
+    80% {
+      transform: scale(1.03, 0.96);
+    }
+    85% {
+      transform: scale(0.98, 1.03);
+    }
+    91% {
+      transform: none;
+    }
+  }
+
+  @keyframes tb-lid-nudge {
+    0%,
+    78%,
+    100% {
+      transform: none;
+    }
+    83% {
+      transform: translateY(-4%) rotate(-3deg);
+    }
+    88% {
+      transform: none;
+    }
+    92% {
+      transform: translateY(-1.5%) rotate(2deg);
+    }
+    96% {
+      transform: none;
+    }
+  }
+
+  /* ---- 打開 ---- */
+  .toolbox[data-state="open"] .toolbox-box {
+    animation: tb-box-open 0.82s both;
+  }
+
+  @keyframes tb-box-open {
+    0% {
+      transform: scale(1.04, 0.94);
+      animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1);
+    }
+    12% {
+      transform: scale(1.08, 0.88);
+      animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+    }
+    32% {
+      transform: scale(0.95, 1.06);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.4, 1);
+    }
+    52% {
+      transform: scale(1.02, 0.98);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.4, 1);
+    }
+    72% {
+      transform: scale(0.995, 1.005);
+      animation-timing-function: var(--ease-out);
+    }
+    100% {
+      transform: none;
+    }
+  }
+
+  /* 外蓋往後倒到看不見，裡面那一面接著從箱口豎起來，最後在鉸鏈上晃一下。
+     兩面要接力不能重疊：外蓋 0.21s 倒平，內面 0.21s 才起來，否則同一格會看到兩片蓋子 */
+  .toolbox[data-state="open"] .tb-lid-closed {
+    animation: tb-lidc-open 0.16s 0.05s forwards;
+  }
+
+  /* 先被頂得彈起來一點，再往後倒 */
+  @keyframes tb-lidc-open {
+    0% {
+      transform: none;
+      animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+    }
+    35% {
+      transform: translateY(-7%) rotateX(24deg);
+      animation-timing-function: cubic-bezier(0.45, 0, 0.9, 0.6);
+    }
+    100% {
+      transform: translateY(-5%) rotateX(90deg);
+      visibility: hidden;
+    }
+  }
+
+  .toolbox[data-state="open"] .tb-lid-open {
+    animation: tb-lido-open 0.52s 0.21s both;
+  }
+
+  /* 還沒開始的等待時間停在 0%：90° 剛好側對畫面，再加 visibility 藏起來，否則會留一條紅線 */
+  @keyframes tb-lido-open {
+    0% {
+      visibility: hidden;
+      transform: rotateX(90deg);
+      animation-timing-function: cubic-bezier(0.2, 0.7, 0.35, 1);
+    }
+    45% {
+      transform: rotateX(-14deg);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.4, 1);
+    }
+    72% {
+      transform: rotateX(5deg);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.4, 1);
+    }
+    100% {
+      transform: none;
+    }
+  }
+
+  /* 箱內壁只在打開時出現：箱口沒有蓋子的那幾格，它會變成一條橫過箱口的紅線 */
+  .toolbox[data-state="open"] .tb-back {
+    animation: tb-back-open 0.01s 0.05s both;
+  }
+
+  @keyframes tb-back-open {
+    from {
+      visibility: hidden;
+    }
+  }
+
+  .toolbox[data-state="open"] .tb-tray {
+    animation: tb-tray-open 0.46s 0.22s both;
+  }
+
+  @keyframes tb-tray-open {
+    0% {
+      transform: translateY(24%);
+      animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+    }
+    60% {
+      transform: translateY(-2.5%);
+      animation-timing-function: var(--ease-out);
+    }
+    100% {
+      transform: none;
+    }
+  }
+
+  /* 阿黃：往上衝時拉長，到頂壓扁，再小幅回彈 */
+  .toolbox[data-state="open"] .tb-dog {
+    animation: tb-dog-open 0.7s 0.2s both;
+  }
+
+  @keyframes tb-dog-open {
+    0% {
+      transform: translateY(62%) scale(0.96, 1.1);
+      animation-timing-function: cubic-bezier(0.15, 0.7, 0.3, 1);
+    }
+    38% {
+      transform: translateY(-7%) scale(0.95, 1.08);
+      animation-timing-function: cubic-bezier(0.5, 0, 0.6, 1);
+    }
+    58% {
+      transform: translateY(1.5%) scale(1.06, 0.93);
+      animation-timing-function: cubic-bezier(0.3, 0, 0.5, 1);
+    }
+    76% {
+      transform: translateY(-1%) scale(0.99, 1.02);
+      animation-timing-function: var(--ease-out);
+    }
+    100% {
+      transform: none;
+    }
+  }
+
+  /*
+   * 手：還在箱子裡就往兩側張開，跟著身體衝出來像在伸手；過了最高點才甩下來拍在箱緣上，往下多壓一點再彈回。
+   * 手臂沿肩膀往外滑一點（translateX），手掌才伸得出身體輪廓；手臂那段夠長，滑出去仍插在身體裡。
+   * 右手比左手晚 40ms，兩隻手不會像機器一樣同步。
+   */
+  .toolbox[data-state="open"] .tb-arm-l {
+    animation: tb-arml-open 0.78s 0.2s both;
+  }
+
+  .toolbox[data-state="open"] .tb-arm-r {
+    animation: tb-armr-open 0.78s 0.24s both;
+  }
+
+  @keyframes tb-arml-open {
+    0% {
+      transform: translate(-2.4%, 0) rotate(36deg);
+      animation-timing-function: cubic-bezier(0.3, 0, 0.5, 1);
+    }
+    36% {
+      transform: translate(-2.8%, -1%) rotate(46deg);
+      animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.5);
+    }
+    58% {
+      transform: translate(0, 0.6%) rotate(-7deg);
+      animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1);
+    }
+    74% {
+      transform: translate(0, 0) rotate(4deg);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.4, 1);
+    }
+    88% {
+      transform: translate(0, 0) rotate(-1deg);
+      animation-timing-function: var(--ease-out);
+    }
+    100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+  }
+
+
+  @keyframes tb-armr-open {
+    0% {
+      transform: translate(2.4%, 0) rotate(-36deg);
+      animation-timing-function: cubic-bezier(0.3, 0, 0.5, 1);
+    }
+    36% {
+      transform: translate(2.8%, -1%) rotate(-46deg);
+      animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.5);
+    }
+    58% {
+      transform: translate(0, 0.6%) rotate(7deg);
+      animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1);
+    }
+    74% {
+      transform: translate(0, 0) rotate(-4deg);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.4, 1);
+    }
+    88% {
+      transform: translate(0, 0) rotate(1deg);
+      animation-timing-function: var(--ease-out);
+    }
+    100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+  }
+
+
+  /* 正面前面那份手：阿黃衝到最高點（38%）時手還舉著、整個高過箱口，這一格切換看不出來 */
+  .toolbox[data-state="open"] .tb-dog-front {
+    animation:
+      tb-dog-open 0.7s 0.2s both,
+      tb-front-show 0.7s 0.2s linear both;
+  }
+
+  @keyframes tb-front-show {
+    0%,
+    37.9% {
+      opacity: 0;
+    }
+    38%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes tool-pop {
+    from {
+      opacity: 0;
+      transform: translate(var(--from-x), var(--from-y)) scale(0.5) rotate(-12deg);
+    }
+    30% {
+      opacity: 1;
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .toolbox[data-state="open"] .tool-pop {
+    animation:
+      tool-pop 0.7s cubic-bezier(0.34, 1.45, 0.64, 1)
+        calc(420ms + var(--i) * 60ms) both,
+      blob-float var(--float, 8s) var(--ease-in-out)
+        calc(1150ms + var(--i) * 60ms) infinite alternate;
+  }
+
+  /* ---- 關上：教具先回箱、前腳抬起、阿黃縮下去，箱蓋最後砰一聲蓋上 ---- */
+  .toolbox[data-state="closed"][data-touched] .tool-pop {
+    animation: tool-return 0.26s calc((4 - var(--i)) * 22ms) forwards;
+  }
+
+  /* 先被吸一下（微微放大），再加速飛回箱口；飛到箱口前都不透明，最後是被箱子擋住而不是淡掉 */
+  @keyframes tool-return {
+    0% {
+      animation-timing-function: cubic-bezier(0.3, 0, 0.5, 1);
+    }
+    22% {
+      transform: scale(1.08);
+      animation-timing-function: cubic-bezier(0.45, 0, 0.75, 0.6);
+    }
+    85% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--from-x), var(--from-y)) scale(0.5) rotate(-12deg);
+      visibility: hidden;
+    }
+  }
+
+  .toolbox[data-state="closed"][data-touched] .tb-dog {
+    animation: tb-dog-close 0.32s 0.02s forwards;
+  }
+
+  @keyframes tb-dog-close {
+    0% {
+      transform: none;
+      animation-timing-function: cubic-bezier(0.3, 0, 0.5, 1);
+    }
+    25% {
+      transform: translateY(-3%) scale(1.03, 0.97);
+      animation-timing-function: cubic-bezier(0.55, 0, 0.85, 0.3);
+    }
+    100% {
+      transform: translateY(62%) scale(0.95, 1.1);
+      visibility: hidden;
+    }
+  }
+
+  /* 關：手先從箱緣抬起來（像揮手），舉著手跟身體一起縮下去 */
+  .toolbox[data-state="closed"][data-touched] .tb-arm-l {
+    animation: tb-arml-close 0.36s forwards;
+  }
+
+  .toolbox[data-state="closed"][data-touched] .tb-arm-r {
+    animation: tb-armr-close 0.36s 0.02s forwards;
+  }
+
+  @keyframes tb-arml-close {
+    0% {
+      transform: translate(0, 0) rotate(0deg);
+      animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1);
+    }
+    35% {
+      transform: translate(-2.4%, 0) rotate(42deg);
+      animation-timing-function: var(--ease-in-out);
+    }
+    100% {
+      transform: translate(-2%, 0) rotate(34deg);
+    }
+  }
+
+
+  @keyframes tb-armr-close {
+    0% {
+      transform: translate(0, 0) rotate(0deg);
+      animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1);
+    }
+    35% {
+      transform: translate(2.4%, 0) rotate(-42deg);
+      animation-timing-function: var(--ease-in-out);
+    }
+    100% {
+      transform: translate(2%, 0) rotate(-34deg);
+    }
+  }
+
+
+  /* 正面前面那份手在 0.12s 收掉：這時手已經舉過箱口，跟後面那份完全重疊 */
+  .toolbox[data-state="closed"][data-touched] .tb-dog-front {
+    animation:
+      tb-dog-close 0.32s 0.02s forwards,
+      tb-front-hide 0.12s linear forwards;
+  }
+
+  @keyframes tb-front-hide {
+    0%,
+    99% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  .toolbox[data-state="closed"][data-touched] .tb-back {
+    animation: tb-back-close 0.01s 0.34s forwards;
+  }
+
+  @keyframes tb-back-close {
+    to {
+      visibility: hidden;
+    }
+  }
+
+  .toolbox[data-state="closed"][data-touched] .tb-tray {
+    animation: tb-tray-close 0.22s cubic-bezier(0.5, 0, 0.8, 0.3) 0.1s forwards;
+  }
+
+  @keyframes tb-tray-close {
+    to {
+      transform: translateY(24%);
+      visibility: hidden;
+    }
+  }
+
+  .toolbox[data-state="closed"][data-touched] .tb-lid-open {
+    animation: tb-lido-close 0.17s cubic-bezier(0.5, 0, 0.9, 0.4) 0.2s forwards;
+  }
+
+  @keyframes tb-lido-close {
+    to {
+      transform: rotateX(90deg);
+      visibility: hidden;
+    }
+  }
+
+  /* 外蓋從後面倒回來，一路加速砸在箱口上，反彈一點點再停 */
+  .toolbox[data-state="closed"][data-touched] .tb-lid-closed {
+    animation:
+      tb-lidc-close 0.36s 0.37s both,
+      tb-lid-nudge 3.4s var(--ease-out) 2s infinite;
+  }
+
+  @keyframes tb-lidc-close {
+    0% {
+      visibility: hidden;
+      transform: rotateX(90deg);
+      animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+    }
+    40% {
+      transform: none;
+      animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1);
+    }
+    62% {
+      transform: rotateX(16deg);
+      animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+    }
+    80% {
+      transform: none;
+      animation-timing-function: var(--ease-out);
+    }
+    90% {
+      transform: rotateX(3deg);
+    }
+    100% {
+      transform: none;
+    }
+  }
+
+  .toolbox[data-state="closed"][data-touched] .toolbox-box {
+    animation:
+      tb-box-close 0.5s 0.51s,
+      tb-box-nudge 3.4s var(--ease-out) 2s infinite;
+  }
+
+  @keyframes tb-box-close {
+    0% {
+      transform: scale(1.06, 0.9);
+      animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+    }
+    35% {
+      transform: scale(0.97, 1.04);
+      animation-timing-function: cubic-bezier(0.4, 0, 0.4, 1);
+    }
+    65% {
+      transform: scale(1.01, 0.99);
+      animation-timing-function: var(--ease-out);
+    }
+    100% {
+      transform: none;
+    }
+  }
+
+  .toolbox-plate {
+    transform: scale(0.84);
+    transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s;
+  }
+
+  .toolbox[data-state="open"] .toolbox-plate {
+    transform: none;
+  }
+
+  .toolbox[data-touched][data-state="closed"] .toolbox-plate {
+    transition-delay: 0.1s;
+  }
+
+  @keyframes tb-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes tb-fade-out {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  /* 淡度放在點的顏色裡，不用 opacity：開箱的縮放動畫才不會連淡度一起帶 */
+  .halftone-plate {
+    background-image: radial-gradient(
+      color-mix(in srgb, var(--brand-blue) 38%, transparent) 26%,
+      transparent 30%
+    );
+    background-size: 14px 14px;
+  }
+
+  /* 卡片插圖底下的網點：每張卡同一個淡色 */
+  .halftone {
+    background-color: var(--card);
+  }
+
+  .halftone::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(var(--stone) 26%, transparent 30%);
+    background-size: 11px 11px;
+    opacity: 0.22;
+    transition: opacity var(--duration-hover) ease;
+  }
+
+  .group:hover .halftone::before {
+    opacity: 0.36;
+  }
+
+
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
     .slide-out-up,
@@ -542,6 +1130,33 @@
     .barkley-zs text,
     .decor-parallax {
       animation: none;
+    }
+
+    /* 教具箱開關只留淡入淡出，不壓扁、不翻、不彈 */
+    .toolbox[data-state] .toolbox-box,
+    .toolbox[data-state] :is(.tb-arm-l, .tb-arm-r),
+    .toolbox[data-state="closed"]:not([data-touched]) .tb-lid-closed {
+      animation: none;
+    }
+
+    .toolbox[data-state="open"] .tb-lid-closed {
+      animation: tb-fade-out 0.2s forwards;
+    }
+
+    .toolbox[data-state="open"] :is(.tb-lid-open, .tb-back, .tb-tray, .tb-dog, .tool-pop) {
+      animation: tb-fade-in 0.3s ease both;
+    }
+
+    .toolbox[data-state="closed"][data-touched] .tb-lid-closed {
+      animation: tb-fade-in 0.2s both;
+    }
+
+    .toolbox[data-state="closed"][data-touched] :is(.tb-lid-open, .tb-back, .tb-tray, .tb-dog, .tool-pop) {
+      animation: tb-fade-out 0.2s forwards;
+    }
+
+    .toolbox-plate {
+      transition: none;
     }
   }
 }
