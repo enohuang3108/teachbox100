@@ -1,12 +1,11 @@
-.overlay { position:fixed; inset:0; z-index:100; overflow:hidden; pointer-events:none }
-.chosenBall { width:clamp(9rem,22vw,12rem); aspect-ratio:1 }
-.action { min-height:3rem; padding:0 2rem; border-radius:999px; font-size:1rem; font-weight:800; transition:transform 140ms var(--ease-out),background-color 160ms ease,border-color 160ms ease,color 160ms ease }
-.action:active { transform:scale(.97) }
-.primary { border:1px solid color-mix(in srgb,var(--brand-yellow) 75%,var(--ink)); background:var(--brand-yellow); color:var(--ink) }
-.flash { position:absolute; top:50%; left:50%; z-index:1; width:220vmax; height:220vmax; border-radius:50%; background:var(--paper); transform:translate(-50%,-50%) scale(.02); animation:flashOpen 620ms cubic-bezier(.77,0,.175,1) forwards }
-.resultScreen { position:fixed; inset:0; z-index:101; display:grid; width:auto; height:auto; max-width:none; max-height:none; margin:0; place-items:center; overflow:auto; border:0; background:var(--paper); padding:1.5rem }
-.resultContent { display:flex; width:min(42rem,100%); flex-direction:column; align-items:center; gap:1.5rem; text-align:center; animation:resultIn 260ms var(--ease-out) both }
-.result { max-width:100%; color:var(--ink); font-family:var(--font-display); font-size:clamp(2.75rem,10vw,6.5rem); font-weight:900; line-height:1.05; overflow-wrap:anywhere }
-@keyframes flashOpen { to { transform:translate(-50%,-50%) scale(1) } }
-@keyframes resultIn { from { opacity:0; transform:translateY(10px) scale(.97); filter:blur(3px) } to { opacity:1; transform:translateY(0) scale(1); filter:blur(0) } }
-@media (prefers-reduced-motion:reduce) { .resultContent { animation:none } .flash { transform:translate(-50%,-50%) scale(1); animation:none } }
+/* 紙籤：舞台內的絕對定位，跟 canvas 同一套座標，才接得上 3D 折紙停下的位置。
+   --p 由 JS 的 spring 驅動：0 是折起來的窄條，1 是整張攤開 */
+.slipScreen { position:absolute; inset:0; z-index:10; cursor:pointer; width:auto; height:auto; max-width:none; max-height:none; margin:0; overflow:visible; border:0; padding:0; background:transparent }
+.slip { --half:calc(var(--slip-w) / 2 - var(--pack) / 2); position:absolute; top:var(--slip-top); left:50%; width:var(--slip-w); height:var(--slip-h); translate:-50% 0; filter:drop-shadow(0 .75rem 1.25rem color-mix(in srgb,var(--ink) 14%,transparent)) }
+/* 紙面從中間折起來的寬度往左右攤開；過衝時不超出紙邊 */
+.slipPaper { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5rem; padding:1.5rem; border-radius:.25rem; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .15 0 0 0 0 .05 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),var(--paper); text-align:center; clip-path:inset(0 max(0px,calc(var(--slip-w) / 2 - var(--pack) / 2 - var(--p) * var(--half))) round .25rem); will-change:clip-path }
+.slipLabel { max-width:100%; color:var(--ink); font-family:var(--font-display); font-size:clamp(2rem,calc(var(--slip-w) * .15),5rem); font-weight:900; line-height:1.15; letter-spacing:.02em; overflow-wrap:anywhere; text-wrap:balance; transform:scale(calc(.95 + .05 * min(var(--p),1))) }
+/* 繼續抽等紙籤快攤開才出現 */
+.slipAction { opacity:0; translate:0 6px; transition:opacity 220ms var(--ease-out),translate 220ms var(--ease-out),transform 140ms var(--ease-out) }
+.slipAction[data-shown="true"] { opacity:1; translate:0 0 }
+@media (prefers-reduced-motion:reduce) { .slipAction { transition:none } }

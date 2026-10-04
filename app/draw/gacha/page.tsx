@@ -62,7 +62,6 @@ export default function GachaPage() {
 
   const onPick = (label: string) => {
     setPicked((p) => [...p, label]);
-    setRecordOpen(false);
     if (sound) playCorrectSound();
   };
 
@@ -130,7 +129,7 @@ export default function GachaPage() {
         }}
       >
         {hydrated && (
-          // 箱子滿版貼著螢幕；手機紀錄收起時不蓋住球池
+          // 箱子滿版貼著螢幕；記錄預設收起，不蓋住球池
           <StageFixed>
             <div className="fixed inset-x-0 top-16 bottom-0 [#game-stage:fullscreen_&]:top-0">
               <GachaMachine
@@ -142,37 +141,27 @@ export default function GachaPage() {
               />
             </div>
 
-            <aside
-              aria-label="已抽出的名單"
-              className="fixed top-20 left-4 z-(--z-sticky) hidden w-64 rounded-3xl bg-card/90 px-5 pt-5 pb-4 shadow-sm backdrop-blur-[2px] sm:block [#game-stage:fullscreen_&]:top-4"
-            >
-              {recordContent}
-            </aside>
+            {recordOpen && (
+              <aside
+                id="gacha-record"
+                aria-label="已抽出的名單"
+                className="fixed top-20 left-4 z-(--z-sticky) w-64 rounded-3xl bg-card/95 px-5 pt-5 pb-4 shadow-sm backdrop-blur-[2px] [#game-stage:fullscreen_&]:top-4"
+              >
+                {recordContent}
+              </aside>
+            )}
 
-            <div className="fixed top-20 left-4 z-(--z-sticky) sm:hidden [#game-stage:fullscreen_&]:top-4">
+            {/* 右下角直排：記錄開關在上、搖一搖在下；記錄預設收起，打開顯示在左上角 */}
+            <div className="fixed right-6 bottom-6 z-(--z-sticky) flex flex-col items-center gap-3">
               <Button
                 variant="outline"
-                aria-label={recordOpen ? "收起抽籤紀錄" : "查看抽籤紀錄"}
                 aria-expanded={recordOpen}
-                aria-controls="gacha-mobile-record"
+                aria-controls="gacha-record"
                 onClick={() => setRecordOpen((open) => !open)}
-                className="rounded-full bg-card/95 px-4 shadow-sm"
+                className="size-24 rounded-full bg-card/95 p-0 text-base font-bold shadow-sm transition-transform duration-press ease-out active:scale-[0.97]"
               >
-                紀錄 {picked.length}{putBack ? "" : ` / ${labels.length}`}
+                {recordOpen ? "隱藏記錄" : "顯示記錄"}
               </Button>
-              {recordOpen && (
-                <aside
-                  id="gacha-mobile-record"
-                  aria-label="已抽出的名單"
-                  className="mt-2 w-64 rounded-3xl bg-card/95 px-5 pt-5 pb-4 shadow-sm backdrop-blur-[2px]"
-                >
-                  {recordContent}
-                </aside>
-              )}
-            </div>
-
-            {/* 操作鈕跟計時器一樣固定在右下角直排，只有一顆搖一搖 */}
-            <div className="fixed right-6 bottom-6 z-(--z-sticky) flex flex-col items-center gap-3">
               <Button
                 onClick={() => setShake((n) => n + 1)}
                 className="size-24 rounded-full p-0 text-xl font-bold transition-transform duration-press ease-out active:scale-[0.97]"

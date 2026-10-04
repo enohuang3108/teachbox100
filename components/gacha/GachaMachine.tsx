@@ -6,7 +6,9 @@ import { Bodies, Body, Composite, Engine } from "matter-js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import * as THREE from "three";
+import { Button } from "@/components/atoms/shadcn/button";
 import styles from "./GachaMachine.module.css";
+import { OPEN_MS, playOpen, slipLayout, TILT } from "./reveal-fx";
 
 const BALL_COLORS = [BRAND.yellow, BRAND.red, BRAND.blue, BRAND.green];
 /** 位移超過這麼多 px 或按住超過這麼久，就算拖曳不算點 */
@@ -28,7 +30,7 @@ type Ball = {
 const BALL = 0x0001;
 const WALL = 0x0002;
 const THROW_STAGGER_MS = 70;
-type Phase = "ready" | "flying" | "opening" | "revealed";
+type Phase = "ready" | "flying" | "waiting" | "revealed";
 
 /** 球越多越小；投影在教室要夠大，所以下限拉高 */
 function ballRadius(width: number, height: number, count: number) {
@@ -74,7 +76,7 @@ function capsuleMesh(
   return group;
 }
 
-function disposeGroup(group: THREE.Group) {
+function disposeGroup(group: THREE.Object3D) {
   group.traverse((o) => {
     if (o instanceof THREE.Mesh) {
       o.geometry.dispose();
@@ -83,88 +85,108 @@ function disposeGroup(group: THREE.Group) {
   });
 }
 
-/** 結果頁的扭蛋：同一顆 3D 殼，斜 45 度擺著不動，只畫一格 */
-function StillCapsule({ color }: { color: string }) {
-  const hostRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host) return;
-    const size = host.clientWidth;
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setSize(size, size);
-    renderer.domElement.style.display = "block";
-    host.appendChild(renderer.domElement);
-    const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-1.1, 1.1, 1.1, -1.1, 0.1, 10);
-    camera.position.z = 5;
-    scene.add(new THREE.HemisphereLight(0xffffff, 0xd9cfbf, 2.2));
-    const sun = new THREE.DirectionalLight(0xffffff, 2.4);
-    sun.position.set(-0.6, 0.9, 1);
-    scene.add(sun);
-    const shared = {
-      top: new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        roughness: 0.28,
-        metalness: 0.02,
-      }),
-      seam: new THREE.MeshStandardMaterial({
-        color: BRAND.ink,
-        roughness: 0.6,
-      }),
-    };
-    const capsule = capsuleMesh(color, shared);
-    // 往前傾一點看得到接縫那圈，再斜 45 度
-    capsule.rotation.set(0.35, 0, -Math.PI / 4);
-    scene.add(capsule);
-    renderer.render(scene, camera);
-    return () => {
-      disposeGroup(capsule);
-      shared.top.dispose();
-      shared.seam.dispose();
-      renderer.dispose();
-      // dispose 不會放掉 GL context；每揭曉一顆開一個，累積超過瀏覽器上限時主畫面的會被收掉，扭蛋整箱消失
-      renderer.forceContextLoss();
-      renderer.domElement.remove();
-    };
-  }, [color]);
-  return <div ref={hostRef} className={styles.chosenBall} aria-hidden="true" />;
-}
-
-function Result({
-  id,
+/**
+ * 紙籤：3D 折紙停下的位置換成 DOM 的紙面，用 spring 從折起來的寬度往左右攤開。
+ * 後面的扭蛋場景留著，不鋪白底。
+ */
+function Slip({
   label,
   putBack,
   onContinue,
+  layout,
 }: {
-  id: number;
   label: string;
   putBack: boolean;
   onContinue: () => void;
+  layout: ReturnType<typeof slipLayout>;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  // 減少動態效果：紙籤直接攤開，按鈕直接出現
+  const [reduced] = useState(
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const [settled, setSettled] = useState(reduced);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || reduced) return;
+    // 紙籤是被彈出來的，攤開帶一點點過衝；response 0.55s、damping 0.86
+    const omega = (2 * Math.PI) / 0.55;
+    const k = omega * omega;
+    const c = 2 * 0.86 * omega;
+    let x = 0;
+    let v = 0;
+    let last = performance.now();
+    let frame = 0;
+    let shown = false;
+    const step = (now: number) => {
+      const dt = Math.min(1 / 30, (now - last) / 1000);
+      last = now;
+      for (let i = 0; i < 4; i++) {
+        v += (-k * (x - 1) - c * v) * (dt / 4);
+        x += v * (dt / 4);
+      }
+      el.style.setProperty("--p", x.toFixed(4));
+      if (!shown && x > 0.85) {
+        shown = true;
+        setSettled(true);
+      }
+      if (Math.abs(x - 1) < 0.0005 && Math.abs(v) < 0.001) {
+        el.style.setProperty("--p", "1");
+        return;
+      }
+      frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [reduced]);
+
   return (
-    <dialog open className={styles.resultScreen} aria-label={`抽中：${label}`}>
-      <div className={styles.resultContent}>
-        <StillCapsule color={BALL_COLORS[id % BALL_COLORS.length]} />
-        <output className={styles.result} data-testid="gacha-result">
-          {label}
-        </output>
-        <button
-          type="button"
-          className={`${styles.action} ${styles.primary}`}
+    // 點紙籤或畫面任何地方都能繼續抽；鍵盤走右下角的按鈕
+    <dialog
+      open
+      className={styles.slipScreen}
+      aria-label={`抽中：${label}`}
+      onClick={onContinue}
+    >
+      <div
+        ref={ref}
+        className={styles.slip}
+        style={
+          {
+            "--p": reduced ? 1 : 0,
+            "--slip-top": `${layout.top}px`,
+            "--slip-w": `${layout.width}px`,
+            "--slip-h": `${layout.height}px`,
+            "--pack": `${layout.pack}px`,
+          } as React.CSSProperties
+        }
+      >
+        <div className={styles.slipPaper}>
+          <output className={styles.slipLabel} data-testid="gacha-result">
+            {label}
+          </output>
+        </div>
+      </div>
+      {/* 跟搖一搖同一個位置與大小：揭曉時蓋在它上面，搖一搖那時也用不到 */}
+      {createPortal(
+        <Button
+          data-shown={settled}
           onClick={onContinue}
           autoFocus
+          className={`${styles.slipAction} fixed right-6 bottom-6 z-(--z-overlay) size-24 flex-col gap-0 rounded-full p-0 text-xl leading-tight font-bold active:scale-[0.97]`}
         >
-          {putBack ? "放回箱子，繼續抽" : "繼續抽"}
-        </button>
-      </div>
+          {putBack && <span className="text-sm">放回箱子</span>}
+          繼續抽
+        </Button>,
+        document.fullscreenElement ?? document.body,
+      )}
     </dialog>
   );
 }
 
 /**
  * 滿版的扭蛋箱：matter-js 管碰撞（零重力、慢慢漂），three.js 把球畫成立體扭蛋。
- * 按住拖曳可以撥動扭蛋；輕點一顆就直接飛到中間打開，不另外問。
+ * 按住拖曳可以撥動扭蛋；輕點一顆就飛到中間等著，再點一下才掀蓋、拿出紙籤攤開。
  */
 export function GachaMachine({
   labels,
@@ -186,7 +208,16 @@ export function GachaMachine({
     from: THREE.Vector3;
     fromScale: number;
     start: number;
+    /** 蓋住箱裡其他扭蛋的紙色幕，讓中間那顆像打了聚光燈 */
+    dim: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
+    /** 開蛋動畫開始的時間；使用者點下去之前是 null */
+    openAt: number | null;
+    /** 點到旁邊取消：飛回原位的開始時間 */
+    cancelAt: number | null;
   } | null>(null);
+  const [layout, setLayout] = useState<ReturnType<typeof slipLayout> | null>(
+    null,
+  );
   const draw = useMemo(() => new BoxDraw(labels.length), [labels]);
   const [phase, setPhase] = useState<Phase>("ready");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -465,7 +496,31 @@ export function GachaMachine({
       }
 
       const fly = flyRef.current;
-      if (fly) {
+      if (fly?.cancelAt != null) {
+        // 取消：沿原路飛回去、縮回原本大小，落地後放回物理世界
+        const q = reduced ? 1 : Math.min(1, (now - fly.cancelAt) / FLY_MS);
+        const e = 1 - Math.pow(1 - q, 3);
+        fly.ball.mesh.position.lerpVectors(
+          new THREE.Vector3(width / 2, -height / 2, 400),
+          fly.from,
+          e,
+        );
+        fly.ball.mesh.scale.setScalar(
+          Math.min(width, height) * 0.22 + (fly.fromScale - Math.min(width, height) * 0.22) * e,
+        );
+        fly.dim.material.opacity = 0.72 * (1 - e);
+        if (q >= 1) {
+          flyRef.current = null;
+          fly.dim.parent?.remove(fly.dim);
+          disposeGroup(fly.dim);
+          Body.setPosition(fly.ball.body, { x: fly.from.x, y: -fly.from.y });
+          Body.setVelocity(fly.ball.body, { x: 0, y: 0 });
+          Composite.add(engine.world, fly.ball.body);
+          ballsRef.current.push(fly.ball);
+          setSelectedId(null);
+          setPhase("ready");
+        }
+      } else if (fly) {
         const p = Math.min(1, (now - fly.start) / FLY_MS);
         const e = 1 - Math.pow(1 - p, 3);
         const target = new THREE.Vector3(width / 2, -height / 2, 400);
@@ -473,8 +528,28 @@ export function GachaMachine({
         fly.ball.mesh.scale.setScalar(
           fly.fromScale + (Math.min(width, height) * 0.22 - fly.fromScale) * e,
         );
-        fly.ball.mesh.rotation.x *= 1 - e * 0.2;
+        // 轉回往前傾一點的正面，接縫那圈看得到
+        fly.ball.mesh.rotation.x += (TILT - fly.ball.mesh.rotation.x) * e * 0.2;
         fly.ball.mesh.rotation.y *= 1 - e * 0.2;
+        fly.ball.mesh.rotation.z *= 1 - e * 0.2;
+        // 箱裡的球在 z≈0、中間那顆在 z=400，幕夾在中間；掀到後面的蓋子不能被蓋到
+        fly.dim.position.set(width / 2, -height / 2, 150);
+        fly.dim.scale.set(width * 2, height * 2, 1);
+        fly.dim.material.opacity = 0.72 * e;
+        if (fly.openAt === null && p >= 1 && !reduced) {
+          // 等人點：上下浮著，每隔一陣子自己晃兩下，看起來在催你打開
+          const idle = now - fly.start - FLY_MS;
+          fly.ball.mesh.position.y +=
+            Math.sin(idle * 0.004) * Math.min(width, height) * 0.012;
+          const w = (idle % 1800) / 400;
+          fly.ball.mesh.rotation.z = w < 1 ? Math.sin(w * Math.PI * 4) * 0.12 * (1 - w) : 0;
+        }
+        if (fly.openAt !== null && now >= fly.openAt && !reduced)
+          playOpen(
+            fly.ball.mesh,
+            now - fly.openAt,
+            slipLayout(width, height).len,
+          );
       }
 
       renderer.render(scene, camera);
@@ -491,7 +566,10 @@ export function GachaMachine({
       canvas.removeEventListener("pointerup", onUp);
       canvas.removeEventListener("pointercancel", onUp);
       for (const ball of ballsRef.current) disposeGroup(ball.mesh);
-      if (flyRef.current) disposeGroup(flyRef.current.ball.mesh);
+      if (flyRef.current) {
+        disposeGroup(flyRef.current.ball.mesh);
+        disposeGroup(flyRef.current.dim);
+      }
       ballsRef.current = [];
       flyRef.current = null;
       shared.top.dispose();
@@ -507,33 +585,69 @@ export function GachaMachine({
   openRef.current = (id: number) => {
     const engine = engineRef.current;
     const ball = ballsRef.current.find((b) => b.id === id);
-    if (!engine || !ball || !draw.select(id) || draw.open() === null) return;
+    if (!engine || !ball || !draw.select(id)) return;
     // 飛出去的球先離開物理世界，揭曉後依設定放回或收走
     Composite.remove(engine.world, ball.body);
     ballsRef.current = ballsRef.current.filter((b) => b !== ball);
+    const dim = new THREE.Mesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({
+        color: BRAND.paper,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      }),
+    );
+    dim.userData.ownMaterial = true;
+    ball.mesh.parent?.add(dim);
+    const start = performance.now();
     flyRef.current = {
       ball,
       from: ball.mesh.position.clone(),
       fromScale: ball.mesh.scale.x,
-      start: performance.now(),
+      start,
+      dim,
+      openAt: null,
+      cancelAt: null,
     };
+    const host = hostRef.current;
+    if (host) setLayout(slipLayout(host.clientWidth, host.clientHeight));
     setSelectedId(id);
+    setPhase("flying");
+    window.setTimeout(() => setPhase("waiting"), FLY_MS);
+  };
+
+  /** 等著的那顆被點了：掀蓋、紙籤跳出來，跑完換 DOM 的紙面攤開 */
+  const openWaiting = () => {
+    const fly = flyRef.current;
+    if (!fly || fly.openAt !== null || fly.cancelAt !== null) return;
+    if (draw.open() === null) return;
+    fly.openAt = performance.now();
     setPhase("flying");
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    window.setTimeout(() => setPhase("opening"), reduced ? 0 : FLY_MS);
-    window.setTimeout(() => setPhase("revealed"), reduced ? 80 : FLY_MS + 620);
+    window.setTimeout(() => setPhase("revealed"), reduced ? 0 : OPEN_MS);
+  };
+
+  /** 等著的時候點到旁邊：這顆不抽了，飛回球池 */
+  const cancelWaiting = () => {
+    const fly = flyRef.current;
+    if (!fly || fly.openAt !== null || fly.cancelAt !== null) return;
+    if (draw.cancel() === null) return;
+    fly.cancelAt = performance.now();
+    setPhase("flying");
   };
 
   const onContinue = () => {
-    if (selectedId === null) return;
     const fly = flyRef.current;
-    if (fly) {
-      fly.ball.mesh.parent?.remove(fly.ball.mesh);
-      disposeGroup(fly.ball.mesh);
-      flyRef.current = null;
-    }
+    // 右下角按鈕的 click 會穿過 portal 冒泡到紙籤那層，同一下會進來兩次；第一次就把 fly 收掉了
+    if (selectedId === null || !fly) return;
+    fly.ball.mesh.parent?.remove(fly.ball.mesh);
+    fly.dim.parent?.remove(fly.dim);
+    disposeGroup(fly.ball.mesh);
+    disposeGroup(fly.dim);
+    flyRef.current = null;
     onPick(labels[selectedId]);
     if (putBack) {
       draw.restore(selectedId);
@@ -587,24 +701,40 @@ export function GachaMachine({
           </button>
         ))}
       </div>
-      {typeof document !== "undefined" &&
-        selectedId !== null &&
-        (phase === "opening" || phase === "revealed") &&
-        createPortal(
-          phase === "opening" ? (
-            <div className={styles.overlay} aria-hidden="true">
-              <div className={styles.flash} />
-            </div>
-          ) : (
-            <Result
-              id={selectedId}
-              label={labels[selectedId]}
-              putBack={putBack}
-              onContinue={onContinue}
-            />
-          ),
-          document.fullscreenElement ?? document.body,
-        )}
+      {phase === "waiting" && (
+        // 整個舞台蓋一層：點到中間那顆就打開，點到旁邊就放回去
+        <button
+          type="button"
+          autoFocus
+          onClick={(e) => {
+            // 鍵盤 Enter 觸發的 click 沒有座標（detail 是 0），當作打開
+            const el = e.currentTarget;
+            const r = Math.min(el.clientWidth, el.clientHeight) * 0.22;
+            const onBall =
+              e.detail === 0 ||
+              Math.hypot(
+                e.nativeEvent.offsetX - el.clientWidth / 2,
+                e.nativeEvent.offsetY - el.clientHeight / 2,
+              ) <=
+                r * 1.1;
+            if (onBall) openWaiting();
+            else cancelWaiting();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") cancelWaiting();
+          }}
+          aria-label="打開扭蛋（按 Esc 放回去）"
+          className="absolute inset-0 z-10 cursor-pointer outline-none"
+        />
+      )}
+      {phase === "revealed" && selectedId !== null && layout && (
+        <Slip
+          label={labels[selectedId]}
+          putBack={putBack}
+          onContinue={onContinue}
+          layout={layout}
+        />
+      )}
     </>
   );
 }

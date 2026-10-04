@@ -14,7 +14,7 @@ test("翻牌配對以有效預設牌組開始，會顯示盤面與翻牌次數",
   await expect(page.getByText("翻牌 1 次")).toBeVisible();
 });
 
-test("轉盤與扭蛋機以老師輸入的名單開始", async ({ page }, testInfo) => {
+test("轉盤與扭蛋機以老師輸入的名單開始", async ({ page }) => {
   test.slow(); // 兩個含 3D 資源的頁面，共用一次測試逾時預算
   await page.goto("/draw/wheel", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "開始使用" }).click();
@@ -28,11 +28,7 @@ test("轉盤與扭蛋機以老師輸入的名單開始", async ({ page }, testIn
   await page.getByRole("textbox", { name: "名單，一行一個" }).fill("小明\n小華");
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "開始", exact: true }).click();
-  if (testInfo.project.name === "mobile") {
-    await expect(page.getByRole("button", { name: "查看抽籤紀錄" })).toContainText("紀錄 0 / 2");
-  } else {
-    await expect(page.getByText("還剩 2 / 2 顆")).toBeVisible();
-  }
+  await expect(page.getByRole("button", { name: "顯示記錄" })).toBeVisible();
 });
 
 test("九九乘法選好範圍後開始，會出現第一題與四個答案", async ({ page }) => {

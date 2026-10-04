@@ -1,24 +1,37 @@
 import { expect, test } from "@playwright/test";
 
-test("點一顆扭蛋直接揭曉，繼續抽會收進紀錄，全部放回", async ({ page }, testInfo) => {
+test("點一顆扭蛋飛到中間，再點一下打開揭曉，繼續抽會收進紀錄，全部放回", async ({ page }) => {
   await page.goto("/draw/gacha");
   await page.getByRole("button", { name: "開始使用" }).click();
   await page.getByRole("textbox", { name: "名單，一行一個" }).fill("小明\n小華");
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "開始", exact: true }).click();
+  // 記錄預設收起，右下角的圓鈕打開才看得到
+  const record = page.getByRole("complementary", { name: "已抽出的名單" });
+  await expect(record).toHaveCount(0);
   const remaining = async (count: number) => {
-    if (testInfo.project.name === "mobile") {
-      await expect(page.getByRole("button", { name: "查看抽籤紀錄" })).toContainText(`紀錄 ${2 - count} / 2`);
-    } else {
-      await expect(page.getByText(`還剩 ${count} / 2 顆`)).toBeVisible();
-    }
+    await page.getByRole("button", { name: "顯示記錄" }).click();
+    await expect(record).toContainText(`還剩 ${count} / 2 顆`);
+    await page.getByRole("button", { name: "隱藏記錄" }).click();
+    await expect(record).toHaveCount(0);
   };
   await remaining(2);
 
   // canvas 上的球位置不固定，走讀螢幕器用的替代按鈕，確定抽到第一顆
+  // 飛到中間等著時點到旁邊：不抽了，扭蛋回到球池
+  await page.getByRole("button", { name: "抽第 2 顆扭蛋" }).press("Enter");
+  await page.getByRole("button", { name: "打開扭蛋" }).click({ position: { x: 8, y: 8 } });
+  await expect(page.getByRole("button", { name: "打開扭蛋" })).toHaveCount(0);
+  await remaining(2);
+
   await page.getByRole("button", { name: "抽第 1 顆扭蛋" }).press("Enter");
+  // 飛到中間先等著，點一下才打開
+  await expect(page.getByTestId("gacha-result")).toHaveCount(0);
+  await page.getByRole("button", { name: "打開扭蛋" }).click();
   await expect(page.getByTestId("gacha-result")).toHaveText("小明");
-  await page.getByRole("button", { name: "繼續抽", exact: true }).click();
+  // 點畫面任何地方都算繼續抽
+  await page.mouse.click(8, 200);
+  await expect(page.getByTestId("gacha-result")).toHaveCount(0);
   await remaining(1);
 
   await page.getByRole("button", { name: "全部放回", exact: true }).first().click();
@@ -27,7 +40,7 @@ test("點一顆扭蛋直接揭曉，繼續抽會收進紀錄，全部放回", as
 
 test("手機連抽 30 顆後仍能抽最後一顆", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "mobile", "手機版長時間抽取案例");
-  test.setTimeout(120_000);
+  test.setTimeout(180_000); // 每顆要飛到中間、再點開、紙籤攤開，30 顆比以前多約 40 秒
   const errors: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "warning" && message.text().includes("Too many active WebGL contexts")) {
@@ -41,11 +54,10 @@ test("手機連抽 30 顆後仍能抽最後一顆", async ({ page }, testInfo) =
   );
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "開始", exact: true }).click();
-  const recordToggle = page.getByRole("button", { name: "查看抽籤紀錄" });
+  const recordToggle = page.getByRole("button", { name: "顯示記錄" });
   await expect(recordToggle).toBeVisible();
   await expect(page.getByRole("complementary", { name: "已抽出的名單" })).toHaveCount(0);
   for (let index = 1; index <= 30; index += 1) {
-    await expect(recordToggle).toContainText(`紀錄 ${index - 1} / 30`);
     if (index === 30 && process.env.QA_CAPTURE_DIR) {
       await page.screenshot({ path: `${process.env.QA_CAPTURE_DIR}/GACHA-004-mobile-last-ball.png` });
     }
@@ -69,12 +81,15 @@ test("手機連抽 30 顆後仍能抽最後一顆", async ({ page }, testInfo) =
           let bottom = 0;
           for (let y = 140; y < image.height; y += 1) {
             for (let x = 0; x < image.width; x += 1) {
-              if (x > image.width - 140 && y > image.height - 140) continue; // 搖一搖按鈕
+              if (x > image.width - 140 && y > image.height - 260) continue; // 右下角的記錄鈕與搖一搖
+              if (x < 90 && y > image.height - 90) continue; // 左下角的 dev 徽章
               const p = (y * image.width + x) * 4;
               const red = data[p];
               const green = data[p + 1];
               const blue = data[p + 2];
-              if (Math.max(red, green, blue) - Math.min(red, green, blue) < 90) continue;
+              // 球可能白色那半朝上，只看彩色會只抓到一條邊；比格線深的陰影和接縫也算
+              const colored = Math.max(red, green, blue) - Math.min(red, green, blue) >= 90;
+              if (!colored && Math.max(red, green, blue) > 215) continue;
               left = Math.min(left, x);
               right = Math.max(right, x);
               top = Math.min(top, y);
@@ -82,23 +97,24 @@ test("手機連抽 30 顆後仍能抽最後一顆", async ({ page }, testInfo) =
             }
           }
           if (right <= left || bottom <= top) return null;
-          return { x: (left + right) / 2, y: (top + bottom) / 2 + 12 };
+          return { x: (left + right) / 2, y: (top + bottom) / 2 };
         }, screenshot.toString("base64"));
         if (ball) {
           await page.mouse.click(ball.x, ball.y);
-          openedByTouch = await page.getByTestId("gacha-result")
+          openedByTouch = await page.getByRole("button", { name: "打開扭蛋" })
             .waitFor({ state: "visible", timeout: 2500 })
             .then(() => true, () => false);
         }
       }
       expect(openedByTouch, "最後一顆扭蛋應可從畫面直接點開").toBe(true);
+      await page.getByRole("button", { name: "打開扭蛋" }).click();
     } else {
       await page.getByRole("button", { name: `抽第 ${index} 顆扭蛋` }).press("Enter");
+      await page.getByRole("button", { name: "打開扭蛋" }).click();
     }
     await expect(page.getByTestId("gacha-result")).toHaveText(`QA-${index}`);
     await page.getByRole("button", { name: "繼續抽", exact: true }).click();
   }
-  await expect(recordToggle).toContainText("紀錄 30 / 30");
   await recordToggle.click();
   await expect(page.getByRole("complementary", { name: "已抽出的名單" })).toContainText("還剩 0 / 30 顆");
   expect(errors).toEqual([]);
