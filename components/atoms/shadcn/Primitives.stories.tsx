@@ -72,7 +72,7 @@ export const 單選: Story = {
       {[
         ["digit", "數字調整"],
         ["multiple", "選擇題"],
-        ["keypad", "手動輸入"],
+        ["keypad", "鍵盤輸入"],
       ].map(([value, label]) => (
         <div key={value} className="flex items-center gap-2">
           <RadioGroupItem value={value} id={`radio-${value}`} />

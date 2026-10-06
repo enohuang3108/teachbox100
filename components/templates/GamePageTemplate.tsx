@@ -19,7 +19,8 @@ import {
   TooltipTrigger,
 } from "../atoms/shadcn/tooltip";
 import { FullscreenButton } from "../atoms/FullscreenButton";
-import { StepSetup } from "../organisms/StepSetup";
+import { StepSetup, type SetupStep } from "../organisms/StepSetup";
+import type { ShareConfig } from "../organisms/ShareDialog";
 import { GAME_STAGE_ID, PageTemplate } from "./PageTemplate";
 
 /**
@@ -52,10 +53,21 @@ export const GamePageTemplate = ({
   settings,
   resetGame,
   tips,
+  steps,
+  share,
+  setupOpen: controlledOpen,
+  onSetupOpenChange,
 }: {
   page: PageKey;
   children: React.ReactNode;
   settings: React.ReactNode[];
+  /** 設定要分好幾站時給這個，取代預設只有一站的「出題」 */
+  steps?: SetupStep[];
+  /** 給了就在設定最後一步放「分享設定」 */
+  share?: ShareConfig;
+  /** 頁面要自己打開設定時（例如載入分享連結）才接管 */
+  setupOpen?: boolean;
+  onSetupOpenChange?: (open: boolean) => void;
   resetGame: () => void;
   tips?: React.ReactNode;
 }) => {
@@ -64,7 +76,9 @@ export const GamePageTemplate = ({
   const btn = ACTION_BTN;
   // 介紹頁 →（開始練習）設定 →（開始練習）出題；頂列的設定鈕再打開同一個對話框
   const [entered, setEntered] = useState(false);
-  const [setupOpen, setSetupOpen] = useState(false);
+  const [innerOpen, setInnerOpen] = useState(false);
+  const setupOpen = controlledOpen ?? innerOpen;
+  const setSetupOpen = onSetupOpenChange ?? setInnerOpen;
 
   const actions = (
     // delayDuration：第一顆要等一下才跳，避免滑過去就一堆泡泡。
@@ -128,12 +142,13 @@ export const GamePageTemplate = ({
           <StepSetup
             title={`${pageInfo.title}設定`}
             startLabel="開始練習"
+            share={share}
             onStart={() => {
               resetGame();
               setSetupOpen(false);
               setEntered(true);
             }}
-            steps={[
+            steps={steps ?? [
               {
                 key: "rules",
                 label: "出題",

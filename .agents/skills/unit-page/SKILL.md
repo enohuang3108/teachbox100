@@ -27,11 +27,11 @@ sitemap 與 llms.txt 自動展開 `pages` 與 `hubs`，不必改。`app/sitemap.
 
 | 頁型 | 用什麼 | 實例 |
 |---|---|---|
-| 出題型教材，設定只有一站、不記住不分享 | `GamePageTemplate` | 金錢六頁、時鐘 |
+| 出題型教材 | `GamePageTemplate`（多站設定傳 `steps`，要分享傳 `share` 並接管 `setupOpen`） | 金錢六頁、時鐘 |
 | 題庫型遊戲（老師匯入題目） | `PageTemplate` ＋ 自己的 `SetupPanel`（`StepSetup`） | 領地戰、終極密碼 |
 | 自訂操作的教材 | `PageTemplate` ＋ 自拼 `TooltipProvider` | 轉盤、扭蛋機、一番賞、翻牌、九九乘法、計時器、噪音計 |
 
-`GamePageTemplate` 把 `settings` 全塞進一站「出題」、自己再套一層 h3，開始鈕寫死「開始練習」，也沒有 blocker、store、分享。設定超過一站、要記住或要分享，就不要硬塞進它 —— 照領地戰自己組。
+`GamePageTemplate` 預設把 `settings` 全塞進一站「出題」，開始鈕寫死「開始練習」，沒有 blocker 與 store。時鐘示範了 `steps`／`share`／`setupOpen` 三個延伸口；需要 blocker 或自己的開始流程，就照領地戰自己組。
 | 分類頁 hub | 兩者都不用，手寫版型 | `app/draw/page.tsx`、`app/coin/page.tsx` |
 
 `PageTemplate` 的順序：三段 JSON-LD → `PageTitleBar` → `#game-stage`（帶 `data-unit={key}`）→ `data-stage-inner` → children → `UnitSeoSection`。傳了 `landing` 時換成下面「介紹頁」的順序。
@@ -82,7 +82,7 @@ const [mode, setMode] = useState<"setup" | "play">("setup");
 
 ### 分享連結
 
-老師設定完，把設定（名單、牌組、題目…）分享給別的老師。有 `StepSetup` 設定的單元都要有：大富翁、轉盤、扭蛋機、一番賞、爬格子、骰子、翻翻配對、九九乘法、計分板、領地戰、終極密碼。金錢與時鐘的難度設定不持久化，不分享。
+老師設定完，把設定（名單、牌組、題目…）分享給別的老師。有 `StepSetup` 設定的單元都要有：大富翁、轉盤、扭蛋機、一番賞、爬格子、骰子、翻翻配對、九九乘法、計分板、領地戰、終極密碼、讀時鐘。金錢的難度設定不持久化，不分享。
 
 **兩種連結，同一份 payload：**
 

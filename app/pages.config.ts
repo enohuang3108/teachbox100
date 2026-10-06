@@ -97,7 +97,6 @@ const pagesConfig = {
     slogan: "看看現在幾點幾分",
     intro:
       "時針停在 3 和 4 中間，到底是幾點？把分針轉一圈，看時針跟著慢慢走一格，孩子就比較好懂。",
-    guide: "拖動指針或下方的滑桿來調整時間。",
   },
   memory: {
     path: "/memory",

@@ -16,7 +16,11 @@ for (const path of pages) {
     await expect(page.getByRole("button", { name: "設定", exact: true })).toHaveCount(0);
 
     await page.getByRole("button", { name: "開始練習" }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "開始練習" }).click();
+    // 時鐘的設定分兩站，開始鈕在最後一站
+    const dialog = page.getByRole("dialog");
+    const next = dialog.getByRole("button", { name: "下一步" });
+    while (await next.isVisible()) await next.click();
+    await dialog.getByRole("button", { name: "開始練習" }).click();
 
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.getByRole("button", { name: "設定", exact: true })).toBeVisible();

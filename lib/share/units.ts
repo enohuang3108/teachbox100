@@ -1,4 +1,5 @@
 import { pages } from "@/app/pages.config";
+import { clockShare } from "@/lib/clock/share";
 import { diceShare } from "@/lib/dice/share";
 import { gachaShare } from "@/lib/gacha/share";
 import { ichibanShare } from "@/lib/ichiban/share";
@@ -32,6 +33,7 @@ export const SHARE_CODECS = {
   dice: diceShare,
   ladder: ladderShare,
   timer: timerShare,
+  "clock-current-time": clockShare,
 };
 
 export type ShareUnit = keyof typeof SHARE_CODECS;

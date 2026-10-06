@@ -40,6 +40,7 @@ const samples: { [K in ShareUnit]: SetupOf<K> } = {
     }),
   },
   multiplication: { tables: [2, 7, 9], count: 30 },
+  "clock-current-time": { period: "pm", showMinuteHint: false, answerMethod: "keypad" },
   scoreboard: {
     names: ["第 1 組", "小明"],
     step: 5,

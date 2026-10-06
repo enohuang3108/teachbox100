@@ -59,6 +59,8 @@ interface ClockProps {
   className?: string;
   draggable?: boolean;
   showAmPm?: boolean; // Controls AM/PM display on clock face
+  /** 錶框外的 0、5、10…分鐘提示 */
+  showMinuteNumbers?: boolean;
 }
 
 const Clock: FC<ClockProps> = ({
@@ -68,6 +70,7 @@ const Clock: FC<ClockProps> = ({
   className,
   draggable = true,
   showAmPm = false,
+  showMinuteNumbers = true,
 }) => {
   const clockRef = useRef<HTMLDivElement>(null);
   const currentClockWidth = clockRef.current?.clientWidth ?? undefined;
@@ -257,7 +260,8 @@ const Clock: FC<ClockProps> = ({
           onTouchStart={precision === "minute" ? handleDragStart : undefined}
         />
 
-        {/* drag ball */}
+        {/* drag ball：不能拖的鐘面不畫 */}
+        {draggable && onChange && (
         <div
           className={cn(
             "absolute top-1/2 left-1/2 rounded-full bg-primary size-3 -translate-x-1/2 -translate-y-full",
@@ -270,6 +274,7 @@ const Clock: FC<ClockProps> = ({
           onMouseDown={precision === "minute" ? handleDragStart : undefined}
           onTouchStart={precision === "minute" ? handleDragStart : undefined}
         />
+        )}
 
         {/* 秒針 */}
         {precision === "second" && (
@@ -296,13 +301,15 @@ const Clock: FC<ClockProps> = ({
       id="clock"
       ref={clockRef}
       className={cn(
-        "relative w-[320px] h-[320px] m-16 rounded-full border-4 border-ink bg-paper touch-none",
+        "relative w-[320px] h-[320px] m-16 rounded-full border-4 border-ink bg-paper",
+        // 只有能拖的鐘面要攔觸控；唯讀的要讓手機能捲過去
+        draggable && onChange && "touch-none",
         className,
       )}
     >
       {renderClockHands()}
       {renderHourNumbers()}
-      {renderMinuteNumbers()}
+      {showMinuteNumbers && renderMinuteNumbers()}
       {renderClockTicks()}
 
       {/* 顯示上下午指示 */}

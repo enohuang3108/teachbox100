@@ -11,7 +11,7 @@ export const AnswerMethod:React.FC<AnswerMethodProps> =({answerMethod, setAnswer
   const labels = {
     digit: "數字調整",
     multiple: "選擇題",
-    keypad: "手動輸入",
+    keypad: "鍵盤輸入",
   };
 
   return (

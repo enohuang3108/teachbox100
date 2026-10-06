@@ -33,8 +33,8 @@ export const 數字調整: Story = {
   },
 };
 
-/** 手動輸入：數字鍵盤。清除是 danger、退格是 warning。 */
-export const 手動輸入: Story = {
+/** 鍵盤輸入：數字鍵盤。清除是 danger、退格是 warning。 */
+export const 鍵盤輸入: Story = {
   render: () => {
     const [value, setValue] = useState("12");
     return (

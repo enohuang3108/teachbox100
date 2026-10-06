@@ -6,9 +6,17 @@ import { Input } from "@/components/atoms/shadcn/input";
 interface KeypadAnswerProps {
   value: string;
   onChange: (value: string) => void;
+  placeholder?: string;
+  /** 輸入框顯示的樣子，例如時鐘把「930」顯示成「9:30」 */
+  display?: (value: string) => string;
 }
 
-export default function KeypadAnswer({ value, onChange }: KeypadAnswerProps) {
+export default function KeypadAnswer({
+  value,
+  onChange,
+  placeholder = "輸入金額",
+  display = (v) => v,
+}: KeypadAnswerProps) {
   const handleButtonClick = (digit: string) => {
     if (digit === "clear") {
       onChange("");
@@ -24,10 +32,9 @@ export default function KeypadAnswer({ value, onChange }: KeypadAnswerProps) {
       <div className="mb-4">
         <Input
           type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          value={display(value)}
           className="py-4 text-center text-xl md:py-6 md:text-2xl"
-          placeholder="輸入金額"
+          placeholder={placeholder}
           readOnly
         />
       </div>
