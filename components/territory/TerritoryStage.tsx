@@ -9,6 +9,7 @@ import {
   type Owner,
   type Side,
 } from "@/lib/territory/rules";
+import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
 import type { TerritoryGame } from "./useTerritoryGame";
 import { VictoryOverlay } from "./VictoryOverlay";
@@ -196,7 +197,7 @@ function ReadyButton({
         "flex min-h-[clamp(3.5rem,8cqw,8rem)] touch-manipulation items-center justify-center rounded-[clamp(10px,1.2cqw,20px)] border-[clamp(3px,0.35cqw,6px)] px-[1.2cqw] py-[0.8cqw] shadow-sm",
         "transition-[transform,background-color,color] duration-hover ease-out active:scale-[0.97] disabled:pointer-events-none",
         PAD_BORDER[side],
-        done ? cn(OWNER_BG[side], "text-paper") : "bg-popover text-ink",
+        done ? cn(OWNER_BG[side], "text-paper") : "bg-card text-ink",
         className,
       )}
     >
@@ -369,7 +370,7 @@ function AnswerPad({
           ? `${name}這題出局`
           : `${name}目前 ${countOf(game.board, side)} 格`}
       </p>
-      <div className="flex flex-col gap-[0.8cqw]">
+      <div className={cn(ANSWER_GRID, "gap-[0.8cqw]")}>
         {optionsOf(question).map((option, i) => (
           <button
             key={option + i}
@@ -389,6 +390,8 @@ function AnswerPad({
               game.answer(side, option);
             }}
             className={cn(
+              ANSWER_CONTENT,
+              answerTextClass(option, "board"),
               "flex min-h-[clamp(2.75rem,5.5cqw,6rem)] touch-manipulation items-center justify-center rounded-[clamp(10px,1.2cqw,20px)] border-[clamp(3px,0.35cqw,6px)] px-[1.2cqw] py-[0.6cqw] shadow-sm",
               "transition-[transform,background-color,border-color] duration-press ease-out",
               "active:scale-[0.97] disabled:pointer-events-none",
@@ -397,10 +400,10 @@ function AnswerPad({
                 : // 出局不用半透明：鈕底下壓著隊色時會混出第三種顏色，改成不透明的灰
                   lockedOut
                   ? "border-border bg-sand text-muted-foreground"
-                  : cn(PAD_BORDER[side], "bg-popover text-ink"),
+                  : cn(PAD_BORDER[side], "bg-card text-ink"),
             )}
           >
-            <span className="min-w-0 text-center text-[clamp(0.95rem,1.7cqw,1.75rem)] font-bold break-words">
+            <span className="min-w-0 text-center font-bold">
               {option}
             </span>
           </button>

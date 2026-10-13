@@ -33,7 +33,7 @@ import {
   randomClockTime,
   type ClockPeriod,
 } from "@/lib/clock/game";
-import { SELECTED_OPTION } from "@/lib/ui-classes";
+import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass, SELECTED_OPTION } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
 import { useSound } from "@/lib/hooks/useSound";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -330,21 +330,21 @@ export default function CurrentTimePage() {
               />
             ) : answerMethod === "multiple" ? (
               // 同九九乘法的大卡片；結果交給中央回饋卡講，按鈕不變色
-              <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+              <div className={cn(ANSWER_GRID, "grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4")}>
                 {choices.map((choice) => (
                   <button
                     key={`${choice.hour}:${choice.minute}`}
                     type="button"
                     onClick={(event) => checkAnswer(event.detail !== 0, choice)}
-                    className="font-display rounded-2xl border-2 border-ink/10 bg-paper-warm px-3 py-6 text-2xl font-black text-ink tabular-nums transition-[border-color,transform] duration-press ease-out hover:border-ink/25 active:scale-[0.97] sm:py-8 sm:text-3xl"
+                    className={cn(ANSWER_CONTENT, answerTextClass(clockText(choice, false)), "font-display min-h-24 rounded-2xl border-2 border-ink/10 bg-card px-3 py-6 text-ink tabular-nums transition-[border-color,transform] duration-press ease-out hover:border-ink/25 active:scale-[0.97] sm:py-8")}
                   >
-                    {/* 上下午放上面一行小字，時間本身不折行 */}
+                    {/* 上下午放上面一行小字；時間在窄選項裡可平衡換行 */}
                     {is24HourClock && (
                       <span className="block text-body font-bold text-muted-foreground">
                         {choice.hour < 12 ? "上午" : "下午"}
                       </span>
                     )}
-                    <span className="whitespace-nowrap">{clockText(choice, false)}</span>
+                    <span className="block text-balance">{clockText(choice, false)}</span>
                   </button>
                 ))}
               </div>

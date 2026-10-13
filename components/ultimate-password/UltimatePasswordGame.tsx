@@ -35,6 +35,8 @@ import {
 import { ULTIMATE_PASSWORD_QUESTIONS } from "@/lib/ultimate-password/questions";
 import { useUltimatePasswordProgress, useUltimatePasswordStore } from "@/lib/ultimate-password/store";
 import { useSharedSetup } from "@/lib/share/useSharedSetup";
+import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
+import { cn } from "@/lib/utils";
 import { playableOf } from "@/lib/territory/rules";
 import {
   useCallback,
@@ -297,7 +299,7 @@ export function UltimatePasswordGame() {
                   )}
                   {!answerAccepted && question && (
                     <div
-                      className={`grid w-full grid-cols-2 gap-4 ${question.type === "choice" ? "max-sm:grid-cols-1" : ""}`}
+                      className={cn(ANSWER_GRID, "w-full grid-cols-2 gap-4", question.type === "choice" && "max-sm:grid-cols-1")}
                     >
                       {(question.type === "choice"
                         ? (question.options ?? [])
@@ -309,7 +311,11 @@ export function UltimatePasswordGame() {
                           type="button"
                           variant="outline"
                           disabled={!!selectedAnswer}
-                          className="min-h-24 whitespace-normal !text-hero transition-transform duration-press ease-out active:scale-[0.97] disabled:opacity-100"
+                          className={cn(
+                            ANSWER_CONTENT,
+                            "min-h-24 transition-transform duration-press ease-out active:scale-[0.97] disabled:opacity-100",
+                            answerTextClass(option),
+                          )}
                           onClick={(event) =>
                             checkQuestionAnswer(option, event.detail !== 0)
                           }

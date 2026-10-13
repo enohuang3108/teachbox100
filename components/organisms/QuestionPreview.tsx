@@ -7,6 +7,7 @@ import {
   type Difficulty,
   type Question,
 } from "@/lib/questions/types";
+import { ANSWER_LENGTH_LIMIT, answerLengthWarnings } from "@/lib/questions/answer-length";
 import { cn } from "@/lib/utils";
 
 // 難度點的顏色只給老師看（題目視窗不顯示），學生之間不會互相比較
@@ -18,6 +19,7 @@ export const DIFFICULTY_DOT: Record<Difficulty, string> = {
 
 /** 設定頁的題庫摘要：題數、各難度幾題，展開看全部。出題的單元共用 */
 export function QuestionPreview({ questions }: { questions: Question[] }) {
+  const warnings = answerLengthWarnings(questions);
   const counts = DIFFICULTIES.map(
     (d) => [d, questions.filter((q) => difficultyOf(q) === d).length] as const,
   );
@@ -37,6 +39,18 @@ export function QuestionPreview({ questions }: { questions: Question[] }) {
           </span>
         ))}
       </div>
+      {warnings.length > 0 && (
+        <div role="status" className="m-4 rounded-xl bg-warning-soft px-4 py-3 text-caption text-warning-ink">
+          <p>有 {warnings.length} 個選項或答案超過 {ANSWER_LENGTH_LIMIT} 個字，仍可使用。建議縮短文字，方便全班閱讀。</p>
+          <ul className="mt-2 max-h-32 space-y-1 overflow-y-auto break-words">
+            {warnings.map((warning) => (
+              <li key={`${warning.questionNumber}-${warning.label}`}>
+                第 {warning.questionNumber} 題・{warning.label}：{warning.text}（{warning.length} 字）
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <details className="group px-4 py-3">
         <summary className="cursor-pointer text-caption text-muted-foreground">
           預覽題目

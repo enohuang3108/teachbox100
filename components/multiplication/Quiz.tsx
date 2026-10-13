@@ -8,6 +8,8 @@ import {
   verdict,
   type Question,
 } from "@/lib/math/multiplication";
+import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
+import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const NEXT_DELAY = 620;
@@ -157,7 +159,7 @@ export function Quiz({
           {question.a} × {question.b} = ?
         </p>
 
-        <div className="grid w-full max-w-md grid-cols-2 gap-3 sm:max-w-2xl sm:gap-4">
+        <div className={cn(ANSWER_GRID, "w-full max-w-md grid-cols-2 gap-3 sm:max-w-2xl sm:gap-4")}>
           {question.options.map((option) => {
             const isAnswer = option === question.answer;
             const chosen = picked === option;
@@ -168,14 +170,14 @@ export function Quiz({
                 type="button"
                 disabled={revealed}
                 onClick={() => answer(option)}
-                className={`font-display rounded-2xl border-2 py-6 text-4xl sm:py-10 sm:text-6xl font-black tabular-nums transition-[background-color,border-color,color,transform] duration-150 ease-out active:scale-[0.97] disabled:active:scale-100 ${
+                className={`${ANSWER_CONTENT} ${answerTextClass(option)} font-display min-h-24 rounded-2xl border-2 px-3 py-6 sm:py-10 tabular-nums transition-[background-color,border-color,color,transform] duration-press ease-out active:scale-[0.97] disabled:active:scale-100 ${
                   chosen && !isAnswer ? "quiz-shake" : ""
                 } ${
                   revealed && isAnswer
                     ? "border-brand-green bg-brand-green text-paper"
                     : chosen
                       ? "border-brand-red bg-brand-red text-paper"
-                      : "border-ink/10 bg-paper-warm text-ink hover:border-ink/25"
+                      : "border-ink/10 bg-card text-ink hover:border-ink/25"
                 }`}
               >
                 {option}

@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx";
+import { ANSWER_LENGTH_LIMIT } from "./answer-length";
 import type { Difficulty, Question, QuestionType } from "./types";
 
 export interface RawRow {
@@ -191,6 +192,8 @@ export function aiQuestionPrompt({ allowShort = true } = {}): string {
 ${allowShort ? "4. 簡答題：選項欄位留空；正確答案直接填答案文字。\n" : ""}\
 ${allowShort ? "5" : "4"}. 解析：可留空，建議簡短說明。
 ${allowShort ? "6" : "5"}. 難度：限填「困難」「普通」「簡單」其中之一；留空視為普通。
+
+【答案長度】每個選項與答案最多 ${ANSWER_LENGTH_LIMIT} 個字（含標點、數字與英文字母）；選擇題的所有選項都須遵守，請使用簡潔詞語，詳細說明放在解析。
 
 【範例】
 選擇｜台灣最高的山是？｜玉山｜雪山｜合歡山｜阿里山｜A｜玉山海拔3952公尺｜簡單

@@ -8,6 +8,7 @@ import {
   type Lane,
   type Side,
 } from "@/lib/morris/game";
+import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
 import { Check, Circle, X } from "lucide-react";
 import type { MorrisGame } from "./useMorrisGame";
@@ -171,13 +172,13 @@ function QuestionLane({
         <LaneMessage title="等對方換題" body="下一題和對方相同，稍等一下。" />
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex min-h-0 flex-1 items-center justify-center py-4">
+          <div className="flex flex-1 items-center justify-center py-4">
             <p className="text-center text-[clamp(1.25rem,2.6cqw,3rem)] leading-[1.5] font-bold text-balance text-ink">
               {question.text}
             </p>
           </div>
           {/* 回饋夾在題目與選項之間、位置先留好：選項永遠貼在底部，學生站在電子白板前伸手就按得到 */}
-          <div className="min-h-[5rem] md:min-h-[6.5cqw]">
+          <div className="min-h-12 md:min-h-[4cqw]">
             {answered && (
               <AnswerFeedback
                 correct={answered.correct}
@@ -190,9 +191,8 @@ function QuestionLane({
               <div
                 data-morris-answers={side}
                 className={cn(
-                  "grid gap-[0.8cqw] transition-opacity duration-hover",
-                  // 短選項排成兩欄；長選項一行一個才不會斷得亂七八糟
-                  options.every((option) => option.length <= 6) && "grid-cols-2",
+                  ANSWER_GRID,
+                  "grid-cols-2 gap-[0.8cqw] transition-opacity duration-hover",
                   lockedOut && "opacity-40",
                 )}
               >
@@ -216,7 +216,9 @@ function QuestionLane({
                         game.answer(side, option);
                       }}
                       className={cn(
-                        "min-h-14 touch-manipulation rounded-xl border-2 px-3 py-2 text-[clamp(1.05rem,1.8cqw,2rem)] font-bold break-words shadow-sm md:min-h-[5cqw]",
+                        ANSWER_CONTENT,
+                        answerTextClass(option, "board"),
+                        "min-h-14 touch-manipulation rounded-xl border-2 px-3 py-2 font-bold shadow-sm md:min-h-[5cqw]",
                         "transition-[transform,background-color,border-color] duration-press ease-out active:scale-[0.97] disabled:pointer-events-none",
                         !answered && cn(SIDE_BORDER[side], "bg-paper text-ink"),
                         // 答對、選錯用實心紅綠配白字，投影時後排也看得出來；暗色模式的 ink 是淺色

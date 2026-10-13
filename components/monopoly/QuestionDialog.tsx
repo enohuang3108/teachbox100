@@ -9,6 +9,8 @@ import {
 } from "@/components/atoms/shadcn/dialog";
 import { useSound } from "@/lib/hooks/useSound";
 import type { PendingAction, Player, Question } from "@/lib/monopoly/types";
+import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { SpotlightAvatar } from "./SpotlightAvatar";
 
@@ -55,10 +57,10 @@ export function QuestionDialog({
 
   return (
     <Dialog open={open}>
-      <DialogContent className="overflow-visible" hideClose>
-        {/* 浮在 dialog 上緣外側：玩家頭像 ＋ 名稱 ＋ 光暈（沿用過場聚光燈風格） */}
-        <div className="absolute bottom-full left-1/2 mb-4 -translate-x-1/2">
-          <SpotlightAvatar player={player} name />
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto" hideClose>
+        {/* 和題目一起捲動，長答案也不會把玩家頭像推到畫面外。 */}
+        <div className="mx-auto">
+          <SpotlightAvatar player={player} name nameClassName="max-w-[16rem] text-h3 text-ink ![text-shadow:none]" />
         </div>
 
         <DialogHeader>
@@ -70,14 +72,12 @@ export function QuestionDialog({
         <p className="text-lg leading-[1.75] text-ink">{question.text}</p>
 
         {revealed === null && question.type === "choice" && (
-          <div className="grid gap-2">
+          <div className={cn(ANSWER_GRID, "grid-cols-2 gap-2 max-sm:grid-cols-1")}>
             {question.options?.map((opt) => (
               <Button
                 key={opt}
                 variant="outline"
-                className={
-                  "h-auto rounded-full py-3 text-base font-semibold transition-transform duration-150 ease-out active:scale-[0.97]"
-                }
+                className={cn(ANSWER_CONTENT, answerTextClass(opt), "min-h-14 rounded-2xl px-4 py-3 transition-transform duration-press ease-out active:scale-[0.97]")}
                 onClick={() => pickChoice(opt)}
               >
                 {opt}
@@ -87,16 +87,16 @@ export function QuestionDialog({
         )}
 
         {revealed === null && question.type === "boolean" && (
-          <div className="flex gap-2">
+          <div className={cn(ANSWER_GRID, "grid-cols-2 gap-2")}>
             <Button
-              className={`flex-1 ${"h-auto rounded-full py-3 text-base font-semibold transition-transform duration-150 ease-out active:scale-[0.97]"}`}
+              className={cn(ANSWER_CONTENT, answerTextClass("是"), "min-h-14 rounded-2xl px-4 py-3 transition-transform duration-press ease-out active:scale-[0.97]")}
               variant="outline"
               onClick={() => pickChoice("是")}
             >
               是
             </Button>
             <Button
-              className={`flex-1 ${"h-auto rounded-full py-3 text-base font-semibold transition-transform duration-150 ease-out active:scale-[0.97]"}`}
+              className={cn(ANSWER_CONTENT, answerTextClass("否"), "min-h-14 rounded-2xl px-4 py-3 transition-transform duration-press ease-out active:scale-[0.97]")}
               variant="outline"
               onClick={() => pickChoice("否")}
             >
@@ -108,15 +108,15 @@ export function QuestionDialog({
         {revealed === null && question.type === "short" && (
           <div className="space-y-3">
             {/* 判定前不亮答案：投影出去時學生會直接看到。解析等判完才出現 */}
-            <div className="flex gap-2">
+            <div className={cn(ANSWER_GRID, "grid-cols-2 gap-2")}>
               <Button
-                className={`flex-1 ${"h-auto rounded-full py-3 text-base font-semibold transition-transform duration-150 ease-out active:scale-[0.97]"}`}
+                className={`flex-1 ${"h-auto min-w-14 max-w-full whitespace-normal break-words rounded-2xl px-4 py-3 text-base font-semibold transition-transform duration-press ease-out active:scale-[0.97]"}`}
                 onClick={() => judge(true)}
               >
                 學生答對
               </Button>
               <Button
-                className={`flex-1 ${"h-auto rounded-full py-3 text-base font-semibold transition-transform duration-150 ease-out active:scale-[0.97]"}`}
+                className={`flex-1 ${"h-auto min-w-14 max-w-full whitespace-normal break-words rounded-2xl px-4 py-3 text-base font-semibold transition-transform duration-press ease-out active:scale-[0.97]"}`}
                 variant="destructive"
                 onClick={() => judge(false)}
               >
@@ -139,7 +139,7 @@ export function QuestionDialog({
               </p>
             )}
             <Button
-              className={`w-full ${"h-auto rounded-full py-3 text-base font-semibold transition-transform duration-150 ease-out active:scale-[0.97]"}`}
+              className={`w-full ${"h-auto min-w-14 max-w-full whitespace-normal break-words rounded-2xl px-4 py-3 text-base font-semibold transition-transform duration-press ease-out active:scale-[0.97]"}`}
               onClick={() => onAnswered(revealed)}
             >
               確定
