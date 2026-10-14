@@ -1,3 +1,4 @@
+import { drawFromDeck, type QuestionDeck } from "@/lib/questions/deck";
 /** 九九乘法出題。全部是純函式，隨機來源由呼叫端傳進來，測試才好固定。 */
 
 export const TABLES = [2, 3, 4, 5, 6, 7, 8, 9] as const;
@@ -46,8 +47,11 @@ export function makeQuestion(
 ): Question {
   const a = pick(tables.length ? tables : [...TABLES], rng);
   const b = 1 + Math.floor(rng() * 9);
-  const answer = a * b;
+  return questionFor(a, b, rng);
+}
 
+function questionFor(a: number, b: number, rng: () => number): Question {
+  const answer = a * b;
   const options = [answer];
   for (const d of shuffle(distractorsFor(a, b), rng)) {
     if (options.length === OPTION_COUNT) break;
@@ -61,17 +65,17 @@ export function makeQuestion(
   return { a, b, answer, options: shuffle(options, rng) };
 }
 
-/** 連續出題時避免緊鄰兩題一模一樣，最多重試幾次就放行 */
+/** 選定乘法表的每個乘式出完後才重新洗牌。 */
 export function makeNextQuestion(
   tables: number[],
-  prev: Question | null,
+  deck: QuestionDeck | null,
   rng: () => number = Math.random,
-): Question {
-  for (let i = 0; i < 8; i++) {
-    const q = makeQuestion(tables, rng);
-    if (!prev || q.a !== prev.a || q.b !== prev.b) return q;
-  }
-  return makeQuestion(tables, rng);
+) {
+  const selected = [...new Set(tables.length ? tables : TABLES)].sort((a, b) => a - b);
+  const pool = selected.flatMap(a => Array.from({ length: 9 }, (_, i) => ({ a, b: i + 1 })));
+  const drawn = drawFromDeck(pool, deck, rng);
+  const { a, b } = drawn.item!;
+  return { question: questionFor(a, b, rng), questionDeck: drawn.deck };
 }
 
 /** 收尾的一句話，依答對率換 */

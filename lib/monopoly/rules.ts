@@ -1,3 +1,4 @@
+import { drawFromDeck } from "@/lib/questions/deck";
 import { BOARD, BOARD_SIZE } from "./board";
 import { deckOf } from "./cards";
 import { pickIndex, rollOne, type Rng } from "./rng";
@@ -76,6 +77,7 @@ export function startGame(
     phase: "playing",
     settings,
     questions,
+    questionDecks: {},
     players,
     currentPlayerIndex: 0,
     lastRoll: null,
@@ -155,14 +157,20 @@ function endTurn(state: GameState, now: number): GameState {
   return { ...ended, pendingAction: null, currentPlayerIndex: next };
 }
 
-function drawQuestion(state: GameState, rng: Rng): Question {
+function drawQuestion(state: GameState, rng: Rng) {
   // 差異化教學開啟時抽輪到的學生難度「以下」的題；範圍內一題都沒有時退回整份題庫，免得卡住流程
   const cap = state.players[state.currentPlayerIndex].difficulty ?? "normal";
   const pool = state.settings.differentiated
     ? state.questions.filter((q) => withinCap(q, cap))
     : [];
   const from = pool.length > 0 ? pool : state.questions;
-  return from[pickIndex(from.length, rng)];
+  const scope = pool.length > 0 ? cap : "all";
+  const drawn = drawFromDeck(from, state.questionDecks?.[scope], rng);
+  if (!drawn.item) throw new Error("題庫至少需要一題");
+  return {
+    question: drawn.item,
+    questionDecks: { ...state.questionDecks, [scope]: drawn.deck },
+  };
 }
 
 // === 收款／破產 ===
@@ -250,12 +258,14 @@ function goPassStart(state: GameState, rng: Rng, now: number): GameState {
     );
     return resolveLanding(paid, rng, now);
   }
+  const drawn = drawQuestion(state, rng);
   return {
     ...state,
+    questionDecks: drawn.questionDecks,
     lapsByPlayer,
     pendingAction: {
       kind: "passStartQuestion",
-      question: drawQuestion(state, rng),
+      question: drawn.question,
       rewardRight: state.settings.passStartQuizBonus ?? PASS_START_QUIZ_BONUS,
       rewardWrong: state.settings.passStartBonus,
     },
@@ -325,24 +335,28 @@ export function resolveLanding(
         p.ownedTiles.includes(prop.index),
       );
       if (!owner) {
+        const drawn = drawQuestion(state, rng);
         return {
           ...state,
+          questionDecks: drawn.questionDecks,
           pendingAction: {
             kind: "buyQuestion",
             tileIndex: prop.index,
-            question: drawQuestion(state, rng),
+            question: drawn.question,
           },
         };
       }
       if (owner.id === player.id) {
         if ((player.houses[prop.index] ?? 0) >= maxBuildLevel(prop))
           return endTurn(state, now);
+        const drawn = drawQuestion(state, rng);
         return {
           ...state,
+          questionDecks: drawn.questionDecks,
           pendingAction: {
             kind: "buildQuestion",
             tileIndex: prop.index,
-            question: drawQuestion(state, rng),
+            question: drawn.question,
           },
         };
       }
@@ -500,15 +514,18 @@ function applyCardEffect(
         ...state,
         pendingAction: { kind: "cardDice", card, rolled: null },
       };
-    case "quiz":
+    case "quiz": {
+      const drawn = drawQuestion(state, rng);
       return {
         ...state,
+        questionDecks: drawn.questionDecks,
         pendingAction: {
           kind: "cardQuiz",
           card,
-          question: drawQuestion(state, rng),
+          question: drawn.question,
         },
       };
+    }
     case "money": {
       const amt = card.effect.amount;
       const cardEv = {

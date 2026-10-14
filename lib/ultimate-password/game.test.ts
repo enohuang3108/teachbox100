@@ -39,7 +39,7 @@ describe("ultimate password game", () => {
       { id: "a", type: "short" as const, text: "A", answer: "10" },
       { id: "b", type: "short" as const, text: "B", answer: "20" },
     ];
-    expect(drawQuestion(questions, () => 0.75)).toEqual(questions[1]);
+    expect(drawQuestion(questions, null, () => 0.75).question).toEqual(questions[0]);
   });
 
   it("keeps one hidden password while questions change between guesses", () => {
@@ -68,4 +68,17 @@ describe("ultimate password game", () => {
     ];
     expect(playableQuestions(questions).map((q) => q.id)).toEqual(["choice", "boolean"]);
   });
+});
+
+
+it("出完整份才重新洗牌，還原進度後繼續未出的題目", () => {
+  const questions = ["a", "b", "c"].map(id => ({ id, type: "boolean" as const, text: id, answer: "是" }));
+  let deck: import("@/lib/questions/deck").QuestionDeck | null = null;
+  const ids: string[] = [];
+  for (let i = 0; i < 9; i++) {
+    const result = drawQuestion(questions, deck, () => 0);
+    ids.push(result.question!.id);
+    deck = JSON.parse(JSON.stringify(result.questionDeck));
+  }
+  for (let i = 0; i < ids.length; i += 3) expect(new Set(ids.slice(i, i + 3)).size).toBe(3);
 });

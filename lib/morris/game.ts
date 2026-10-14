@@ -1,3 +1,4 @@
+import { shuffleQuestions } from "@/lib/questions/deck";
 import type { Rng } from "@/lib/monopoly/rng";
 import {
   withinCap,
@@ -61,19 +62,10 @@ export function playableOf(bank: Question[], cap: Difficulty = "hard") {
   );
 }
 
-function shuffle<T>(items: T[], rng: Rng): T[] {
-  const out = [...items];
-  for (let index = out.length - 1; index > 0; index--) {
-    const target = Math.floor(rng() * (index + 1));
-    [out[index], out[target]] = [out[target], out[index]];
-  }
-  return out;
-}
-
 function distinctQueues(bank: Question[], cap: Difficulty, rng: Rng) {
   const pool = playableOf(bank, cap);
-  const red = shuffle(pool, rng);
-  const blue = shuffle(pool, rng);
+  const red = shuffleQuestions(pool, rng);
+  const blue = shuffleQuestions(pool, rng);
   if (red.length > 1 && red[0]?.id === blue[0]?.id) {
     const different = blue.findIndex((question) => question.id !== red[0]?.id);
     if (different > 0) [blue[0], blue[different]] = [blue[different], blue[0]];

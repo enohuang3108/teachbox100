@@ -1,3 +1,4 @@
+import type { QuestionDeck } from "@/lib/questions/deck";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { Round } from "@/lib/ultimate-password/game";
@@ -41,6 +42,7 @@ export const useUltimatePasswordStore = create<UltimatePasswordStore>()(
  */
 interface UltimatePasswordProgress {
   question: Question | null;
+  questionDeck: QuestionDeck | null;
   round: Round | null;
   /** 題目答對了，輪到猜密碼 */
   answerAccepted: boolean;
@@ -53,6 +55,7 @@ export const useUltimatePasswordProgress = create<UltimatePasswordProgress>()(
   persist(
     (): UltimatePasswordProgress => ({
       question: null,
+      questionDeck: null,
       round: null,
       answerAccepted: false,
       numberGuess: 50,

@@ -539,3 +539,67 @@ describe("結束條件", () => {
     expect(ranking(s)[0].name).toBe("小明"); // 同現金，p0 有資產
   });
 });
+
+
+describe("題庫洗牌循環", () => {
+  it("買地與蓋房共用出題順序，出完整份才重複，保留輸入狀態", () => {
+    const bank = ["a", "b", "c"].map(id => ({ ...Q[0], id }));
+    let state = startGame(DEFAULT_SETTINGS, bank, PLAYERS, 0);
+    state = { ...state, players: replaceForTest(state.players, 0, { position: 1 }) };
+    const ids: string[] = [];
+    for (let i = 0; i < 9; i++) {
+      const before = JSON.stringify(state);
+      const next = resolveLanding(state, () => 0, 0);
+      expect(JSON.stringify(state)).toBe(before);
+      const pending = next.pendingAction;
+      if (!pending || !("question" in pending)) throw new Error("expected question");
+      ids.push(pending.question.id);
+      state = JSON.parse(JSON.stringify(next)); // 模擬持久化還原
+      if (i === 0) state.players[0].ownedTiles = [1];
+    }
+    for (let i = 0; i < ids.length; i += bank.length) {
+      expect(new Set(ids.slice(i, i + bank.length)).size).toBe(bank.length);
+    }
+  });
+});
+
+
+it("過起點、買地與機會問答共同用完整份題庫才重複", () => {
+  const bank = ["a", "b", "c"].map(id => ({ ...Q[0], id }));
+  let state = startGame(DEFAULT_SETTINGS, bank, PLAYERS, 0);
+  state = { ...state, players: replaceForTest(state.players, 0, { position: 33 }) };
+  state = takeTurn(state, () => 0, 0);
+  const pending = state.pendingAction;
+  if (pending?.kind !== "passStartQuestion") throw new Error("expected pass start");
+  const ids = [pending.question.id];
+  state = answerPassStart(state, true, () => 0, 0);
+  if (state.pendingAction?.kind !== "buyQuestion") throw new Error("expected buy");
+  ids.push(state.pendingAction.question.id);
+  state = { ...state, players: replaceForTest(state.players, 0, { position: 3 }) };
+  state = resolveLanding(state, () => 0.601, 0); // 機會問答卡 c7
+  state = drawAndApplyCard(state, () => 0, 0);
+  if (state.pendingAction?.kind !== "cardQuiz") throw new Error("expected card quiz");
+  ids.push(state.pendingAction.question.id);
+  expect(new Set(ids).size).toBe(3);
+});
+
+it("差異化難度題庫各自依序出完，換學生不重置", () => {
+  const bank: Question[] = [
+    { ...Q[0], id: "e1", difficulty: "easy" },
+    { ...Q[0], id: "e2", difficulty: "easy" },
+    { ...Q[0], id: "n1", difficulty: "normal" },
+  ];
+  let state = startGame({ ...DEFAULT_SETTINGS, differentiated: true }, bank,
+    PLAYERS.map((p, i) => ({ ...p, difficulty: i === 0 ? "easy" : "normal" })), 0);
+  state = { ...state, players: state.players.map(p => ({ ...p, position: 1 })) };
+  const seen: string[][] = [[], []];
+  for (let i = 0; i < 12; i++) {
+    const player = i % 2;
+    state = resolveLanding({ ...state, currentPlayerIndex: player }, () => 0, 0);
+    const pending = state.pendingAction;
+    if (!pending || !("question" in pending)) throw new Error("expected question");
+    seen[player].push(pending.question.id);
+  }
+  for (let i = 0; i < 6; i += 2) expect(seen[0].slice(i, i + 2).sort()).toEqual(["e1", "e2"]);
+  for (let i = 0; i < 6; i += 3) expect(seen[1].slice(i, i + 3).sort()).toEqual(["e1", "e2", "n1"]);
+});

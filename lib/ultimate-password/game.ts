@@ -1,3 +1,4 @@
+import { drawFromDeck, type QuestionDeck } from "@/lib/questions/deck";
 import type { Question } from "@/lib/questions/types";
 
 export type NumberRange = { low: number; high: number };
@@ -11,8 +12,13 @@ export function startRound(random = Math.random): Round {
   return { secret: Math.floor(random() * 100) + 1, range: { low: 1, high: 100 } };
 }
 
-export function drawQuestion(questions: Question[], random = Math.random): Question | null {
-  return questions[Math.floor(random() * questions.length)] ?? null;
+export function drawQuestion(
+  questions: Question[],
+  deck: QuestionDeck | null = null,
+  random = Math.random,
+) {
+  const drawn = drawFromDeck(questions, deck, random);
+  return { question: drawn.item, questionDeck: drawn.deck };
 }
 
 export function resolveGuess(

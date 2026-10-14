@@ -1,3 +1,4 @@
+import { shuffleQuestions } from "@/lib/questions/deck";
 import type { Rng } from "@/lib/monopoly/rng";
 import {
   difficultyOf,
@@ -227,12 +228,7 @@ export function drawQuestions(
   cap: Difficulty,
   rng: Rng,
 ): Question[] {
-  const pool = playableOf(bank, cap);
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-  return pool;
+  return shuffleQuestions(playableOf(bank, cap), rng);
 }
 
 /** 是非題的兩個選項，固定順序，畫面與判定同一份 */

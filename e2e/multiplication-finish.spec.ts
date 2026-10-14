@@ -2,17 +2,20 @@ import { expect, test } from "@playwright/test";
 
 test("九九乘法完成後保留作答紀錄，窄螢幕不遮住分數", async ({ page }, testInfo) => {
   test.slow();
+  await page.addInitScript(() => { Math.random = () => 0.11; });
   await page.goto("/multiplication");
   await page.getByRole("button", { name: "開始使用", exact: true }).click();
   await page.getByRole("button", { name: "下一步", exact: true }).click();
   await page.getByRole("group", { name: "出幾題" }).getByRole("button", { name: "10 題" }).click();
   await page.getByRole("button", { name: "開始練習", exact: true }).click();
 
+  const seen = new Set<string>();
   for (let index = 0; index < 10; index++) {
     const equation = page.locator(".quiz-enter > p");
     const text = await equation.textContent();
     const match = text?.match(/(\d+)\s*×\s*(\d+)\s*=/);
     expect(match).not.toBeNull();
+    seen.add(`${match![1]}x${match![2]}`);
     const answer = Number(match![1]) * Number(match![2]);
     const options = page.locator(".quiz-enter button");
     const values = (await options.allTextContents()).map(Number);
@@ -23,6 +26,7 @@ test("九九乘法完成後保留作答紀錄，窄螢幕不遮住分數", async
     }
   }
 
+  expect(seen.size).toBe(10);
   await expect(page.getByRole("button", { name: "再練一輪", exact: true })).toBeVisible();
   await expect(page.locator(".cheer-pop")).toContainText("9/10");
   await expect(page.getByText("好厲害！", { exact: true })).toBeVisible();

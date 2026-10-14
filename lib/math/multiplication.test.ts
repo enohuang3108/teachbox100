@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { celebration, makeNextQuestion, makeQuestion, OPTION_COUNT, TABLES } from "./multiplication";
 
-/** 走遍 0..1 的固定序列，讓出題結果可重現 */
-const seq = (values: number[]) => {
-  let i = 0;
-  return () => values[i++ % values.length];
-};
-
 describe("makeQuestion", () => {
   it("選項一定有正確答案，且剛好四個不重複", () => {
     for (let i = 0; i < 500; i++) {
@@ -35,22 +29,6 @@ describe("makeQuestion", () => {
   });
 });
 
-describe("makeNextQuestion", () => {
-  it("不會緊接著出一模一樣的題目", () => {
-    let prev = makeQuestion([...TABLES]);
-    for (let i = 0; i < 300; i++) {
-      const next = makeNextQuestion([...TABLES], prev);
-      expect(next.a === prev.a && next.b === prev.b).toBe(false);
-      prev = next;
-    }
-  });
-
-  it("只剩一種可能的題目時仍會回傳（不會無限重試）", () => {
-    const q = makeNextQuestion([2], { a: 2, b: 2, answer: 4, options: [] }, seq([0.1]));
-    expect(q.a).toBe(2);
-  });
-});
-
 describe("celebration", () => {
   it("每個分數都有鼓勵，八成以上才撒紙屑、全對才加砲", () => {
     expect(celebration(10, 10)).toEqual({ label: "全對！", confetti: true, cannons: true });
@@ -59,4 +37,16 @@ describe("celebration", () => {
     expect(celebration(0, 10)).toEqual({ label: "繼續加油！", confetti: false, cannons: false });
     expect(celebration(0, 0).confetti).toBe(false);
   });
+});
+
+
+it("選定乘法表的所有組合出完前不重複", () => {
+  let deck: import("@/lib/questions/deck").QuestionDeck | null = null;
+  const pairs: string[] = [];
+  for (let i = 0; i < 54; i++) {
+    const result = makeNextQuestion([2, 3], deck, () => 0);
+    pairs.push(`${result.question.a}x${result.question.b}`);
+    deck = result.questionDeck;
+  }
+  for (let i = 0; i < pairs.length; i += 18) expect(new Set(pairs.slice(i, i + 18)).size).toBe(18);
 });

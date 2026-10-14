@@ -1,5 +1,6 @@
 "use client";
 
+import type { QuestionDeck } from "@/lib/questions/deck";
 import { Button } from "@/components/atoms/shadcn/button";
 import { FinishCelebration } from "@/components/multiplication/FinishCelebration";
 import { useSound } from "@/lib/hooks/useSound";
@@ -34,15 +35,19 @@ export function Quiz({
     { a: number; b: number; picked: number; answer: number }[]
   >([]);
   const timeout = useRef(0);
+  const questionDeck = useRef<QuestionDeck | null>(null);
   const { playCorrectSound, playWrongSound } = useSound();
 
   const nextQuestion = useCallback(() => {
-    setQuestion((prev) => makeNextQuestion(tables, prev));
+    const drawn = makeNextQuestion(tables, questionDeck.current);
+    questionDeck.current = drawn.questionDeck;
+    setQuestion(drawn.question);
     setPicked(null);
   }, [tables]);
 
   // 第一題在 client 才抽，SSR 與 hydration 兩邊的亂數才不會對不起來
   useEffect(() => {
+    questionDeck.current = null;
     nextQuestion();
     return () => window.clearTimeout(timeout.current);
   }, [nextQuestion]);

@@ -1,3 +1,4 @@
+import type { QuestionDeck } from "@/lib/questions/deck";
 // 題目相關的型別住在 lib/questions —— 題庫格式全站共用（ADR-0001）
 export * from "@/lib/questions/types";
 import type { Difficulty, Question } from "@/lib/questions/types";
@@ -221,6 +222,7 @@ export interface GameState {
   phase: GamePhase;
   settings: GameSettings;
   questions: Question[];
+  questionDecks?: Record<string, QuestionDeck>;
   players: Player[];
   currentPlayerIndex: number;
   lastRoll: number[] | null;

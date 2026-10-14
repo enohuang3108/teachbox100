@@ -107,7 +107,7 @@ export function UltimatePasswordGame() {
     answerTransitionTimer.current = null;
     setFeedback(null);
     patch({
-      question: drawQuestion(playable),
+      ...drawQuestion(playable),
       round: startRound(),
       answerAccepted: false,
       numberGuess: 50,
@@ -157,7 +157,7 @@ export function UltimatePasswordGame() {
         patch({
           round: result.round,
           answerAccepted: false,
-          question: drawQuestion(playable),
+          ...drawQuestion(playable, useUltimatePasswordProgress.getState().questionDeck),
         });
         setSelectedAnswer("");
         setMessage("");
@@ -194,7 +194,7 @@ export function UltimatePasswordGame() {
       },
       () => {
         setSelectedAnswer("");
-        patch({ question: drawQuestion(playable) });
+        patch(drawQuestion(playable, useUltimatePasswordProgress.getState().questionDeck));
         setMessage("");
       },
     );
