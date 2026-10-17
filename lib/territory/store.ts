@@ -23,6 +23,9 @@ interface TerritoryStore {
   countdown: Countdown;
   size: BoardSize;
   sound: boolean;
+  reading: boolean;
+  speechRate: number;
+  voiceURI: string;
   setBank: (bank: Question[]) => void;
   setUseDefault: (v: boolean) => void;
   setCap: (cap: Difficulty) => void;
@@ -30,6 +33,9 @@ interface TerritoryStore {
   setCountdown: (countdown: Countdown) => void;
   setSize: (size: BoardSize) => void;
   setSound: (v: boolean) => void;
+  setReading: (reading: boolean) => void;
+  setSpeechRate: (speechRate: number) => void;
+  setVoiceURI: (voiceURI: string) => void;
 }
 
 export const useTerritoryStore = create<TerritoryStore>()(
@@ -42,6 +48,9 @@ export const useTerritoryStore = create<TerritoryStore>()(
       countdown: 3,
       size: "auto",
       sound: true,
+      reading: true,
+      speechRate: 0.9,
+      voiceURI: "",
       setBank: (bank) => set({ bank }),
       setUseDefault: (useDefault) => set({ useDefault }),
       setCap: (cap) => set({ cap }),
@@ -53,6 +62,9 @@ export const useTerritoryStore = create<TerritoryStore>()(
       setCountdown: (countdown) => set({ countdown }),
       setSize: (size) => set({ size }),
       setSound: (sound) => set({ sound }),
+      setReading: (reading) => set({ reading }),
+      setSpeechRate: (speechRate) => set({ speechRate }),
+      setVoiceURI: (voiceURI) => set({ voiceURI }),
     }),
     { name: "territory-game" },
   ),

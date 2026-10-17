@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { questionVoice, type SpeechPreferences } from "@/lib/territory/speech";
 import { defaultRng } from "@/lib/monopoly/rng";
 import type { Difficulty, Question } from "@/lib/questions/types";
 import {
@@ -71,7 +72,9 @@ export function useTerritoryGame(
   onResult?: (correct: boolean) => void,
   sound = true,
   enabled = true,
+  speech: Partial<SpeechPreferences> = {},
 ): TerritoryGame {
+  const { reading = true, speechRate = 0.9, voiceURI = "" } = speech;
   const [queue, setQueue] = useState<Question[]>([]);
   const [index, setIndex] = useState(0);
   const [aspect, setAspect] = useState(16 / 9);
@@ -129,11 +132,12 @@ export function useTerritoryGame(
   useEffect(() => {
     if (!enabled || !question || phase !== "reading") return;
     const synth = window.speechSynthesis;
-    if (!sound || !synth || !window.SpeechSynthesisUtterance) {
+    if (!reading || !sound || !synth || !window.SpeechSynthesisUtterance) {
       skipReading();
       return;
     }
     let active = true;
+    let endedNaturally = false;
     let watchdog: number;
     const finish = () => {
       if (!active) return;
@@ -144,18 +148,20 @@ export function useTerritoryGame(
     const utterance = new SpeechSynthesisUtterance(question.text);
     utterance.lang = "zh-TW";
     const voices = synth.getVoices();
-    const voice = voices.find((v) => /^zh[-_]TW$/i.test(v.lang))
-      ?? voices.find((v) => /^zh(?:[-_]|$)/i.test(v.lang));
+    const voice = questionVoice(voices, voiceURI);
     if (voice) utterance.voice = voice;
-    utterance.rate = 0.9;
-    utterance.onend = finish;
+    utterance.rate = speechRate;
+    utterance.onend = () => {
+      endedNaturally = true;
+      finish();
+    };
     utterance.onerror = finish;
     // 有些瀏覽器不回報自動播放被擋：未開始先等五秒，開始後留足長題時間。
     watchdog = window.setTimeout(finish, 5000);
     utterance.onstart = () => {
       if (!active) return;
       window.clearTimeout(watchdog);
-      watchdog = window.setTimeout(finish, Math.max(60_000, question.text.length * 1000));
+      watchdog = window.setTimeout(finish, Math.max(60_000, question.text.length * 1000 / speechRate));
     };
     try {
       synth.speak(utterance);
@@ -168,9 +174,10 @@ export function useTerritoryGame(
       utterance.onstart = null;
       utterance.onend = null;
       utterance.onerror = null;
-      synth.cancel();
+      // 自然結束時不再中斷音訊尾端；只有離開、重開或播放失敗才取消。
+      if (!endedNaturally) synth.cancel();
     };
-  }, [enabled, question, phase, sound, skipReading]);
+  }, [enabled, question, phase, sound, reading, speechRate, voiceURI, skipReading]);
 
   useEffect(() => {
     if (!enabled || over || phase !== "countdown" || countdown === null) return;

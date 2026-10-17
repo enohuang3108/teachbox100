@@ -26,3 +26,16 @@ describe("territoryShare", () => {
     expect(await territoryShare.decode("#" + hash)).toBeNull();
   });
 });
+
+  it("朗讀開關、語速與選定聲音跟著分享設定走", async () => {
+    const setup = { bank: null, cap: "hard" as const, names: ["藍隊", "紅隊"] as [string, string], countdown: 3 as const, size: "auto" as const, reading: false, speechRate: 1.2, voiceURI: "中文男聲" };
+    const hash = await territoryShare.encode(setup);
+    expect(await territoryShare.decode("#" + hash)).toEqual(setup);
+  });
+
+  it("分享連結拒絕無效的朗讀開關與語速", async () => {
+    for (const [reading, rate] of [["x", "0.9"], ["1", "0"], ["1", "99"]]) {
+      const hash = await raw.encode(["1", "h", "藍隊", "紅隊", "d", "3", "auto", reading, rate, ""].join(US));
+      expect(await territoryShare.decode("#" + hash)).toBeNull();
+    }
+  });

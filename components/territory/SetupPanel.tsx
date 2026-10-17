@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SpeechSettings } from "./SpeechSettings";
 import { Button } from "@/components/atoms/shadcn/button";
 import { DialogDescription } from "@/components/atoms/shadcn/dialog";
 import { Input } from "@/components/atoms/shadcn/input";
@@ -59,6 +60,9 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
     names,
     countdown,
     size,
+    reading,
+    speechRate,
+    voiceURI,
     setBank,
     setUseDefault,
     setCap,
@@ -304,9 +308,11 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
             }))}
           />
 
+          <SpeechSettings />
+
           <Field
             label="每題倒數"
-            hint="先顯示並朗讀題目，唸完倒數後才顯示選項；靜音時直接倒數"
+            hint="開啟朗讀時唸完再倒數，倒數後才顯示選項"
             value={String(countdown)}
             onChange={(v) => setCountdown(Number(v) as Countdown)}
             options={COUNTDOWNS.map((c) => ({ value: String(c), label: `${c} 秒` }))}
@@ -333,6 +339,9 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
           names,
           countdown,
           size,
+          reading,
+          speechRate,
+          voiceURI,
         },
       }}
     />

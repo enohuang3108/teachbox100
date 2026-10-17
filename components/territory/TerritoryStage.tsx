@@ -279,7 +279,6 @@ function QuestionText({
       </div>
       {game.countdown !== null && (
         <div className="flex flex-col items-center gap-2" style={HALO}>
-          <p className="text-body-lg text-ink">倒數後顯示選項</p>
           <p aria-live="assertive" className="font-display text-ink text-[clamp(3rem,10cqw,9rem)] leading-none font-extrabold tabular-nums">
             {game.countdown}
           </p>

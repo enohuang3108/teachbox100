@@ -42,7 +42,7 @@ export default function TerritoryPage() {
   const [setupOpen, setSetupOpen] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
 
-  const { bank, useDefault, cap, names, countdown, size, sound, setSound } =
+  const { bank, useDefault, cap, names, countdown, size, sound, setSound, reading, speechRate, voiceURI } =
     useTerritoryStore();
   useSharedSetup("quiz-territory", (setup) => {
     useTerritoryStore.setState({
@@ -52,6 +52,9 @@ export default function TerritoryPage() {
       names: setup.names,
       countdown: setup.countdown,
       size: setup.size,
+      reading: setup.reading ?? true,
+      speechRate: setup.speechRate ?? 0.9,
+      voiceURI: setup.voiceURI ?? "",
     });
     setSetupOpen(true);
   });
@@ -70,6 +73,7 @@ export default function TerritoryPage() {
     },
     sound,
     entered && !setupOpen && !confirmLeave,
+    { reading, speechRate, voiceURI },
   );
 
   // 唸完後每換一個數字響一拍，選項出現時再響一聲「開始」
