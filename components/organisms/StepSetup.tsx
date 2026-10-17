@@ -39,6 +39,7 @@ export function StepSetup({
   onStart,
   share,
   zhuyinStepKey,
+  zhuyinPosition = "before",
 }: {
   title: string;
   steps: SetupStep[];
@@ -49,6 +50,8 @@ export function StepSetup({
   share?: ShareConfig;
   /** 指定注音開關所屬步驟；未指定時每站都顯示。 */
   zhuyinStepKey?: string;
+  /** 注音開關放在該步驟內容前方或後方。 */
+  zhuyinPosition?: "before" | "after";
 }) {
   const [stepKey, setStepKey] = useState(steps[0].key);
   const [shareOpen, setShareOpen] = useState(false);
@@ -65,6 +68,34 @@ export function StepSetup({
   const blocked = blocker != null;
   const current = steps[index];
   const isLast = index === steps.length - 1;
+  const zhuyinControl = (!zhuyinStepKey || current.key === zhuyinStepKey) ? (
+    <div className={cn("border-border", zhuyinPosition === "after" ? "mt-6 border-t pt-4" : "mb-6 border-b pb-4")}>
+      <label htmlFor={zhuyinId} className="flex cursor-pointer items-center justify-between gap-4">
+        <span className="text-body text-foreground">顯示注音</span>
+        <Switch
+          id={zhuyinId}
+          aria-label="顯示注音"
+          aria-busy={fontLoading}
+          checked={zhuyin}
+          disabled={fontLoading}
+          onCheckedChange={async (enabled) => {
+            setFontError(false);
+            if (!enabled) { setZhuyin(path, false); return; }
+            setFontLoading(true);
+            try {
+              await loadZhuyinFont();
+              setZhuyin(path, true);
+            } catch {
+              setFontError(true);
+            } finally {
+              setFontLoading(false);
+            }
+          }}
+        />
+      </label>
+      {fontError && <p role="alert" className="mt-2 text-caption text-danger-ink">注音字型載入失敗，請確認網路後再試一次。</p>}
+    </div>
+  ) : null;
 
   return (
     <div className="grid h-[min(680px,90dvh)] grid-rows-[auto_1fr] md:grid-cols-[232px_1fr] md:grid-rows-1">
@@ -126,35 +157,9 @@ export function StepSetup({
           key={current.key}
           className="min-h-0 overflow-y-auto px-5 py-6 animate-in fade-in-0 slide-in-from-bottom-1 duration-200 motion-reduce:slide-in-from-bottom-0 md:px-8"
         >
-          {(!zhuyinStepKey || current.key === zhuyinStepKey) && (
-          <div className="mb-6 border-b border-border pb-4">
-            <label htmlFor={zhuyinId} className="flex cursor-pointer items-center justify-between gap-4">
-              <span className="text-body text-foreground">顯示注音</span>
-              <Switch
-                id={zhuyinId}
-                aria-label="顯示注音"
-                aria-busy={fontLoading}
-                checked={zhuyin}
-                disabled={fontLoading}
-                onCheckedChange={async (enabled) => {
-                  setFontError(false);
-                  if (!enabled) { setZhuyin(path, false); return; }
-                  setFontLoading(true);
-                  try {
-                    await loadZhuyinFont();
-                    setZhuyin(path, true);
-                  } catch {
-                    setFontError(true);
-                  } finally {
-                    setFontLoading(false);
-                  }
-                }}
-              />
-            </label>
-            {fontError && <p role="alert" className="mt-2 text-caption text-danger-ink">注音字型載入失敗，請確認網路後再試一次。</p>}
-          </div>
-          )}
+          {zhuyinPosition === "before" && zhuyinControl}
           {current.content}
+          {zhuyinPosition === "after" && zhuyinControl}
         </div>
 
         <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-card px-5 py-3 md:px-8">

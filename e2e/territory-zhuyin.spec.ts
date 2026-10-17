@@ -12,6 +12,11 @@ for (const theme of ["light", "dark"]) {
     await dialog.getByRole("button", { name: "下一步", exact: true }).click();
     await expect(toggle).toBeVisible();
     await expect(toggle).not.toBeChecked();
+    const followsCountdown = await dialog.locator('[id="每題倒數-5"]').evaluate((el) => {
+      const control = document.querySelector('[role="switch"][aria-label="顯示注音"]')!;
+      return !!(el.compareDocumentPosition(control) & Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+    expect(followsCountdown).toBe(true);
     await toggle.click();
     await expect(toggle).toBeChecked();
     await expect.poll(() => page.locator("body").evaluate((el) => getComputedStyle(el).fontFamily)).toContain("Bpmf Iansui");
@@ -19,6 +24,7 @@ for (const theme of ["light", "dark"]) {
     await expect(toggle).toHaveCount(0);
     await dialog.getByRole("button", { name: "下一步", exact: true }).click();
     await expect(toggle).toBeChecked();
+    await toggle.scrollIntoViewIfNeeded();
     await page.screenshot({ animations: "disabled", path: `/tmp/territory-zhuyin-${testInfo.project.name}-${theme}.png` });
   });
 }

@@ -320,6 +320,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
     <StepSetup
       title="領地戰設定"
       zhuyinStepKey="rules"
+      zhuyinPosition="after"
       steps={steps}
       blocker={blocker}
       startLabel="開始比賽"
