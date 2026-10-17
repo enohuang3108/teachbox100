@@ -20,7 +20,7 @@ import {
 /** 結算後停留多久再出下一題。答錯留久一點，好讓兩隊看清楚正解 */
 const PAUSE_CORRECT = 1400;
 const PAUSE_WRONG = 2200;
-/** 每題出現前的倒數，從幾開始、一拍多久 */
+/** 朗讀後的倒數，每拍一秒 */
 const COUNTDOWN_BEAT = 1000;
 const NOT_READY: Record<Side, boolean> = { left: false, right: false };
 
@@ -40,10 +40,9 @@ export interface TerritoryGame {
   /** 最近一次暈開依序變色的格子，畫面拿來排先後 */
   changed: number[];
   question: Question | null;
-  /** 出題前的倒數 3、2、1；null 代表題目已經出來，或兩隊還沒都準備好 */
+  canAnswer: boolean;
+  /** 朗讀結束後才倒數，題目保留，選項仍隱藏 */
   countdown: number | null;
-  /** 倒數中的下一題：題目還藏著，但先讓兩隊知道這題值幾分 */
-  upcoming: Question | null;
   /** 開局前兩隊各按一次「準備好了」，都按了才開始倒數 */
   ready: Record<Side, boolean>;
   markReady: (side: Side) => void;
@@ -70,6 +69,8 @@ export function useTerritoryGame(
   countdownFrom: number,
   size: BoardSize,
   onResult?: (correct: boolean) => void,
+  sound = true,
+  enabled = true,
 ): TerritoryGame {
   const [queue, setQueue] = useState<Question[]>([]);
   const [index, setIndex] = useState(0);
@@ -82,6 +83,7 @@ export function useTerritoryGame(
   const [over, setOver] = useState(false);
   const [winner, setWinner] = useState<Side | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [phase, setPhase] = useState<"reading" | "countdown" | "answer">("reading");
   const [ready, setReady] = useState<Record<Side, boolean>>(NOT_READY);
   const timer = useRef<number | null>(null);
 
@@ -93,8 +95,9 @@ export function useTerritoryGame(
     const { cols, rows } = gridFor(boardCells(size, q.length), a);
     setQueue(q);
     setIndex(0);
-    // 新的一局先等兩隊都按「準備好了」，倒數由 markReady 啟動
+    // 新的一局先等兩隊都按「準備好了」，再朗讀題目
     setCountdown(null);
+    setPhase("reading");
     setReady(NOT_READY);
     setAspect(a);
     setBoard(newBoard(cols, rows));
@@ -115,30 +118,75 @@ export function useTerritoryGame(
     [],
   );
 
-  // 倒數：每拍減一，數完才把題目與答案鈕放出來
-  useEffect(() => {
-    if (over || countdown === null) return;
-    const id = window.setTimeout(
-      () => setCountdown((c) => (c !== null && c > 1 ? c - 1 : null)),
-      COUNTDOWN_BEAT,
-    );
-    return () => window.clearTimeout(id);
-  }, [countdown, over]);
-
   const started = ready.left && ready.right;
-
-  const markReady = useCallback((side: Side) => {
-    setReady((r) => {
-      if (r[side]) return r;
-      const next = { ...r, [side]: true };
-      if (next.left && next.right) setCountdown(countdownFrom);
-      return next;
-    });
+  const question = over || !started ? null : (queue[index] ?? null);
+  const skipReading = useCallback(() => {
+    setPhase("countdown");
+    setCountdown(countdownFrom);
   }, [countdownFrom]);
 
-  // 準備與倒數中都不給題目，兩隊同時看到、同時開搶
-  const question =
-    over || !started || countdown !== null ? null : (queue[index] ?? null);
+  // 每一題只唸題幹；換題、重開、離開畫面或靜音時清掉舊語音與回呼。
+  useEffect(() => {
+    if (!enabled || !question || phase !== "reading") return;
+    const synth = window.speechSynthesis;
+    if (!sound || !synth || !window.SpeechSynthesisUtterance) {
+      skipReading();
+      return;
+    }
+    let active = true;
+    let watchdog: number;
+    const finish = () => {
+      if (!active) return;
+      active = false;
+      window.clearTimeout(watchdog);
+      skipReading();
+    };
+    const utterance = new SpeechSynthesisUtterance(question.text);
+    utterance.lang = "zh-TW";
+    const voices = synth.getVoices();
+    const voice = voices.find((v) => /^zh[-_]TW$/i.test(v.lang))
+      ?? voices.find((v) => /^zh(?:[-_]|$)/i.test(v.lang));
+    if (voice) utterance.voice = voice;
+    utterance.rate = 0.9;
+    utterance.onend = finish;
+    utterance.onerror = finish;
+    // 有些瀏覽器不回報自動播放被擋：未開始先等五秒，開始後留足長題時間。
+    watchdog = window.setTimeout(finish, 5000);
+    utterance.onstart = () => {
+      if (!active) return;
+      window.clearTimeout(watchdog);
+      watchdog = window.setTimeout(finish, Math.max(60_000, question.text.length * 1000));
+    };
+    try {
+      synth.speak(utterance);
+    } catch {
+      finish();
+    }
+    return () => {
+      active = false;
+      window.clearTimeout(watchdog);
+      utterance.onstart = null;
+      utterance.onend = null;
+      utterance.onerror = null;
+      synth.cancel();
+    };
+  }, [enabled, question, phase, sound, skipReading]);
+
+  useEffect(() => {
+    if (!enabled || over || phase !== "countdown" || countdown === null) return;
+    const id = window.setTimeout(() => {
+      if (countdown > 1) setCountdown(countdown - 1);
+      else {
+        setCountdown(null);
+        setPhase("answer");
+      }
+    }, COUNTDOWN_BEAT);
+    return () => window.clearTimeout(id);
+  }, [countdown, over, phase, enabled]);
+
+  const markReady = useCallback((side: Side) => {
+    setReady((r) => r[side] ? r : { ...r, [side]: true });
+  }, []);
 
   // 題目出完就用格數收尾
   useEffect(() => {
@@ -153,12 +201,13 @@ export function useTerritoryGame(
     setSettling(false);
     setLockedOut(null);
     setIndex((i) => i + 1);
-    setCountdown(countdownFrom);
-  }, [countdownFrom]);
+    setCountdown(null);
+    setPhase("reading");
+  }, []);
 
   const answer = useCallback(
     (side: Side, choice: string) => {
-      if (!question || settling || over || lockedOut === side) return;
+      if (!enabled || phase !== "answer" || !question || settling || over || lockedOut === side) return;
       const r = resolveAnswer(question, side, choice, lockedOut);
       const next = spread(board, r.side, r.cells);
 
@@ -193,7 +242,7 @@ export function useTerritoryGame(
       }
       // 對方接手同一題：棋盤已經動了，但題目還在
     },
-    [question, settling, over, lockedOut, board, onResult, nextRound],
+    [enabled, phase, question, settling, over, lockedOut, board, onResult, nextRound],
   );
 
   return useMemo(
@@ -204,7 +253,7 @@ export function useTerritoryGame(
       question,
       // 最後一題結算完、還沒宣布結束的那一拍，不要冒出一個「3」
       countdown: index < queue.length ? countdown : null,
-      upcoming: countdown !== null && !over ? (queue[index] ?? null) : null,
+      canAnswer: enabled && phase === "answer",
       ready,
       markReady,
       lockedOut,
@@ -223,6 +272,8 @@ export function useTerritoryGame(
       changed,
       question,
       countdown,
+      phase,
+      enabled,
       ready,
       markReady,
       lockedOut,

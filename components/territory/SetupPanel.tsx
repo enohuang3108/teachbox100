@@ -306,7 +306,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
 
           <Field
             label="每題倒數"
-            hint="倒數完才出題，兩隊同時開搶"
+            hint="先顯示並朗讀題目，唸完倒數後才顯示選項；靜音時直接倒數"
             value={String(countdown)}
             onChange={(v) => setCountdown(Number(v) as Countdown)}
             options={COUNTDOWNS.map((c) => ({ value: String(c), label: `${c} 秒` }))}

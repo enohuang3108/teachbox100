@@ -68,9 +68,11 @@ export default function TerritoryPage() {
       if (correct) playCorrectSound();
       else playWrongSound();
     },
+    sound,
+    entered && !setupOpen && !confirmLeave,
   );
 
-  // 倒數每換一個數字響一拍，數完題目出現時再響一聲「開始」
+  // 唸完後每換一個數字響一拍，選項出現時再響一聲「開始」
   const lastCount = useRef<number | null>(null);
   useEffect(() => {
     const prev = lastCount.current;
