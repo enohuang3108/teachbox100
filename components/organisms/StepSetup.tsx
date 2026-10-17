@@ -5,7 +5,10 @@ import { DialogTitle } from "@/components/atoms/shadcn/dialog";
 import { cn } from "@/lib/utils";
 import { ShareDialog, type ShareConfig } from "./ShareDialog";
 import { Check, Share2, type LucideIcon } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
+import { usePathname } from "next/navigation";
+import { Switch } from "@/components/atoms/shadcn/switch";
+import { loadZhuyinFont, useZhuyinPreferences } from "@/lib/zhuyin";
 
 const PRESS =
   "transition-transform duration-press ease-out active:scale-[0.97]";
@@ -35,6 +38,7 @@ export function StepSetup({
   startLabel,
   onStart,
   share,
+  zhuyinStepKey,
 }: {
   title: string;
   steps: SetupStep[];
@@ -43,9 +47,17 @@ export function StepSetup({
   onStart: () => void;
   /** 給了就在最後一步的開始鈕左邊放「分享設定」；設定還沒填完（有 blocker）不能分享 */
   share?: ShareConfig;
+  /** 指定注音開關所屬步驟；未指定時每站都顯示。 */
+  zhuyinStepKey?: string;
 }) {
   const [stepKey, setStepKey] = useState(steps[0].key);
   const [shareOpen, setShareOpen] = useState(false);
+  const path = usePathname();
+  const zhuyin = useZhuyinPreferences((state) => state.units[path] ?? false);
+  const setZhuyin = useZhuyinPreferences((state) => state.setEnabled);
+  const [fontLoading, setFontLoading] = useState(false);
+  const [fontError, setFontError] = useState(false);
+  const zhuyinId = useId();
   const index = Math.max(
     0,
     steps.findIndex((s) => s.key === stepKey),
@@ -114,6 +126,34 @@ export function StepSetup({
           key={current.key}
           className="min-h-0 overflow-y-auto px-5 py-6 animate-in fade-in-0 slide-in-from-bottom-1 duration-200 motion-reduce:slide-in-from-bottom-0 md:px-8"
         >
+          {(!zhuyinStepKey || current.key === zhuyinStepKey) && (
+          <div className="mb-6 border-b border-border pb-4">
+            <label htmlFor={zhuyinId} className="flex cursor-pointer items-center justify-between gap-4">
+              <span className="text-body text-foreground">顯示注音</span>
+              <Switch
+                id={zhuyinId}
+                aria-label="顯示注音"
+                aria-busy={fontLoading}
+                checked={zhuyin}
+                disabled={fontLoading}
+                onCheckedChange={async (enabled) => {
+                  setFontError(false);
+                  if (!enabled) { setZhuyin(path, false); return; }
+                  setFontLoading(true);
+                  try {
+                    await loadZhuyinFont();
+                    setZhuyin(path, true);
+                  } catch {
+                    setFontError(true);
+                  } finally {
+                    setFontLoading(false);
+                  }
+                }}
+              />
+            </label>
+            {fontError && <p role="alert" className="mt-2 text-caption text-danger-ink">注音字型載入失敗，請確認網路後再試一次。</p>}
+          </div>
+          )}
           {current.content}
         </div>
 
@@ -149,7 +189,7 @@ export function StepSetup({
             {isLast ? (
               <Button
                 className={cn("rounded-full px-6 font-bold", PRESS)}
-                disabled={blocked}
+                disabled={blocked || fontLoading}
                 onClick={onStart}
               >
                 {startLabel}

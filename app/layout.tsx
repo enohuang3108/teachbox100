@@ -4,6 +4,7 @@ import { Background } from "@/components/atoms/Background";
 import { AppChrome } from "@/components/molecules/AppChrome";
 import { BackScrollRestoration } from "@/components/atoms/BackScrollRestoration";
 import { OfflineReadyToast } from "@/components/atoms/OfflineReadyToast";
+import { ZhuyinFontController } from "@/components/atoms/ZhuyinFontController";
 import { WarningIcon } from "@/components/atoms/icons/warning";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import "@/styles/globals.css";
@@ -123,6 +124,7 @@ export default function RootLayout({
           </div>
           <div className="block noscript:hidden">
             <PostHogProvider>
+              <ZhuyinFontController />
               <BackScrollRestoration />
               <AppChrome />
               <OfflineReadyToast />
