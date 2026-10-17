@@ -24,7 +24,7 @@ test("領地戰可選小場地與 5 秒倒數，兩隊準備後先看題再倒�
   await page.getByRole("button", { name: "紅隊準備好了", exact: true }).click();
 
   await expect(board.getByText("5", { exact: true })).toBeVisible();
-  await expect(board.getByText("倒數後顯示選項", { exact: true })).toBeVisible();
+  await expect(board.getByText("倒數後顯示選項", { exact: true })).toHaveCount(0);
   await expect(board.getByText("READY?", { exact: true })).toHaveCount(0);
   await expect(board.getByRole("button", { name: /藍隊選/ }).first()).toBeVisible({
     timeout: 15_000,
