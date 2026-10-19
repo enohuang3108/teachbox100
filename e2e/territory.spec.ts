@@ -20,6 +20,8 @@ test("領地戰可選小場地與 5 秒倒數，兩隊準備後先看題再倒�
   const cells = await board.locator(":scope > div.grid > div").count();
   expect(cells).toBeGreaterThanOrEqual(12);
   expect(cells).toBeLessThanOrEqual(15); // 小場地的目標是 12 格，排版最多補到 125%
+  // 兩隊之間固定插 2 支旗子，開局是中立的灰色
+  await expect(board.locator('[data-flag="none"]')).toHaveCount(2);
   await page.getByRole("button", { name: "藍隊準備好了", exact: true }).click();
   await expect(board.getByText("READY?", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "紅隊準備好了", exact: true }).click();

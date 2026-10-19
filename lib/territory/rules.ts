@@ -94,6 +94,20 @@ export function newBoard(cols: number, rows: number): Board {
 export const originOf = (side: Side, cols: number, rows: number) =>
   side === "left" ? 0 : cols * rows - 1;
 
+/**
+ * 兩支旗子：插在藍隊起點到紅隊起點那條對角線的 1/3 與 2/3 處，對棋盤中心點對稱，
+ * 兩隊離自己那支一樣遠。欄數 ≥ 3 時兩支都不會落在被答案鈕蓋住的最左、最右欄。
+ * 九宮格兩支會疊在正中間，就上下拆開
+ */
+export function flagsOf(cols: number, rows: number): [number, number] {
+  const x = Math.round((cols - 1) / 3);
+  const y = Math.round((rows - 1) / 3);
+  let a = y * cols + x;
+  const last = cols * rows - 1;
+  if (a === last - a) a -= cols;
+  return [a, last - a];
+}
+
 function dist2(a: number, b: number, cols: number) {
   const dx = (a % cols) - (b % cols);
   const dy = Math.floor(a / cols) - Math.floor(b / cols);

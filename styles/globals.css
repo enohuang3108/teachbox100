@@ -1738,6 +1738,27 @@ main:has(> #game-stage[data-unit="ichiban"]) {
   --territory-fill: 480ms;
 }
 
+/* 領地戰格子上的旗子：換手時（.flag-swap）舊旗降到底、換色、新旗升上來。
+   --from / --to 是新舊隊色，--delay 對齊那格換色的先後 */
+@keyframes flag-drop {
+  0%, 100% { transform: none; }
+  45%, 55% { transform: translateY(24px); }
+}
+@keyframes flag-fill {
+  0%, 49% { fill: var(--from); }
+  51%, 100% { fill: var(--to); }
+}
+.flag-cloth { fill: var(--to); }
+.flag-swap {
+  animation: flag-drop 1400ms var(--ease-in-out) var(--delay) both;
+}
+.flag-swap .flag-cloth {
+  animation: flag-fill 1400ms var(--delay) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flag-swap, .flag-swap .flag-cloth { animation: none; }
+}
+
 /* 領地戰獲勝：隊旗掉下來插進棋盤。--hit 是旗子落地、紙屑炸開、音效響起的那一刻；
    基底都是最後的樣子，降低動態效果時拿掉動畫就是結果 */
 @keyframes victory-rise {

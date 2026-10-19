@@ -1,10 +1,11 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { DIFFICULTY_LABEL, difficultyOf, type Question } from "@/lib/questions/types";
 import {
   cellValue,
   countOf,
+  flagsOf,
   optionsOf,
   type Owner,
   type Side,
@@ -51,6 +52,7 @@ export function TerritoryStage({
     side === "left" ? names[0] || "藍隊" : names[1] || "紅隊";
   // 直立螢幕的左右太窄，兩隊的鈕改成並排放在題目下方
   const portrait = aspect < 1;
+  const flags = flagsOf(board.cols, board.rows);
 
   return (
     <div
@@ -68,7 +70,12 @@ export function TerritoryStage({
         }}
       >
         {board.cells.map((owner, i) => (
-          <Cell key={i} owner={owner} order={game.changed.indexOf(i)} />
+          <Cell
+            key={i}
+            owner={owner}
+            order={game.changed.indexOf(i)}
+            flag={flags.includes(i)}
+          />
         ))}
       </div>
 
@@ -222,18 +229,77 @@ function WallFlag({ side }: { side: Side }) {
  * 暈開的先後靠 transition-delay 排，不用 keyframes。
  * 顏色變化能幫人看懂局面，所以降低動態效果時照樣保留。
  */
-function Cell({ owner, order }: { owner: Owner; order: number }) {
+function Cell({
+  owner,
+  order,
+  flag,
+}: {
+  owner: Owner;
+  order: number;
+  flag: boolean;
+}) {
+  const fill: CSSProperties = {
+    transitionDuration: "var(--territory-fill)",
+    transitionDelay: order >= 0 ? `${order * STAGGER_MS}ms` : "0ms",
+  };
   return (
     <div
       className={cn(
-        "rounded-[clamp(4px,1cqw,16px)] transition-[background-color] ease-[ease]",
+        "grid place-items-center rounded-[clamp(4px,1cqw,16px)] transition-[background-color] ease-[ease]",
         OWNER_BG[owner ?? "none"],
       )}
-      style={{
-        transitionDuration: "var(--territory-fill)",
-        transitionDelay: order >= 0 ? `${order * STAGGER_MS}ms` : "0ms",
-      }}
-    />
+      style={fill}
+    >
+      {flag && <Flag owner={owner} delay={fill.transitionDelay} />}
+    </div>
+  );
+}
+
+const FLAG_COLOR: Record<"left" | "right" | "none", string> = {
+  left: "var(--brand-blue)",
+  right: "var(--brand-red)",
+  none: "color-mix(in srgb, var(--stone) 80%, var(--ink))",
+};
+
+/**
+ * 插在格子上的三角旗，開局是灰的。格子換手時舊旗沿著旗桿降下、換成新隊色再升上去，
+ * 降旗跟著這格換色的先後排。
+ */
+function Flag({ owner, delay }: { owner: Owner; delay: CSSProperties["transitionDelay"] }) {
+  // 記住上一個主人：換手那一次才播降旗、升旗（render 中比對是 React 建議的寫法）
+  const [shown, setShown] = useState(owner);
+  const [from, setFrom] = useState<Owner | undefined>(undefined);
+  if (owner !== shown) {
+    setFrom(shown);
+    setShown(owner);
+  }
+  return (
+    <svg
+      data-flag={owner ?? "none"}
+      aria-hidden
+      // 旗桿在 x = 0：viewBox 左右對稱，旗桿就插在格子正中
+      viewBox="-36 0 72 48"
+      // 紙色外框：插在同隊顏色的格子上也分得出來
+      className="h-[42%] overflow-visible [filter:drop-shadow(1.5px_0_0_var(--paper))_drop-shadow(-1.5px_0_0_var(--paper))_drop-shadow(0_1.5px_0_var(--paper))_drop-shadow(0_-1.5px_0_var(--paper))]"
+    >
+      <g stroke="var(--ink)" strokeLinejoin="round" strokeLinecap="round">
+        <path d="M0 45 V3" strokeWidth="3" />
+        <g
+          key={owner ?? "none"}
+          className={from === undefined ? undefined : "flag-swap"}
+          style={
+            {
+              "--from": FLAG_COLOR[from ?? "none"],
+              "--to": FLAG_COLOR[owner ?? "none"],
+              "--delay": delay,
+            } as CSSProperties
+          }
+        >
+          <path className="flag-cloth" strokeWidth="2.5" d="M0 4 L25 12 L0 20 Z" />
+        </g>
+        <ellipse cx="0" cy="45" rx="7" ry="2.5" strokeWidth="2.5" fill="var(--ink)" />
+      </g>
+    </svg>
   );
 }
 
@@ -397,4 +463,3 @@ function AnswerPad({
     </section>
   );
 }
-

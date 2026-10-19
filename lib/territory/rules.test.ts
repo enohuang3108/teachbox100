@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Question } from "@/lib/questions/types";
 import {
   boardCells,
+  flagsOf,
   cellCount,
   countOf,
   gridFor,
@@ -60,6 +61,12 @@ describe("棋盤大小", () => {
 
   it("藍隊從左上、紅隊從右下各占一格開始", () => {
     expect(draw(newBoard(4, 3))).toEqual(["L...", "....", "...R"]);
+  });
+
+  it("兩支旗子在兩隊之間的 1/3、2/3 處，對中心點對稱", () => {
+    expect(flagsOf(5, 3)).toEqual([6, 8]); // 中列第 2、第 4 格
+    expect(flagsOf(6, 4)).toEqual([8, 15]);
+    expect(flagsOf(3, 3)).toEqual([1, 7]); // 九宮格不疊在正中間
   });
 });
 
