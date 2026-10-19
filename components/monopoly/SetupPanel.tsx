@@ -1,24 +1,11 @@
 "use client";
 
-import { Button } from "@/components/atoms/shadcn/button";
 import { DialogDescription } from "@/components/atoms/shadcn/dialog";
 import { Checkbox } from "@/components/atoms/shadcn/checkbox";
 import { Input } from "@/components/atoms/shadcn/input";
 import { Switch } from "@/components/atoms/shadcn/switch";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/atoms/shadcn/tabs";
 import { defaultCharacterId } from "@/lib/monopoly/characters";
 import { DEFAULT_QUESTIONS } from "@/lib/monopoly/default-questions";
-import {
-  AI_QUESTION_PROMPT,
-  buildTemplateBlob,
-  parseQuestions,
-  rowsFromFile,
-} from "@/lib/monopoly/excel";
 import { useMonopolyStore } from "@/lib/monopoly/store";
 import {
   DIFFICULTIES,
@@ -26,7 +13,6 @@ import {
   DIFFICULTY_LABEL,
   difficultyOf,
   PLAYER_COLORS,
-  type Difficulty,
   type EndCondition,
   type PlayerInput,
   type Question,
@@ -34,24 +20,22 @@ import {
 import { cn } from "@/lib/utils";
 import {
   Coins,
-  Download,
   Library,
   Plus,
   Repeat,
   SlidersHorizontal,
   Timer,
   Trophy,
-  Upload,
   Users,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { PASS_START_QUIZ_BONUS } from "@/lib/monopoly/rules";
 import { StepSetup, type SetupStep } from "@/components/organisms/StepSetup";
-import {
-  DIFFICULTY_DOT,
-  QuestionPreview,
-} from "@/components/organisms/QuestionPreview";
+import { DIFFICULTY_DOT } from "@/components/organisms/QuestionPreview";
+import { useAssistStep } from "@/components/organisms/AssistStep";
+import { QuestionBankStep } from "@/components/organisms/QuestionBankStep";
+import { activeQuestions, useSelectedBank } from "@/lib/questions/library";
 import { CharacterPicker } from "./CharacterPicker";
 import { ColorPicker } from "./ColorPicker";
 
@@ -92,7 +76,8 @@ const END_OPTIONS: {
   },
 ];
 
-type Source = "default" | "custom";
+/** 大富翁三種題型都出 */
+const everyQuestion = (questions: Question[]) => questions;
 
 /** 長得跟 shadcn TabsList 一樣，但語意是單選（沒有對應的分頁內容），所以用 radiogroup */
 function Segmented<T extends string>({
@@ -173,19 +158,15 @@ function endSummary(ec: EndCondition) {
 export function SetupPanel() {
   const {
     draftSettings,
-    draftQuestions,
+    bankId,
     draftPlayers,
-    importQuestions,
+    selectBank,
     updateSettings,
     setPlayers,
     begin,
   } = useMonopolyStore();
-  const [source, setSource] = useState<Source>(
-    draftQuestions.length > 0 ? "custom" : "default",
-  );
-  const [errors, setErrors] = useState<string[]>([]);
-  const [copied, setCopied] = useState(false);
-  const [dragging, setDragging] = useState(false);
+  const assist = useAssistStep();
+  const saved = useSelectedBank(bankId);
 
   const playerCount = draftSettings.playerCount;
 
@@ -237,39 +218,7 @@ export function SetupPanel() {
     );
   }
 
-  async function readFile(file: File | undefined) {
-    if (!file) return;
-    setErrors([]);
-    try {
-      const result = parseQuestions(await rowsFromFile(file));
-      if (result.ok) {
-        importQuestions(result.questions);
-      } else {
-        setErrors(result.errors.map((er) => `第 ${er.row} 列：${er.message}`));
-        importQuestions([]);
-      }
-    } catch {
-      setErrors(["檔案讀取失敗，請確認為 .xlsx 格式"]);
-    }
-  }
-
-  function downloadTemplate() {
-    const url = URL.createObjectURL(buildTemplateBlob());
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "大富翁題庫範本.xlsx";
-    a.click();
-    URL.revokeObjectURL(url);
-    navigator.clipboard
-      .writeText(AI_QUESTION_PROMPT)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      })
-      .catch(() => {});
-  }
-
-  const questions = source === "default" ? DEFAULT_QUESTIONS : draftQuestions;
+  const questions = saved ? activeQuestions(saved) : DEFAULT_QUESTIONS;
   const ec = draftSettings.endCondition;
   const differentiated = draftSettings.differentiated ?? false;
   const passStartQuiz = draftSettings.passStartQuiz ?? true;
@@ -282,7 +231,7 @@ export function SetupPanel() {
     draftPlayers.length >= MIN_PLAYERS &&
     draftPlayers.every((p) => p.name.trim());
   const blocker = !bankDone
-    ? "還沒匯入題庫"
+    ? "這份題庫沒有勾選任何題目"
     : !playersDone
       ? "玩家至少 2 位，而且都要有名字"
       : null;
@@ -292,115 +241,17 @@ export function SetupPanel() {
       key: "bank",
       label: "題庫",
       icon: Library,
-      summary:
-        source === "default"
-          ? `預設 ${DEFAULT_QUESTIONS.length} 題`
-          : bankDone
-            ? `自訂 ${draftQuestions.length} 題`
-            : "尚未匯入",
+      summary: `${saved ? saved.title : "內建題庫"} ${questions.length} 題`,
       done: bankDone,
       content: (
-        <section className="space-y-5">
-          <header>
-            <h3 className="text-h3 text-ink">要用哪份題庫？</h3>
-            <DialogDescription className="mt-1">
-              先用預設題庫試玩，或匯入自己出的
-              Excel。每題可標簡單／普通／困難，給不同程度的學生抽。
-            </DialogDescription>
-          </header>
-          <Tabs
-            value={source}
-            onValueChange={(v) => setSource(v as Source)}
-            className="gap-4"
-          >
-            <TabsList aria-label="題庫來源">
-              <TabsTrigger value="default" className="px-4">
-                預設題庫
-              </TabsTrigger>
-              <TabsTrigger value="custom" className="px-4">
-                自訂題庫
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="default">
-              <QuestionPreview questions={DEFAULT_QUESTIONS} />
-            </TabsContent>
-            <TabsContent value="custom" className="space-y-3">
-              <label
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setDragging(true);
-                }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setDragging(false);
-                  readFile(e.dataTransfer.files[0]);
-                }}
-                className={cn(
-                  "flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-6 py-8 text-center transition-[background-color,border-color] duration-hover",
-                  dragging
-                    ? "border-ink bg-secondary"
-                    : "border-border hover:bg-muted/60",
-                )}
-              >
-                <Upload className="size-6 text-muted-foreground" aria-hidden />
-                <span className="text-sm font-semibold text-ink">
-                  {draftQuestions.length > 0
-                    ? "換一份 Excel"
-                    : "把 .xlsx 拖進來，或點這裡選檔"}
-                </span>
-                <input
-                  type="file"
-                  accept=".xlsx,.xls"
-                  className="sr-only"
-                  onChange={(e) => readFile(e.target.files?.[0])}
-                />
-              </label>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-caption text-muted-foreground">
-                  沒有題庫？下載題庫範本會附一段提示詞，貼給 AI 就能出題。
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={cn("rounded-full", PRESS)}
-                  onClick={downloadTemplate}
-                >
-                  <Download className="size-4" aria-hidden />
-                  {/* 兩段文字疊在同一格，寬度固定取長的那段，換字不會把按鈕擠到下一行 */}
-                  <span className="grid">
-                    <span
-                      className={cn(
-                        "col-start-1 row-start-1",
-                        copied && "invisible",
-                      )}
-                    >
-                      下載題庫範本
-                    </span>
-                    <span
-                      className={cn(
-                        "col-start-1 row-start-1",
-                        !copied && "invisible",
-                      )}
-                    >
-                      已複製提示詞
-                    </span>
-                  </span>
-                </Button>
-              </div>
-              {errors.length > 0 && (
-                <ul className="max-h-40 overflow-y-auto rounded-xl bg-danger-soft px-4 py-3 text-sm leading-[1.75] text-danger-ink">
-                  {errors.map((er, i) => (
-                    <li key={i}>{er}</li>
-                  ))}
-                </ul>
-              )}
-              {draftQuestions.length > 0 && (
-                <QuestionPreview questions={draftQuestions} />
-              )}
-            </TabsContent>
-          </Tabs>
-        </section>
+        <QuestionBankStep
+          builtIn={DEFAULT_QUESTIONS}
+          playable={everyQuestion}
+          bankId={bankId}
+          onSelect={selectBank}
+          allowShort
+          templateName="大富翁題庫範本.xlsx"
+        />
       ),
     },
     {
@@ -582,7 +433,7 @@ export function SetupPanel() {
     },
     {
       key: "rules",
-      label: "規則",
+      label: "遊戲設定",
       icon: SlidersHorizontal,
       summary: endSummary(ec),
       content: (
@@ -781,12 +632,15 @@ export function SetupPanel() {
         </section>
       ),
     },
+    assist,
   ];
 
   return (
     <>
       <StepSetup
-        title="遊戲設定"
+        title="大富翁設定"
+        zhuyinStepKey="assist"
+        zhuyinPosition="after"
         steps={steps}
         blocker={blocker}
         startLabel="開始遊戲"
@@ -795,12 +649,11 @@ export function SetupPanel() {
           setup: {
             settings: draftSettings,
             players: draftPlayers,
-            questions: source === "default" ? null : draftQuestions,
+            questions: saved ? questions : null,
+            title: saved?.title,
           },
         }}
-        onStart={() =>
-          begin(source === "default" ? DEFAULT_QUESTIONS : undefined)
-        }
+        onStart={() => begin(questions)}
       />
     </>
   );

@@ -1,105 +1,44 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Button } from "@/components/atoms/shadcn/button";
 import { DialogDescription } from "@/components/atoms/shadcn/dialog";
 import { Input } from "@/components/atoms/shadcn/input";
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@/components/atoms/shadcn/radio-group";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/atoms/shadcn/tabs";
-import { QuestionPreview } from "@/components/organisms/QuestionPreview";
+import { useAssistStep } from "@/components/organisms/AssistStep";
+import { QuestionBankStep } from "@/components/organisms/QuestionBankStep";
 import { StepSetup, type SetupStep } from "@/components/organisms/StepSetup";
 import { playableOf } from "@/lib/morris/game";
 import { DEFAULT_NAMES, useMorrisStore } from "@/lib/morris/store";
 import { DEFAULT_QUESTIONS } from "@/lib/questions/default-questions";
-import {
-  aiQuestionPrompt,
-  buildTemplateBlob,
-  parseQuestions,
-  rowsFromFile,
-} from "@/lib/questions/excel";
+import { activeQuestions, useSelectedBank } from "@/lib/questions/library";
 import {
   DIFFICULTIES,
   DIFFICULTY_CAP_LABEL,
   type Difficulty,
+  type Question,
 } from "@/lib/questions/types";
 import { SELECTED_OPTION } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
-import { Download, Library, SlidersHorizontal, Upload } from "lucide-react";
+import { Library, SlidersHorizontal } from "lucide-react";
 
-const PRESS = "transition-transform duration-press ease-out active:scale-[0.97]";
-const QUESTION_OPTIONS = { allowShort: false };
 const MIN_QUESTIONS = 6;
+/** 要當場判對錯：只出選擇與是非 */
+const playableAll = (questions: Question[]) => playableOf(questions, "hard");
 
 export function SetupPanel({ onStart }: { onStart: () => void }) {
-  const {
-    bank,
-    useDefault,
-    cap,
-    names,
-    setBank,
-    setUseDefault,
-    setCap,
-    setName,
-  } = useMorrisStore();
-  const [errors, setErrors] = useState<string[]>([]);
-  const [skipped, setSkipped] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const fileInput = useRef<HTMLInputElement>(null);
-
-  const active = useDefault ? DEFAULT_QUESTIONS : bank;
+  const { bankId, cap, names, selectBank, setCap, setName } = useMorrisStore();
+  const assist = useAssistStep();
+  const saved = useSelectedBank(bankId);
+  const active = saved ? activeQuestions(saved) : DEFAULT_QUESTIONS;
   const playable = playableOf(active, cap);
-
-  async function readFile(file: File | undefined) {
-    if (!file) return;
-    setErrors([]);
-    setSkipped(0);
-    try {
-      const result = parseQuestions(await rowsFromFile(file));
-      if (!result.ok) {
-        setErrors(result.errors.map((error) => `第 ${error.row} 列：${error.message}`));
-        setBank([]);
-        return;
-      }
-      const usable = result.questions.filter((question) => question.type !== "short");
-      setSkipped(result.questions.length - usable.length);
-      setBank(usable);
-    } catch {
-      setErrors(["檔案讀取失敗，請確認為 .xlsx 格式"]);
-    }
-  }
-
-  function downloadTemplate() {
-    const url = URL.createObjectURL(buildTemplateBlob(QUESTION_OPTIONS));
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = "圈叉搶答題庫範本.xlsx";
-    anchor.click();
-    URL.revokeObjectURL(url);
-    navigator.clipboard
-      .writeText(aiQuestionPrompt(QUESTION_OPTIONS))
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      })
-      .catch(() => {});
-  }
 
   const blocker =
     playable.length < MIN_QUESTIONS
-      ? useDefault
-        ? `這個難度上限只有 ${playable.length} 題，至少要 ${MIN_QUESTIONS} 題`
-        : bank.length === 0 && errors.length === 0
-          ? ""
-          : `篩選後只有 ${playable.length} 題，至少要 ${MIN_QUESTIONS} 題選擇或是非題`
+      ? playableAll(active).length < MIN_QUESTIONS
+        ? `這份題庫只有 ${playableAll(active).length} 題選擇或是非題，至少要 ${MIN_QUESTIONS} 題`
+        : `這個難度上限只有 ${playable.length} 題，至少要 ${MIN_QUESTIONS} 題`
       : !names[0].trim() || !names[1].trim()
         ? "兩隊都要有名字"
         : null;
@@ -109,104 +48,22 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
       key: "bank",
       label: "題庫",
       icon: Library,
-      summary: useDefault
-        ? `內建題庫 ${playableOf(DEFAULT_QUESTIONS, cap).length} 題`
-        : bank.length > 0
-          ? `自訂 ${bank.length} 題`
-          : "尚未匯入",
+      summary: `${saved ? saved.title : "內建題庫"} ${playableAll(active).length} 題`,
       done: playable.length >= MIN_QUESTIONS,
       content: (
-        <section className="space-y-5">
-          <header>
-            <h3 className="text-h3 text-ink">要用哪份題庫？</h3>
-            <DialogDescription className="mt-1">
-              兩隊各自把整份題庫洗牌，當下看到的題目不會相同。只收選擇題與是非題，至少要六題。
-            </DialogDescription>
-          </header>
-          <Tabs
-            value={useDefault ? "default" : "custom"}
-            onValueChange={(value) => setUseDefault(value === "default")}
-            className="gap-4"
-          >
-            <TabsList aria-label="題庫來源">
-              <TabsTrigger value="default" className="px-4">內建題庫</TabsTrigger>
-              <TabsTrigger value="custom" className="px-4">自訂題庫</TabsTrigger>
-            </TabsList>
-            <TabsContent value="default">
-              <QuestionPreview questions={playableOf(DEFAULT_QUESTIONS, "hard")} />
-            </TabsContent>
-            <TabsContent value="custom" className="space-y-3">
-              <button
-                type="button"
-                aria-label={bank.length > 0 ? "換一份 Excel" : "匯入 Excel 題庫"}
-                onClick={() => fileInput.current?.click()}
-                onDragOver={(event) => {
-                  event.preventDefault();
-                  setDragging(true);
-                }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  setDragging(false);
-                  readFile(event.dataTransfer.files[0]);
-                }}
-                className={cn(
-                  "flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-6 py-8 text-center transition-[background-color,border-color] duration-hover",
-                  dragging ? "border-ink bg-secondary" : "border-border hover:bg-muted/60",
-                )}
-              >
-                <Upload className="size-6 text-muted-foreground" aria-hidden />
-                <span className="text-sm font-semibold text-ink">
-                  {bank.length > 0 ? "換一份 Excel" : "把 .xlsx 拖進來，或點這裡選檔"}
-                </span>
-              </button>
-              <input
-                ref={fileInput}
-                type="file"
-                accept=".xlsx,.xls"
-                className="sr-only"
-                onChange={(event) => readFile(event.target.files?.[0])}
-              />
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-caption text-muted-foreground">
-                  下載範本會一併複製出題提示詞，貼給 AI 就能準備題庫。
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={cn("rounded-full", PRESS)}
-                  onClick={downloadTemplate}
-                >
-                  <Download className="size-4" aria-hidden />
-                  <span className="grid">
-                    <span className={cn("col-start-1 row-start-1", copied && "invisible")}>
-                      下載題庫範本
-                    </span>
-                    <span className={cn("col-start-1 row-start-1", !copied && "invisible")}>
-                      已複製提示詞
-                    </span>
-                  </span>
-                </Button>
-              </div>
-              {skipped > 0 && (
-                <p className="rounded-xl bg-warning-soft px-4 py-3 text-sm text-warning-ink">
-                  已略過 {skipped} 題簡答題——這個單元需要能自動判對錯。
-                </p>
-              )}
-              {errors.length > 0 && (
-                <ul className="max-h-40 overflow-y-auto rounded-xl bg-danger-soft px-4 py-3 text-sm leading-[1.75] text-danger-ink">
-                  {errors.map((error, index) => <li key={index}>{error}</li>)}
-                </ul>
-              )}
-              {bank.length > 0 && <QuestionPreview questions={bank} />}
-            </TabsContent>
-          </Tabs>
-        </section>
+        <QuestionBankStep
+          builtIn={DEFAULT_QUESTIONS}
+          playable={playableAll}
+          bankId={bankId}
+          onSelect={selectBank}
+          allowShort={false}
+          templateName="圈叉搶答題庫範本.xlsx"
+        />
       ),
     },
     {
       key: "rules",
-      label: "玩法",
+      label: "遊戲設定",
       icon: SlidersHorizontal,
       summary: `${playable.length} 題・紅圈藍叉`,
       content: (
@@ -249,18 +106,21 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
         </section>
       ),
     },
+    assist,
   ];
 
   return (
     <StepSetup
       title="圈叉搶答設定"
+      zhuyinStepKey="assist"
+      zhuyinPosition="after"
       steps={steps}
       blocker={blocker}
       startLabel="開始比賽"
       onStart={onStart}
       share={{
         unit: "quiz-morris",
-        setup: { bank: useDefault ? null : bank, cap, names },
+        setup: { bank: saved ? activeQuestions(saved) : null, title: saved?.title, cap, names },
       }}
     />
   );

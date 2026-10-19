@@ -17,6 +17,8 @@ export interface SharedSetup {
   settings: GameSettings;
   players: PlayerInput[];
   questions: Question[] | null;
+  /** 題庫名稱；收到的人在清單裡看得到選了哪份 */
+  title?: string;
 }
 
 const VERSION = "1";
@@ -31,7 +33,7 @@ const END_CODE: Record<EndCondition["type"], string> = {
 const optionalFlag = (b: boolean | undefined) =>
   b === undefined ? "" : b ? "1" : "0";
 
-function serialize({ settings: s, players, questions }: SharedSetup): string {
+function serialize({ settings: s, players, questions, title }: SharedSetup): string {
   const ec = s.endCondition;
   const endValue =
     ec.type === "time"
@@ -54,6 +56,7 @@ function serialize({ settings: s, players, questions }: SharedSetup): string {
     endValue,
     players.length,
     questions ? "c" : "d",
+    ...(questions && title ? [clean(title)] : []),
   ].join(US);
   const playerRows = players.map((p) =>
     [clean(p.name), p.color, p.character, diffCode(p.difficulty)].join(US),
@@ -110,7 +113,8 @@ function parse(text: string): SharedSetup {
 
   if (h[11] === "d") return { settings, players, questions: null };
   const questions = rows.slice(playerCount).map(questionFrom);
-  return { settings, players, questions };
+  // 第 13 欄題庫名稱是後來加的，舊連結沒有
+  return { settings, players, questions, ...(h[12] ? { title: h[12] } : {}) };
 }
 
 export const monopolyShare = defineCodec(serialize, parse);

@@ -39,3 +39,13 @@ describe("territoryShare", () => {
       expect(await territoryShare.decode("#" + hash)).toBeNull();
     }
   });
+
+  it("題庫名稱跟著分享連結走，舊連結沒有名稱", async () => {
+    const bank = [{ id: "q1", type: "boolean" as const, text: "太陽從東邊升起", answer: "是", difficulty: "easy" as const }];
+    const setup = { bank, cap: "hard" as const, names: ["藍隊", "紅隊"] as [string, string], countdown: 3 as const, size: "auto" as const, title: "三年級自然" };
+    const decoded = await territoryShare.decode("#" + await territoryShare.encode(setup));
+    expect(decoded?.title).toBe("三年級自然");
+    expect(decoded?.bank?.map((q) => q.text)).toEqual(["太陽從東邊升起"]);
+    const old = await raw.encode(["1", "h", "藍隊", "紅隊", "d"].join(US));
+    expect((await territoryShare.decode("#" + old))?.title).toBeUndefined();
+  });

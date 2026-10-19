@@ -11,6 +11,7 @@ import { useSound } from "@/lib/hooks/useSound";
 import type { PendingAction, Player, Question } from "@/lib/monopoly/types";
 import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
+import { useQuestionReading } from "@/lib/questions/speech";
 import { useState } from "react";
 import { SpotlightAvatar } from "./SpotlightAvatar";
 
@@ -33,6 +34,8 @@ export function QuestionDialog({
     pending?.kind === "buildQuestion" ||
     pending?.kind === "cardQuiz" ||
     pending?.kind === "passStartQuestion";
+  // 跳出題目先唸，唸完才開放作答
+  const reading = useQuestionReading(open ? question : null, question.text, true);
   if (!open) return null;
 
   // 標題：買地／蓋房用固定字樣；過起點加碼題標出答對／答錯獎金；互動答題卡顯示卡片描述
@@ -69,8 +72,9 @@ export function QuestionDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <p className="text-lg leading-[1.75] text-ink">{question.text}</p>
+        <p className="zhuyin-text text-lg leading-[1.75] text-ink">{question.text}</p>
 
+        <fieldset disabled={reading} className={cn("m-0 min-w-0 border-0 p-0 transition-opacity duration-hover", reading && "opacity-50")}>
         {revealed === null && question.type === "choice" && (
           <div className={cn(ANSWER_GRID, "grid-cols-2 gap-2 max-sm:grid-cols-1")}>
             {question.options?.map((opt) => (
@@ -125,6 +129,8 @@ export function QuestionDialog({
             </div>
           </div>
         )}
+
+        </fieldset>
 
         {revealed !== null && (
           <div className="space-y-3">

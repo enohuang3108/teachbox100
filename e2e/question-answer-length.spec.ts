@@ -31,14 +31,14 @@ for (const [route, start] of [["/ultimate-password", "開始使用"], ["/quiz/te
     await page.route(/\/(?:ingest|monitoring)(?:\/|$|\?)/, (route) => route.fulfill({ status: 204 }));
     await page.goto(route, { waitUntil: "domcontentloaded" });
     await page.getByRole("button", { name: start, exact: true }).click();
-    await page.getByRole("tab", { name: "自訂題庫" }).click();
     await page.locator('input[type="file"]').setInputFiles({ name: "長答案.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer });
     const warning = page.getByRole("status").filter({ hasText: "超過 10 個字" });
     await expect(warning).toContainText(longAnswer);
     await expect(warning).toContainText("仍可使用");
-    await expect(page.getByText("共 6 題", { exact: true })).toBeVisible();
+    await expect(page.getByRole("radio", { name: "長答案" })).toBeChecked();
     await expect(page.getByRole("button", { name: "下一步", exact: true })).toBeEnabled();
     if (route === "/quiz/territory" || route === "/quiz/morris") {
+      await page.getByRole("button", { name: "下一步", exact: true }).click();
       await page.getByRole("button", { name: "下一步", exact: true }).click();
       await page.getByRole("button", { name: "開始比賽", exact: true }).click();
       await page.getByRole("button", { name: "紅隊準備好了", exact: true }).click();
@@ -70,6 +70,7 @@ for (const [route, start] of [["/ultimate-password", "開始使用"], ["/quiz/te
     if (route === "/monopoly") {
       await page.getByRole("button", { name: "下一步", exact: true }).click();
       await page.getByRole("button", { name: "下一步", exact: true }).click();
+      await page.getByRole("button", { name: "下一步", exact: true }).click();
       await page.getByRole("dialog").getByRole("button", { name: "開始遊戲", exact: true }).click();
       // 固定骰點落在第 2 格買地，讓題目視窗的檢查可重現。
       await page.evaluate(() => { Math.random = () => 0.1; });
@@ -91,6 +92,7 @@ for (const [route, start] of [["/ultimate-password", "開始使用"], ["/quiz/te
     await page.evaluate(() => document.documentElement.classList.add("dark"));
     await page.screenshot({ animations: "disabled", scale: "css", path: `/tmp/answer-length-warning-dark-${test.info().project.name}.png` });
     await page.evaluate(() => document.documentElement.classList.remove("dark"));
+    await page.getByRole("button", { name: "下一步", exact: true }).click();
     await page.getByRole("button", { name: "下一步", exact: true }).click();
     await page.getByRole("button", { name: "開始遊戲", exact: true }).click();
     await expect(page.getByRole("dialog")).toHaveCount(0);

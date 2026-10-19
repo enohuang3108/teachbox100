@@ -35,6 +35,8 @@ import {
 import { ULTIMATE_PASSWORD_QUESTIONS } from "@/lib/ultimate-password/questions";
 import { useUltimatePasswordProgress, useUltimatePasswordStore } from "@/lib/ultimate-password/store";
 import { useSharedSetup } from "@/lib/share/useSharedSetup";
+import { activeQuestions, receiveSharedBank, useSelectedBank } from "@/lib/questions/library";
+import { useQuestionReading } from "@/lib/questions/speech";
 import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
 import { playableOf } from "@/lib/territory/rules";
@@ -63,11 +65,11 @@ export function UltimatePasswordGame() {
   const [setupOpen, setSetupOpen] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
 
-  const { bank, useDefault, cap, sound, setSound } = useUltimatePasswordStore();
+  const { bankId, cap, sound, setSound } = useUltimatePasswordStore();
+  const saved = useSelectedBank(bankId);
   useSharedSetup("ultimate-password", (setup) => {
     useUltimatePasswordStore.setState({
-      bank: setup.bank ?? [],
-      useDefault: setup.bank === null,
+      bankId: receiveSharedBank(setup.bank, setup.title),
       cap: setup.cap,
     });
     setSetupOpen(true);
@@ -81,6 +83,8 @@ export function UltimatePasswordGame() {
   const patch = useUltimatePasswordProgress.setState;
   const setNumberGuess = (numberGuess: number) => patch({ numberGuess });
   const [selectedAnswer, setSelectedAnswer] = useState("");
+  // 換一題就先唸題目，唸完才開放作答
+  const reading = useQuestionReading(answerAccepted ? null : question, question?.text ?? "", sound);
   const [message, setMessage] = useState("");
   const [feedback, setFeedback] = useState<AnswerFeedback | null>(null);
   const answerTransitionTimer = useRef<ReturnType<typeof setTimeout> | null>(
@@ -97,8 +101,8 @@ export function UltimatePasswordGame() {
 
   const range = round?.range ?? { low: 1, high: 100 };
   const playable = useMemo(
-    () => playableOf(useDefault ? ULTIMATE_PASSWORD_QUESTIONS : bank, cap),
-    [useDefault, bank, cap],
+    () => playableOf(saved ? activeQuestions(saved) : ULTIMATE_PASSWORD_QUESTIONS, cap),
+    [saved, cap],
   );
 
   const resetGame = useCallback(() => {
@@ -264,7 +268,7 @@ export function UltimatePasswordGame() {
                 <div className="w-full space-y-4">
                   {question ? (
                     <div className="rounded-3xl border-2 border-ink/10 bg-card px-8 py-7 shadow-sm">
-                      <h2 className="text-hero text-foreground">
+                      <h2 className="zhuyin-text text-hero text-foreground">
                         {question.text}
                       </h2>
                       {answerAccepted && (
@@ -310,10 +314,11 @@ export function UltimatePasswordGame() {
                           key={option}
                           type="button"
                           variant="outline"
-                          disabled={!!selectedAnswer}
+                          disabled={!!selectedAnswer || reading}
                           className={cn(
                             ANSWER_CONTENT,
-                            "min-h-24 transition-transform duration-press ease-out active:scale-[0.97] disabled:opacity-100",
+                            "min-h-24 transition-[transform,opacity] duration-press ease-out active:scale-[0.97] disabled:opacity-100",
+                            reading && "disabled:opacity-50",
                             answerTextClass(option),
                           )}
                           onClick={(event) =>

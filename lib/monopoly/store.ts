@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { adoptLegacyBank } from "@/lib/questions/library";
 import { defaultRng } from "./rng";
 import {
   answerCardQuiz,
@@ -24,13 +25,14 @@ import {
 interface MonopolyStore {
   game: GameState | null;
   draftSettings: GameSettings;
-  draftQuestions: Question[];
+  /** 選用的共用題庫（lib/questions/library）；null 用預設題庫 */
+  bankId: string | null;
   draftPlayers: PlayerInput[];
-  importQuestions: (questions: Question[]) => void;
+  selectBank: (id: string | null) => void;
   updateSettings: (patch: Partial<GameSettings>) => void;
   setPlayers: (players: PlayerInput[]) => void;
-  /** 傳 questions 就用那份開局（預設題庫），不覆蓋老師匯入的 draftQuestions */
-  begin: (questions?: Question[]) => void;
+  /** 用設定頁選好的題目開局 */
+  begin: (questions: Question[]) => void;
   roll: () => void;
   answer: (correct: boolean) => void;
   answerPassStart: (correct: boolean) => void;
@@ -45,26 +47,42 @@ interface MonopolyStore {
 
 const now = () => Date.now();
 
+/** v1 起始金額改成可設定；v2 匯入的題庫搬進各遊戲共用的清單，這裡只記選哪份 */
+export function migrateMonopoly(persisted: unknown, version: number) {
+  const s = persisted as {
+    draftSettings?: GameSettings;
+    draftQuestions?: Question[];
+    bankId?: string | null;
+  };
+  if (version < 1 && s.draftSettings) {
+    s.draftSettings = { ...s.draftSettings, startingMoney: 8000 };
+  }
+  if (version < 2) {
+    // 舊版有匯入過就是在用自訂題庫
+    s.bankId = adoptLegacyBank("legacy-monopoly", "大富翁自訂題庫", s.draftQuestions);
+    delete s.draftQuestions;
+  }
+  return s;
+}
+
 export const useMonopolyStore = create<MonopolyStore>()(
   persist(
     (set, get) => ({
       game: null,
       draftSettings: DEFAULT_SETTINGS,
-      draftQuestions: [],
+      bankId: null,
       draftPlayers: [],
 
-      importQuestions: (questions) => set({ draftQuestions: questions }),
+      selectBank: (bankId) => set({ bankId }),
       updateSettings: (patch) =>
         set((s) => ({ draftSettings: { ...s.draftSettings, ...patch } })),
       setPlayers: (players) => set({ draftPlayers: players }),
 
       begin: (questions) => {
         const { draftSettings, draftPlayers } = get();
-        const draftQuestions = questions ?? get().draftQuestions;
-        if (draftQuestions.length === 0 || draftPlayers.length < 2) return;
-        const settings = draftSettings;
+        if (questions.length === 0 || draftPlayers.length < 2) return;
         set({
-          game: startGame(settings, draftQuestions, draftPlayers, now()),
+          game: startGame(draftSettings, questions, draftPlayers, now()),
         });
       },
 
@@ -123,14 +141,8 @@ export const useMonopolyStore = create<MonopolyStore>()(
       name: "monopoly-game",
       // v1：起始金額開放老師設定。v0 時它不能改、畫面一律當 8000，
       // 但 persist 裡可能還留著更早的預設 15000，升級時統一換成 8000
-      version: 1,
-      migrate: (persisted, version) => {
-        const s = persisted as { draftSettings?: GameSettings };
-        if (version < 1 && s.draftSettings) {
-          s.draftSettings = { ...s.draftSettings, startingMoney: 8000 };
-        }
-        return s as never;
-      },
+      version: 2,
+      migrate: migrateMonopoly as never,
     },
   ),
 );

@@ -34,6 +34,7 @@ async function begin(page: Page, mode: "normal" | "unsupported" | "muted" | "rea
   await page.goto("/quiz/territory");
   await page.getByRole("button", { name: "開始使用", exact: true }).click();
   await page.getByRole("button", { name: "下一步", exact: true }).click();
+  await page.getByRole("button", { name: "下一步", exact: true }).click();
   await configure?.(page);
   await page.getByRole("button", { name: "開始比賽", exact: true }).click();
   await page.clock.install({ time: new Date("2026-10-17T12:00:00Z") });
@@ -143,12 +144,14 @@ for (const voice of ["test-female", "test-male"]) {
     await expect(page.getByText("3", { exact: true })).toHaveCount(0);
     await page.evaluate(() => (window as SpeechWindow).testUtterance!.onend?.({} as SpeechSynthesisEvent));
     await expect(page.getByText("3", { exact: true })).toBeVisible();
-    const prefs = await page.evaluate(() => JSON.parse(localStorage.getItem("territory-game")!).state);
+    // 朗讀偏好各出題遊戲共用一份
+    const prefs = await page.evaluate(() => JSON.parse(localStorage.getItem("question-speech")!).state);
     expect(prefs.speechRate).toBe(1.2);
     expect(prefs.voiceURI).toBe(voice);
     await page.clock.resume();
     await page.reload();
     await page.getByRole("button", { name: "開始使用", exact: true }).click();
+    await page.getByRole("button", { name: "下一步", exact: true }).click();
     await page.getByRole("button", { name: "下一步", exact: true }).click();
     await expect(page.getByLabel("朗讀語速", { exact: true })).toHaveValue("1.2");
     await expect(page.getByLabel("朗讀聲音", { exact: true })).toHaveValue(voice);
@@ -163,7 +166,6 @@ test("關閉題目朗讀時保留音效並直接倒數", async ({ page }) => {
   });
   await expect(page.getByText("3", { exact: true })).toBeVisible();
   expect(await page.evaluate(() => (window as SpeechWindow).testUtterance)).toBeUndefined();
-  const prefs = await page.evaluate(() => JSON.parse(localStorage.getItem("territory-game")!).state);
-  expect(prefs.reading).toBe(false);
-  expect(prefs.sound).toBe(true);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("question-speech")!).state.reading)).toBe(false);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("territory-game")!).state.sound)).toBe(true);
 });

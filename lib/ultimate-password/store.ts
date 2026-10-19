@@ -2,37 +2,42 @@ import type { QuestionDeck } from "@/lib/questions/deck";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { Round } from "@/lib/ultimate-password/game";
+import { adoptLegacyBank } from "@/lib/questions/library";
 import type { Difficulty, Question } from "@/lib/questions/types";
 
 /**
- * 老師的題庫與難度存在這台裝置；密碼與範圍不存，重整就重來。
- * 選「內建題庫」時 bank 留著，切回自訂還在。
+ * 老師選的題庫與難度存在這台裝置；密碼與範圍不存，重整就重來。
+ * 題庫各遊戲共用（lib/questions/library），這裡只記選哪份，null 用內建。
  */
 interface UltimatePasswordStore {
-  bank: Question[];
-  /** true = 用內建題庫，不動 bank */
-  useDefault: boolean;
+  bankId: string | null;
   cap: Difficulty;
   sound: boolean;
-  setBank: (bank: Question[]) => void;
-  setUseDefault: (v: boolean) => void;
+  selectBank: (id: string | null) => void;
   setCap: (cap: Difficulty) => void;
   setSound: (v: boolean) => void;
+}
+
+/** v0 自己存一份 bank：搬進共用題庫清單 */
+export function migrateUltimatePassword(persisted: unknown, version: number) {
+  const state = persisted as Record<string, unknown>;
+  if (version >= 1) return state;
+  const { bank, useDefault, ...rest } = state as { bank?: Question[]; useDefault?: boolean };
+  const id = adoptLegacyBank("legacy-ultimate-password", "終極密碼自訂題庫", bank);
+  return { ...rest, bankId: id && useDefault === false ? id : null };
 }
 
 export const useUltimatePasswordStore = create<UltimatePasswordStore>()(
   persist(
     (set) => ({
-      bank: [],
-      useDefault: true,
+      bankId: null,
       cap: "hard",
       sound: true,
-      setBank: (bank) => set({ bank }),
-      setUseDefault: (useDefault) => set({ useDefault }),
+      selectBank: (bankId) => set({ bankId }),
       setCap: (cap) => set({ cap }),
       setSound: (sound) => set({ sound }),
     }),
-    { name: "ultimate-password-game" },
+    { name: "ultimate-password-game", version: 1, migrate: migrateUltimatePassword as never },
   ),
 );
 

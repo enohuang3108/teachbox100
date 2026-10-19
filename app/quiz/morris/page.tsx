@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { pages, type PageWithKey } from "@/app/pages.config";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
 import { SettingsButton } from "@/components/atoms/SettingsButton";
@@ -22,6 +22,7 @@ import { ACTION_BTN, Tip } from "@/components/templates/GamePageTemplate";
 import { GAME_STAGE_ID, PageTemplate } from "@/components/templates/PageTemplate";
 import { useSound } from "@/lib/hooks/useSound";
 import { useMorrisStore } from "@/lib/morris/store";
+import { activeQuestions, receiveSharedBank, useSelectedBank } from "@/lib/questions/library";
 import { DEFAULT_QUESTIONS } from "@/lib/questions/default-questions";
 import { useSharedSetup } from "@/lib/share/useSharedSetup";
 import { FlagOff } from "lucide-react";
@@ -40,18 +41,19 @@ export default function MorrisPage() {
   const [confirmSettings, setConfirmSettings] = useState(false);
   const [confirmEnd, setConfirmEnd] = useState(false);
 
-  const { bank, useDefault, cap, names, sound, setSound } = useMorrisStore();
+  const { bankId, cap, names, sound, setSound } = useMorrisStore();
+  const saved = useSelectedBank(bankId);
   useSharedSetup("quiz-morris", (setup) => {
     useMorrisStore.setState({
-      bank: setup.bank ?? [],
-      useDefault: setup.bank === null,
+      bankId: receiveSharedBank(setup.bank, setup.title),
       cap: setup.cap,
       names: setup.names,
     });
     setSetupOpen(true);
   });
 
-  const active = useDefault ? DEFAULT_QUESTIONS : bank;
+  // 每次 render 都 filter 會變成新陣列，遊戲會當成換了題庫而重開
+  const active = useMemo(() => (saved ? activeQuestions(saved) : DEFAULT_QUESTIONS), [saved]);
   const game = useMorrisGame(active, cap);
   useGameSounds(game.state, sound);
 

@@ -1,0 +1,41 @@
+import { describe, expect, it } from "vitest";
+import { migrateTerritory } from "@/lib/territory/store";
+import { useSpeechStore } from "./speech";
+import { activeQuestions, adoptLegacyBank, findBank, useQuestionLibrary } from "./library";
+import type { Question } from "./types";
+
+const q = (text: string): Question => ({ id: text, type: "boolean", text, answer: "是", difficulty: "easy" });
+
+describe("共用題庫清單", () => {
+  it("同名題庫覆蓋並排到最上面，帶 id 是改同一份", () => {
+    const { saveBank, removeBank } = useQuestionLibrary.getState();
+    saveBank({ title: "自然", questions: [q("a")], off: [] });
+    const math = saveBank({ title: "數學", questions: [q("b")], off: [] });
+    const nature = saveBank({ title: "自然", questions: [q("c"), q("d")], off: ["d"] });
+    expect(useQuestionLibrary.getState().banks.map((b) => b.title)).toEqual(["自然", "數學"]);
+    expect(activeQuestions(findBank(useQuestionLibrary.getState().banks, nature)!)).toEqual([q("c")]);
+    saveBank({ id: math, title: "數學 2", questions: [q("b")], off: [] });
+    expect(useQuestionLibrary.getState().banks.map((b) => b.title)).toEqual(["數學 2", "自然"]);
+    removeBank(nature);
+    expect(findBank(useQuestionLibrary.getState().banks, nature)).toBeNull();
+  });
+
+  it("舊版單元自己存的題庫搬進共用清單，重複搬不會多一份", () => {
+    useQuestionLibrary.setState({ banks: [] });
+    expect(adoptLegacyBank("legacy-x", "舊題庫", [])).toBeNull();
+    adoptLegacyBank("legacy-x", "舊題庫", [q("a")]);
+    adoptLegacyBank("legacy-x", "舊題庫", [q("a")]);
+    expect(useQuestionLibrary.getState().banks).toHaveLength(1);
+  });
+
+  it("領地戰舊資料：自訂題庫搬進清單並繼續選它，朗讀偏好搬進共用設定", () => {
+    useQuestionLibrary.setState({ banks: [] });
+    const state = migrateTerritory({ bank: [q("a")], useDefault: false, cap: "easy", reading: false, speechRate: 1.2, voiceURI: "v" }, 0);
+    expect(state).toEqual({ cap: "easy", bankId: "legacy-territory" });
+    expect(useQuestionLibrary.getState().banks[0]).toMatchObject({ title: "領地戰自訂題庫", questions: [q("a")] });
+    expect(useSpeechStore.getState()).toMatchObject({ reading: false, speechRate: 1.2, voiceURI: "v" });
+    expect(migrateTerritory({ bank: [], useDefault: true }, 0)).toEqual({ bankId: null });
+    migrateTerritory({ reading: true }, 0);
+    expect(useSpeechStore.getState().speechRate).toBe(1.2); // 沒存的欄位不蓋掉
+  });
+});

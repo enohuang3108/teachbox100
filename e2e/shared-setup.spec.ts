@@ -82,6 +82,7 @@ test("大富翁的非預設玩家與骰子規則會傳到新瀏覽器", async ({
   await page.getByRole("textbox", { name: "第 1 位玩家名字" }).fill("星星隊");
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("radiogroup", { name: "骰子數量" }).getByRole("radio", { name: "1 顆" }).click();
+  await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "分享設定" }).click();
   const long = page.getByRole("textbox", { name: "完整連結" });
   await expect(long).toHaveValue(/#.+/);

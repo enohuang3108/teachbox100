@@ -12,6 +12,7 @@ test("領地戰可選小場地與 5 秒倒數，兩隊準備後先看題再倒�
   await page.locator('[id="每題倒數-5"]').click();
   await expect(page.locator('[id="場地大小-small"]')).toBeChecked();
   await expect(page.locator('[id="每題倒數-5"]')).toBeChecked();
+  await page.getByRole("button", { name: "下一步", exact: true }).click();
   await page.getByRole("button", { name: "開始比賽", exact: true }).click();
 
   const board = page.locator("[data-territory-board]");

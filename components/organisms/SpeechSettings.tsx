@@ -3,20 +3,21 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Switch } from "@/components/atoms/shadcn/switch";
 import { Button } from "@/components/atoms/shadcn/button";
-import { questionVoice, SPEECH_RATES } from "@/lib/territory/speech";
-import { useTerritoryStore } from "@/lib/territory/store";
+import { chineseVoices, questionVoice, SPEECH_RATES, useSpeechStore } from "@/lib/questions/speech";
 
 export function SpeechSettings() {
-  const { reading, speechRate, voiceURI, setReading, setSpeechRate, setVoiceURI } = useTerritoryStore();
+  const { reading, speechRate, voiceURI, setReading, setSpeechRate, setVoiceURI } = useSpeechStore();
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [error, setError] = useState(false);
+  // Firefox 核心（含 Zen）在 macOS 朗讀結尾會爆音，是瀏覽器本身的問題；設定視窗只在 client 開
+  const [gecko] = useState(() => typeof navigator !== "undefined" && /firefox/i.test(navigator.userAgent));
   const previewing = useRef<SpeechSynthesisUtterance | null>(null);
   const id = useId();
 
   useEffect(() => {
     const synth = window.speechSynthesis;
     if (!synth) return;
-    const update = () => setVoices(synth.getVoices().filter((voice) => /^zh(?:[-_]|$)/i.test(voice.lang)));
+    const update = () => setVoices(chineseVoices(synth.getVoices()));
     update();
     synth.addEventListener?.("voiceschanged", update);
     return () => {
@@ -59,7 +60,8 @@ export function SpeechSettings() {
         <Switch id={`${id}-reading`} checked={reading}
           onCheckedChange={(on) => { stopPreview(); setReading(on); }} />
       </label>
-      <p className="text-caption text-muted-foreground">開啟後，題目唸完才開始倒數；關閉時直接倒數。頂列靜音會一併關閉朗讀。</p>
+      <p className="text-caption text-muted-foreground">開啟後，出題時先唸題目，唸完才開放作答。頂列靜音會一併關閉朗讀。</p>
+      {gecko && <p className="text-caption text-warning-ink">這個瀏覽器朗讀結尾可能會有爆音，建議改用 Chrome。</p>}
       <fieldset disabled={!reading} className="space-y-4 disabled:opacity-50">
         <label htmlFor={`${id}-rate`} className="flex flex-col gap-2">
           <span className="text-body text-ink">朗讀語速</span>

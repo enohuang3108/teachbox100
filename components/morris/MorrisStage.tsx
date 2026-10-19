@@ -10,7 +10,8 @@ import {
 } from "@/lib/morris/game";
 import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
-import { Check, Circle, X } from "lucide-react";
+import { Check, Circle, Volume2, X } from "lucide-react";
+import { useReadAloud } from "@/lib/questions/speech";
 import type { MorrisGame } from "./useMorrisGame";
 
 const SIDE_COLOR: Record<Side, string> = {
@@ -53,6 +54,7 @@ export function MorrisStage({
           lane={state.lanes.red}
           game={game}
           nameOf={nameOf}
+          sound={sound}
         />
         <Board game={game} nameOf={nameOf} />
         <QuestionLane
@@ -61,6 +63,7 @@ export function MorrisStage({
           lane={state.lanes.blue}
           game={game}
           nameOf={nameOf}
+          sound={sound}
         />
       </div>
 
@@ -114,14 +117,18 @@ function QuestionLane({
   lane,
   game,
   nameOf,
+  sound,
 }: {
   side: Side;
   name: string;
   lane: Lane;
   game: MorrisGame;
   nameOf: (side: Side) => string;
+  sound: boolean;
 }) {
   const { state } = game;
+  // 兩隊各看各的題目，同時自動唸會疊在一起：改成按喇叭才唸
+  const readAloud = useReadAloud();
   const question = lane.current;
   const disabled = state.phase !== "quiz" || lane.cooldown > 0;
   const answered = lane.feedback;
@@ -172,10 +179,21 @@ function QuestionLane({
         <LaneMessage title="等對方換題" body="下一題和對方相同，稍等一下。" />
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex flex-1 items-center justify-center py-4">
-            <p className="text-center text-[clamp(1.25rem,2.6cqw,3rem)] leading-[1.5] font-bold text-balance text-ink">
+          <div className="flex flex-1 items-center justify-center gap-2 py-4">
+            <p className="zhuyin-text text-center text-[clamp(1.25rem,2.6cqw,3rem)] leading-[1.5] font-bold text-balance text-ink">
               {question.text}
             </p>
+            {readAloud && sound && (
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={`${name}唸題目`}
+                onClick={() => readAloud(question.text)}
+                className="shrink-0 rounded-full text-muted-foreground transition-transform duration-press ease-out active:scale-[0.97]"
+              >
+                <Volume2 className="size-5" aria-hidden />
+              </Button>
+            )}
           </div>
           {/* 回饋夾在題目與選項之間、位置先留好：選項永遠貼在底部，學生站在電子白板前伸手就按得到 */}
           <div className="min-h-12 md:min-h-[4cqw]">

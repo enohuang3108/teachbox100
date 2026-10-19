@@ -9,6 +9,7 @@ import { preloadMonopoly } from "@/lib/monopoly/preload";
 import { useMonopolyStore } from "@/lib/monopoly/store";
 import { useEffect, useState } from "react";
 import { useSharedSetup } from "@/lib/share/useSharedSetup";
+import { receiveSharedBank } from "@/lib/questions/library";
 import { SetupPanel } from "./SetupPanel";
 
 const page = pages.monopoly;
@@ -39,7 +40,7 @@ export function MonopolyGate({
       game: null,
       draftSettings: setup.settings,
       draftPlayers: setup.players,
-      draftQuestions: setup.questions ?? [],
+      bankId: receiveSharedBank(setup.questions, setup.title),
     });
     preloadMonopoly();
     setEntered(true);

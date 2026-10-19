@@ -3,7 +3,7 @@ import type { Difficulty, Question } from "@/lib/questions/types";
 import { DIFFICULTIES } from "@/lib/questions/types";
 import { clean, defineCodec, fail, RS, US } from "@/lib/share/codec";
 import { BOARD_SIZES, type BoardSize } from "./rules";
-import { SPEECH_RATES } from "./speech";
+import { SPEECH_RATES } from "@/lib/questions/speech";
 import { COUNTDOWNS, type Countdown } from "./store";
 
 /** bank 為 null 代表用內建題庫，連結就不用塞整份題目 */
@@ -16,6 +16,8 @@ export interface TerritorySetup {
   reading?: boolean;
   speechRate?: number;
   voiceURI?: string;
+  /** 題庫名稱；收到的人在清單裡看得到選了哪份 */
+  title?: string;
 }
 
 const VERSION = "1";
@@ -31,9 +33,10 @@ export const territoryShare = defineCodec<TerritorySetup>(
         s.bank ? "c" : "d",
         String(s.countdown),
         s.size,
-        ...(s.reading !== undefined || s.speechRate !== undefined || s.voiceURI !== undefined
+        ...(s.reading !== undefined || s.speechRate !== undefined || s.voiceURI !== undefined || s.title !== undefined
           ? [s.reading === false ? "0" : "1", String(s.speechRate ?? 0.9), clean(s.voiceURI ?? "")]
           : []),
+        ...(s.title !== undefined ? [clean(s.title)] : []),
       ].join(US),
       ...(s.bank ?? []).map(questionRow),
     ].join(RS),
@@ -53,6 +56,7 @@ export const territoryShare = defineCodec<TerritorySetup>(
     };
     return {
       ...speech,
+      ...(h[10] === undefined ? {} : { title: h[10] }),
       cap,
       names: [h[2] ?? "", h[3] ?? ""],
       countdown,

@@ -40,6 +40,7 @@ test("/ultimate-password 先選題庫與難度，再答題縮小範圍並顯示�
   await expect(dialog.getByText("要用哪份題庫？")).toBeVisible();
   await dialog.getByRole("button", { name: "下一步" }).click();
   await expect(dialog.getByText("題目要多難？")).toBeVisible();
+  await dialog.getByRole("button", { name: "下一步" }).click();
   await dialog.getByRole("button", { name: "開始遊戲" }).click();
   await expect(page.getByRole("heading", { name: "質數 13 大於 10 且小於 20。" })).toBeVisible();
   await expect(page.getByText("目前密碼範圍：1 到 100")).toBeVisible();
@@ -75,23 +76,20 @@ test("/ultimate-password 答錯題目先揭曉正解，再換題", async ({ page
   await page.goto("/ultimate-password", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "開始使用" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "下一步" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "下一步" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "開始遊戲" }).click();
   await page.getByRole("button", { name: "否", exact: true }).click();
   await expect(page.getByRole("status", { name: "答錯了，正確答案：是" })).toBeVisible();
   await expect(page.getByRole("button", { name: "是", exact: true })).toBeVisible();
 });
 
-test("/ultimate-password 自訂題庫還沒匯入時擋住開始，難度重整後還記得", async ({ page }) => {
+test("/ultimate-password 難度重整後還記得", async ({ page }) => {
   await page.goto("/ultimate-password", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "開始使用" }).click();
   const dialog = page.getByRole("dialog");
-  await dialog.getByRole("tab", { name: "自訂題庫" }).click();
-  await dialog.getByRole("button", { name: "下一步" }).click();
-  await expect(dialog.getByRole("button", { name: "開始遊戲" })).toBeDisabled();
-  await dialog.getByRole("button", { name: "上一步" }).click();
-  await dialog.getByRole("tab", { name: "內建題庫" }).click();
   await dialog.getByRole("button", { name: "下一步" }).click();
   await dialog.getByRole("radio", { name: "普通以下" }).click();
+  await dialog.getByRole("button", { name: "下一步" }).click();
   await expect(dialog.getByRole("button", { name: "開始遊戲" })).toBeEnabled();
 
   await page.reload();
@@ -104,6 +102,7 @@ test("/ultimate-password 重新整理後接著玩，密碼與範圍都還在", a
   await page.addInitScript(() => { Math.random = () => 0.11; });
   await page.goto("/ultimate-password", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "開始使用" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "下一步" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "下一步" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "開始遊戲" }).click();
   await page.getByRole("button", { name: "是", exact: true }).click();
@@ -129,6 +128,7 @@ test("/ultimate-password 關閉分頁後清空局面，保留老師設定", asyn
   const setup = page.getByRole("dialog");
   await setup.getByRole("button", { name: "下一步" }).click();
   await setup.getByRole("radio", { name: "普通以下" }).click();
+  await setup.getByRole("button", { name: "下一步" }).click();
   await setup.getByRole("button", { name: "開始遊戲" }).click();
   await page.getByRole("button", { name: "12", exact: true }).click();
   await page.getByRole("button", { name: "確認密碼" }).click();
@@ -140,6 +140,7 @@ test("/ultimate-password 關閉分頁後清空局面，保留老師設定", asyn
   await newPage.getByRole("button", { name: "開始使用" }).click();
   await newPage.getByRole("dialog").getByRole("button", { name: "下一步" }).click();
   await expect(newPage.getByRole("dialog").getByRole("radio", { name: "普通以下" })).toBeChecked();
+  await newPage.getByRole("dialog").getByRole("button", { name: "下一步" }).click();
   await newPage.getByRole("dialog").getByRole("button", { name: "開始遊戲" }).click();
   await expect(newPage.getByText("目前密碼範圍：1 到 100")).toBeVisible();
 });
@@ -157,6 +158,7 @@ test("/ultimate-password 整份出完前不重複，重新整理後延續順序"
   });
   await page.goto("/ultimate-password", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "開始使用" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "下一步" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "下一步" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "開始遊戲" }).click();
   const headings: string[] = [];

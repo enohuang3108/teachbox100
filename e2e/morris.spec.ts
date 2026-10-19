@@ -30,6 +30,7 @@ test("圈叉搶答會鎖場下棋、暫停答錯冷卻並可手動和局", async
   await page.goto("/quiz/morris", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "開始使用", exact: true }).click();
   await page.getByRole("button", { name: "下一步", exact: true }).click();
+  await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "開始比賽", exact: true }).click();
 
   await expect(page.getByText("站到自己的題目旁，準備好再按。", { exact: true })).toHaveCount(0);
@@ -137,6 +138,7 @@ test("圈叉搶答連線獲勝時畫出大圈叉並貼上獲勝紙膠帶", async
   await page.goto("/quiz/morris", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "開始使用", exact: true }).click();
   await page.getByRole("button", { name: "下一步", exact: true }).click();
+  await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "開始比賽", exact: true }).click();
   await page.getByRole("button", { name: "紅隊準備好了", exact: true }).click();
   await page.getByRole("button", { name: "藍隊準備好了", exact: true }).click();

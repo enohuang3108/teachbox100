@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { pages, type PageWithKey } from "@/app/pages.config";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
 import { SettingsButton } from "@/components/atoms/SettingsButton";
@@ -26,6 +26,8 @@ import { useTerritoryGame } from "@/components/territory/useTerritoryGame";
 import { useSound } from "@/lib/hooks/useSound";
 import { DEFAULT_QUESTIONS } from "@/lib/questions/default-questions";
 import { useSharedSetup } from "@/lib/share/useSharedSetup";
+import { activeQuestions, receiveSharedBank, useSelectedBank } from "@/lib/questions/library";
+import { useSpeechStore } from "@/lib/questions/speech";
 import { useTerritoryStore } from "@/lib/territory/store";
 
 const pageInfo: PageWithKey = {
@@ -42,16 +44,20 @@ export default function TerritoryPage() {
   const [setupOpen, setSetupOpen] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
 
-  const { bank, useDefault, cap, names, countdown, size, sound, setSound, reading, speechRate, voiceURI } =
-    useTerritoryStore();
+  const { bankId, cap, names, countdown, size, sound, setSound } = useTerritoryStore();
+  const saved = useSelectedBank(bankId);
+  // 每次 render 都 filter 會變成新陣列，遊戲會當成換了題庫而重開
+  const questions = useMemo(() => (saved ? activeQuestions(saved) : DEFAULT_QUESTIONS), [saved]);
   useSharedSetup("quiz-territory", (setup) => {
+    // 收到的題庫存進清單並選它，老師一眼看得到用的是哪份
     useTerritoryStore.setState({
-      bank: setup.bank ?? [],
-      useDefault: setup.bank === null,
+      bankId: receiveSharedBank(setup.bank, setup.title),
       cap: setup.cap,
       names: setup.names,
       countdown: setup.countdown,
       size: setup.size,
+    });
+    useSpeechStore.setState({
       reading: setup.reading ?? true,
       speechRate: setup.speechRate ?? 0.9,
       voiceURI: setup.voiceURI ?? "",
@@ -62,7 +68,7 @@ export default function TerritoryPage() {
   const { playCorrectSound, playWrongSound, playCountdownTick, playGoSound } =
     useSound();
   const game = useTerritoryGame(
-    useDefault ? DEFAULT_QUESTIONS : bank,
+    questions,
     cap,
     countdown,
     size,
@@ -73,7 +79,6 @@ export default function TerritoryPage() {
     },
     sound,
     entered && !setupOpen && !confirmLeave,
-    { reading, speechRate, voiceURI },
   );
 
   // 唸完後每換一個數字響一拍，選項出現時再響一聲「開始」
