@@ -38,3 +38,6 @@ export function withinCap(q: Question, cap: Difficulty): boolean {
   return DIFFICULTIES.indexOf(difficultyOf(q)) <= DIFFICULTIES.indexOf(cap);
 }
 
+
+// 放這裡不放 speech.ts：那支是 "use client"，伺服器端解分享連結 import 到的會是 client reference 而不是陣列
+export const SPEECH_RATES = [0.7, 0.9, 1, 1.2, 1.4] as const;

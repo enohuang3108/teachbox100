@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export const SPEECH_RATES = [0.7, 0.9, 1, 1.2, 1.4] as const;
+export { SPEECH_RATES } from "@/lib/questions/types";
 
 export interface SpeechPreferences {
   reading: boolean;

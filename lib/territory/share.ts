@@ -1,9 +1,8 @@
 import { questionFrom, questionRow } from "@/lib/questions/share";
 import type { Difficulty, Question } from "@/lib/questions/types";
-import { DIFFICULTIES } from "@/lib/questions/types";
+import { DIFFICULTIES, SPEECH_RATES } from "@/lib/questions/types";
 import { clean, defineCodec, fail, RS, US } from "@/lib/share/codec";
 import { BOARD_SIZES, type BoardSize } from "./rules";
-import { SPEECH_RATES } from "@/lib/questions/speech";
 import { COUNTDOWNS, type Countdown } from "./store";
 
 /** bank 為 null 代表用內建題庫，連結就不用塞整份題目 */
