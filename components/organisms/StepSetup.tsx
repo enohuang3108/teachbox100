@@ -38,6 +38,7 @@ export function StepSetup({
   startLabel,
   onStart,
   share,
+  offerZhuyin = false,
   zhuyinStepKey,
   zhuyinPosition = "before",
 }: {
@@ -48,7 +49,9 @@ export function StepSetup({
   onStart: () => void;
   /** 給了就在最後一步的開始鈕左邊放「分享設定」；設定還沒填完（有 blocker）不能分享 */
   share?: ShareConfig;
-  /** 指定注音開關所屬步驟；未指定時每站都顯示。 */
+  /** 有題目或選項可以標注音才開；注音只套在 `.zhuyin-text`，沒有題目的單元給了開關也沒效果 */
+  offerZhuyin?: boolean;
+  /** 指定注音開關所屬步驟（給了就等於開啟注音）；未指定時每站都顯示。 */
   zhuyinStepKey?: string;
   /** 注音開關放在該步驟內容前方或後方。 */
   zhuyinPosition?: "before" | "after";
@@ -68,7 +71,7 @@ export function StepSetup({
   const blocked = blocker != null;
   const current = steps[index];
   const isLast = index === steps.length - 1;
-  const zhuyinControl = (!zhuyinStepKey || current.key === zhuyinStepKey) ? (
+  const zhuyinControl = (zhuyinStepKey ? current.key === zhuyinStepKey : offerZhuyin) ? (
     <div className={zhuyinPosition === "after" ? "mt-6" : "mb-6"}>
       <label htmlFor={zhuyinId} className="flex cursor-pointer items-center justify-between gap-4">
         <span className="text-sm font-semibold text-ink">顯示注音</span>

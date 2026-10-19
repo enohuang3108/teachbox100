@@ -25,6 +25,7 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
       blocker={tables.length === 0 ? "至少選一段乘法表" : null}
       startLabel="開始練習"
       share={{ unit: "multiplication", setup: { tables, count } }}
+      offerZhuyin
       onStart={onStart}
       steps={[
         {

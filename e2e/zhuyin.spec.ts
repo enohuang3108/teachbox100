@@ -3,19 +3,33 @@ import { pages } from "../app/pages.config";
 
 // 認識新臺幣與噪音計沒有遊戲設定面板。
 const units = Object.entries(pages).filter(([key]) => !["coin-introduction", "noise"].includes(key));
+// 注音只套在題目與作答選項：有題目可讀的單元才給開關，其他單元給了也沒東西可換
+const QUIZ = ["quiz-territory", "quiz-morris", "ultimate-password", "monopoly"];
+const WITH_QUESTIONS = [...QUIZ, "coin-value", "coin-equivalent", "coin-pay", "coin-change", "coin-buy", "clock-current-time", "multiplication"];
 
 for (const [key, unit] of units) {
-  test(`${key} 設定提供注音選項`, async ({ page }) => {
+  const offered = WITH_QUESTIONS.includes(key);
+  test(`${key} 設定${offered ? "提供" : "不提供"}注音選項`, async ({ page }) => {
     test.setTimeout(120_000);
     await page.goto(unit.path);
     await page.getByRole("button", { name: /^開始(使用|練習|遊戲)$/ }).click();
-    // 出題遊戲的注音放在最後一步「輔助」
-    if (["quiz-territory", "quiz-morris", "ultimate-password", "monopoly"].includes(key)) {
-      await expect(page.getByRole("switch", { name: "顯示注音", exact: true })).toHaveCount(0);
-      const next = page.getByRole("dialog").getByRole("button", { name: "下一步", exact: true });
+    const toggle = page.getByRole("dialog").getByRole("switch", { name: "顯示注音", exact: true });
+    await expect(page.getByRole("dialog")).toBeVisible();
+    // 出題遊戲的注音放在最後一步「輔助」；其他單元每一站都檢查
+    const next = page.getByRole("dialog").getByRole("button", { name: "下一步", exact: true });
+    if (QUIZ.includes(key)) {
+      await expect(toggle).toHaveCount(0);
       while (await next.isVisible()) await next.click();
     }
-    await expect(page.getByRole("dialog").getByRole("switch", { name: "顯示注音", exact: true })).not.toBeChecked();
+    if (offered) {
+      await expect(toggle).not.toBeChecked();
+      return;
+    }
+    await expect(toggle).toHaveCount(0);
+    while (await next.isVisible()) {
+      await next.click();
+      await expect(toggle).toHaveCount(0);
+    }
   });
 }
 

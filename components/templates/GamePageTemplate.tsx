@@ -143,6 +143,8 @@ export const GamePageTemplate = ({
             title={`${pageInfo.title}設定`}
             startLabel="開始練習"
             share={share}
+            // 用這個樣板的金錢與時鐘練習都有題目可標注音
+            offerZhuyin
             onStart={() => {
               resetGame();
               setSetupOpen(false);
