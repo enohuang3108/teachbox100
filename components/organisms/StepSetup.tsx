@@ -101,7 +101,7 @@ export function StepSetup({
   ) : null;
 
   return (
-    <div className="grid h-[min(680px,90dvh)] grid-rows-[auto_1fr] md:grid-cols-[232px_1fr] md:grid-rows-1">
+    <div className="grid h-[min(680px,90dvh)] grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr] md:grid-cols-[232px_minmax(0,1fr)] md:grid-rows-1">
       <nav
         aria-label="設定步驟"
         className="flex gap-1 border-b border-border bg-muted/60 p-3 pr-12 md:flex-col md:border-r md:border-b-0 md:p-4 md:pr-4"
@@ -155,7 +155,7 @@ export function StepSetup({
         })}
       </nav>
 
-      <div className="grid min-h-0 grid-rows-[1fr_auto]">
+      <div className="grid min-h-0 grid-cols-[minmax(0,1fr)] grid-rows-[1fr_auto]">
         <div
           key={current.key}
           className="min-h-0 overflow-y-auto px-5 py-6 animate-in fade-in-0 slide-in-from-bottom-1 duration-200 motion-reduce:slide-in-from-bottom-0 md:px-8"

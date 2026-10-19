@@ -70,13 +70,16 @@ const sameQuestions = (a: Question[], b: Question[]) => content(a) === content(b
 /**
  * 分享連結帶來的題庫存進清單並回傳 id 讓單元選它；連結用內建題庫時回 null。
  * 不用 saveBank 的同名覆蓋：老師自己的同名題庫不能被別人的連結蓋掉，撞名就另存「名稱（分享）」；
- * 同一份題目已經在清單裡（同一條連結再開）就選回那份，不再多存。
+ * 同一份題目已經在清單裡（同一條連結再開）就選回那份，不再多存；連結只帶勾選的題目，
+ * 所以先比對方正在出的題，比不到但全部題目相同時把停用的勾回來，照分享者的勾選出題。
  */
 export function receiveSharedBank(bank: Question[] | null, title?: string) {
   if (!bank) return null;
   const { banks, saveBank } = useQuestionLibrary.getState();
-  const known = banks.find((b) => sameQuestions(b.questions, bank));
+  const known = banks.find((b) => sameQuestions(activeQuestions(b), bank));
   if (known) return known.id;
+  const whole = banks.find((b) => sameQuestions(b.questions, bank));
+  if (whole) return saveBank({ ...whole, off: [] });
   const base = title || "分享的題庫";
   const taken = new Set(banks.map((b) => b.title));
   let name = base;

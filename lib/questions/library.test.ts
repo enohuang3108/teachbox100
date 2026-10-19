@@ -55,4 +55,19 @@ describe("共用題庫清單", () => {
     expect(banks().map((b) => b.title)).toContain("第三課（分享 2）");
     expect(receiveSharedBank(null, "第三課")).toBeNull();
   });
+
+  it("收到的題目跟清單裡某份相同時，照分享者勾選的題目出", () => {
+    useQuestionLibrary.setState({ banks: [] });
+    const { saveBank } = useQuestionLibrary.getState();
+    const two = [q("a"), q("b")];
+    const mine = saveBank({ title: "第四課", questions: two, off: ["b"] });
+    const banks = () => useQuestionLibrary.getState().banks;
+    // 自己現在出的題目就是連結那幾題：直接選回，不動勾選
+    expect(receiveSharedBank([q("a")], "第四課")).toBe(mine);
+    expect(findBank(banks(), mine)?.off).toEqual(["b"]);
+    // 連結帶全部題目：選回同一份並重新勾回來
+    expect(receiveSharedBank(two, "第四課")).toBe(mine);
+    expect(findBank(banks(), mine)?.off).toEqual([]);
+    expect(banks()).toHaveLength(1);
+  });
 });
