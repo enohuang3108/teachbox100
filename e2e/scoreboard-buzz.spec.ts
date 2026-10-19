@@ -257,7 +257,7 @@ test("live: 老師更換房號後舊學生看到斷線提示，新房號能重�
     await student.getByRole("textbox", { name: "你的名字" }).fill("小明");
     await student.getByRole("button", { name: "加入" }).click();
     await expect(teacher.getByText("已加入 1 人", { exact: true })).toBeVisible({ timeout: 25_000 });
-    await expect(student.getByText("已經加入了，等老師出題。這一頁先別關掉")).toBeVisible();
+    await expect(student.getByText("已經加入了，等老師出題。可以先按按看，老師那邊會看到你舉手")).toBeVisible();
 
     await teacher.getByRole("dialog", { name: "掃描加入搶答" })
       .getByRole("button", { name: "Close" }).click();

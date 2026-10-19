@@ -3,6 +3,7 @@ import {
   addPlayer,
   rebindOrder,
   nextOrder,
+  handRaiser,
   synchronizeNewPeer,
   STATE_RETRY_MS,
   relayStatus,
@@ -31,6 +32,20 @@ describe("nextOrder", () => {
 
   it("同一個人按第二次不計", () => {
     expect(nextOrder({ ...base, order: [a] }, "a")).toBeNull();
+  });
+});
+
+describe("handRaiser", () => {
+  it("還沒開放搶答時按鈴＝舉手，回傳他的 uid", () => {
+    expect(handRaiser({ ...base, open: false }, "a")).toBe("u-a");
+  });
+
+  it("開放搶答中按鈴是搶答，不是舉手", () => {
+    expect(handRaiser(base, "a")).toBeNull();
+  });
+
+  it("沒報到的 peer 舉手不理", () => {
+    expect(handRaiser({ ...base, open: false }, "ghost")).toBeNull();
   });
 });
 

@@ -45,6 +45,7 @@ export function BuzzPanel() {
   const code = useBuzzStore((s) => s.code);
   const enabled = useBuzzStore((s) => s.enabled);
   const players = useBuzzStore((s) => s.players);
+  const raised = useBuzzStore((s) => s.raised);
   const relay = useBuzzStore((s) => s.relay);
   const [qr, setQr] = useState<string | null>(null);
   const [showQr, setShowQr] = useState(false);
@@ -132,6 +133,16 @@ export function BuzzPanel() {
                           {i + 1}
                         </span>
                         <span className="truncate">{p.name}</span>
+                        {/* 開始前按鈴＝舉手：老師一眼確認這支手機按下去有用 */}
+                        {raised.includes(p.uid) && (
+                          <span
+                            role="img"
+                            aria-label="舉手"
+                            className="animate-in fade-in zoom-in-75 shrink-0 duration-150 ease-out"
+                          >
+                            ✋
+                          </span>
+                        )}
                       </li>
                     ))}
                   </ul>

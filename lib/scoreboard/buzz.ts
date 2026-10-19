@@ -38,6 +38,8 @@ export interface BuzzStore {
   relay: RelayStatus;
   /** 按鈴順序，先到先排 */
   order: Buzzer[];
+  /** 老師端：還沒開放搶答時按了鈴的人（uid），名單上亮一下舉手 */
+  raised: string[];
 }
 
 /** connecting = 還在連；up = 至少一台通了；down = 全連不上 */
@@ -49,6 +51,7 @@ export const useBuzzStore = create<BuzzStore>(() => ({
   open: false,
   players: [],
   order: [],
+  raised: [],
   connected: false,
   relay: "connecting",
 }));
@@ -311,6 +314,8 @@ async function connect(code: string, host: boolean) {
   const buzz = r.makeAction<null>("buzz", {
     onMessage: host
       ? (_, { peerId }) => {
+          const hand = handRaiser(get(), peerId);
+          if (hand) return raiseHand(hand);
           const next = nextOrder(get(), peerId);
           if (!next) return;
           set({ order: next });
@@ -326,7 +331,10 @@ async function connect(code: string, host: boolean) {
       state.send({ open, order: order.map((b) => ({ ...b, uid: "" })) });
     };
     // state 變動就同步給全班；新 peer 先立刻拿當前狀態，再短暫補送一次。
-    unbroadcast = useBuzzStore.subscribe(broadcast);
+    // 舉手只亮在老師的名單上，不必推給全班
+    unbroadcast = useBuzzStore.subscribe((s, prev) => {
+      if (s.raised === prev.raised) broadcast();
+    });
     r.onPeerJoin = () => synchronizeNewPeer(broadcast);
     r.onPeerLeave = () =>
       pending.forEach(({ peerId, payload }) => admit(peerId, payload));
@@ -415,6 +423,33 @@ export function nextOrder(
   return [...order, who];
 }
 
+/**
+ * 還沒開放搶答時按鈴＝舉手：不計名次，只讓老師在名單上看到「這支手機連得到」。
+ * 回傳舉手的人的 uid；開放中或沒報到過就回 null。
+ */
+export function handRaiser(
+  { open, players }: Pick<BuzzStore, "open" | "players">,
+  peerId: string,
+): string | null {
+  if (open) return null;
+  return players.find((p) => p.id === peerId)?.uid ?? null;
+}
+
+export const RAISE_MS = 1000;
+const raiseTimers = new Map<string, ReturnType<typeof setTimeout>>();
+/** 連按會重新計時，放下手的時間永遠是最後一下之後 1 秒 */
+function raiseHand(uid: string) {
+  clearTimeout(raiseTimers.get(uid));
+  if (!get().raised.includes(uid)) set({ raised: [...get().raised, uid] });
+  raiseTimers.set(
+    uid,
+    setTimeout(() => {
+      raiseTimers.delete(uid);
+      set({ raised: get().raised.filter((u) => u !== uid) });
+    }, RAISE_MS),
+  );
+}
+
 /** 主機端每次有人按鈴時的回呼（拿來播音效），回傳值是這是第幾個按的 */
 const onBuzzHandlers = new Set<(rank: number) => void>();
 export const onBuzz = (fn: (rank: number) => void) => {
@@ -486,6 +521,7 @@ function destroyRoom() {
     open: false,
     players: [],
     order: [],
+    raised: [],
     connected: false,
     relay: "connecting",
   });

@@ -153,11 +153,53 @@ function Crown() {
 }
 
 /**
- * 連線搶答的控制列 + 按鈴順序。沒開連線就整條不出現，
+ * 開始／停止搶答鈕。貼在右下角跟「一次幾分」排一起：老師一題按一次，
+ * 站在白板前伸手就按得到。沒開連線就不出現。
+ *
+ * 一顆鈕走完一輪：開始搶答 → 搶答中（按一下停） → 下一題（清順序再開放）。
+ * 以前「停止 → 清除順序 → 再開始」要按三次，出十題就是三十次。
+ */
+export function BuzzToggle() {
+  const { code, enabled, open, order } = useBuzzStore();
+  if (!enabled || !code) return null;
+
+  const label = open ? "搶答中，按此停止" : order.length > 0 ? "下一題" : "開始搶答";
+
+  return (
+    // 跟上面「一次幾分」同一種圓鈕：小字講是什麼、大字講按了會怎樣
+    <button
+      type="button"
+      aria-label={label}
+      onClick={() => setOpen(!open)}
+      className={`flex size-20 flex-col items-center justify-center gap-0.5 rounded-full border shadow-sm transition-[background-color,color,border-color,transform] duration-150 ease-out active:scale-[0.97] ${
+        open
+          ? "bg-brand-yellow border-brand-yellow text-ink"
+          : "bg-ink border-ink text-paper"
+      }`}
+    >
+      <span className="flex items-center gap-1 text-xs font-semibold opacity-70">
+        {/* 開放中才有的呼吸點：投影到教室後面，光看顏色分不出開沒開 */}
+        {open && (
+          <span className="relative flex size-2">
+            <span className="bg-ink/40 absolute inline-flex size-full animate-ping rounded-full" />
+            <span className="bg-ink relative inline-flex size-2 rounded-full" />
+          </span>
+        )}
+        {open ? "搶答中" : "搶答"}
+      </span>
+      <span className="text-lg leading-tight font-bold">
+        {open ? "停止" : order.length > 0 ? "下一題" : "開始"}
+      </span>
+    </button>
+  );
+}
+
+/**
+ * 連線搶答的按鈴順序。沒開連線就不出現，
  * 沒用這個功能的老師看到的計分板跟以前一模一樣。
  */
 function BuzzBar() {
-  const { code, enabled, open, order } = useBuzzStore();
+  const { code, enabled, order } = useBuzzStore();
   const { playBonusSound } = useSound();
   const sound = useScoreboardStore((s) => s.sound);
 
@@ -167,53 +209,26 @@ function BuzzBar() {
     [sound, playBonusSound],
   );
 
-  if (!enabled || !code) return null;
+  if (!enabled || !code || order.length === 0) return null;
 
   return (
-    <div className="flex w-full flex-col items-center gap-3">
-      {/*
-        一顆鈕走完一輪：開始搶答 → 搶答中（按一下停） → 下一題（清順序再開放）。
-        以前「停止 → 清除順序 → 再開始」要按三次，出十題就是三十次。
-      */}
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className={`flex items-center gap-2.5 rounded-full border px-6 py-2.5 text-lg font-bold transition-[background-color,color,border-color,transform] duration-150 ease-out active:scale-[0.97] ${
-          open
-            ? "bg-brand-yellow border-brand-yellow text-ink"
-            : "bg-ink border-ink text-paper"
-        }`}
-      >
-        {/* 開放中才有的呼吸點：投影到教室後面，光看顏色分不出開沒開 */}
-        {open && (
-          <span className="relative flex size-2.5">
-            <span className="bg-ink/40 absolute inline-flex size-full animate-ping rounded-full" />
-            <span className="bg-ink relative inline-flex size-2.5 rounded-full" />
-          </span>
-        )}
-        {open ? "搶答中，按此停止" : order.length > 0 ? "下一題" : "開始搶答"}
-      </button>
-
-      {order.length > 0 && (
-        <ol className="flex flex-wrap items-center justify-center gap-2">
-          {order.map((b, i) => (
-            <li
-              key={b.id}
-              // 名次一個個進場，眼睛跟得上誰先誰後
-              style={{ animationDelay: `${i * 50}ms` }}
-              className={`animate-in fade-in slide-in-from-bottom-2 fill-mode-both flex items-center gap-2 rounded-full border px-4 py-1.5 text-base font-semibold duration-200 ease-out ${
-                i === 0
-                  ? "bg-brand-yellow/25 border-brand-yellow text-ink text-xl"
-                  : "bg-paper-warm border-ink/10 text-ink-soft"
-              }`}
-            >
-              <span className="tabular-nums opacity-60">{i + 1}</span>
-              {b.name}
-            </li>
-          ))}
-        </ol>
-      )}
-    </div>
+    <ol className="flex flex-wrap items-center justify-center gap-2">
+      {order.map((b, i) => (
+        <li
+          key={b.id}
+          // 名次一個個進場，眼睛跟得上誰先誰後
+          style={{ animationDelay: `${i * 50}ms` }}
+          className={`animate-in fade-in slide-in-from-bottom-2 fill-mode-both flex items-center gap-2 rounded-full border px-4 py-1.5 text-base font-semibold duration-200 ease-out ${
+            i === 0
+              ? "bg-brand-yellow/25 border-brand-yellow text-ink text-xl"
+              : "bg-paper-warm border-ink/10 text-ink-soft"
+          }`}
+        >
+          <span className="tabular-nums opacity-60">{i + 1}</span>
+          {b.name}
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -223,12 +238,14 @@ export function Scoreboard() {
   const top = Math.max(...teams.map((t) => t.score));
   const gridRef = useRef<HTMLDivElement>(null);
   const cols = useFitColumns(teams.length, gridRef);
+  const buzzing = useBuzzStore((s) => s.enabled);
 
   return (
     // 右邊留出右下角操作鈕的寬度，才不會蓋到卡片
     <div
       data-score-root
-      className="flex flex-col items-center gap-6 pr-20 sm:px-20"
+      // 連線時右下角多一顆搶答鈕，底部留出它的高度才不會蓋到最後一排卡片
+      className={`flex flex-col items-center gap-6 pr-20 sm:px-20 ${buzzing ? "pb-24" : ""}`}
     >
       <BuzzBar />
 

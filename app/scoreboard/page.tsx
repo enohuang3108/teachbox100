@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
 } from "@/components/atoms/shadcn/popover";
 import { TooltipProvider } from "@/components/atoms/shadcn/tooltip";
-import { Scoreboard } from "@/components/scoreboard/Scoreboard";
+import { BuzzToggle, Scoreboard } from "@/components/scoreboard/Scoreboard";
 import { SetupPanel } from "@/components/scoreboard/SetupPanel";
 import { ACTION_BTN, Tip } from "@/components/templates/GamePageTemplate";
 import {
@@ -134,6 +134,8 @@ export default function ScoreboardPage() {
                 </ul>
               </PopoverContent>
             </Popover>
+            {/* 連線搶答一題按一次，放最底下最順手 */}
+            <BuzzToggle />
           </div>
         </StageFixed>
       </PageTemplate>

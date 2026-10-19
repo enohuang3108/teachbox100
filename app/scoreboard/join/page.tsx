@@ -12,6 +12,7 @@ import {
 import { useEffect, useState } from "react";
 
 const RANK_LABEL = ["", "第一個", "第二個", "第三個"];
+const RETRY_WAIT_S = 10;
 
 export default function JoinPage() {
   // 房號走 hash 不走 query：不必包 Suspense，也不會被當成兩個不同網址收錄
@@ -59,6 +60,23 @@ export default function JoinPage() {
     }
     const timer = setTimeout(() => setSlow(true), 15000);
     return () => clearTimeout(timer);
+  }, [joined, connected]);
+
+  /**
+   * 斷線通常幾秒內自己接回來。重新連線鈕一出現學生就會馬上按，
+   * 反而打斷正在進行的自動重連，所以先倒數 10 秒才給按。
+   */
+  const [retryIn, setRetryIn] = useState(RETRY_WAIT_S);
+  useEffect(() => {
+    if (!joined || connected) {
+      setRetryIn(RETRY_WAIT_S);
+      return;
+    }
+    const timer = setInterval(
+      () => setRetryIn((s) => Math.max(0, s - 1)),
+      1000,
+    );
+    return () => clearInterval(timer);
   }, [joined, connected]);
 
   const join = async (c = code, n = name) => {
@@ -157,7 +175,8 @@ export default function JoinPage() {
       <button
         type="button"
         onClick={sendBuzz}
-        disabled={!connected || !open || rank > 0}
+        // 還沒開放也能按：老師名單上會亮舉手，先確認按下去有用
+        disabled={!connected || rank > 0}
         className="bg-brand-yellow text-ink flex-1 rounded-3xl text-5xl font-bold shadow-sm transition-[transform,opacity,background-color] supports-[-webkit-touch-callout:none]:transition-[transform,background-color] duration-150 ease-out active:scale-[0.97] disabled:opacity-40"
       >
         {rank > 0 ? (RANK_LABEL[rank] ?? `第 ${rank} 個`) : "搶答"}
@@ -171,7 +190,7 @@ export default function JoinPage() {
               ? "現在可以按"
               : /* 剛加入還沒出題：先確認「你進來了」，再交代不要關掉頁面。
                    只講「等老師開放搶答」的話，學生分不出是自己沒連上還是老師還沒開始。 */
-                "已經加入了，等老師出題。這一頁先別關掉"}
+                "已經加入了，等老師出題。可以先按按看，老師那邊會看到你舉手"}
         </p>
       ) : (
         /* 斷線通常幾秒內自己接回來。接不回來時，講出最可能的原因跟下一步，
@@ -188,11 +207,16 @@ export default function JoinPage() {
             </p>
           ) : (
             <p className="text-ink-soft text-center text-base leading-[1.75]">
-              正在連上老師…斷線會自動重連，等太久就按下面
+              正在連上老師…斷線會自動重連
             </p>
           )}
-          <Button variant="outline" onClick={() => location.reload()}>
-            重新連線
+          <Button
+            variant="outline"
+            disabled={retryIn > 0}
+            onClick={() => location.reload()}
+            className="tabular-nums"
+          >
+            {retryIn > 0 ? `${retryIn} 秒後可重新連線` : "重新連線"}
           </Button>
         </div>
       )}
