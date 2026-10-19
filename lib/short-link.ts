@@ -72,6 +72,9 @@ export async function resolveShortLink(id: string) {
   return link.target ? { ...link, target: link.target } : null;
 }
 
+/** 只看內容不延長：首頁預覽代碼不算「有人打開」 */
+export const peekShortLink = (id: string) => redis.get<string>(`share:${id}`);
+
 /** 每個 IP 每分鐘最多建 5 個，免費額度不被灌爆（學校共用對外 IP 時是全校共用這 5 次） */
 export const RATE_LIMIT = 5;
 export async function allowCreate(ip: string): Promise<boolean> {

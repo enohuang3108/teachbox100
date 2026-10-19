@@ -2,6 +2,7 @@
 
 import { hubs, pages } from "@/app/pages.config";
 import { FeedbackButton } from "@/components/atoms/FeedbackButton";
+import { OpenShareLinkButton } from "@/components/molecules/OpenShareLinkButton";
 import { Link } from "next-view-transitions";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -13,6 +14,10 @@ const BARE_PATHS = new Set([
   ...Object.values(hubs).map((h) => h.path),
   "/scoreboard/join",
 ]);
+
+// 分享連結在左、回饋在右，兩顆同一套實心藥丸
+const PILL =
+  "bg-ink text-paper cursor-pointer rounded-full font-bold transition-transform duration-150 ease-out active:scale-[0.97]";
 
 const Logo = ({ size }: { size: number }) => (
   <Link href="/" passHref prefetch={true} aria-label="回到首頁">
@@ -36,7 +41,10 @@ export const AppChrome = () => {
       <header className="border-ink/8 bg-paper sticky top-0 z-(--z-overlay) border-b pt-[env(safe-area-inset-top)] md:hidden">
         <div className="flex items-center justify-between px-3 py-1.5">
           <Logo size={44} />
-          <FeedbackButton className="bg-ink text-paper cursor-pointer rounded-full px-3.5 py-2 text-[13px] font-bold transition-transform duration-150 ease-out active:scale-[0.97]" />
+          <div className="flex items-center gap-2">
+            <OpenShareLinkButton className={`${PILL} px-3.5 py-2 text-[13px]`} label="使用分享連結" />
+            <FeedbackButton className={`${PILL} px-3.5 py-2 text-[13px]`} />
+          </div>
         </div>
       </header>
 
@@ -44,7 +52,10 @@ export const AppChrome = () => {
       <div className="fixed top-3 left-3 z-(--z-header) hidden md:block">
         <Logo size={64} />
       </div>
-      <FeedbackButton className="bg-ink text-paper fixed top-4 right-4 z-(--z-overlay) hidden cursor-pointer rounded-full px-4 py-2.5 text-sm font-bold transition-transform duration-150 ease-out active:scale-[0.97] md:block" />
+      <div className="fixed top-4 right-4 z-(--z-overlay) hidden items-center gap-2 md:flex">
+        <OpenShareLinkButton className={`${PILL} px-4 py-2.5 text-sm`} label="使用分享連結" />
+        <FeedbackButton className={`${PILL} px-4 py-2.5 text-sm`} />
+      </div>
     </>
   );
 };

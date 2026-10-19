@@ -56,7 +56,7 @@ export function SpeechSettings() {
   return (
     <section aria-label="題目朗讀設定" className="space-y-4">
       <label htmlFor={`${id}-reading`} className="flex cursor-pointer items-center justify-between gap-4">
-        <span className="text-body text-ink">題目朗讀</span>
+        <span className="text-sm font-semibold text-ink">題目朗讀</span>
         <Switch id={`${id}-reading`} checked={reading}
           onCheckedChange={(on) => { stopPreview(); setReading(on); }} />
       </label>
@@ -64,7 +64,7 @@ export function SpeechSettings() {
       {gecko && <p className="text-caption text-warning-ink">這個瀏覽器朗讀結尾可能會有爆音，建議改用 Chrome。</p>}
       <fieldset disabled={!reading} className="space-y-4 disabled:opacity-50">
         <label htmlFor={`${id}-rate`} className="flex flex-col gap-2">
-          <span className="text-body text-ink">朗讀語速</span>
+          <span className="text-sm font-semibold text-ink">朗讀語速</span>
           <select id={`${id}-rate`} aria-label="朗讀語速" value={speechRate}
             onChange={(event) => { stopPreview(); setSpeechRate(Number(event.target.value)); }}
             className="min-h-11 rounded-xl border border-border bg-card px-3 py-2 text-body text-ink">
@@ -72,7 +72,7 @@ export function SpeechSettings() {
           </select>
         </label>
         <label htmlFor={`${id}-voice`} className="flex flex-col gap-2">
-          <span className="text-body text-ink">朗讀聲音</span>
+          <span className="text-sm font-semibold text-ink">朗讀聲音</span>
           <select id={`${id}-voice`} aria-label="朗讀聲音" value={voices.some((voice) => voice.voiceURI === voiceURI) ? voiceURI : ""}
             onChange={(event) => { stopPreview(); setVoiceURI(event.target.value); }}
             className="min-h-11 rounded-xl border border-border bg-card px-3 py-2 text-body text-ink">
