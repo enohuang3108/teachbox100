@@ -61,7 +61,7 @@
 ## TERR-006 朗讀結束後倒數，才顯示選項
 - smoke: true
 - viewport: desktop, mobile
-- auto: e2e/territory-speech.spec.ts（模擬語音結束、失敗與不支援）
+- auto: e2e/territory-speech.spec.ts
 - 前置: 題庫至少兩題，音效開啟
 - 步驟:
   1. 兩隊準備後觀察朗讀期間與唸完後的倒數
@@ -96,7 +96,7 @@
 ## TERR-009 朗讀開關、語速與男女聲選擇
 - smoke: true
 - viewport: desktop, mobile
-- auto: e2e/territory-speech.spec.ts；lib/territory/share.test.ts；lib/territory/speech.test.ts
+- auto: manual —— 瀏覽器模擬由 e2e/territory-speech.spec.ts 與 lib/territory/share.test.ts 保護；實際聲音與跨裝置回退需真機
 - 前置: 進入輔助設定；裝置有中文語音
 - 步驟:
   1. 開啟題目朗讀，調語速並選擇聲音、試聽，再開始比賽
@@ -104,4 +104,48 @@
   3. 關閉題目朗讀後開局，觀察倒數與音效設定
   4. 分享設定到另一裝置，該裝置缺少原本聲音
 - 預期: 試聽與正式題目使用選定語速及聲音；唸完才倒數，倒數後顯示選項；關閉朗讀直接倒數、不關閉音效；重整保留設定；分享連結不帶朗讀設定、收到舊連結也不改動自己的朗讀偏好；換機找不到聲音時回到預設中文。男女聲依裝置實際提供的語音而定，不能保證每台都有兩種。
+- issues: —
+
+## TERR-010 共用題庫與取消編輯
+- smoke: false
+- viewport: desktop, mobile
+- auto: e2e/question-library.spec.ts
+- 前置: 清掉 localStorage
+- 步驟:
+  1. 領地戰在瀏覽器建立兩題範本題庫
+  2. 圈叉搶答、終極密碼、大富翁查看清單；修改第一題、按一次刪除後取消
+  3. 再開編輯器與回領地戰查看選取
+- 預期: 四個遊戲看得到同一份題庫；其他遊戲仍選內建，領地戰保留選取；取消不修改題目也不刪除題庫
+- issues: —
+
+## TERR-011 編輯器驗證與 HTML 輸入
+- smoke: false
+- viewport: desktop, mobile
+- auto: e2e/question-library.spec.ts
+- 前置: 清掉 localStorage
+- 步驟:
+  1. 建立題庫，依序嘗試空名稱、全不選、空題目並儲存
+  2. 題目輸入含 onerror 的 img 標籤，儲存後重開，再開始比賽讓題幹顯示
+- 預期: 三種無效輸入有提示且不能儲存；HTML 在編輯器與遊戲題幹均原樣保留為文字，不建立 img 元素也不執行事件
+- issues: —
+
+## TERR-012 收到相同題庫內容時沿用分享的勾選題目
+- smoke: false
+- viewport: desktop, mobile
+- auto: e2e/shared-bank-selection.spec.ts
+- 前置: 兩個獨立瀏覽器各建立相同兩題題庫；接收端事先停用第二題
+- 步驟:
+  1. 分享者勾選兩題並複製完整分享連結
+  2. 接收端開啟該連結，查看題庫的有效題數
+- 預期: 收到分享者勾選的兩題；不因接收端先前停用第二題而變成一題
+- issues: —
+
+## TERR-013 手機共用題庫清單的下一步完整可見
+- smoke: false
+- viewport: mobile
+- auto: e2e/shared-bank-selection.spec.ts
+- 前置: 390×844，已儲存名稱為「QA分享勾選題目」的題庫，透過完整分享連結載入
+- 步驟:
+  1. 查看題庫設定站，量測下一步按鈕的左右邊界
+- 預期: 下一步按鈕完整位於視窗內，右邊界不超過 390px
 - issues: —

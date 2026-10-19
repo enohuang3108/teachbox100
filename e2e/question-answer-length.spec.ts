@@ -4,12 +4,16 @@ import * as XLSX from "xlsx";
 
 async function expectAlignedAnswers(shortButton: Locator, longButton: Locator) {
   await shortButton.evaluate(() => document.fonts.ready.then(() => undefined));
-  const shortBox = await shortButton.boundingBox();
-  const longBox = await longButton.boundingBox();
-  expect(shortBox).not.toBeNull();
-  expect(longBox).not.toBeNull();
-  expect(longBox!.width).toBeCloseTo(shortBox!.width, 1);
-  expect(longBox!.height).toBeCloseTo(shortBox!.height, 1);
+  const longElement = await longButton.elementHandle();
+  expect(longElement).not.toBeNull();
+  // Dialog 進場會縮放整組答案，兩次跨 frame 的 boundingBox 會量到不同縮放率。
+  // 在同一次瀏覽器執行裡量兩顆，仍要求寬高差小於原本的 0.05px。
+  await expect.poll(() => shortButton.evaluate((short, long) => {
+    const a = short.getBoundingClientRect();
+    const b = long!.getBoundingClientRect();
+    return Math.max(Math.abs(a.width - b.width), Math.abs(a.height - b.height));
+  }, longElement)).toBeLessThan(0.05);
+  await longElement?.dispose();
   const shortFont = await shortButton.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
   const longFont = await longButton.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
   expect(longFont).toBeLessThanOrEqual(shortFont);

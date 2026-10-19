@@ -1,13 +1,13 @@
 # 大富翁（/monopoly）
 
-## MONO-001 介紹 → 三步設定 → 第一位玩家回合
+## MONO-001 介紹 → 四步設定 → 第一位玩家回合
 - smoke: True
 - viewport: desktop, mobile
 - auto: e2e/setup-and-start.spec.ts
 - 前置: 清掉 localStorage
 - 步驟:
   1. 開 /monopoly
-  2. 開始遊戲 → 下一步 → 下一步 → 開始遊戲
+  2. 開始遊戲 → 下一步 → 下一步 → 下一步 → 開始遊戲
 - 預期: 出現「擲骰子」鈕
 - issues: —
 

@@ -1,14 +1,14 @@
 # 終極密碼（/ultimate-password）
 
-## PASS-001 兩站設定後開始
+## PASS-001 三站設定後開始
 - smoke: true
 - viewport: desktop, mobile
 - auto: e2e/game-template.spec.ts
 - 前置: 清掉 localStorage、sessionStorage
 - 步驟:
   1. 開 /ultimate-password → 開始使用，查看題庫站
-  2. 選自訂題庫但不匯入，按「下一步」；再切回內建題庫並選難度，按「開始遊戲」
-- 預期: 自訂題庫尚未匯入時「開始遊戲」不可用；選有效題庫後出現第一題、答案鈕和「目前密碼範圍：1 到 100」
+  2. 選有效題庫後，到遊戲設定選難度，再到輔助按「開始遊戲」
+- 預期: 題庫、遊戲設定、輔助依序可操作；選有效題庫後出現第一題、答案鈕和「目前密碼範圍：1 到 100」
 - issues: —
 
 ## PASS-002 答題回饋與猜錯範圍
