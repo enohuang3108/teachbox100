@@ -24,6 +24,8 @@ for (const unit of units) {
     }
 
     const share = page.getByRole("button", { name: "分享設定", exact: true });
+    // 設定視窗還沒開就問「看得到分享鈕嗎」會誤判；一番賞只有一站、3D 頁載入慢，最常撞到
+    await expect(page.getByRole("dialog")).toBeVisible();
     for (let step = 0; step < 4 && !(await share.isVisible()); step++) {
       await page.getByRole("button", { name: "下一步", exact: true }).click();
     }
