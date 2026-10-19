@@ -11,7 +11,6 @@ import { QuestionBankStep } from "@/components/organisms/QuestionBankStep";
 import { StepSetup, type SetupStep } from "@/components/organisms/StepSetup";
 import { DEFAULT_QUESTIONS } from "@/lib/questions/default-questions";
 import { activeQuestions, useSelectedBank } from "@/lib/questions/library";
-import { useSpeechStore } from "@/lib/questions/speech";
 import {
   DIFFICULTIES,
   DIFFICULTY_CAP_LABEL,
@@ -51,7 +50,6 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
     setCountdown,
     setSize,
   } = useTerritoryStore();
-  const { reading, speechRate, voiceURI } = useSpeechStore();
   const assist = useAssistStep();
 
   const saved = useSelectedBank(bankId);
@@ -179,9 +177,6 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
           names,
           countdown,
           size,
-          reading,
-          speechRate,
-          voiceURI,
         },
       }}
     />

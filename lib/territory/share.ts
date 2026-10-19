@@ -12,6 +12,7 @@ export interface TerritorySetup {
   names: [string, string];
   countdown: Countdown;
   size: BoardSize;
+  /** 舊連結才有：朗讀偏好改成裝置共用，不再隨連結帶走，收到也不套用；欄位留著讓題庫名稱的位置不變 */
   reading?: boolean;
   speechRate?: number;
   voiceURI?: string;

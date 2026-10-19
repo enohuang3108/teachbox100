@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { territoryShare } from "../lib/territory/share";
 
 type SpeechWindow = Window & {
   testUtterance?: SpeechSynthesisUtterance;
@@ -168,4 +169,21 @@ test("關閉題目朗讀時保留音效並直接倒數", async ({ page }) => {
   expect(await page.evaluate(() => (window as SpeechWindow).testUtterance)).toBeUndefined();
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem("question-speech")!).state.reading)).toBe(false);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem("territory-game")!).state.sound)).toBe(true);
+});
+
+test("打開別人的領地戰分享連結，不改動自己的朗讀偏好", async ({ page }) => {
+  await page.route(/\/(?:ingest|monitoring)(?:\/|$|\?)/, (route) => route.fulfill({ status: 204 }));
+  await page.addInitScript(() => {
+    localStorage.setItem("question-speech", JSON.stringify({ state: { reading: true, speechRate: 1.2, voiceURI: "mine" }, version: 0 }));
+  });
+  // 舊連結帶著對方的朗讀設定：關閉朗讀、0.7 倍、對方的聲音
+  const hash = await territoryShare.encode({
+    bank: null, cap: "hard", names: ["藍隊", "紅隊"], countdown: 3, size: "auto",
+    reading: false, speechRate: 0.7, voiceURI: "theirs",
+  });
+  await page.goto(`/quiz/territory#${hash}`, { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.waitForTimeout(500);
+  const prefs = await page.evaluate(() => JSON.parse(localStorage.getItem("question-speech")!).state);
+  expect(prefs).toMatchObject({ reading: true, speechRate: 1.2, voiceURI: "mine" });
 });

@@ -27,7 +27,6 @@ import { useSound } from "@/lib/hooks/useSound";
 import { DEFAULT_QUESTIONS } from "@/lib/questions/default-questions";
 import { useSharedSetup } from "@/lib/share/useSharedSetup";
 import { activeQuestions, receiveSharedBank, useSelectedBank } from "@/lib/questions/library";
-import { useSpeechStore } from "@/lib/questions/speech";
 import { useTerritoryStore } from "@/lib/territory/store";
 
 const pageInfo: PageWithKey = {
@@ -57,11 +56,7 @@ export default function TerritoryPage() {
       countdown: setup.countdown,
       size: setup.size,
     });
-    useSpeechStore.setState({
-      reading: setup.reading ?? true,
-      speechRate: setup.speechRate ?? 0.9,
-      voiceURI: setup.voiceURI ?? "",
-    });
+    // 朗讀偏好屬於這台裝置、四個出題遊戲共用，舊連結帶來的對方設定不套用
     setSetupOpen(true);
   });
 
