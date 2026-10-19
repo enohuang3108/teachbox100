@@ -6,7 +6,6 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from "@/components/atoms/shadcn/radio-group";
-import { useAssistStep } from "@/components/organisms/AssistStep";
 import { QuestionBankStep } from "@/components/organisms/QuestionBankStep";
 import { StepSetup, type SetupStep } from "@/components/organisms/StepSetup";
 import { playableOf } from "@/lib/morris/game";
@@ -21,7 +20,8 @@ import {
 } from "@/lib/questions/types";
 import { SELECTED_OPTION } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
-import { Library, SlidersHorizontal } from "lucide-react";
+import { useZhuyinPreferences } from "@/lib/zhuyin";
+import { Accessibility, Library, SlidersHorizontal } from "lucide-react";
 
 const MIN_QUESTIONS = 6;
 /** 要當場判對錯：只出選擇與是非 */
@@ -29,7 +29,7 @@ const playableAll = (questions: Question[]) => playableOf(questions, "hard");
 
 export function SetupPanel({ onStart }: { onStart: () => void }) {
   const { bankId, cap, names, selectBank, setCap, setName } = useMorrisStore();
-  const assist = useAssistStep();
+  const zhuyin = useZhuyinPreferences((state) => state.units["/quiz/morris"] ?? false);
   const saved = useSelectedBank(bankId);
   const active = saved ? activeQuestions(saved) : DEFAULT_QUESTIONS;
   const playable = playableOf(active, cap);
@@ -106,7 +106,18 @@ export function SetupPanel({ onStart }: { onStart: () => void }) {
         </section>
       ),
     },
-    assist,
+    {
+      // 兩隊題目不同，不朗讀；輔助只剩 StepSetup 接在後面的注音開關
+      key: "assist",
+      label: "輔助",
+      icon: Accessibility,
+      summary: zhuyin ? "注音" : "不標注音",
+      content: (
+        <header>
+          <h3 className="text-h3 text-ink">需要哪些輔助？</h3>
+        </header>
+      ),
+    },
   ];
 
   return (

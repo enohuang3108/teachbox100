@@ -92,25 +92,20 @@ test("大富翁音效調到 0 就不朗讀，題目直接可以作答", async ({
   expect(await lastSpoken(page)).toBeUndefined();
 });
 
-test("圈叉搶答兩隊各看各的題，按喇叭才唸那一隊的題目", async ({ page }) => {
+test("圈叉搶答兩隊題目不同，不提供朗讀也不唸題", async ({ page }) => {
   await fakeSpeech(page);
   await page.goto("/quiz/morris", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "開始使用" }).click();
   await page.getByRole("button", { name: "下一步", exact: true }).click();
   await page.getByRole("button", { name: "下一步", exact: true }).click();
+  await expect(page.getByRole("switch", { name: "顯示注音" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "題目朗讀設定" })).toHaveCount(0);
   await page.getByRole("button", { name: "開始比賽", exact: true }).click();
   await page.getByRole("button", { name: "紅隊準備好了", exact: true }).click();
   await page.getByRole("button", { name: "藍隊準備好了", exact: true }).click();
-  const speaker = page.getByRole("button", { name: "紅隊唸題目" });
-  await expect(speaker).toBeVisible({ timeout: 15_000 });
+  await expect(page.locator('[data-morris-lane="red"] p.zhuyin-text')).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("button", { name: /唸題目/ })).toHaveCount(0);
   expect(await page.evaluate(() => (window as SpeechWindow).spoken!.length)).toBe(0);
-  await speaker.click();
-  const question = await page.locator('[data-morris-lane="red"] p.zhuyin-text').textContent();
-  await expect.poll(() => lastSpoken(page)).toBe(question);
-  // 唸到一半按靜音要馬上停，喇叭也收起來
-  await page.getByRole("button", { name: "關閉音效" }).click();
-  await expect.poll(() => cancelled(page)).toBeGreaterThan(0);
-  await expect(speaker).toHaveCount(0);
 });
 
 test("領地戰匯入的題庫，圈叉搶答也選得到", async ({ page }) => {

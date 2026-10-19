@@ -10,8 +10,7 @@ import {
 } from "@/lib/morris/game";
 import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
-import { Check, Circle, Volume2, X } from "lucide-react";
-import { useReadAloud } from "@/lib/questions/speech";
+import { Check, Circle, X } from "lucide-react";
 import type { MorrisGame } from "./useMorrisGame";
 
 const SIDE_COLOR: Record<Side, string> = {
@@ -31,14 +30,11 @@ export function MorrisStage({
   game,
   names,
   sound,
-  paused = false,
   onSettings,
 }: {
   game: MorrisGame;
   names: [string, string];
   sound: boolean;
-  /** 設定或確認視窗蓋在棋盤上：正在唸的題目要停 */
-  paused?: boolean;
   onSettings: () => void;
 }) {
   const { state } = game;
@@ -57,7 +53,6 @@ export function MorrisStage({
           lane={state.lanes.red}
           game={game}
           nameOf={nameOf}
-          speak={sound && !paused}
         />
         <Board game={game} nameOf={nameOf} />
         <QuestionLane
@@ -66,7 +61,6 @@ export function MorrisStage({
           lane={state.lanes.blue}
           game={game}
           nameOf={nameOf}
-          speak={sound && !paused}
         />
       </div>
 
@@ -120,19 +114,16 @@ function QuestionLane({
   lane,
   game,
   nameOf,
-  speak,
 }: {
   side: Side;
   name: string;
   lane: Lane;
   game: MorrisGame;
   nameOf: (side: Side) => string;
-  speak: boolean;
 }) {
   const { state } = game;
-  // 兩隊各看各的題目，同時自動唸會疊在一起：改成按喇叭才唸
+  // 兩隊各看各的題目，不朗讀
   const question = lane.current;
-  const readAloud = useReadAloud(speak, question);
   const disabled = state.phase !== "quiz" || lane.cooldown > 0;
   const answered = lane.feedback;
   const acting = state.phase === "move" && state.movingSide === side;
@@ -186,17 +177,6 @@ function QuestionLane({
             <p className="zhuyin-text text-center text-[clamp(1.25rem,2.6cqw,3rem)] leading-[1.5] font-bold text-balance text-ink">
               {question.text}
             </p>
-            {readAloud && (
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={`${name}唸題目`}
-                onClick={() => readAloud(question.text)}
-                className="shrink-0 rounded-full text-muted-foreground transition-transform duration-press ease-out active:scale-[0.97]"
-              >
-                <Volume2 className="size-5" aria-hidden />
-              </Button>
-            )}
           </div>
           {/* 回饋夾在題目與選項之間、位置先留好：選項永遠貼在底部，學生站在電子白板前伸手就按得到 */}
           <div className="min-h-12 md:min-h-[4cqw]">

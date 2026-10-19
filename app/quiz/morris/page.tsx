@@ -113,7 +113,6 @@ export default function MorrisPage() {
             game={game}
             names={names}
             sound={sound}
-            paused={setupOpen || confirmSettings || confirmEnd}
             onSettings={() => setSetupOpen(true)}
           />
         )}
