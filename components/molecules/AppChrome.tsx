@@ -15,9 +15,11 @@ const BARE_PATHS = new Set([
   "/scoreboard/join",
 ]);
 
-// 分享連結在左、回饋在右，兩顆同一套實心藥丸
+// 回饋是實心主鈕；分享連結是次要入口，用跟首頁「玩玩大富翁」同一套淡框藥丸，不搶回饋的份量
 const PILL =
   "bg-ink text-paper cursor-pointer rounded-full font-bold transition-transform duration-150 ease-out active:scale-[0.97]";
+const SOFT_PILL =
+  "bg-paper text-ink ring-1 ring-ink/15 hover:bg-sand cursor-pointer rounded-full font-bold transition-[background-color,transform] duration-150 ease-out active:scale-[0.97]";
 
 const Logo = ({ size }: { size: number }) => (
   <Link href="/" passHref prefetch={true} aria-label="回到首頁">
@@ -42,7 +44,7 @@ export const AppChrome = () => {
         <div className="flex items-center justify-between px-3 py-1.5">
           <Logo size={44} />
           <div className="flex items-center gap-2">
-            <OpenShareLinkButton className={`${PILL} px-3.5 py-2 text-[13px]`} label="使用分享連結" />
+            <OpenShareLinkButton className={`${SOFT_PILL} px-3.5 py-2 text-[13px]`} label="使用分享連結" />
             <FeedbackButton className={`${PILL} px-3.5 py-2 text-[13px]`} />
           </div>
         </div>
@@ -53,7 +55,7 @@ export const AppChrome = () => {
         <Logo size={64} />
       </div>
       <div className="fixed top-4 right-4 z-(--z-overlay) hidden items-center gap-2 md:flex">
-        <OpenShareLinkButton className={`${PILL} px-4 py-2.5 text-sm`} label="使用分享連結" />
+        <OpenShareLinkButton className={`${SOFT_PILL} px-4 py-2.5 text-sm`} label="使用分享連結" />
         <FeedbackButton className={`${PILL} px-4 py-2.5 text-sm`} />
       </div>
     </>
