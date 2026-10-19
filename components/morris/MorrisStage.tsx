@@ -31,11 +31,14 @@ export function MorrisStage({
   game,
   names,
   sound,
+  paused = false,
   onSettings,
 }: {
   game: MorrisGame;
   names: [string, string];
   sound: boolean;
+  /** 設定或確認視窗蓋在棋盤上：正在唸的題目要停 */
+  paused?: boolean;
   onSettings: () => void;
 }) {
   const { state } = game;
@@ -54,7 +57,7 @@ export function MorrisStage({
           lane={state.lanes.red}
           game={game}
           nameOf={nameOf}
-          sound={sound}
+          speak={sound && !paused}
         />
         <Board game={game} nameOf={nameOf} />
         <QuestionLane
@@ -63,7 +66,7 @@ export function MorrisStage({
           lane={state.lanes.blue}
           game={game}
           nameOf={nameOf}
-          sound={sound}
+          speak={sound && !paused}
         />
       </div>
 
@@ -117,19 +120,19 @@ function QuestionLane({
   lane,
   game,
   nameOf,
-  sound,
+  speak,
 }: {
   side: Side;
   name: string;
   lane: Lane;
   game: MorrisGame;
   nameOf: (side: Side) => string;
-  sound: boolean;
+  speak: boolean;
 }) {
   const { state } = game;
   // 兩隊各看各的題目，同時自動唸會疊在一起：改成按喇叭才唸
-  const readAloud = useReadAloud();
   const question = lane.current;
+  const readAloud = useReadAloud(speak, question);
   const disabled = state.phase !== "quiz" || lane.cooldown > 0;
   const answered = lane.feedback;
   const acting = state.phase === "move" && state.movingSide === side;
@@ -183,7 +186,7 @@ function QuestionLane({
             <p className="zhuyin-text text-center text-[clamp(1.25rem,2.6cqw,3rem)] leading-[1.5] font-bold text-balance text-ink">
               {question.text}
             </p>
-            {readAloud && sound && (
+            {readAloud && (
               <Button
                 variant="ghost"
                 size="icon"

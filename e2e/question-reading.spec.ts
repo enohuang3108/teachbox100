@@ -1,12 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
 
-type SpeechWindow = Window & { spoken?: SpeechSynthesisUtterance[] };
+type SpeechWindow = Window & { spoken?: SpeechSynthesisUtterance[]; cancelled?: number };
 
 // 假的語音：記下每次要唸的句子，由測試決定什麼時候唸完
 async function fakeSpeech(page: Page) {
   await page.addInitScript(() => {
     const w = window as SpeechWindow;
     w.spoken = [];
+    w.cancelled = 0;
     Object.defineProperty(window, "SpeechSynthesisUtterance", { configurable: true, value: class {
       text: string;
       constructor(text: string) { this.text = text; }
@@ -14,13 +15,14 @@ async function fakeSpeech(page: Page) {
     Object.defineProperty(window, "speechSynthesis", { configurable: true, value: {
       getVoices: () => [],
       speak: (u: SpeechSynthesisUtterance) => { w.spoken!.push(u); u.onstart?.({} as SpeechSynthesisEvent); },
-      cancel: () => {},
+      cancel: () => { w.cancelled!++; },
     } });
   });
   await page.route(/\/(?:ingest|monitoring)(?:\/|$|\?)/, (route) => route.fulfill({ status: 204 }));
 }
 
 const lastSpoken = (page: Page) => page.evaluate(() => (window as SpeechWindow).spoken!.at(-1)?.text);
+const cancelled = (page: Page) => page.evaluate(() => (window as SpeechWindow).cancelled);
 const finishSpeaking = (page: Page) =>
   page.evaluate(() => (window as SpeechWindow).spoken!.at(-1)!.onend?.({} as SpeechSynthesisEvent));
 
@@ -38,6 +40,21 @@ test("終極密碼先唸題目，唸完才開放作答", async ({ page }) => {
   await expect(answer).toBeDisabled();
   await finishSpeaking(page);
   await expect(answer).toBeEnabled();
+});
+
+test("終極密碼打開設定就停止朗讀，關掉設定再唸一次", async ({ page }) => {
+  await fakeSpeech(page);
+  await page.goto("/ultimate-password", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "開始使用" }).click();
+  await page.getByRole("button", { name: "下一步" }).click();
+  await page.getByRole("button", { name: "下一步" }).click();
+  await page.getByRole("button", { name: "開始遊戲" }).click();
+  await expect.poll(() => lastSpoken(page)).toBeTruthy();
+  const times = await page.evaluate(() => (window as SpeechWindow).spoken!.length);
+  await page.getByRole("button", { name: "設定", exact: true }).click();
+  await expect.poll(() => cancelled(page)).toBeGreaterThan(0);
+  await page.keyboard.press("Escape");
+  await expect.poll(() => page.evaluate(() => (window as SpeechWindow).spoken!.length)).toBe(times + 1);
 });
 
 test("大富翁跳出題目先唸，唸完才開放作答", async ({ page }) => {
@@ -58,6 +75,23 @@ test("大富翁跳出題目先唸，唸完才開放作答", async ({ page }) => 
   await expect(answers.first()).toBeEnabled();
 });
 
+test("大富翁音效調到 0 就不朗讀，題目直接可以作答", async ({ page }) => {
+  await fakeSpeech(page);
+  await page.addInitScript(() => {
+    localStorage.setItem("monopoly-audio", JSON.stringify({ state: { bgmVolume: 0.3, sfxVolume: 0 }, version: 0 }));
+  });
+  await page.goto("/monopoly", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "開始遊戲", exact: true }).click();
+  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: "下一步" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "開始遊戲", exact: true }).click();
+  await page.evaluate(() => { Math.random = () => 0.1; });
+  await page.getByRole("button", { name: "擲骰子", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByText("答對才能購買")).toBeVisible({ timeout: 15_000 });
+  await expect(dialog.locator("fieldset button").first()).toBeEnabled();
+  expect(await lastSpoken(page)).toBeUndefined();
+});
+
 test("圈叉搶答兩隊各看各的題，按喇叭才唸那一隊的題目", async ({ page }) => {
   await fakeSpeech(page);
   await page.goto("/quiz/morris", { waitUntil: "domcontentloaded" });
@@ -73,6 +107,10 @@ test("圈叉搶答兩隊各看各的題，按喇叭才唸那一隊的題目", as
   await speaker.click();
   const question = await page.locator('[data-morris-lane="red"] p.zhuyin-text').textContent();
   await expect.poll(() => lastSpoken(page)).toBe(question);
+  // 唸到一半按靜音要馬上停，喇叭也收起來
+  await page.getByRole("button", { name: "關閉音效" }).click();
+  await expect.poll(() => cancelled(page)).toBeGreaterThan(0);
+  await expect(speaker).toHaveCount(0);
 });
 
 test("領地戰匯入的題庫，圈叉搶答也選得到", async ({ page }) => {

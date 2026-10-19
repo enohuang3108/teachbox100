@@ -109,7 +109,13 @@ export default function MorrisPage() {
         }}
       >
         {hydrated && (
-          <MorrisStage game={game} names={names} sound={sound} onSettings={() => setSetupOpen(true)} />
+          <MorrisStage
+            game={game}
+            names={names}
+            sound={sound}
+            paused={setupOpen || confirmSettings || confirmEnd}
+            onSettings={() => setSetupOpen(true)}
+          />
         )}
       </PageTemplate>
 

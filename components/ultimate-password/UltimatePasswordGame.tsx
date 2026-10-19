@@ -83,8 +83,12 @@ export function UltimatePasswordGame() {
   const patch = useUltimatePasswordProgress.setState;
   const setNumberGuess = (numberGuess: number) => patch({ numberGuess });
   const [selectedAnswer, setSelectedAnswer] = useState("");
-  // 換一題就先唸題目，唸完才開放作答
-  const reading = useQuestionReading(answerAccepted ? null : question, question?.text ?? "", sound);
+  // 換一題就先唸題目，唸完才開放作答；設定或離開確認蓋在上面時先停，關掉再唸
+  const reading = useQuestionReading(
+    answerAccepted ? null : question,
+    question?.text ?? "",
+    sound && !setupOpen && !confirmLeave,
+  );
   const [message, setMessage] = useState("");
   const [feedback, setFeedback] = useState<AnswerFeedback | null>(null);
   const answerTransitionTimer = useRef<ReturnType<typeof setTimeout> | null>(

@@ -120,12 +120,15 @@ export function useQuestionReading(current: object | null, text: string, sound: 
   return on && doneFor !== current;
 }
 
-/** 按了才唸：兩隊各看各的題目時不能自動唸，交給老師點。再按一次從頭唸，離開畫面就停 */
-export function useReadAloud() {
+/**
+ * 按了才唸：兩隊各看各的題目時不能自動唸，交給老師點。再按一次從頭唸；
+ * active 變 false（靜音、打開設定）、換題或離開畫面就停。關掉或不能唸時回 null，不顯示喇叭
+ */
+export function useReadAloud(active: boolean, current: object | null) {
   const { reading, speechRate, voiceURI } = useSpeechStore();
   const stop = useRef<(() => void) | null>(null);
-  useEffect(() => () => stop.current?.(), []);
-  return reading
+  useEffect(() => () => stop.current?.(), [active, current]);
+  return reading && active
     ? (text: string) => {
         stop.current?.();
         stop.current = speakQuestion(text, { speechRate, voiceURI }, () => {

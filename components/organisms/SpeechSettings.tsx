@@ -60,7 +60,7 @@ export function SpeechSettings() {
         <Switch id={`${id}-reading`} checked={reading}
           onCheckedChange={(on) => { stopPreview(); setReading(on); }} />
       </label>
-      <p className="text-caption text-muted-foreground">開啟後，出題時先唸題目，唸完才開放作答。頂列靜音會一併關閉朗讀。</p>
+      <p className="text-caption text-muted-foreground">開啟後，出題時先唸題目，唸完才開放作答。頂列靜音（大富翁是把音效調到 0）會一併關閉朗讀。</p>
       {gecko && <p className="text-caption text-warning-ink">這個瀏覽器朗讀結尾可能會有爆音，建議改用 Chrome。</p>}
       <fieldset disabled={!reading} className="space-y-4 disabled:opacity-50">
         <label htmlFor={`${id}-rate`} className="flex flex-col gap-2">

@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/atoms/shadcn/dialog";
 import { useSound } from "@/lib/hooks/useSound";
+import { useAudioStore } from "@/lib/monopoly/audio";
 import type { PendingAction, Player, Question } from "@/lib/monopoly/types";
 import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
@@ -35,7 +36,9 @@ export function QuestionDialog({
     pending?.kind === "cardQuiz" ||
     pending?.kind === "passStartQuestion";
   // 跳出題目先唸，唸完才開放作答
-  const reading = useQuestionReading(open ? question : null, question.text, true);
+  // 大富翁沒有頂列靜音，音效拉到 0 就當靜音
+  const muted = useAudioStore((s) => s.sfxVolume === 0);
+  const reading = useQuestionReading(open ? question : null, question.text, !muted);
   if (!open) return null;
 
   // 標題：買地／蓋房用固定字樣；過起點加碼題標出答對／答錯獎金；互動答題卡顯示卡片描述
