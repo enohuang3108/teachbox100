@@ -314,7 +314,7 @@ export default function CurrentTimePage() {
         >
           <h2
             className={cn(
-              "mt-8 mb-6 text-center text-3xl font-bold md:text-4xl",
+              "zhuyin-text mt-8 mb-6 text-center text-3xl font-bold md:text-4xl",
               stacked ? "md:mt-12" : "md:mt-0",
             )}
           >

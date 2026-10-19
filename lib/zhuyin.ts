@@ -21,12 +21,18 @@ export const useZhuyinPreferences = create<ZhuyinPreferences>()(
 );
 
 export async function loadZhuyinFont() {
-  try {
-    const fonts = await document.fonts.load('24px "Bpmf Iansui"', "學習國語");
-    if (fonts.length) return;
-  } catch {
-    // CSS FontFace 下載失敗後會保留 error 狀態；建立新實例才能重試。
-  }
-  const font = new FontFace("Bpmf Iansui", 'url("/fonts/bpmf-iansui/BpmfIansui-Regular.woff2")');
-  document.fonts.add(await font.load());
+  await Promise.all([
+    ["400", "Regular"],
+    ["700", "Bold"],
+    ["900", "Heavy"],
+  ].map(async ([weight, style]) => {
+    try {
+      const fonts = await document.fonts.load(`${weight} 24px "Bpmf Zihi Sans"`, "學習國語");
+      if (fonts.length) return;
+    } catch {
+      // CSS FontFace 下載失敗後會保留 error 狀態；建立新實例才能重試。
+    }
+    const font = new FontFace("Bpmf Zihi Sans", `url("/fonts/bpmf-zihi-sans/BpmfZihiSans-${style}.woff2")`, { weight });
+    document.fonts.add(await font.load());
+  }));
 }

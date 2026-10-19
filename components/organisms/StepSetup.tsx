@@ -69,9 +69,9 @@ export function StepSetup({
   const current = steps[index];
   const isLast = index === steps.length - 1;
   const zhuyinControl = (!zhuyinStepKey || current.key === zhuyinStepKey) ? (
-    <div className={cn("border-border", zhuyinPosition === "after" ? "mt-6 border-t pt-4" : "mb-6 border-b pb-4")}>
+    <div className={zhuyinPosition === "after" ? "mt-6" : "mb-6"}>
       <label htmlFor={zhuyinId} className="flex cursor-pointer items-center justify-between gap-4">
-        <span className="text-body text-foreground">顯示注音</span>
+        <span className="text-sm font-semibold text-ink">顯示注音</span>
         <Switch
           id={zhuyinId}
           aria-label="顯示注音"

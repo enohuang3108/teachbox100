@@ -48,7 +48,7 @@ export default function GameAnswerSection({
 
   return (
     <div className={cn("relative mt-16", className)}>
-      <h2 className="mb-6 text-3xl font-bold md:text-4xl">{question}</h2>
+      <h2 className="zhuyin-text mb-6 text-3xl font-bold md:text-4xl">{question}</h2>
       {children}
       {/* 提交按鈕 */}
       <div className="mt-6 md:mt-8">

@@ -160,7 +160,7 @@ export function Quiz({
         key={`${question.a}-${question.b}-${index}`}
         className="quiz-enter flex w-full flex-col items-center gap-14 sm:gap-20"
       >
-        <p className="font-display text-ink text-[clamp(4rem,18vw,8rem)] leading-none font-black tabular-nums">
+        <p className="zhuyin-text font-display text-ink text-[clamp(4rem,18vw,8rem)] leading-none font-black tabular-nums">
           {question.a} × {question.b} = ?
         </p>
 

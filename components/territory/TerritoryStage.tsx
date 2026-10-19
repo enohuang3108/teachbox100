@@ -267,7 +267,7 @@ function QuestionText({
           {"●".repeat(value)}
         </p>
         <p
-          className="font-display text-ink text-[clamp(1.25rem,3.8cqw,4rem)] leading-[1.35] font-extrabold text-balance break-words"
+          className="zhuyin-text font-display text-ink text-[clamp(1.25rem,3.8cqw,4rem)] leading-[1.35] font-extrabold text-balance break-words"
           style={HALO}
         >
           {/* 墨點看不到的人要聽得到這題值幾格 */}

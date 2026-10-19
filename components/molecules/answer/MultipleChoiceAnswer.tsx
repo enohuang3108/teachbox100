@@ -33,7 +33,7 @@ export default function MultipleChoiceAnswer({
           <RadioGroupItem value={choice.toString()} id={`choice-${index}`} />
           <Label
             htmlFor={`choice-${index}`}
-            className="flex-1 cursor-pointer text-lg peer-checked:text-primary md:text-xl"
+            className="zhuyin-text flex-1 cursor-pointer text-lg peer-checked:text-primary md:text-xl"
           >
             {choicesText(choice)}
           </Label>

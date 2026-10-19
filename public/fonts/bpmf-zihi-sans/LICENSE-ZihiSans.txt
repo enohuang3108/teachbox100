@@ -1,5 +1,5 @@
-BpmfIansui.ttf	注音芫荽
-Copyright 2022 But Ko
+BpmfZihiSans-*.ttf	字嗨注音黑體
+Copyright 2020 But Ko, with Reserved Font Name '字嗨' and 'Zihi'.
 
 	https://github.com/ButTaiwan/bpmfvs
 
@@ -14,17 +14,15 @@ Bopomofo IVS Font Specification (注音IVS字型規格)
 	https://github.com/ButTaiwan/bpmfvs
 
 
-contains Iansui (芫荽).
-	https://github.com/ButTaiwan/iansui
-	Copyright But Ko
-	Licensed under SIL Open Font License 1.1
-
-which based on Klee One
-	https://github.com/fontworks-fonts/Klee
-	Copyright 2020 The Klee Project Authors
+BpmfZihiSans-*.ttf contains Source Han Sans (思源黑體).
+	Copyright Adobe
+	https://github.com/adobe-fonts/source-han-sans
 	Licensed under SIL Open Font License 1.1
 
 
+Copyright 2014-2019 Adobe (http://www.adobe.com/), with Reserved Font
+Name 'Source'. Source is a trademark of Adobe in the United States
+and/or other countries.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

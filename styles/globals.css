@@ -4,20 +4,34 @@
 @custom-variant dark (&:is(.dark *));
 @custom-variant reduced-motion (@media (prefers-reduced-motion: reduce));
 
-/* 官方注音芫荽 v1.500，完整授權與來源放在同目錄；只在開啟時下載。 */
+/* 使用者提供的字嗨注音黑體 1.400，完整授權與來源放在同目錄；只在開啟時下載。 */
 @font-face {
-  font-family: "Bpmf Iansui";
-  src: url("/fonts/bpmf-iansui/BpmfIansui-Regular.woff2") format("woff2");
+  font-family: "Bpmf Zihi Sans";
+  src: url("/fonts/bpmf-zihi-sans/BpmfZihiSans-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
-/* 保留數字專用字體（例如計時器），一般中文與 font-display 則一起切換。 */
-html[data-zhuyin] :is(body, .font-sans, .font-display) {
-  --font-sans: "Bpmf Iansui", var(--font-nunito, ui-sans-serif), var(--font-noto-tc, sans-serif), sans-serif;
-  --font-display: var(--font-sans);
-  font-family: var(--font-sans);
+@font-face {
+  font-family: "Bpmf Zihi Sans";
+  src: url("/fonts/bpmf-zihi-sans/BpmfZihiSans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Bpmf Zihi Sans";
+  src: url("/fonts/bpmf-zihi-sans/BpmfZihiSans-Heavy.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 只標記題目與作答選項，設定、操作按鈕及其他介面維持原字體。 */
+html[data-zhuyin] .zhuyin-text {
+  font-family: "Bpmf Zihi Sans", var(--font-nunito, ui-sans-serif), var(--font-noto-tc, sans-serif), sans-serif;
 }
 
 @theme inline {

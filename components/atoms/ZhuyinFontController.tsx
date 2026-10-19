@@ -4,7 +4,7 @@ import { useZhuyinPreferences } from "@/lib/zhuyin";
 import { usePathname } from "next/navigation";
 import { useLayoutEffect } from "react";
 
-/** 掛在 layout，讓設定的 portal、遊戲、SVG 與 canvas 共用同一字體。 */
+/** 記錄當前單元偏好；只有標記的題目與作答選項套用字體。 */
 export function ZhuyinFontController() {
   const path = usePathname();
   const enabled = useZhuyinPreferences((state) => state.units[path] ?? false);

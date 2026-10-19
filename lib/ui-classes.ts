@@ -13,7 +13,7 @@ export const SELECTED_OPTION =
 /** 同組回答等寬等高；欄數與間距由各遊戲的空間決定。 */
 export const ANSWER_GRID = "grid auto-rows-fr items-stretch";
 export const ANSWER_CONTENT =
-  "h-auto min-w-0 whitespace-normal text-balance break-words";
+  "zhuyin-text h-auto min-w-0 whitespace-normal text-balance break-words";
 
 /** 1–6 字中等、7 字以上較小。雙隊棋盤依場地縮放，避免擠出隊伍欄。 */
 export function answerTextClass(answer: string | number, scale: "page" | "board" = "page") {
