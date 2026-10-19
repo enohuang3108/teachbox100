@@ -63,6 +63,23 @@ export function adoptLegacyBank(id: string, title: string, questions: Question[]
   return id;
 }
 
-/** 分享連結帶來的題庫存進清單並回傳 id 讓單元選它；連結用內建題庫時回 null */
-export const receiveSharedBank = (bank: Question[] | null, title?: string) =>
-  bank ? useQuestionLibrary.getState().saveBank({ title: title || "分享的題庫", questions: bank, off: [] }) : null;
+// 分享連結解碼時題目 id 會重編，比內容不比 id
+const content = (questions: Question[]) => JSON.stringify(questions.map((q) => ({ ...q, id: "" })));
+const sameQuestions = (a: Question[], b: Question[]) => content(a) === content(b);
+
+/**
+ * 分享連結帶來的題庫存進清單並回傳 id 讓單元選它；連結用內建題庫時回 null。
+ * 不用 saveBank 的同名覆蓋：老師自己的同名題庫不能被別人的連結蓋掉，撞名就另存「名稱（分享）」；
+ * 同一份題目已經在清單裡（同一條連結再開）就選回那份，不再多存。
+ */
+export function receiveSharedBank(bank: Question[] | null, title?: string) {
+  if (!bank) return null;
+  const { banks, saveBank } = useQuestionLibrary.getState();
+  const known = banks.find((b) => sameQuestions(b.questions, bank));
+  if (known) return known.id;
+  const base = title || "分享的題庫";
+  const taken = new Set(banks.map((b) => b.title));
+  let name = base;
+  for (let n = 1; taken.has(name); n++) name = `${base}（分享${n === 1 ? "" : ` ${n}`}）`;
+  return saveBank({ title: name, questions: bank, off: [] });
+}

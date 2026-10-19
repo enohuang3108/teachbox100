@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { migrateTerritory } from "@/lib/territory/store";
 import { useSpeechStore } from "./speech";
-import { activeQuestions, adoptLegacyBank, findBank, useQuestionLibrary } from "./library";
+import { activeQuestions, adoptLegacyBank, findBank, receiveSharedBank, useQuestionLibrary } from "./library";
 import type { Question } from "./types";
 
 const q = (text: string): Question => ({ id: text, type: "boolean", text, answer: "是", difficulty: "easy" });
@@ -37,5 +37,22 @@ describe("共用題庫清單", () => {
     expect(migrateTerritory({ bank: [], useDefault: true }, 0)).toEqual({ bankId: null });
     migrateTerritory({ reading: true }, 0);
     expect(useSpeechStore.getState().speechRate).toBe(1.2); // 沒存的欄位不蓋掉
+  });
+
+  it("收到分享的題庫跟自己的同名時另存一份，不蓋掉自己的；同一條連結再開選回同一份", () => {
+    useQuestionLibrary.setState({ banks: [] });
+    const { saveBank } = useQuestionLibrary.getState();
+    const mine = saveBank({ title: "第三課", questions: [q("a"), q("b")], off: ["b"] });
+    // 分享連結解出來的題目 id 是重新編的
+    const shared = [{ ...q("c"), id: "q0" }];
+    const got = receiveSharedBank(shared, "第三課")!;
+    expect(got).not.toBe(mine);
+    const banks = () => useQuestionLibrary.getState().banks;
+    expect(findBank(banks(), mine)).toMatchObject({ title: "第三課", off: ["b"] });
+    expect(findBank(banks(), got)?.title).toBe("第三課（分享）");
+    expect(receiveSharedBank([{ ...q("c"), id: "q9" }], "第三課")).toBe(got);
+    expect(receiveSharedBank([q("d")], "第三課")).not.toBe(got);
+    expect(banks().map((b) => b.title)).toContain("第三課（分享 2）");
+    expect(receiveSharedBank(null, "第三課")).toBeNull();
   });
 });
