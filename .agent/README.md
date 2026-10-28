@@ -115,3 +115,25 @@ port 被別人佔用時，`launch` 回 exit 2，不會去搶。使用者 3100 �
 
 **10/28 建置時抓到的 harness 錯**：證據原本直接寫進 `.agent/evidence/`，dev 看到檔案變動就重新編譯，測試跑到一半的頁面整頁重載、一直沒 hydrate，造成 wheel、library 假紅。
 改成先寫到 repo 外、跑完再搬進來之後，14 個 sub 全綠。對照組：server 開著時寫進 evidence 觸發一次 `Compiled`，寫到 repo 外不會觸發。
+
+## Eval
+
+baseline 2026-10-28，env `6d5b4c1+ab1e662`，候選 Claude Opus 5.5 subagent（clone 裡獨立工作，只拿到使用者那句話），裁判 `codex gpt-6.1-sol high`。
+題目與每次 run 在 `.agent/evals/`。成功＝客觀判準 pass 且分數 ≥ 7。
+
+| 題目 | surface | 成功率 | 平均分 |
+|---|---|---|---|
+| shared-bank-same-name | 純邏輯（vitest） | 1/2 | 7.5 |
+| share-link-speech-prefs | 瀏覽器（Playwright） | 2/2 | 10 |
+| zhuyin-toggle-scope | 瀏覽器（Playwright） | 1/2 | 6 |
+
+**失分最多：「改之前先用證據重現」**，在注音那題兩次都是 0 分。分享連結 run 1 只靠單元測試，沒開瀏覽器。
+**6 次沒有一次用 `.agent/verify`**：clone 裡都沒有 `.agent/evidence/`。候選只走 repo 原本的 `pnpm verify:change` proof，代表 `AGENTS.md` 沒有指到 `.agent/`，Feature Map 等於沒被發現。
+這是下一個要改的環境：在 `AGENTS.md` 加一行指向 `.agent/README.md` 與 `.agent/verify`，然後跑 rerun 比較。
+
+其他觀察：
+- 兩個失敗都是**範圍判斷**錯：一次比對時把題目 id 算進去，一次自行拿掉九九乘法的開關
+- 3/6 次 commit 落在 main（clone 用的是修之前的 pre-commit，沒有擋 main 的規則）
+- dev 在高負載下逾時，候選自己改用 production 才跑完；`.agent/features/` 的 Gotchas 已經寫了這個，但候選沒讀到
+
+裁判與我的不同意見：shared-bank run 1 的「根因」裁判給 1/2。解碼時 id 固定是 `q{i}`，同一條連結再開，實際上選得回同一份；判準多測了回報沒提的「開自己的連結」。分數照裁判記，歧義寫在題目檔。

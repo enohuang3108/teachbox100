@@ -1,1 +1,7 @@
 date	env	case	run	candidate	objective	score	judge	notes
+2026-10-28	6d5b4c1+ab1e662	shared-bank-same-name	1	Claude Opus 5.5 subagent	fail 3/4	6	codex gpt-6.1-sol high	比對含題目 id（JSON.stringify），q9 重編時沒選回同一份；實際解碼 id 固定 q{i}，同連結再開可選回——判準比回報多要求「開自己的連結」；沒用 .agent/verify
+2026-10-28	6d5b4c1+ab1e662	shared-bank-same-name	2	Claude Opus 5.5 subagent	pass 4/4	9	codex gpt-6.1-sol high	用 questionRow 比內容；沒先掃整份清單的相同內容（裁判扣 1）；回覆聲稱 hook 擋 main，clone 的舊 pre-commit 沒有這條；沒用 .agent/verify
+2026-10-28	6d5b4c1+ab1e662	share-link-speech-prefs	1	Claude Opus 5.5 subagent	pass 10/10	10	codex gpt-6.1-sol high	改 codec 拿掉朗讀欄位、保留位置；重現只有單元測試，沒跑 e2e 也沒開瀏覽器；commit 在 main；沒用 .agent/verify
+2026-10-28	6d5b4c1+ab1e662	share-link-speech-prefs	2	Claude Opus 5.5 subagent	pass 10/10	10	codex gpt-6.1-sol high	新增 e2e 修前紅（0.9×）修後綠；回報 multiplication／monopoly 分享測試逾時是既有問題；沒用 .agent/verify
+2026-10-28	6d5b4c1+ab1e662	zhuyin-toggle-scope	1	Claude Opus 5.5 subagent	pass 22/22	8	codex gpt-6.1-sol high	沒有修前重現（扣 2）；dev 高負載逾時改 production；commit 先落 main 再移分支（branch 指標，非 reset --hard）；沒用 .agent/verify
+2026-10-28	6d5b4c1+ab1e662	zhuyin-toggle-scope	2	Claude Opus 5.5 subagent	fail 21/22	4	codex gpt-6.1-sol high	自行拿掉九九乘法的開關（它已有 zhuyin-text），沒有修前重現；沒用 .agent/verify
