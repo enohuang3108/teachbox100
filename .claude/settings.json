@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Artifact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -e '(.tool_input.action // \"publish\") == \"publish\"' >/dev/null && { echo '這個專案不發佈到 claude.ai artifact（10-01 使用者兩次要求刪掉）。HTML 存本機檔，用 open 打開。' >&2; exit 2; }; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
