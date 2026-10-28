@@ -35,10 +35,19 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    ".next-e2e-2/types/**/*.ts",
+    ".next-e2e-3/types/**/*.ts",
+    ".next-e2e-castle/types/**/*.ts",
+    ".next-e2e-p/types/**/*.ts",
+    ".next-e2e/types/**/*.ts",
+    ".next-speech-settings/types/**/*.ts",
+    ".next-speech-turbo/types/**/*.ts",
+    ".next-speech/types/**/*.ts",
+    ".next-zhuyin/types/**/*.ts",
     ".next/types/**/*.ts",
     "next-env.d.ts",
     "types/**/*.d.ts",
-    ".next-e2e/types/**/*.ts"
+    ".next-e2e-claude/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
