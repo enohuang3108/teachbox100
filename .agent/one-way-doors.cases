@@ -1,0 +1,63 @@
+# expect<TAB>command：y＝要被擋、n＝要放行。改 one-way-doors 後跑 ~/agent-kit/brigade/bin/brigade-doors-test
+y	git push origin main
+y	git push -u origin main
+y	git push origin HEAD:main
+y	git push origin brigade/setup:refs/heads/main
+y	git -C /Users/huai/side_project/teachbox100 push origin main
+y	pnpm test && git push origin main
+n	git push origin brigade/setup
+n	git push -u origin main-fix
+n	git push origin feature/main
+n	git commit -m "git push origin main after review"
+n	git pull origin main
+n	git fetch origin main
+y	git push --force origin brigade/setup
+y	git push -f origin brigade/setup
+y	git push --force-with-lease origin brigade/setup
+y	git push origin --delete old-branch
+y	git push origin :refs/tags/v1
+y	git push origin +brigade/setup
+y	git push --mirror origin
+n	git push -q && git log -1 --oneline
+y	git checkout -- app/page.tsx
+y	git checkout .
+y	git checkout -f main
+y	git restore app/page.tsx
+y	git reset --hard HEAD
+y	git clean -fd
+y	git stash drop
+y	git stash clear
+y	git switch --discard-changes main
+y	git -C /tmp/x restore app/page.tsx
+n	git checkout main
+n	git checkout -b brigade/next
+n	git reset HEAD~1
+n	git stash
+n	git stash pop
+n	git clean -n
+n	git commit -m "Explain why reset --hard is a door"
+y	vercel deploy --prod
+y	npx vercel@50.0.0 deploy --prod
+y	vercel --prod
+y	vercel rollback dpl_abc
+y	vercel promote https://teachbox100-abc.vercel.app
+y	vercel remove teachbox100-abc
+y	vercel env add KV_REST_API_TOKEN production
+y	vercel env rm KV_REST_API_URL
+y	pnpm dlx vercel env update NEXT_PUBLIC_SITE_URL production
+y	vercel domains rm teachbox100.com
+n	vercel deploy
+n	vercel ls
+n	vercel env ls
+n	vercel env pull .env.local
+n	vercel logs teachbox100.com
+n	git commit -m "docs: note vercel rollback steps"
+y	curl -H "Authorization: Bearer $KV_REST_API_TOKEN" "$KV_REST_API_URL/del/share:abcd1234"
+y	curl -H "Authorization: Bearer $KV_REST_API_TOKEN" "$KV_REST_API_URL/flushdb"
+y	curl -X POST -H "Authorization: Bearer $T" https://able-cat-1234.upstash.io -d '["DEL","share:abcd1234"]'
+y	redis-cli -u "$REDIS_URL" flushall
+y	node -e "const {Redis}=require('@upstash/redis'); Redis.fromEnv().del('share:x')"
+n	curl -H "Authorization: Bearer $KV_REST_API_TOKEN" "$KV_REST_API_URL/get/share:abcd1234"
+n	curl -H "Authorization: Bearer $KV_REST_API_TOKEN" "$KV_REST_API_URL/ttl/share:abcd1234"
+n	redis-cli -u "$REDIS_URL" get share:abcd1234
+n	pnpm test lib/short-link.test.ts

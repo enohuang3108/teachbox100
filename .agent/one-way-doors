@@ -1,0 +1,17 @@
+# brigade one-way doors：每段一個 ERE，hook 把指令拆成單一指令後以 grep -Ei 比對，命中就擋。
+# 理由與回滾見 .agent/README.md 的 Doors。
+
+# 1 push 到 main＝Vercel 正式部署（使用者政策：部署由使用者用 ! 執行）。分支 push 不擋；在 main 上打裸的 git push、引號裡的指令（sh -c）擋不到，agent 一律寫出分支名
+^[^"']*\bgit(\s+-\S+(\s+("[^"]*"|'[^']*'|[^-\s]\S*))?)*\s+push\b[^"']*(\s|:|refs/heads/)main(\s|$)
+
+# 2 改寫遠端歷史、刪遠端 tag 或分支
+git\b.*\bpush\b.*(--force|-f\b|--delete|--mirror|--prune|\s:|\s\+\S)
+
+# 3 丟棄未提交的改動：使用者手改的檔案會一起消失。還原自己的暫存改動用 cp 先備份再 cp 回來
+git(\s+-\S+(\s+("[^"]*"|'[^']*'|[^-\s]\S*))?)*\s+(checkout\b.*\s(--(\s|$)|\.(\s|$)|-f\b|--force)|restore\b|reset\b.*--hard|clean\b.*\s-[a-z]*f|stash\s+(drop|clear)|switch\b.*--discard-changes)
+
+# 4 Vercel CLI 動正式站或專案設定：正式部署、回滾、promote、刪部署、env 改動（沒有歷史）、網域
+^[^"']*\bvercel(@\S+)?\b[^"']*(--prod\b|\s(rollback|promote|remove|rm|redeploy|alias)\b|\senv\s+(add|rm|remove|update)\b|\sdomains\s+(add|rm|remove)\b)
+
+# 5 共用 Upstash Redis 刪資料（本機與正式站同一個庫，刪掉的是老師已分享出去的短連結）
+(upstash\.io|KV_REST_API_URL|UPSTASH_REDIS_REST_URL).*(/(del|unlink|flushdb|flushall|getdel)\b|\[\s*\\?"(del|unlink|flushdb|flushall))|redis-cli\b.*\b(del|unlink|flushdb|flushall)\b|\.(del|unlink|flushdb|flushall)\(
