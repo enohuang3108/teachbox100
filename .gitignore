@@ -69,3 +69,4 @@ storybook-static/
 
 # brigade
 .agent/evidence/
+.agent/evals/runs/*.prompt.md
