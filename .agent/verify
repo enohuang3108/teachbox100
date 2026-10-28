@@ -13,10 +13,12 @@ KEY=$(printf %s "$ROOT" | cksum | cut -d' ' -f1)
 # One server per worktree, never the user's 3100: port 3200–3299 and dist dir keyed by the worktree path.
 PORT=$((3200 + KEY % 100))
 DIST=.next-brigade-$((KEY % 100))
-STATE=/private/tmp/teachbox100-brigade-$KEY
+# $TMPDIR is per-user on macOS; a shared /tmp path could be pre-created by another user to swap the pidfile.
+STATE=${TMPDIR:-/tmp}/teachbox100-brigade-$KEY
 PROJECT=${BRIGADE_PROJECT:-desktop}
 URL=http://127.0.0.1:$PORT
-mkdir -p "$STATE"
+(umask 077; mkdir -p "$STATE")
+[ -O "$STATE" ] && [ ! -L "$STATE" ] || { echo "needs human: $STATE is not a directory owned by $(id -un)" >&2; exit 2; }
 
 say() { printf '%s\n' "$*"; }
 need_human() { say "needs human: $*" >&2; exit 2; }

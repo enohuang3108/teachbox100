@@ -87,7 +87,7 @@ agent 推分支一律寫出分支名：`git push -u origin <branch>`。
 - 分享連結的 API 用攔截代替：預覽 UI 驗過了，Redis 讀寫與 TTL 只靠 `lib/short-link.test.ts`
 - `Math.random` 固定（multiplication `finish`）：題序可以重現，但紙屑會疊成一片
 
-**隔離**：每個 worktree 用自己的 port（`3200 + 路徑雜湊 % 100`）、distDir（`.next-brigade-<n>`）、state（`/private/tmp/teachbox100-brigade-<key>/`）。
+**隔離**：每個 worktree 用自己的 port（`3200 + 路徑雜湊 % 100`）、distDir（`.next-brigade-<n>`）、state（`$TMPDIR/teachbox100-brigade-<key>/`）。
 port 被別人佔用時，`launch` 回 exit 2，不會去搶。使用者 3100 那台不碰，也不 `pkill`。
 `next dev` 會把自己的 distDir 寫進 `tsconfig.json`；`launch` 先備份一份，`cleanup` 時如果差異只有那一行就還原，其他差異留給人處理。
 

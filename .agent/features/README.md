@@ -11,7 +11,7 @@
 - 每個案例都用全新的 browser context：localStorage 是空的，等於第一次打開的老師
 - 有 3D 或 canvas 的單元（一番賞）要用 `.agent/verify launch prod`（build 約 2–3 分）
 - 任何異常先跑 `.agent/verify doctor`（它會提示機器負載）
-- 跑 `drive` 期間，不要讓任何東西寫進 worktree：dev 會重新編譯，跑到一半的頁面會整頁重載。`verify` 自己的證據會先寫到 `/private/tmp/teachbox100-brigade-<key>/run/`，跑完才搬進 `.agent/evidence/`
+- 跑 `drive` 期間，不要讓任何東西寫進 worktree：dev 會重新編譯，跑到一半的頁面會整頁重載。`verify` 自己的證據會先寫到 `$TMPDIR/teachbox100-brigade-<key>/run/`，跑完才搬進 `.agent/evidence/`
 
 ## Driving conventions
 
