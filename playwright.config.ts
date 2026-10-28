@@ -3,6 +3,8 @@ import { defineConfig, devices } from "@playwright/test";
 // 開發機 3100 常有人在用：E2E_PORT=3199 另開一台，搭配 NEXT_DIST_DIR 才不會跟那台搶 .next
 const port = process.env.E2E_PORT ?? "3100";
 const serverMode = process.env.E2E_SERVER_MODE === "production" ? "start" : "dev";
+// 只給 E2E_PORT 不給 NEXT_DIST_DIR，第二台會蓋掉 3100 那台的 .next（09-07、09-20、09-29 三次）；非 3100 自己分一份
+const distDir = process.env.NEXT_DIST_DIR ?? (port === "3100" ? undefined : `.next-e2e-${port}`);
 
 export default defineConfig({
   testDir: "./e2e",
@@ -34,6 +36,6 @@ export default defineConfig({
     reuseExistingServer: process.env.E2E_REUSE_SERVER === "1",
     timeout: 120_000,
     // Sentry server SDK 在執行期讀這個，測試噴的錯才不會混進 production
-    env: { SENTRY_ENVIRONMENT: "e2e" },
+    env: { SENTRY_ENVIRONMENT: "e2e", ...(distDir && { NEXT_DIST_DIR: distDir }) },
   },
 });

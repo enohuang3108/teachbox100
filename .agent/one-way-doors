@@ -15,3 +15,6 @@ git(\s+-\S+(\s+("[^"]*"|'[^']*'|[^-\s]\S*))?)*\s+(checkout\b.*\s(--(\s|$)|\.(\s|
 
 # 5 共用 Upstash Redis 刪資料（本機與正式站同一個庫，刪掉的是老師已分享出去的短連結）
 (upstash\.io|KV_REST_API_URL|UPSTASH_REDIS_REST_URL).*(/(del|unlink|flushdb|flushall|getdel)\b|\[\s*\\?"(del|unlink|flushdb|flushall))|redis-cli\b.*\b(del|unlink|flushdb|flushall)\b|\.(del|unlink|flushdb|flushall)\(
+
+# 6 動到使用者 3100 那台 dev server（政策，09-07、09-20、09-29 三次）：按名稱殺 next 會一起殺掉它；砍 .next 它會白畫面。只 kill 自己記的 pid，或用 .agent/verify cleanup
+^[^"']*\b(pkill|killall)\b.*\bnext\b|^[^"']*\brm\b[^|;&]*\s(\./)?\.next/?(\s|$)

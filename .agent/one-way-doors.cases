@@ -61,3 +61,14 @@ n	curl -H "Authorization: Bearer $KV_REST_API_TOKEN" "$KV_REST_API_URL/get/share
 n	curl -H "Authorization: Bearer $KV_REST_API_TOKEN" "$KV_REST_API_URL/ttl/share:abcd1234"
 n	redis-cli -u "$REDIS_URL" get share:abcd1234
 n	pnpm test lib/short-link.test.ts
+y	pkill -f "next dev"
+y	pkill -f next-server
+y	killall next
+y	rm -rf .next
+y	rm -rf ./.next/
+y	pkill -f "next dev" && rm -rf .next
+n	kill 12345
+n	rm -rf .next-e2e-3199
+n	rm -rf node_modules/.cache
+n	pgrep -fl "next dev"
+n	git commit -m "never pkill next"
