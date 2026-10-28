@@ -1,0 +1,55 @@
+#!/bin/sh
+# brigade fast check: the PostToolUse hook runs it with the file just edited. Read-only, under 30 s per file.
+#   .agent/check <file>...   check those files (paths relative to the repo root or absolute)
+#   .agent/check             everything fast: pnpm lint, lint:tokens, test
+# Slow gates (Playwright, next build) stay in .agent/verify.
+set -u
+ROOT=$(cd "$(dirname "$0")/.." && pwd)
+cd "$ROOT" || exit 1
+fail=0
+run() { out=$("$@" 2>&1) || { printf '✗ %s\n%s\n' "$*" "$out" >&2; fail=1; }; }
+
+# main already carries tsc errors in other files (.agent/README.md Gates), so only this file's errors count.
+types() {
+  out=$(pnpm exec tsc --noEmit -p . 2>&1 | grep -F "$1(")
+  [ -z "$out" ] || { printf '✗ tsc --noEmit (errors in %s)\n%s\n' "$1" "$out" >&2; fail=1; }
+}
+# Same rules as pnpm lint:tokens, reported for this file only.
+tokens() {
+  out=$(node scripts/check-design-tokens.mjs 2>&1 | grep -F "$1:")
+  [ -z "$out" ] || { printf '✗ pnpm lint:tokens (%s)\n%s\n' "$1" "$out" >&2; fail=1; }
+}
+
+check_one() {
+  f=${1#"$ROOT"/}
+  [ -f "$f" ] || return 0
+  case $f in
+    node_modules/*|.next*/*|.agent/evidence/*) return 0 ;;
+    *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs)
+      run pnpm exec oxlint --type-aware "$f"
+      case $f in *.ts|*.tsx) types "$f" ;; esac
+      case $f in app/*.ts|app/*.tsx|components/*.ts|components/*.tsx|lib/*.ts|lib/*.tsx) tokens "$f" ;; esac
+      # Unit tests: the file itself, or the sibling test that covers it. Playwright specs belong to .agent/verify.
+      case $f in
+        e2e/*) ;;
+        *.test.ts|*.test.tsx) run pnpm exec vitest run "$f" ;;
+        *) b=${f%.*}; for t in "$b.test.ts" "$b.test.tsx"; do [ -f "$t" ] && run pnpm exec vitest run "$t"; done ;;
+      esac ;;
+    *.json)
+      # tsconfig and friends are JSONC; only strict JSON files are parsed.
+      case $f in tsconfig*.json|.vscode/*) ;; *) run node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"))' "$f" ;; esac ;;
+    *.py)
+      run python3 -c 'import ast,sys; ast.parse(open(sys.argv[1]).read(), sys.argv[1])' "$f" ;;
+    .agent/verify|.agent/check|.agent/bin/*|.githooks/*|*.sh)
+      run ~/agent-kit/brigade/bin/brigade-shell-lint "$f" ;;
+  esac
+}
+
+if [ $# -eq 0 ]; then
+  run pnpm lint
+  run pnpm lint:tokens
+  run pnpm test
+else
+  for f in "$@"; do check_one "$f"; done
+fi
+exit $fail

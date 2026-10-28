@@ -41,6 +41,6 @@ recorded=$(sed -n 's/.*"codeDiffHash": *"\([^"]*\)".*/\1/p' "$receipt")
 # proof 當下的程式碼 diff 與現在的比對。用 hash 而不是檔案時間，因為 macOS bash 的
 # -nt 只有秒級解析度，同一秒內的編輯會漏掉。
 current=$(git diff --binary HEAD -- "${CODE_PATHS[@]}" | shasum -a 256 | cut -d' ' -f1)
-[ "$recorded" = "$current" ] || fail "proof 跑完後程式碼又改了（$recorded != $current）"
+[ "$recorded" = "$current" ] || fail "proof 跑完後程式碼又改了（$recorded != ${current}）"
 
 exit 0
