@@ -30,6 +30,7 @@ agent 冷啟動時讀這份：哪些能自己驗證、哪些動作要停手。�
 | Storybook | `pnpm test:stories` | 未量 |
 | commit 閘門 | `.githooks/pre-commit`：動到 `app/ lib/ components/ hooks/` 就要 `.agents/verification/<HEAD>.json` 的 proof，且 diff hash 對得上。先 `git add` 再 `pnpm verify:change -- --matrix "<列>" --behavior "<行為>" --seam unit -- pnpm test <檔>` | — |
 | CI | **沒有**（repo 沒有 `.github/`）。Vercel 只做 build | — |
+| 編輯後快速檢查 | `.agent/check <檔>`：`.ts/.tsx/.js/.mjs` 跑 `oxlint --type-aware`＋`tsc`（只報這個檔的錯）＋`lint:tokens`（`app/ components/ lib/`）＋同名 `.test.ts(x)`；`*.test.ts(x)` 跑 vitest；`e2e/` 不跑 Playwright；JSON 用 `JSON.parse`（`tsconfig*` 是 JSONC，跳過）；Python 用 `ast.parse`；shell（`.agent/verify`、`.githooks/*`、`*.sh`）用 `brigade-shell-lint`。不帶參數＝`pnpm lint`＋`lint:tokens`＋`test` | 2026-10-28 實測：TS 4–7 秒（tsc 佔大半），其他 1 秒內。**PostToolUse hook 不會自動跑**：使用者還沒核准信任這個 repo（`brigade-trust`），要手動跑 |
 
 ## Doors
 
@@ -53,6 +54,27 @@ one-way 全部在 `one-way-doors`，由 hook 擋下；改規則後跑 `~/agent-k
 
 `one-way-doors` 只看得到 agent 直接下的 Bash 指令；寫成腳本、`sh -c "…"`、在 main 上打裸的 `git push`（沒寫分支名）都擋不到，那類動作照上表自己停手。
 agent 推分支一律寫出分支名：`git push -u origin <branch>`。
+
+## Rules
+
+每條規則都配上執行它的東西。人糾正 agent 時：修那個錯，並加一列；已經在表上卻沒有東西擋住＝重犯，往更高一層修。錯不可能再發生時，刪掉那列。
+2026-10-28 由 brigade-3-guardrails 整理自 37 份對話紀錄（227 則使用者訊息）與 auto-memory，使用者逐項核准 A–D。
+
+| 規則 | 執行者 | 證明 |
+|---|---|---|
+| 第二台 Next server 不共用使用者 3100 的 `.next` | 架構：`playwright.config.ts` 在 port 不是 3100 時自動設 `NEXT_DIST_DIR=.next-e2e-<port>`；`.agent/verify` 用自己的 `.next-brigade-<n>` | 舊 config 加 `E2E_PORT=3199` → `NEXT_DIST_DIR` 沒設（寫進 `.next`）；新 config → `.next-e2e-3199`；3100 不變（`a04628a`） |
+| 不按名稱殺 next、不砍 `.next` | hook `guard-doors.sh`，door 6 | `brigade-doors-test` 73/73；本 session 寫測試案例時的 printf 就被它擋下（`a04628a`） |
+| agent 不在 main 上 commit | git hook `.githooks/pre-commit`（`CLAUDECODE=1` 且在 main 時擋） | scratch clone：舊 hook exit 0、新 hook exit 1；人 exit 0、分支 exit 0（`b34ed88`，重建） |
+| 不發佈到 claude.ai artifact | 專案 hook `.claude/settings.json` PreToolUse `Artifact`（只擋 publish） | 模擬輸入：publish exit 2、不帶 action exit 2、list exit 0（`8a6def3`）；沒有拿真的呼叫測，免得 hook 沒載入時真的發佈出去 |
+| 說「修好了」之前要有這次改動之後的證據 | hook `require-evidence.sh`（Stop，**2026-10-28 起只警告**；滿一週沒有誤報、使用者同意後 `touch .agent/enforce-evidence` 改成擋下，預定 2026-11-04 檢查）＋ `.agent/verify` | 對話 10-17、10-19 共 4 次「還是沒有」；brigade-2 的證據目錄 |
+| 動到產品程式碼要有 proof 才能 commit | git hook `.githooks/pre-commit`（verify:change receipt＋diff hash） | 既有；`pnpm test:workflow` |
+| 顏色、z-index、transition 走 design token | `pnpm lint:tokens`；`.agent/check` 編輯當下報 | 既有；`check` 對 `UnitHero.tsx` 加 `bg-red-500` → exit 1（`36c5b94`） |
+| shell 變數後面不直接接全形字元 | `brigade-shell-lint`（`.agent/check` 改到 shell 時） | 抓到 `.githooks/pre-commit:44` 的真錯：bash 印出 `x（��y`，改 `${current}` 後印出 `x（abc）y`（`36c5b94`） |
+| 部署（push main）、改寫遠端歷史、丟棄未提交改動、Vercel CLI、刪 Redis 由使用者執行 | hook `guard-doors.sh`，door 1–5 | `brigade-doors-test` 73/73；`echo npx vercel deploy --prod` 被擋，訊息指向本檔 Doors |
+| 回覆一律用繁體中文（臺灣） | 全域 hook `reply-language.sh` | agent-kit `8e9d8cd` |
+
+駁回（使用者 2026-10-28）：加了沒要求的文字或裝飾（約 12 次）、動畫有破綻（約 7 次）、外觀醜或不像其他單元（約 6 次）、同一件事要講第二次（約 3 次）、入口放錯位置（2 次）。這些屬於判斷，不設規則，auto-memory 照舊留著。
+證據不足（只有 1 次）：proof 要在 `git add` 之後跑、`pnpm test:e2e` 多加 `--`、只在瀏覽器跑的套件會讓 build 壞掉。再發生一次就補進來。
 
 ## 平台限制
 
