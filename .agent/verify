@@ -1,0 +1,175 @@
+#!/bin/sh
+# brigade verify for TeachBox100. Contract: ~/agent-kit/brigade/README.md; recipes: .agent/features/.
+#   .agent/verify doctor                    read-only health check
+#   .agent/verify launch [dev|prod]         start this worktree's own Next server to ready (default dev)
+#   .agent/verify drive <feature> [sub]     run a mapped feature's Playwright journeys, evidence in $EVIDENCE
+#   .agent/verify cleanup                   stop what this script started, keep evidence
+#   .agent/verify                           smoke: launch dev → doctor → drive home → cleanup
+# Exit: 0 ok, 1 broken, 2 needs a human (port taken by someone else, deps or browsers missing).
+# BRIGADE_PROJECT=mobile drives the Pixel 5 project instead of desktop.
+set -u
+ROOT=$(cd "$(dirname "$0")/.." && pwd)
+KEY=$(printf %s "$ROOT" | cksum | cut -d' ' -f1)
+# One server per worktree, never the user's 3100: port 3200–3299 and dist dir keyed by the worktree path.
+PORT=$((3200 + KEY % 100))
+DIST=.next-brigade-$((KEY % 100))
+STATE=/private/tmp/teachbox100-brigade-$KEY
+PROJECT=${BRIGADE_PROJECT:-desktop}
+URL=http://127.0.0.1:$PORT
+mkdir -p "$STATE"
+
+say() { printf '%s\n' "$*"; }
+need_human() { say "needs human: $*" >&2; exit 2; }
+web_pid() { p=$(cat "$STATE/web.pid" 2>/dev/null) && kill -0 "$p" 2>/dev/null && say "$p"; }
+port_pid() { lsof -ti "tcp:$PORT" -sTCP:LISTEN 2>/dev/null | head -1; }
+kill_tree() { for c in $(pgrep -P "$1"); do kill_tree "$c"; done; kill "$1" 2>/dev/null; }
+# Ready = the home page renders the unit grid, not just a socket answering (dev compiles on first hit).
+ready() { curl -sf --max-time 120 "$URL/" 2>/dev/null | grep -q 'href="/draw"'; }
+# Evidence is staged outside the repo and moved in when the drive ends: next dev recompiles on any file written under
+# the worktree, and a recompile mid-journey full-reloads the page so it never hydrates (10/28, quiz library).
+new_evidence() {
+  name=$(date +%Y%m%d-%H%M%S)-$1
+  FINAL=$ROOT/.agent/evidence/$name; EVIDENCE=$STATE/run/$name
+  mkdir -p "$EVIDENCE"; export EVIDENCE
+  { say "feature: $1 ${2:-}"; say "project: $PROJECT"; say "server: $URL ($(cat "$STATE/mode" 2>/dev/null || echo ?))"
+    say "rev: $(git -C "$ROOT" rev-parse --short HEAD)$(git -C "$ROOT" diff --quiet || echo ' +dirty')"; say "started: $(date '+%F %T')"; } > "$EVIDENCE/summary.txt"
+}
+
+# Feature map → "sub spec|test-title-regex" per line, then the routes to screenshot. Keep in step with .agent/features/*.md.
+pairs() {
+  case $1 in
+    home) printf '%s\n' "grid home.spec.ts|首頁列出分類與獨立單元" "order home.spec.ts|首頁卡片依搜尋流量排序" "toolbox home.spec.ts|首頁教具箱一開始關著" ;;
+    draw) printf '%s\n' "wheel wheel-result.spec.ts|抽籤轉盤轉完" "wheel-start setup-and-start.spec.ts|轉盤與扭蛋機以老師輸入的名單開始" \
+      "gacha gacha.spec.ts|點一顆扭蛋飛到中間" "redirect gacha.spec.ts|舊的抽籤機網址永久轉到扭蛋機" ;;
+    clock) printf '%s\n' "drag clock-drag.spec.ts|右下角時間滑桿跨越 12 點" ;;
+    multiplication) printf '%s\n' "start setup-and-start.spec.ts|九九乘法選好範圍後開始" "finish multiplication-finish.spec.ts|九九乘法完成後保留作答紀錄" \
+      "perfect multiplication-finish.spec.ts|九九乘法全對時" ;;
+    quiz) printf '%s\n' "territory territory.spec.ts|領地戰可選小場地" "library question-library.spec.ts|瀏覽器建立題庫後四個遊戲共用" \
+      "share-open open-share-link.spec.ts|分享預覽保留大小寫" ;;
+    *) return 1 ;;
+  esac
+}
+routes() {
+  case $1 in
+    home) say / ;; draw) say /draw /draw/wheel /draw/gacha ;; clock) say /clock/current-time ;;
+    multiplication) say /multiplication ;; quiz) say /quiz/territory /quiz/morris /ultimate-password /monopoly / ;;
+  esac
+}
+# dev compiles a route on its first hit; on a loaded machine that alone eats the 30s test budget (10/28: 43s compiles).
+prewarm() {
+  for r in $(routes "$1"); do
+    t0=$(date +%s); curl -sf -o /dev/null --max-time 300 "$URL$r" || { say "FAIL prewarm $r"; return 1; }
+    say "warm $r ($(( $(date +%s) - t0 ))s)"
+  done
+}
+
+doctor() {
+  bad=0
+  say "worktree: $ROOT"; say "port: $PORT  dist: $DIST  state: $STATE"
+  say "node $(node -v 2>/dev/null || echo missing)  pnpm $(pnpm -v 2>/dev/null || echo missing)"
+  [ -d "$ROOT/node_modules/@playwright/test" ] || { say "FAIL node_modules missing: pnpm install"; bad=2; }
+  ls "$HOME/Library/Caches/ms-playwright" "$HOME/.cache/ms-playwright" 2>/dev/null | grep -q '^chromium' \
+    || { say "FAIL Playwright Chromium missing: pnpm exec playwright install chromium"; bad=2; }
+  [ -f "$ROOT/.env.local" ] && grep -q '^KV_REST_API_URL=' "$ROOT/.env.local" \
+    && say "note: .env.local points at the shared production Redis; share links created here live 30 days (.agent/README.md door 10)" \
+    || say "note: no KV_REST_API_* in .env.local; /api/share will fail, journeys that mock it still run"
+  p=$(port_pid); w=$(web_pid)
+  if [ -n "$w" ] && [ "$p" = "$w" -o -n "$(pgrep -P "$w")" ]; then
+    if ready; then say "ok server $URL pid $w ($(cat "$STATE/mode"))"; else say "FAIL server pid $w up but $URL/ not ready"; bad=1; fi
+  elif [ -n "$p" ]; then say "FAIL port $PORT held by pid $p, not ours"; bad=2
+  else say "server: not running (.agent/verify launch)"; fi
+  load=$(sysctl -n vm.loadavg 2>/dev/null | awk '{print int($2)}'); cpus=$(sysctl -n hw.ncpu 2>/dev/null || nproc)
+  [ -n "$load" ] && [ "$load" -gt $((cpus * 2)) ] && say "note: load average $load on $cpus cores — dev compiles slow down; journeys may need BRIGADE_TIMEOUT_MS=120000 or launch prod"
+  u=$(lsof -ti tcp:3100 -sTCP:LISTEN 2>/dev/null | head -1)
+  [ -n "$u" ] && say "note: user's dev server on 3100 (pid $u) — never touch it or its .next"
+  return $bad
+}
+
+launch() {
+  mode=${1:-dev}
+  case $mode in dev|prod) ;; all|web) mode=dev ;; *) say "unknown surface: $mode (dev|prod)" >&2; return 1 ;; esac
+  if w=$(web_pid); then
+    if [ "$(cat "$STATE/mode")" = "$mode" ] && ready; then say "ready: $URL already up (pid $w, $mode)"; return 0; fi
+    kill_tree "$w"; rm -f "$STATE/web.pid"; sleep 1
+  fi
+  p=$(port_pid); [ -n "$p" ] && need_human "port $PORT held by pid $p, not started by this worktree's verify"
+  [ -d "$ROOT/node_modules/@playwright/test" ] || need_human "node_modules missing: pnpm install"
+  cd "$ROOT" || return 1
+  # next adds "$DIST/types/**/*.ts" to tsconfig.json (and re-sorts it); cleanup puts the user's copy back.
+  [ -f "$STATE/tsconfig.json" ] || cp tsconfig.json "$STATE/tsconfig.json"
+  if [ "$mode" = prod ]; then
+    # Production build for 3D units (ichiban): dev cold-compile times out the journeys.
+    say "building into $DIST (log: $STATE/build.log)"
+    NEXT_DIST_DIR=$DIST SENTRY_ENVIRONMENT=e2e pnpm exec next build > "$STATE/build.log" 2>&1 || { tail -30 "$STATE/build.log" >&2; return 1; }
+    cmd=start
+  else cmd=dev; fi
+  NEXT_DIST_DIR=$DIST SENTRY_ENVIRONMENT=e2e nohup pnpm exec next $cmd . --hostname 127.0.0.1 --port "$PORT" > "$STATE/web.log" 2>&1 &
+  say $! > "$STATE/web.pid"; say "$mode" > "$STATE/mode"
+  i=0
+  until ready; do
+    i=$((i + 1)); [ $i -gt 60 ] && { say "not ready after 180s (log: $STATE/web.log)" >&2; tail -20 "$STATE/web.log" >&2; return 1; }
+    kill -0 "$(cat "$STATE/web.pid")" 2>/dev/null || { say "server exited (log: $STATE/web.log)" >&2; tail -20 "$STATE/web.log" >&2; return 1; }
+    sleep 3
+  done
+  say "ready: $URL/ renders the unit grid (pid $(cat "$STATE/web.pid"), $mode, log $STATE/web.log)"
+}
+
+drive() {
+  feature=$1; sub=${2:-}
+  list=$(pairs "$feature") || { say "unknown feature: $feature (see .agent/features/README.md)" >&2; return 1; }
+  [ -n "$sub" ] && { list=$(say "$list" | grep "^$sub ") || { say "unknown sub-feature: $feature $sub" >&2; return 1; }; }
+  web_pid >/dev/null && ready || { say "server not ready: run .agent/verify launch first" >&2; return 2; }
+  new_evidence "$feature" "$sub"
+  rc=0
+  [ "$(cat "$STATE/mode")" = dev ] && { prewarm "$feature" | tee -a "$EVIDENCE/summary.txt"; }
+  # Playwright reuses our server (E2E_REUSE_SERVER) instead of starting one on 3100; trace keeps every action's before/after DOM.
+  say "$list" | while IFS='|' read -r head title; do
+    s=${head%% *}; spec=${head#* }
+    say "== $feature $s: $spec / $title"
+    E2E_PORT=$PORT E2E_REUSE_SERVER=1 pnpm exec playwright test "e2e/$spec" -g "$title" --project="$PROJECT" \
+      --timeout "${BRIGADE_TIMEOUT_MS:-60000}" --trace on --reporter=list --output "$EVIDENCE/pw-$s" > "$EVIDENCE/$s.log" 2>&1
+    r=$?; tail -5 "$EVIDENCE/$s.log"
+    # A grep that matches nothing passes with 0 tests; that is a broken map, not a green journey.
+    grep -qE '[0-9]+ passed' "$EVIDENCE/$s.log" && [ $r -eq 0 ] || { say "FAIL $feature $s (log $EVIDENCE/$s.log)"; echo "$s" >> "$EVIDENCE/failed"; }
+  done
+  [ -f "$EVIDENCE/failed" ] && rc=1
+  # After-state for a human or agent to look at: each route as the user lands on it.
+  vp=1280,800; [ "$PROJECT" = mobile ] && vp=393,851
+  for r in $(routes "$feature"); do
+    f=$EVIDENCE/$(say "$r" | tr / _ | sed 's/^_$/_home/').png
+    pnpm exec playwright screenshot --viewport-size="$vp" --wait-for-timeout=1500 "$URL$r" "$f" >/dev/null 2>&1 || { say "FAIL screenshot $r"; rc=1; }
+  done
+  { say "result: $([ $rc -eq 0 ] && echo pass || echo fail)"; say "finished: $(date '+%F %T')"; } >> "$EVIDENCE/summary.txt"
+  mkdir -p "$(dirname "$FINAL")" && mv "$EVIDENCE" "$FINAL" && EVIDENCE=$FINAL || { say "FAIL moving evidence to $FINAL"; rc=1; }
+  say "traces: pnpm exec playwright show-trace $EVIDENCE/pw-<sub>/*/trace.zip"
+  say "$EVIDENCE"
+  return $rc
+}
+
+cleanup() {
+  if w=$(web_pid); then kill_tree "$w"; say "stopped server pid $w"; fi
+  rm -f "$STATE/web.pid" "$STATE/mode"
+  # Restore only when next's own line is the whole difference; anything else is a human edit and stays.
+  t=$ROOT/tsconfig.json; s=$STATE/tsconfig.json
+  if [ -f "$s" ]; then
+    if cmp -s "$t" "$s"; then :
+    elif [ "$(grep -vF "$DIST/" "$t" | tr -d ' ,' | sort)" = "$(tr -d ' ,' < "$s" | sort)" ]; then cp "$s" "$t"; say "restored tsconfig.json (next had added $DIST)"
+    else say "warning: tsconfig.json changed beyond next's $DIST line; left as is"; fi
+    rm -f "$s"
+  fi
+  sleep 1; p=$(port_pid); [ -n "$p" ] && say "warning: port $PORT still held by pid $p (not ours, left alone)"
+  say "evidence kept in $ROOT/.agent/evidence/"
+}
+
+case ${1:-smoke} in
+  doctor) doctor ;;
+  launch) shift; launch "${1:-dev}" ;;
+  drive) shift; [ $# -ge 1 ] || { say "usage: verify drive <feature> [sub]" >&2; exit 1; }; drive "$@" ;;
+  cleanup) cleanup ;;
+  smoke)
+    launch dev || { rc=$?; cleanup; exit $rc; }
+    doctor || { rc=$?; cleanup; exit $rc; }
+    drive home; rc=$?; ev=$EVIDENCE
+    cleanup; say "$ev"; exit $rc ;;
+  *) say "usage: verify [doctor|launch [dev|prod]|drive <feature> [sub]|cleanup]" >&2; exit 1 ;;
+esac

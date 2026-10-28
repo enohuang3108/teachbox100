@@ -64,4 +64,32 @@ agent 推分支一律寫出分支名：`git push -u origin <branch>`。
 
 ## 驗證方式
 
-（brigade-2-verify 填）
+改完要證明行為時用 `.agent/verify`（子指令與 exit code 見檔頭）；功能與 sub-feature 清單在 `.agent/features/README.md`。
+
+- **smoke**：`.agent/verify`（launch dev → doctor → `drive home` → cleanup）。2026-10-28 實測約 1.5 分鐘，第一次冷編譯會再久一點
+- **單一功能**：`.agent/verify launch` 之後跑 `.agent/verify drive <feature> [sub]`，證據路徑印在最後一行；先看裡面的 `<route>.png`，失敗時看 `pw-<sub>/*/trace.zip`
+- **看狀態**：`.agent/verify doctor`；收尾用 `.agent/verify cleanup`（只停自己啟動的 server，證據會留著）
+- **3D 單元**：`.agent/verify launch prod`（先 `next build` 到自己的 distDir）
+- 改了規則、資料、解析的邏輯，仍然走 repo 的 proof：`pnpm verify:change …`（`.agents/skills/teachbox100-testing/proof.md`）。`verify drive` 證明的是使用者路徑
+
+| surface | harness | 狀態 |
+|---|---|---|
+| 網站 | 這個 worktree 自己的 `next dev`（port 3200–3299）＋ repo 的 Playwright spec（`E2E_REUSE_SERVER`、`--trace on`）＋ `playwright screenshot` | ✅ 5 個功能、14 個 sub 全綠（2026-10-28，`home`／`draw`／`clock`／`multiplication`／`quiz`） |
+| PWA 離線 | `launch prod` | 已建檔，沒有在 brigade 跑過 journey |
+| 短連結 API | 攔截 `/api/share/*`（`quiz share-open`） | 只驗 client 端；真的 `POST` 會寫進正式 Redis，不放進 drive |
+| 計分板搶答 | `LIVE_WEBRTC=1 pnpm test:e2e e2e/scoreboard-live.spec.ts` | 不在 map 裡：要連公開 relay，結果看 relay 狀況 |
+| 麥克風、觸控、音效、投影 | — | verified-unreachable：要實機，走 `/qa-test`（`docs/testing.md` 第三欄） |
+
+**替身清單**（這些步驟在真實目標跑過之前都算未驗證）：
+
+- headless Chromium 代替真實瀏覽器：沒有 GPU 合成、沒有中文語音（領地戰的 journey 關掉了 `speechSynthesis`）、沒有真的觸控
+- `next dev` 代替正式部署：沒有 Vercel CDN 快取、沒有 service worker（只有 `launch prod` 才有）、Sentry environment 是 `e2e`
+- 分享連結的 API 用攔截代替：預覽 UI 驗過了，Redis 讀寫與 TTL 只靠 `lib/short-link.test.ts`
+- `Math.random` 固定（multiplication `finish`）：題序可以重現，但紙屑會疊成一片
+
+**隔離**：每個 worktree 用自己的 port（`3200 + 路徑雜湊 % 100`）、distDir（`.next-brigade-<n>`）、state（`/private/tmp/teachbox100-brigade-<key>/`）。
+port 被別人佔用時，`launch` 回 exit 2，不會去搶。使用者 3100 那台不碰，也不 `pkill`。
+`next dev` 會把自己的 distDir 寫進 `tsconfig.json`；`launch` 先備份一份，`cleanup` 時如果差異只有那一行就還原，其他差異留給人處理。
+
+**10/28 建置時抓到的 harness 錯**：證據原本直接寫進 `.agent/evidence/`，dev 看到檔案變動就重新編譯，測試跑到一半的頁面整頁重載、一直沒 hydrate，造成 wheel、library 假紅。
+改成先寫到 repo 外、跑完再搬進來之後，14 個 sub 全綠。對照組：server 開著時寫進 evidence 觸發一次 `Compiled`，寫到 repo 外不會觸發。
