@@ -8,6 +8,12 @@
 # 真的要跳過：git commit --no-verify
 set -e
 
+# agent 一律在自己的分支上做（09-30「你有新開獨立的 branch 嗎？」四次）；人自己在 main commit 不受影響
+if [ -n "${CLAUDECODE:-}" ] && [ "$(git branch --show-current)" = main ]; then
+  echo "擋下 commit：agent 不在 main 上 commit。先開分支：git switch -c <type>/<主題>" >&2
+  exit 1
+fi
+
 # 與 scripts/verify-change.mjs 的 CODE_PATHS 逐字一致，兩邊要一起改。
 # 排除測試檔：寫測試是讓 seam 變 red 的那一步，不需要先有 proof。
 CODE_PATHS=(app lib components hooks ':(exclude)*.test.ts' ':(exclude)*.test.tsx' ':(exclude)*.spec.ts' ':(exclude)*.spec.tsx')
