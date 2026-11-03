@@ -13,6 +13,7 @@ import {
   generateRandomCoins,
   sumValues,
 } from "@/lib/coin/game";
+import type { Coin as CoinType } from "@/lib/types/types";
 import { useEffect, useState } from "react";
 
 export default function CoinGamePage() {

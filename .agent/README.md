@@ -22,7 +22,7 @@ M 系列 Mac 的耗時。
 | gate | 指令 | 耗時 |
 |---|---|---|
 | lint | `pnpm lint`（oxlint type-aware） | 2 秒，有 warning 無 error |
-| 型別 | `pnpm exec tsc --noEmit` | 6 秒，**main 上已經紅 4 個**（`app/coin/pay/page.tsx:19`、`app/coin/value/page.tsx:19`、`lib/hooks/use-toast.ts:9` 等）；`next.config` 設 `ignoreBuildErrors: true`，build 不擋 |
+| 型別 | `pnpm exec tsc --noEmit` | 6 秒，應為 0 錯；`next.config` 設 `ignoreBuildErrors: true`，build 不擋 |
 | 設計 token | `pnpm lint:tokens` | 1 秒 |
 | 單元測試 | `pnpm test`（Vitest，384 項） | 3 秒 |
 | proof 工具自身 | `pnpm test:workflow` | 1 秒 |

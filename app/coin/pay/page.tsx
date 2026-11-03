@@ -8,7 +8,7 @@ import SelectedCoinsList, { type SelectedCoin } from "@/components/molecules/Sel
 import { useMaxAmount } from "@/components/molecules/setting/MaxAmount";
 import { GamePageTemplate } from "@/components/templates/GamePageTemplate";
 import { AVAILABLE_COINS } from "@/lib/constants/game";
-import { PRODUCTS } from "@/lib/constants/products";
+import { PRODUCTS, type Product } from "@/lib/constants/products";
 import { createPaymentQuestion } from "@/lib/coin/game";
 import type { Coin as CoinType } from "@/lib/types/types";
 import { getRandomFeedback } from "@/lib/utils/gameFeedback";
