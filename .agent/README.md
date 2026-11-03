@@ -17,7 +17,7 @@ agent 冷啟動時讀這份：哪些能自己驗證、哪些動作要停手。�
 
 ## Gates
 
-2026-10-28 在 M 系列 Mac 實測。
+M 系列 Mac 的耗時。
 
 | gate | 指令 | 耗時 |
 |---|---|---|
@@ -30,12 +30,12 @@ agent 冷啟動時讀這份：哪些能自己驗證、哪些動作要停手。�
 | Storybook | `pnpm test:stories` | 未量 |
 | commit 閘門 | `.githooks/pre-commit`：動到 `app/ lib/ components/ hooks/` 就要 `.agents/verification/<HEAD>.json` 的 proof，且 diff hash 對得上。先 `git add` 再 `pnpm verify:change -- --matrix "<列>" --behavior "<行為>" --seam unit -- pnpm test <檔>` | — |
 | CI | **沒有**（repo 沒有 `.github/`）。Vercel 只做 build | — |
-| 編輯後快速檢查 | `.agent/check <檔>`：`.ts/.tsx/.js/.mjs` 跑 `oxlint --type-aware`＋`tsc`（只報這個檔的錯）＋`lint:tokens`（`app/ components/ lib/`）＋同名 `.test.ts(x)`；`*.test.ts(x)` 跑 vitest；`e2e/` 不跑 Playwright；JSON 用 `JSON.parse`（`tsconfig*` 是 JSONC，跳過）；Python 用 `ast.parse`；shell（`.agent/verify`、`.githooks/*`、`*.sh`）用 `brigade-shell-lint`。不帶參數＝`pnpm lint`＋`lint:tokens`＋`test` | 2026-10-28 實測：TS 4–7 秒（tsc 佔大半），其他 1 秒內。**PostToolUse hook 不會自動跑**：使用者還沒核准信任這個 repo（`brigade-trust`），要手動跑 |
+| 編輯後快速檢查 | `.agent/check <檔>`：`.ts/.tsx/.js/.mjs` 跑 `oxlint --type-aware`＋`tsc`（只報這個檔的錯）＋`lint:tokens`（`app/ components/ lib/`）＋同名 `.test.ts(x)`；`*.test.ts(x)` 跑 vitest；`e2e/` 不跑 Playwright；JSON 用 `JSON.parse`（`tsconfig*` 是 JSONC，跳過）；Python 用 `ast.parse`；shell（`.agent/verify`、`.githooks/*`、`*.sh`）用 `brigade-shell-lint`。不帶參數＝`pnpm lint`＋`lint:tokens`＋`test` | TS 4–7 秒（tsc 佔大半），其他 1 秒內。PostToolUse hook 只在 `brigade-trust` 過的 clone 自動跑；`~/agent-kit/brigade/bin/brigade-trust --check .` exit 1 時要手動跑 |
 
 ## Doors
 
 one-way 全部在 `one-way-doors`，由 hook 擋下；改規則後跑 `~/agent-kit/brigade/bin/brigade-doors-test`。
-2026-10-28 使用者逐項確認（#6、#7 由建議的 one-way 改成 two-way）。
+分類由使用者逐項確認。
 
 | # | door | 分類 | 理由 | 回滾 |
 |---|---|---|---|---|
@@ -58,22 +58,22 @@ agent 推分支一律寫出分支名：`git push -u origin <branch>`。
 ## Rules
 
 每條規則都配上執行它的東西。人糾正 agent 時：修那個錯，並加一列；已經在表上卻沒有東西擋住＝重犯，往更高一層修。錯不可能再發生時，刪掉那列。
-2026-10-28 由 brigade-3-guardrails 整理自 37 份對話紀錄（227 則使用者訊息）與 auto-memory，使用者逐項核准 A–D。
+每條的紅綠證明寫在加它的 commit 訊息。
 
-| 規則 | 執行者 | 證明 |
-|---|---|---|
-| 第二台 Next server 不共用使用者 3100 的 `.next` | 架構：`playwright.config.ts` 在 port 不是 3100 時自動設 `NEXT_DIST_DIR=.next-e2e-<port>`；`.agent/verify` 用自己的 `.next-brigade-<n>` | 舊 config 加 `E2E_PORT=3199` → `NEXT_DIST_DIR` 沒設（寫進 `.next`）；新 config → `.next-e2e-3199`；3100 不變（`a04628a`） |
-| 不按名稱殺 next、不砍 `.next` | hook `guard-doors.sh`，door 6 | `brigade-doors-test` 73/73；本 session 寫測試案例時的 printf 就被它擋下（`a04628a`） |
-| agent 不在 main 上 commit | git hook `.githooks/pre-commit`（`CLAUDECODE=1` 且在 main 時擋） | scratch clone：舊 hook exit 0、新 hook exit 1；人 exit 0、分支 exit 0（`b34ed88`，重建） |
-| 不發佈到 claude.ai artifact | 專案 hook `.claude/settings.json` PreToolUse `Artifact`（只擋 publish） | 模擬輸入：publish exit 2、不帶 action exit 2、list exit 0（`8a6def3`）；沒有拿真的呼叫測，免得 hook 沒載入時真的發佈出去 |
-| 說「修好了」之前要有這次改動之後的證據 | hook `require-evidence.sh`（Stop，**2026-10-28 起只警告**；滿一週沒有誤報、使用者同意後 `touch .agent/enforce-evidence` 改成擋下，預定 2026-11-04 檢查）＋ `.agent/verify` | 對話 10-17、10-19 共 4 次「還是沒有」；brigade-2 的證據目錄 |
-| 動到產品程式碼要有 proof 才能 commit | git hook `.githooks/pre-commit`（verify:change receipt＋diff hash） | 既有；`pnpm test:workflow` |
-| 顏色、z-index、transition 走 design token | `pnpm lint:tokens`；`.agent/check` 編輯當下報 | 既有；`check` 對 `UnitHero.tsx` 加 `bg-red-500` → exit 1（`36c5b94`） |
-| shell 變數後面不直接接全形字元 | `brigade-shell-lint`（`.agent/check` 改到 shell 時） | 抓到 `.githooks/pre-commit:44` 的真錯：bash 印出 `x（��y`，改 `${current}` 後印出 `x（abc）y`（`36c5b94`） |
-| 部署（push main）、改寫遠端歷史、丟棄未提交改動、Vercel CLI、刪 Redis 由使用者執行 | hook `guard-doors.sh`，door 1–5 | `brigade-doors-test` 73/73；`echo npx vercel deploy --prod` 被擋，訊息指向本檔 Doors |
-| 回覆一律用繁體中文（臺灣） | 全域 hook `reply-language.sh` | agent-kit `8e9d8cd` |
+| 規則 | 執行者 |
+|---|---|
+| 第二台 Next server 不共用使用者 3100 的 `.next` | 架構：`playwright.config.ts` 在 port 不是 3100 時自動設 `NEXT_DIST_DIR=.next-e2e-<port>`；`.agent/verify` 用自己的 `.next-brigade-<n>` |
+| 不按名稱殺 next、不砍 `.next` | hook `guard-doors.sh`，door 6 |
+| agent 不在 main 上 commit | git hook `.githooks/pre-commit`（`CLAUDECODE=1` 且在 main 時擋） |
+| 不發佈到 claude.ai artifact | 專案 hook `.claude/settings.json` PreToolUse `Artifact`（只擋 publish） |
+| 說「修好了」之前要有這次改動之後的證據 | hook `require-evidence.sh`（Stop，**目前只警告**；跑滿一週沒有誤報、使用者同意後 `touch .agent/enforce-evidence` 改成擋下）＋ `.agent/verify` |
+| 動到產品程式碼要有 proof 才能 commit | git hook `.githooks/pre-commit`（verify:change receipt＋diff hash） |
+| 顏色、z-index、transition 走 design token | `pnpm lint:tokens`；`.agent/check` 編輯當下報 |
+| shell 變數後面不直接接全形字元 | `brigade-shell-lint`（`.agent/check` 改到 shell 時） |
+| 部署（push main）、改寫遠端歷史、丟棄未提交改動、Vercel CLI、刪 Redis 由使用者執行 | hook `guard-doors.sh`，door 1–5 |
+| 回覆一律用繁體中文（臺灣） | 全域 hook `reply-language.sh` |
 
-駁回（使用者 2026-10-28）：加了沒要求的文字或裝飾（約 12 次）、動畫有破綻（約 7 次）、外觀醜或不像其他單元（約 6 次）、同一件事要講第二次（約 3 次）、入口放錯位置（2 次）。這些屬於判斷，不設規則，auto-memory 照舊留著。
+駁回（使用者決定）：加了沒要求的文字或裝飾（約 12 次）、動畫有破綻（約 7 次）、外觀醜或不像其他單元（約 6 次）、同一件事要講第二次（約 3 次）、入口放錯位置（2 次）。這些屬於判斷，不設規則，auto-memory 照舊留著。
 證據不足（只有 1 次）：proof 要在 `git add` 之後跑、`pnpm test:e2e` 多加 `--`、只在瀏覽器跑的套件會讓 build 壞掉。再發生一次就補進來。
 
 ## 平台限制
@@ -88,7 +88,7 @@ agent 推分支一律寫出分支名：`git push -u origin <branch>`。
 
 改完要證明行為時用 `.agent/verify`（子指令與 exit code 見檔頭）；功能與 sub-feature 清單在 `.agent/features/README.md`。
 
-- **smoke**：`.agent/verify`（launch dev → doctor → `drive home` → cleanup）。2026-10-28 實測約 1.5 分鐘，第一次冷編譯會再久一點
+- **smoke**：`.agent/verify`（launch dev → doctor → `drive home` → cleanup）。約 1.5 分鐘，第一次冷編譯會再久一點
 - **單一功能**：`.agent/verify launch` 之後跑 `.agent/verify drive <feature> [sub]`，證據路徑印在最後一行；先看裡面的 `<route>.png`，失敗時看 `pw-<sub>/*/trace.zip`
 - **看狀態**：`.agent/verify doctor`；收尾用 `.agent/verify cleanup`（只停自己啟動的 server，證據會留著）
 - **3D 單元**：`.agent/verify launch prod`（先 `next build` 到自己的 distDir）
@@ -96,7 +96,7 @@ agent 推分支一律寫出分支名：`git push -u origin <branch>`。
 
 | surface | harness | 狀態 |
 |---|---|---|
-| 網站 | 這個 worktree 自己的 `next dev`（port 3200–3299）＋ repo 的 Playwright spec（`E2E_REUSE_SERVER`、`--trace on`）＋ `playwright screenshot` | ✅ 5 個功能、14 個 sub 全綠（2026-10-28，`home`／`draw`／`clock`／`multiplication`／`quiz`） |
+| 網站 | 這個 worktree 自己的 `next dev`（port 3200–3299）＋ repo 的 Playwright spec（`E2E_REUSE_SERVER`、`--trace on`）＋ `playwright screenshot` | ✅ 5 個功能、14 個 sub（`home`／`draw`／`clock`／`multiplication`／`quiz`） |
 | PWA 離線 | `launch prod` | 已建檔，沒有在 brigade 跑過 journey |
 | 短連結 API | 攔截 `/api/share/*`（`quiz share-open`） | 只驗 client 端；真的 `POST` 會寫進正式 Redis，不放進 drive |
 | 計分板搶答 | `LIVE_WEBRTC=1 pnpm test:e2e e2e/scoreboard-live.spec.ts` | 不在 map 裡：要連公開 relay，結果看 relay 狀況 |
@@ -113,27 +113,12 @@ agent 推分支一律寫出分支名：`git push -u origin <branch>`。
 port 被別人佔用時，`launch` 回 exit 2，不會去搶。使用者 3100 那台不碰，也不 `pkill`。
 `next dev` 會把自己的 distDir 寫進 `tsconfig.json`；`launch` 先備份一份，`cleanup` 時如果差異只有那一行就還原，其他差異留給人處理。
 
-**10/28 建置時抓到的 harness 錯**：證據原本直接寫進 `.agent/evidence/`，dev 看到檔案變動就重新編譯，測試跑到一半的頁面整頁重載、一直沒 hydrate，造成 wheel、library 假紅。
-改成先寫到 repo 外、跑完再搬進來之後，14 個 sub 全綠。對照組：server 開著時寫進 evidence 觸發一次 `Compiled`，寫到 repo 外不會觸發。
+**證據先寫到 repo 外、跑完才搬進 `.agent/evidence/`**：直接寫進 repo 會讓 `next dev` 重新編譯，跑到一半的頁面整頁重載、不 hydrate，造成假紅。
 
 ## Eval
 
-baseline 2026-10-28，env `6d5b4c1+ab1e662`，候選 Claude Opus 5.5 subagent（clone 裡獨立工作，只拿到使用者那句話），裁判 `codex gpt-6.1-sol high`。
-題目與每次 run 在 `.agent/evals/`。成功＝客觀判準 pass 且分數 ≥ 7。
+題目在 `.agent/evals/cases/`（三題：`shared-bank-same-name` 純邏輯、`share-link-speech-prefs` 與 `zhuyin-toggle-scope` 瀏覽器），每次的候選回覆在 `runs/`，分數在 `results.tsv`。
+成功＝客觀判準 pass 且裁判分數 ≥ 7。還沒解的缺口在 `.agent/patterns.md`。
 
-| 題目 | surface | 成功率 | 平均分 |
-|---|---|---|---|
-| shared-bank-same-name | 純邏輯（vitest） | 1/2 | 7.5 |
-| share-link-speech-prefs | 瀏覽器（Playwright） | 2/2 | 10 |
-| zhuyin-toggle-scope | 瀏覽器（Playwright） | 1/2 | 6 |
-
-**失分最多：「改之前先用證據重現」**，在注音那題兩次都是 0 分。分享連結 run 1 只靠單元測試，沒開瀏覽器。
-**6 次沒有一次用 `.agent/verify`**：clone 裡都沒有 `.agent/evidence/`。候選只走 repo 原本的 `pnpm verify:change` proof，代表 `AGENTS.md` 沒有指到 `.agent/`，Feature Map 等於沒被發現。
-這是下一個要改的環境：在 `AGENTS.md` 加一行指向 `.agent/README.md` 與 `.agent/verify`，然後跑 rerun 比較。
-
-其他觀察：
-- 兩個失敗都是**範圍判斷**錯：一次比對時把題目 id 算進去，一次自行拿掉九九乘法的開關
-- 3/6 次 commit 落在 main（clone 用的是修之前的 pre-commit，沒有擋 main 的規則）
-- dev 在高負載下逾時，候選自己改用 production 才跑完；`.agent/features/` 的 Gotchas 已經寫了這個，但候選沒讀到
-
-裁判與我的不同意見：shared-bank run 1 的「根因」裁判給 1/2。解碼時 id 固定是 `q{i}`，同一條連結再開，實際上選得回同一份；判準多測了回報沒提的「開自己的連結」。分數照裁判記，歧義寫在題目檔。
+重跑：`/brigade-4-eval` 的 rerun 模式。候選是 clone 裡獨立的 `claude -p`（不是 subagent），裁判是 `~/agent-kit/brigade/bin/brigade-model JUDGE`。
+`results.tsv` 現有的列是 `codex gpt-6.1-sol` 評的，裁判已經換了，下一次 rerun 是新的基準線，不要拿來跟舊列比。
