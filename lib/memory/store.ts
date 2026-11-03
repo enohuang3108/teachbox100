@@ -7,9 +7,12 @@ interface MemoryStore {
   deck: PairGroup[];
   preview: boolean;
   sound: boolean;
+  /** 卡背樣式，CARD_BACKS 的 id */
+  back: string;
   setDeck: (deck: PairGroup[]) => void;
   setPreview: (v: boolean) => void;
   setSound: (v: boolean) => void;
+  setBack: (v: string) => void;
   restoreStarter: () => void;
 }
 
@@ -19,9 +22,11 @@ export const useMemoryStore = create<MemoryStore>()(
       deck: STARTER_DECK,
       preview: false,
       sound: true,
+      back: "barkley",
       setDeck: (deck) => set({ deck }),
       setPreview: (preview) => set({ preview }),
       setSound: (sound) => set({ sound }),
+      setBack: (back) => set({ back }),
       restoreStarter: () => set({ deck: STARTER_DECK }),
     }),
     { name: "memory-game" },

@@ -16,6 +16,7 @@ import {
 } from "@/components/atoms/shadcn/dialog";
 import { TooltipProvider } from "@/components/atoms/shadcn/tooltip";
 import { MemoryCard } from "@/components/memory/MemoryCard";
+import { MemoryVictory } from "@/components/memory/MemoryVictory";
 import { SetupPanel } from "@/components/memory/SetupPanel";
 import { useMemoryGame } from "@/components/memory/useMemoryGame";
 import { ACTION_BTN, Tip } from "@/components/templates/GamePageTemplate";
@@ -60,7 +61,7 @@ export default function MemoryPage() {
     setSetupOpen(true);
   });
   const [confirmLeave, setConfirmLeave] = useState(false);
-  const { deck, preview, sound, setSound } = useMemoryStore();
+  const { deck, preview, sound, setSound, back } = useMemoryStore();
   const game = useMemoryGame(deck, preview, sound);
 
   const begin = () => {
@@ -74,10 +75,13 @@ export default function MemoryPage() {
   };
 
   const fs = useFullscreenViewport(GAME_STAGE_ID);
-  // 全螢幕：扣掉上方計數列與邊距後，挑讓牌最大的欄數
+  // 全螢幕：扣掉 globals.css 給的 1rem 邊距後，挑讓牌最大的欄數
   const cols = fs
-    ? fullscreenColumnsFor(game.cards.length, fs.w - 64, fs.h - 120)
+    ? fullscreenColumnsFor(game.cards.length, fs.w - 32, fs.h - 32)
     : columnsFor(game.cards.length);
+  const rows = Math.ceil(game.cards.length / cols);
+  // 全螢幕牌寬：寬、高各算一個上限取小的，牌維持 3:4；外層是 size container，結算列出現時跟著讓位
+  const fsCardW = `min((100cqw - ${cols - 1}rem) / ${cols}, (100cqh - ${rows - 1}rem) / ${rows} * 0.75)`;
 
   const actions = (
     <TooltipProvider delayDuration={350} skipDelayDuration={600}>
@@ -109,58 +113,59 @@ export default function MemoryPage() {
         }}
       >
         {hydrated && (
-          <div className="flex flex-col gap-4">
-            <div className="text-ink flex flex-wrap items-center gap-x-6 gap-y-1 text-lg font-bold tabular-nums">
-              <span>
-                配對 {game.matched.size} / {deck.length}
-              </span>
-              <span>翻牌 {game.flips} 次</span>
-              {game.previewing && (
-                <span className="text-brand-blue">記住位置！</span>
-              )}
-            </div>
-
-            {game.done && (
-              <div className="bg-brand-yellow/20 border-brand-yellow/60 flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-5 py-4">
-                <p className="text-ink font-display text-xl font-extrabold">
-                  🎉 全部配對完成！總共翻了 {game.flips} 次
-                </p>
-                <Button onClick={game.start}>再玩一次</Button>
-              </div>
-            )}
-
+          <div className="flex h-full flex-col gap-4">
             {/* 2–6 欄：桌機依牌數挑欄數，手機 min(44%) 壓成 2 欄；牌多就往下捲。
               全螢幕則不限寬、欄數固定，讓牌鋪滿投影畫面 */}
+            {/* 外層是 container：全螢幕算牌寬用、結束畫面的 cqw 也量它 */}
             <div
-              className="mx-auto grid w-full gap-3 sm:gap-4"
-              style={
-                fs
-                  ? { gridTemplateColumns: `repeat(${cols}, 1fr)` }
-                  : {
-                      maxWidth: `${cols * 12}rem`,
-                      gridTemplateColumns: `repeat(auto-fit, minmax(min(44%, max(8.5rem, calc(100% / ${cols} - 1rem))), 1fr))`,
-                    }
-              }
+              className="@container relative min-h-0 flex-1"
+              style={fs ? { containerType: "size" } : undefined}
             >
-              {game.cards.map((card) => {
-                const matched = game.matched.has(card.groupId);
-                return (
-                  <MemoryCard
-                    key={card.id}
-                    face={card.face}
-                    faceUp={
-                      game.previewing ||
-                      matched ||
-                      game.faceUp.includes(card.id)
-                    }
-                    matched={matched}
-                    disabled={
-                      game.previewing || matched || game.faceUp.length === 2
-                    }
-                    onSelect={() => game.select(card)}
-                  />
-                );
-              })}
+              <div
+                className="mx-auto grid w-full gap-3 sm:gap-4"
+                style={
+                  fs
+                    ? {
+                        height: "100%",
+                        gap: "1rem",
+                        gridTemplateColumns: `repeat(${cols}, ${fsCardW})`,
+                        justifyContent: "center",
+                        alignContent: "center",
+                      }
+                    : {
+                        maxWidth: `${cols * 12}rem`,
+                        gridTemplateColumns: `repeat(auto-fit, minmax(min(44%, max(8.5rem, calc(100% / ${cols} - 1rem))), 1fr))`,
+                      }
+                }
+              >
+                {game.cards.map((card) => {
+                  const matched = game.matched.has(card.groupId);
+                  return (
+                    <MemoryCard
+                      key={card.id}
+                      face={card.face}
+                      back={back}
+                      faceUp={
+                        game.previewing ||
+                        matched ||
+                        game.faceUp.includes(card.id)
+                      }
+                      matched={matched}
+                      disabled={
+                        game.previewing || matched || game.faceUp.length === 2
+                      }
+                      onSelect={() => game.select(card)}
+                    />
+                  );
+                })}
+              </div>
+              {game.done && (
+                <MemoryVictory
+                  sound={sound}
+                  onRestart={game.start}
+                  onSettings={openSettings}
+                />
+              )}
             </div>
           </div>
         )}

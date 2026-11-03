@@ -1,6 +1,5 @@
 "use client";
 
-import { realisticEffect } from "@/lib/helpers/confetti-effects";
 import { useSound } from "@/lib/hooks/useSound";
 import {
   buildBoard,
@@ -52,9 +51,6 @@ export function useMemoryGame(deck: PairGroup[], previewOn: boolean, soundOn: bo
   }, [faceUp, cards, soundOn, playCorrectSound, playWrongSound]);
 
   const done = cards.length > 0 && matched.size === deck.length;
-  useEffect(() => {
-    if (done) realisticEffect();
-  }, [done]);
 
   const select = (card: Card) => {
     if (previewing || faceUp.length === 2) return;
