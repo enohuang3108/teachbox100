@@ -48,6 +48,7 @@ pairs() {
       "perfect multiplication-finish.spec.ts|九九乘法全對時" ;;
     quiz) printf '%s\n' "territory territory.spec.ts|領地戰可選小場地" "library question-library.spec.ts|瀏覽器建立題庫後四個遊戲共用" \
       "share-open open-share-link.spec.ts|分享預覽保留大小寫" ;;
+    coin) printf '%s\n' "value game-template.spec.ts|/coin/value 介紹頁按開始練習" "pay game-template.spec.ts|/coin/pay 介紹頁按開始練習" ;;
     *) return 1 ;;
   esac
 }
@@ -55,6 +56,7 @@ routes() {
   case $1 in
     home) say / ;; draw) say /draw /draw/wheel /draw/gacha ;; clock) say /clock/current-time ;;
     multiplication) say /multiplication ;; quiz) say /quiz/territory /quiz/morris /ultimate-password /monopoly / ;;
+    coin) say /coin/value /coin/pay ;;
   esac
 }
 # dev compiles a route on its first hit; on a loaded machine that alone eats the 30s test budget (10/28: 43s compiles).
@@ -141,7 +143,7 @@ drive() {
     f=$EVIDENCE/$(say "$r" | tr / _ | sed 's/^_$/_home/').png
     pnpm exec playwright screenshot --viewport-size="$vp" --wait-for-timeout=1500 "$URL$r" "$f" >/dev/null 2>&1 || { say "FAIL screenshot $r"; rc=1; }
   done
-  { say "result: $([ $rc -eq 0 ] && echo pass || echo fail)"; say "finished: $(date '+%F %T')"; } >> "$EVIDENCE/summary.txt"
+  { say "result: $([ $rc -eq 0 ] && echo pass || echo fail)"; say "status: $rc"; say "finished: $(date '+%F %T')"; } >> "$EVIDENCE/summary.txt"
   mkdir -p "$(dirname "$FINAL")" && mv "$EVIDENCE" "$FINAL" && EVIDENCE=$FINAL || { say "FAIL moving evidence to $FINAL"; rc=1; }
   say "traces: pnpm exec playwright show-trace $EVIDENCE/pw-<sub>/*/trace.zip"
   say "$EVIDENCE"
