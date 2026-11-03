@@ -22,7 +22,7 @@ M 系列 Mac 的耗時。
 | gate | 指令 | 耗時 |
 |---|---|---|
 | lint | `pnpm lint`（oxlint type-aware） | 2 秒，有 warning 無 error |
-| 型別 | `pnpm exec tsc --noEmit` | 6 秒，應為 0 錯；`next.config` 設 `ignoreBuildErrors: true`，build 不擋 |
+| 型別 | `pnpm exec tsc --noEmit` | 6 秒，0 個錯；`next.config` 設 `ignoreBuildErrors: true`，build 不擋，要自己跑 |
 | 設計 token | `pnpm lint:tokens` | 1 秒 |
 | 單元測試 | `pnpm test`（Vitest，384 項） | 3 秒 |
 | proof 工具自身 | `pnpm test:workflow` | 1 秒 |
@@ -114,6 +114,13 @@ port 被別人佔用時，`launch` 回 exit 2，不會去搶。使用者 3100 �
 `next dev` 會把自己的 distDir 寫進 `tsconfig.json`；`launch` 先備份一份，`cleanup` 時如果差異只有那一行就還原，其他差異留給人處理。
 
 **證據先寫到 repo 外、跑完才搬進 `.agent/evidence/`**：直接寫進 repo 會讓 `next dev` 重新編譯，跑到一半的頁面整頁重載、不 hydrate，造成假紅。
+
+## Loop
+
+目前在 A 階（本機手動）：任務寫進 `.agent/queue.md`（`- [ ] <id>: (<類型>) <症狀與期望>`），跑 `~/agent-kit/brigade/bin/brigade-run`。
+每筆一個 worktree `../teachbox100-agent-<id>`、分支 `agent/<id>`，從當下 HEAD 開；做完標 `[x]`（待老大 review）或 `[!]`，下一行 `→` 是結果。
+回覆、決策、審查在 worktree 的 `.agent/evidence/loop-<id>/`。merge 與 `git worktree remove` 由老大決定。
+GitHub 迴圈（Issue、runner、叫醒 Grok 主管）是 B 階，還沒接，分工見 `roles.md`。
 
 ## Eval
 
