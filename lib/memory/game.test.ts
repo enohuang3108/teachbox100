@@ -5,11 +5,13 @@ import {
   isMatch,
   MAX_GROUPS,
   MIN_GROUPS,
+  parseBatch,
   STARTER_DECK,
+  toBatch,
   validateDeck,
   type PairGroup,
 } from "./game";
-import { fullscreenColumnsFor } from "./layout";
+import { faceFontScale, fullscreenColumnsFor } from "./layout";
 
 const group = (i: number, over: Partial<PairGroup> = {}): PairGroup => ({
   id: `g${i}`,
@@ -108,5 +110,59 @@ describe("fullscreenColumnsFor", () => {
   });
   it("8 張牌在 16:9 一排放完", () => {
     expect(fullscreenColumnsFor(8, 1920, 1080)).toBe(4);
+  });
+});
+
+describe("批次輸入", () => {
+  it("一行一組，第一個空白前後是兩張卡面；空行略過，只寫一段或兩段相同就是同卡面", () => {
+    const deck = parseBatch("貓 cat\n\n  狗　 a dog \n蘋果\n樹 樹\n");
+    expect(deck.map((g) => [g.faces, g.sameFace])).toEqual([
+      [["貓", "cat"], false],
+      [["狗", "a dog"], false],
+      [["蘋果", ""], true],
+      [["樹", ""], true],
+    ]);
+  });
+
+  it("有 Tab 就以 Tab 分隔（從試算表貼上），卡面裡可以有空白", () => {
+    expect(parseBatch("ice cream\t冰淇淋")[0].faces).toEqual(["ice cream", "冰淇淋"]);
+  });
+
+  it("牌組轉回文字再解析，卡面不變", () => {
+    const deck = [
+      group(1),
+      group(2, { faces: ["月", "x"], sameFace: true }),
+      group(3, { faces: ["ice cream", "冰淇淋"] }),
+    ];
+    const back = parseBatch(toBatch(deck));
+    expect(back.map((g) => [g.faces[0], g.sameFace ? g.faces[0] : g.faces[1]])).toEqual([
+      ["甲1", "乙1"],
+      ["月", "月"],
+      ["ice cream", "冰淇淋"],
+    ]);
+  });
+});
+
+describe("faceFontScale", () => {
+  it("字越多字級越小，短字有上限", () => {
+    const one = faceFontScale("貓");
+    const eight = faceFontScale("一二三四五六七八");
+    const twenty = faceFontScale("一二三四五六七八九十一二三四五六七八九十");
+    expect(one).toBeGreaterThan(eight);
+    expect(eight).toBeGreaterThan(twenty);
+    expect(one).toBeLessThanOrEqual(0.4);
+    // 中文沒有空白，整句不能被當成一個「長單字」縮到看不見
+    expect(twenty).toBeGreaterThan(0.15);
+  });
+  it("20 個中文字照估算的行數排得進 3:4 的牌", () => {
+    const f = faceFontScale("一二三四五六七八九十一二三四五六七八九十");
+    const perLine = Math.floor(0.9 / f);
+    expect(Math.ceil(20 / perLine) * f * 1.25).toBeLessThan(4 / 3);
+  });
+  it("三個字的短詞排成一行，不折行", () => {
+    expect(faceFontScale("冰淇淋") * 3).toBeLessThanOrEqual(0.9);
+  });
+  it("最長的英文單字一行放得下", () => {
+    expect(faceFontScale("watermelon") * 10 * 0.62).toBeLessThanOrEqual(0.9);
   });
 });

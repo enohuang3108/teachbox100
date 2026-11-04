@@ -1497,10 +1497,20 @@ html[data-zhuyin] .zhuyin-text {
   will-change: transform;
 }
 
-/* 翻牌配對全螢幕：牌要鋪滿投影畫面，不吃 64rem 的上限，欄數由頁面依螢幕比例算 */
+/*
+ * 翻牌配對全螢幕：牌鋪滿投影畫面。邊距縮到 1rem、不吃 64rem 上限也不縮放，
+ * 高度一路傳到盤面；牌寬由頁面依可用寬高算，維持 3:4。
+ */
+#game-stage[data-unit="memory"]:fullscreen {
+  padding: 1rem;
+}
 #game-stage[data-unit="memory"]:fullscreen > [data-stage-inner] {
+  --fs-scale: 1;
   max-width: none;
-  padding-inline: 2rem;
+  height: 100%;
+}
+#game-stage[data-unit="memory"]:fullscreen > [data-stage-inner] > div {
+  height: 100%;
 }
 
 /* 頁首底色：紙色淡到透明。直線漸層在中段會看到一條折痕，

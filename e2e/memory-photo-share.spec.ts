@@ -43,7 +43,7 @@ test("大量真實圖片分享時壓縮並提示短連結容量不足", async ({
     await expect(page.getByRole("button", { name: `配對 ${group} 卡面 ${face} 清除圖片` })).toBeVisible();
   }
 
-  await page.getByRole("button", { name: "下一步" }).click();
+  for (let i = 0; i < 2; i++) await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "分享設定" }).click();
   const long = page.getByRole("textbox", { name: "完整連結" });
   await expect(long).toHaveValue(/\/memory#.+/);

@@ -1,8 +1,9 @@
 "use client";
 
 import { isImageFace } from "@/lib/memory/game";
+import { faceFontScale } from "@/lib/memory/layout";
 import { cn } from "@/lib/utils";
-import { CARD_BACK_INK, CardBack } from "./CardBack";
+import { CardBack } from "./CardBack";
 
 /**
  * 一張牌。翻面靠 .memory-card 那組 CSS（styles/globals.css）：
@@ -10,12 +11,15 @@ import { CARD_BACK_INK, CardBack } from "./CardBack";
  */
 export function MemoryCard({
   face,
+  back,
   faceUp,
   matched,
   disabled,
   onSelect,
 }: {
   face: string;
+  /** CARD_BACKS 的 id */
+  back: string;
   faceUp: boolean;
   matched: boolean;
   disabled: boolean;
@@ -33,25 +37,28 @@ export function MemoryCard({
       className="memory-card aspect-[3/4] w-full cursor-pointer rounded-2xl outline-none focus-visible:ring-4 focus-visible:ring-brand-yellow/60 disabled:cursor-default"
     >
       <span className="memory-card-inner">
-        <span
-          className="memory-face flex items-center justify-center"
-          style={{ backgroundColor: CARD_BACK_INK }}
-        >
-          <CardBack />
+        <span className="memory-face overflow-hidden">
+          <CardBack id={back} />
         </span>
         <span
           className={cn(
-            "memory-face memory-face-front bg-paper border-ink/10 text-ink font-display flex items-center justify-center overflow-hidden border px-2 text-center font-extrabold break-words",
-            face.length > 8 ? "text-base sm:text-lg" : "text-xl sm:text-2xl",
+            "memory-face memory-face-front bg-paper border-ink/10 text-ink font-display flex items-center justify-center overflow-hidden border px-2 text-center leading-[1.25] font-extrabold break-words @container",
             matched && "border-brand-green/60 border-2",
           )}
         >
+          {/* 字級跟著牌寬走（cqw）：字少就大、字多自動縮，全螢幕放大也同比例 */}
           {isImageFace(face) ? (
             // 縮圖是 data URL，不走 next/image
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={face} alt="" className="h-full w-full object-contain p-1" />
+            <img
+              src={face}
+              alt=""
+              className="h-full w-full object-contain p-1"
+            />
           ) : (
-            face
+            <span style={{ fontSize: `${faceFontScale(face) * 100}cqw` }}>
+              {face}
+            </span>
           )}
         </span>
       </span>

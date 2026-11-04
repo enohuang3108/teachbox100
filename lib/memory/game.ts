@@ -86,6 +86,50 @@ export function validateDeck(deck: PairGroup[]): DeckValidation {
   return result;
 }
 
+/**
+ * 批次輸入：一行一組，第一個空白前是卡面 1、後面整段是卡面 2；行裡有 Tab（從試算表貼上）就改用 Tab 分。
+ * 只寫一段或兩段相同就是同卡面。空行略過，所以打字途中多按的 Enter 不會變成一組空白配對。
+ */
+export function parseBatch(text: string): PairGroup[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line, i) => {
+      const m = line.match(line.includes("\t") ? /^(.+?)\t+(.*)$/ : /^(\S+)\s+(.*)$/);
+      const [a, b] = m ? [m[1].trim(), m[2].trim()] : [line, ""];
+      const sameFace = b === "" || a === b;
+      return { id: `batch-${i}`, faces: [a, sameFace ? "" : b], sameFace };
+    });
+}
+
+/** 牌組轉成批次文字；卡面 1 自己有空白時改用 Tab 分，parseBatch 才拆得回來 */
+export const toBatch = (deck: PairGroup[]): string =>
+  deck
+    .map(({ faces: [a, b], sameFace }) =>
+      sameFace ? a : `${a}${/\s/.test(a) ? "\t" : " "}${b}`,
+    )
+    .join("\n");
+
+/** 給老師貼給 AI 的提示詞，產出的文字直接貼進批次輸入；規格跟 parseBatch / validateDeck 同一處維護 */
+export const AI_DECK_PROMPT = `你是出題助手，請幫我做一副「翻牌配對」遊戲的牌組。
+
+【格式】
+1. 一行一組配對，至少 ${MIN_GROUPS} 行、最多 ${MAX_GROUPS} 行。
+2. 每行寫「卡面1 卡面2」，中間用一個半形空格隔開；卡面1 裡不要有空格，卡面2 可以有。
+3. 兩張卡面一樣時，那一行只寫一次。
+4. 每張卡面最多 ${MAX_FACE_LENGTH} 個字，越短越好，要投影在卡片上給全班看。
+5. 同一個卡面不能出現在兩行。
+6. 只輸出這些行，放在一個程式碼區塊裡，不要編號、標題或說明。
+
+【範例】
+貓 cat
+狗 dog
+太陽 sun
+
+【我的需求】
+〈在此補上：年級／科目／主題／組數，例如「國小三年級英文動物單字，10 組，中文配英文」〉`;
+
 /** 每組恰好兩張牌，保留配對識別，再用注入的亂數洗牌 */
 export function buildBoard(deck: PairGroup[], rng: Rng): Card[] {
   const cards = deck.flatMap((g) =>
