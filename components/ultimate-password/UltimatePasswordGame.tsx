@@ -15,11 +15,13 @@ import {
   DialogTitle,
 } from "@/components/atoms/shadcn/dialog";
 import { TooltipProvider } from "@/components/atoms/shadcn/tooltip";
+import { Countdown } from "@/components/monopoly/Countdown";
 import {
   FeedbackOverlay,
   type AnswerFeedback,
 } from "@/components/ultimate-password/FeedbackOverlay";
 import { SetupPanel } from "@/components/ultimate-password/SetupPanel";
+import { TimeUpExplosion } from "@/components/ultimate-password/TimeUpExplosion";
 import { WinCelebration } from "@/components/ultimate-password/WinCelebration";
 import { ACTION_BTN, Tip } from "@/components/templates/GamePageTemplate";
 import {
@@ -30,6 +32,7 @@ import { useSound } from "@/lib/hooks/useSound";
 import {
   drawQuestion,
   resolveRoundGuess,
+  rulerStep,
   startRound,
 } from "@/lib/ultimate-password/game";
 import { ULTIMATE_PASSWORD_QUESTIONS } from "@/lib/ultimate-password/questions";
@@ -37,11 +40,10 @@ import { useUltimatePasswordProgress, useUltimatePasswordStore } from "@/lib/ult
 import { useSharedSetup } from "@/lib/share/useSharedSetup";
 import { activeQuestions, receiveSharedBank, useSelectedBank } from "@/lib/questions/library";
 import { useQuestionReading } from "@/lib/questions/speech";
-import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
+import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass, REPLAY_BTN } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
 import { playableOf } from "@/lib/territory/rules";
 import {
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -65,12 +67,15 @@ export function UltimatePasswordGame() {
   const [setupOpen, setSetupOpen] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
 
-  const { bankId, cap, sound, setSound } = useUltimatePasswordStore();
+  const { bankId, cap, sound, setSound, low, high, minutes } = useUltimatePasswordStore();
   const saved = useSelectedBank(bankId);
   useSharedSetup("ultimate-password", (setup) => {
     useUltimatePasswordStore.setState({
       bankId: receiveSharedBank(setup.bank, setup.title),
       cap: setup.cap,
+      low: setup.low,
+      high: setup.high,
+      minutes: setup.minutes,
     });
     setSetupOpen(true);
   });
@@ -78,7 +83,7 @@ export function UltimatePasswordGame() {
   const sfx = useSound();
   const playCorrectSound = () => sound && sfx.playCorrectSound();
   const playWrongSound = () => sound && sfx.playWrongSound();
-  const { question, round, answerAccepted, numberGuess, answerNumber } =
+  const { question, round, answerAccepted, numberGuess, answerNumber, timeUp } =
     useUltimatePasswordProgress();
   const patch = useUltimatePasswordProgress.setState;
   const setNumberGuess = (numberGuess: number) => patch({ numberGuess });
@@ -103,27 +108,40 @@ export function UltimatePasswordGame() {
     [],
   );
 
-  const range = round?.range ?? { low: 1, high: 100 };
+  const bounds = round?.bounds ?? { low, high };
+  const range = round?.range ?? bounds;
+  const tick = rulerStep(bounds);
   const playable = useMemo(
     () => playableOf(saved ? activeQuestions(saved) : ULTIMATE_PASSWORD_QUESTIONS, cap),
     [saved, cap],
   );
 
-  const resetGame = useCallback(() => {
+  const clearFeedback = () => {
     if (answerTransitionTimer.current)
       clearTimeout(answerTransitionTimer.current);
     answerTransitionTimer.current = null;
     setFeedback(null);
+  };
+
+  const resetGame = () => {
+    clearFeedback();
     patch({
       ...drawQuestion(playable),
-      round: startRound(),
+      round: startRound({ bounds: { low, high }, minutes }),
       answerAccepted: false,
-      numberGuess: 50,
+      numberGuess: Math.floor((low + high) / 2),
       answerNumber: null,
+      timeUp: false,
     });
     setSelectedAnswer("");
     setMessage("");
-  }, [patch, playable]);
+  };
+
+  // 爆炸的滴答與音效交給 TimeUpExplosion
+  const explode = () => {
+    clearFeedback();
+    patch({ timeUp: true });
+  };
 
   function showFeedback(nextFeedback: AnswerFeedback, onFinish: () => void) {
     setFeedback(nextFeedback);
@@ -215,8 +233,8 @@ export function UltimatePasswordGame() {
   };
   const openSettings = () => {
     // 範圍縮過又還沒猜中時，回設定會丟掉這一局
-    const narrowed = range.low !== 1 || range.high !== 100;
-    if (narrowed && answerNumber === null) setConfirmLeave(true);
+    const narrowed = range.low !== bounds.low || range.high !== bounds.high;
+    if (narrowed && answerNumber === null && !timeUp) setConfirmLeave(true);
     else setSetupOpen(true);
   };
 
@@ -252,7 +270,21 @@ export function UltimatePasswordGame() {
         {hydrated && (
           <section className="relative isolate mx-auto flex min-h-[min(72svh,680px)] w-full max-w-5xl flex-col items-center gap-8 text-center">
             {feedback && <FeedbackOverlay feedback={feedback} />}
-            {answerNumber !== null ? (
+            {timeUp && round ? (
+              <div className="password-win-enter relative my-auto flex w-full flex-col items-center py-8">
+                <output className="sr-only">
+                  時間到，爆炸了！正確密碼是 {round.secret}
+                </output>
+                <TimeUpExplosion secret={round.secret} sound={sound} />
+                <Button
+                  size="lg"
+                  className={cn("relative mt-10", REPLAY_BTN)}
+                  onClick={resetGame}
+                >
+                  再玩一局
+                </Button>
+              </div>
+            ) : answerNumber !== null ? (
               <div className="password-win-enter relative my-auto flex w-full flex-col items-center py-8">
                 <output className="sr-only">
                   破解成功！正確密碼是 {answerNumber}
@@ -261,7 +293,8 @@ export function UltimatePasswordGame() {
                   <WinCelebration secret={answerNumber} sound={sound} />
                 </div>
                 <Button
-                  className="relative mt-10 h-14 px-8 text-h3 transition-transform duration-press ease-out active:scale-[0.97]"
+                  size="lg"
+                  className={cn("relative mt-10", REPLAY_BTN)}
                   onClick={resetGame}
                 >
                   再玩一局
@@ -291,9 +324,18 @@ export function UltimatePasswordGame() {
                       目前題庫沒有符合難度的題目，請調整設定。
                     </p>
                   )}
-                  <p className="text-h2 font-semibold tabular-nums text-foreground">
-                    目前密碼範圍：{range.low} 到 {range.high}
-                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-4">
+                    <p className="text-h2 font-semibold tabular-nums text-foreground">
+                      目前密碼範圍：{range.low} 到 {range.high}
+                    </p>
+                    {round?.endsAt && (
+                      <Countdown
+                        endsAt={round.endsAt}
+                        onExpire={explode}
+                        className="h-14 px-6 text-[clamp(1.5rem,3vw,2rem)]"
+                      />
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex w-full flex-1 flex-col items-center justify-end gap-6 pb-2">
@@ -343,9 +385,9 @@ export function UltimatePasswordGame() {
                           size="icon"
                           className="size-16 text-3xl transition-transform duration-press ease-out active:scale-[0.97]"
                           aria-label="減少 1"
-                          disabled={numberGuess <= 1}
+                          disabled={numberGuess <= bounds.low}
                           onClick={() =>
-                            patch((s) => ({ numberGuess: Math.max(1, s.numberGuess - 1) }))
+                            patch((s) => ({ numberGuess: Math.max(bounds.low, s.numberGuess - 1) }))
                           }
                         >
                           −
@@ -353,12 +395,12 @@ export function UltimatePasswordGame() {
                         <TickSlider
                           value={numberGuess}
                           onChange={setNumberGuess}
-                          min={1}
-                          max={100}
+                          min={bounds.low}
+                          max={bounds.high}
                           step={1}
-                          tickEvery={5}
-                          majorEvery={20}
-                          tickStart={0}
+                          tickEvery={tick}
+                          majorEvery={tick * 4}
+                          tickStart={bounds.low - (bounds.low % tick)}
                           label="選擇數字"
                           className="flex-1"
                         />
@@ -368,9 +410,9 @@ export function UltimatePasswordGame() {
                           size="icon"
                           className="size-16 text-3xl transition-transform duration-press ease-out active:scale-[0.97]"
                           aria-label="增加 1"
-                          disabled={numberGuess >= 100}
+                          disabled={numberGuess >= bounds.high}
                           onClick={() =>
-                            patch((s) => ({ numberGuess: Math.min(100, s.numberGuess + 1) }))
+                            patch((s) => ({ numberGuess: Math.min(bounds.high, s.numberGuess + 1) }))
                           }
                         >
                           +

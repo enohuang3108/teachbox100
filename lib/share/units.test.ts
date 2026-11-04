@@ -81,6 +81,9 @@ const samples: { [K in ShareUnit]: SetupOf<K> } = {
   },
   "ultimate-password": {
     cap: "easy",
+    low: 0,
+    high: 500,
+    minutes: 5,
     bank: [
       {
         id: "q0",
