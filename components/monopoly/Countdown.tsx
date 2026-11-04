@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { Timer } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -20,9 +21,11 @@ function format(remainingMs: number): string {
 export function Countdown({
   endsAt,
   onExpire,
+  className,
 }: {
   endsAt: number;
   onExpire: () => void;
+  className?: string;
 }) {
   const [remaining, setRemaining] = useState(() =>
     Math.max(0, endsAt - Date.now()),
@@ -51,15 +54,17 @@ export function Countdown({
 
   return (
     <div
-      className={`flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-bold tabular-nums ring-1 transition-colors duration-200 ${
+      className={cn(
+        "flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-bold tabular-nums ring-1 transition-colors duration-200",
         urgent
           ? "bg-brand-red text-paper ring-ink/10"
-          : "bg-paper-warm text-ink ring-ink/[0.06]"
-      }`}
+          : "bg-paper-warm text-ink ring-ink/[0.06]",
+        className,
+      )}
       title="剩餘時間"
       aria-label="剩餘時間"
     >
-      <Timer className="h-4 w-4" />
+      <Timer className="size-[1.15em]" />
       {format(remaining)}
     </div>
   );

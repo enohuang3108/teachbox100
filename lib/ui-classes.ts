@@ -10,6 +10,13 @@
 export const SELECTED_OPTION =
   "group-has-[span[data-state=checked]]:bg-secondary group-has-[span[data-state=checked]]:border-ink hover:bg-accent";
 
+/**
+ * 結束畫面的「再玩一次」與旁邊的「設定」。字級跟著舞台（@container）縮放，
+ * 投影時不會比紙膠帶小一截；沒有 container 時 cqw 退回視窗寬。
+ */
+export const REPLAY_BTN =
+  "h-auto rounded-full px-[3cqw] py-[1cqw] text-[clamp(1rem,1.8cqw,1.75rem)] transition-transform duration-press ease-out active:scale-[0.97]";
+
 /** 同組回答等寬等高；欄數與間距由各遊戲的空間決定。 */
 export const ANSWER_GRID = "grid auto-rows-fr items-stretch";
 export const ANSWER_CONTENT =

@@ -11,6 +11,7 @@ import {
 } from "@/lib/helpers/confetti-effects";
 import { useSound } from "@/lib/hooks/useSound";
 import type { Side } from "@/lib/morris/game";
+import { REPLAY_BTN } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
 
 /** 大圈叉畫完的那一刻；紙屑、音效、紙膠帶都對著它。改了要一起改 globals.css 的 morris-win-mark */
@@ -93,10 +94,10 @@ export function MorrisVictory({
             {winnerName} 獲勝！
           </p>
           <div className="victory-late mt-[2cqw] flex gap-[1cqw]">
-            <Button size="lg" className="rounded-full active:scale-[0.97]" onClick={onRestart}>
+            <Button size="lg" className={REPLAY_BTN} onClick={onRestart}>
               再玩一次
             </Button>
-            <Button size="lg" variant="outline" className="rounded-full active:scale-[0.97]" onClick={onSettings}>
+            <Button size="lg" variant="outline" className={REPLAY_BTN} onClick={onSettings}>
               設定
             </Button>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, type Ref } from "react";
 import { StageConfetti } from "@/components/organisms/StageConfetti";
 import {
   originOf,
@@ -26,7 +26,6 @@ export function WinCelebration({
   sound: boolean;
 }) {
   const lock = useRef<HTMLDivElement>(null);
-  const clip = useId();
   const { playCountdownTick, playUnlockSound } = useSound();
 
   // 降低動態效果不等於靜音：畫面直接給結果，聲音照樣走完
@@ -59,41 +58,7 @@ export function WinCelebration({
         }}
       />
       <div className="relative grid size-56 place-items-center sm:size-64">
-        <div ref={lock} className="unlock-tension absolute inset-0">
-          <svg
-            viewBox="0 0 120 140"
-            className="size-full overflow-visible"
-            aria-hidden="true"
-          >
-            <defs>
-              <clipPath id={`${clip}l`}>
-                <rect x="0" y="0" width="60" height="140" />
-              </clipPath>
-              <clipPath id={`${clip}r`}>
-                <rect x="60" y="0" width="60" height="140" />
-              </clipPath>
-            </defs>
-            <path
-              className="unlock-fly"
-              d="M32 64 V42 a28 28 0 0 1 56 0 V64"
-              fill="none"
-              stroke="var(--ink)"
-              strokeWidth="14"
-              strokeLinecap="round"
-            />
-            {(["l", "r"] as const).map((side) => (
-              <g
-                key={side}
-                className={`unlock-half-${side}`}
-                clipPath={`url(#${clip}${side})`}
-              >
-                <rect x="10" y="60" width="100" height="78" rx="16" fill="var(--brand-yellow)" />
-                <circle cx="60" cy="92" r="10" fill="var(--ink)" />
-                <rect x="55" y="96" width="10" height="22" rx="4" fill="var(--ink)" />
-              </g>
-            ))}
-          </svg>
-        </div>
+        <PasswordLock ref={lock} />
         <p className="unlock-reveal relative text-[clamp(5rem,18vw,11rem)] font-black leading-none tabular-nums text-foreground">
           {secret}
         </p>
@@ -101,6 +66,48 @@ export function WinCelebration({
       <p className="password-win-tape unlock-late mt-6 w-[min(100%,40rem)] bg-primary px-6 py-3 text-center text-[clamp(2rem,5vw,3.5rem)] font-black leading-tight text-primary-foreground">
         破解成功！
       </p>
+    </div>
+  );
+}
+
+/** 密碼鎖：越搖越兇（unlock-tension），在外層的 --open 炸開成鎖扣與左右兩半。破解與時間到共用 */
+export function PasswordLock({ ref }: { ref?: Ref<HTMLDivElement> }) {
+  const clip = useId();
+  return (
+    <div ref={ref} className="unlock-tension absolute inset-0">
+      <svg
+        viewBox="0 0 120 140"
+        className="size-full overflow-visible"
+        aria-hidden="true"
+      >
+        <defs>
+          <clipPath id={`${clip}l`}>
+            <rect x="0" y="0" width="60" height="140" />
+          </clipPath>
+          <clipPath id={`${clip}r`}>
+            <rect x="60" y="0" width="60" height="140" />
+          </clipPath>
+        </defs>
+        <path
+          className="unlock-fly"
+          d="M32 64 V42 a28 28 0 0 1 56 0 V64"
+          fill="none"
+          stroke="var(--ink)"
+          strokeWidth="14"
+          strokeLinecap="round"
+        />
+        {(["l", "r"] as const).map((side) => (
+          <g
+            key={side}
+            className={`unlock-half-${side}`}
+            clipPath={`url(#${clip}${side})`}
+          >
+            <rect x="10" y="60" width="100" height="78" rx="16" fill="var(--brand-yellow)" />
+            <circle cx="60" cy="92" r="10" fill="var(--ink)" />
+            <rect x="55" y="96" width="10" height="22" rx="4" fill="var(--ink)" />
+          </g>
+        ))}
+      </svg>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import type { QuestionDeck } from "@/lib/questions/deck";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import type { Round } from "@/lib/ultimate-password/game";
+import { DEFAULT_BOUNDS, type Round, type TimeLimit } from "@/lib/ultimate-password/game";
 import { adoptLegacyBank } from "@/lib/questions/library";
 import type { Difficulty, Question } from "@/lib/questions/types";
 
@@ -13,6 +13,13 @@ interface UltimatePasswordStore {
   bankId: string | null;
   cap: Difficulty;
   sound: boolean;
+  /** 密碼範圍（含頭尾） */
+  low: number;
+  high: number;
+  /** 總限時分鐘，0 = 不限時 */
+  minutes: TimeLimit;
+  setRange: (low: number, high: number) => void;
+  setMinutes: (minutes: TimeLimit) => void;
   selectBank: (id: string | null) => void;
   setCap: (cap: Difficulty) => void;
   setSound: (v: boolean) => void;
@@ -33,6 +40,10 @@ export const useUltimatePasswordStore = create<UltimatePasswordStore>()(
       bankId: null,
       cap: "hard",
       sound: true,
+      ...DEFAULT_BOUNDS,
+      minutes: 0,
+      setRange: (low, high) => set({ low, high }),
+      setMinutes: (minutes) => set({ minutes }),
       selectBank: (bankId) => set({ bankId }),
       setCap: (cap) => set({ cap }),
       setSound: (sound) => set({ sound }),
@@ -54,6 +65,8 @@ interface UltimatePasswordProgress {
   numberGuess: number;
   /** 猜中時的密碼；null = 還在猜 */
   answerNumber: number | null;
+  /** 限時到了還沒猜中 */
+  timeUp: boolean;
 }
 
 export const useUltimatePasswordProgress = create<UltimatePasswordProgress>()(
@@ -65,6 +78,7 @@ export const useUltimatePasswordProgress = create<UltimatePasswordProgress>()(
       answerAccepted: false,
       numberGuess: 50,
       answerNumber: null,
+      timeUp: false,
     }),
     {
       name: "ultimate-password-progress",
