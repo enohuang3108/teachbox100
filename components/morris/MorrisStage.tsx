@@ -8,7 +8,7 @@ import {
   type Lane,
   type Side,
 } from "@/lib/morris/game";
-import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
+import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass, REPLAY_BTN } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
 import { Check, Circle, X } from "lucide-react";
 import type { MorrisGame } from "./useMorrisGame";
@@ -90,13 +90,13 @@ export function MorrisStage({
               和局
             </p>
             <div className="mt-6 flex justify-center gap-2">
-              <Button onClick={game.restart} className="rounded-full active:scale-[0.97]">
+              <Button onClick={game.restart} className={REPLAY_BTN}>
                 再玩一次
               </Button>
               <Button
                 variant="outline"
                 onClick={onSettings}
-                className="rounded-full active:scale-[0.97]"
+                className={REPLAY_BTN}
               >
                 設定
               </Button>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, type CSSProperties } from "react";
 import { Button } from "@/components/atoms/shadcn/button";
+import { REPLAY_BTN } from "@/lib/ui-classes";
 import { StageConfetti } from "@/components/organisms/StageConfetti";
 import {
   originOf,
@@ -73,7 +74,7 @@ export function MemoryVictory({
           <div className="victory-late mt-[2cqw] flex gap-[1cqw]">
             <Button
               size="lg"
-              className="rounded-full active:scale-[0.97]"
+              className={REPLAY_BTN}
               onClick={onRestart}
             >
               再玩一次
@@ -81,7 +82,7 @@ export function MemoryVictory({
             <Button
               size="lg"
               variant="outline"
-              className="rounded-full active:scale-[0.97]"
+              className={REPLAY_BTN}
               onClick={onSettings}
             >
               設定

@@ -11,6 +11,7 @@ import {
 } from "@/lib/helpers/confetti-effects";
 import { useSound } from "@/lib/hooks/useSound";
 import type { Side } from "@/lib/territory/rules";
+import { REPLAY_BTN } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
 
 const TEAM_BG: Record<Side, string> = {
@@ -34,8 +35,6 @@ const TIE_HIT_MS = 200;
 const TITLE =
   "font-display text-[clamp(2rem,7cqw,6.5rem)] font-extrabold leading-tight";
 const DETAIL = "text-[clamp(1rem,1.8cqw,1.75rem)] font-bold tabular-nums";
-const RESTART =
-  "h-auto rounded-full px-[3cqw] py-[1cqw] text-[clamp(1rem,1.8cqw,1.75rem)] transition-transform duration-press ease-out active:scale-[0.97]";
 
 /**
  * 三角旗面：上下 y=10–52，旗尖在 (78, 31)。跟棋盤兩側的隊旗同一個造型，放大。
@@ -169,7 +168,7 @@ export function VictoryOverlay({
                 {detail}
               </p>
             )}
-            <Button size="lg" className={cn("victory-late mt-[2cqw]", RESTART)} onClick={onRestart}>
+            <Button size="lg" className={cn("victory-late mt-[2cqw]", REPLAY_BTN)} onClick={onRestart}>
               再來一局
             </Button>
           </div>
@@ -177,7 +176,7 @@ export function VictoryOverlay({
           <div ref={anchor} className="quiz-enter flex flex-col items-center gap-[2cqw] rounded-[2cqw] bg-card px-[5cqw] py-[3.5cqw] text-center shadow-lg">
             <p className={cn("text-ink", TITLE)}>平手！</p>
             {detail && <p className={cn("text-muted-foreground", DETAIL)}>{detail}</p>}
-            <Button size="lg" className={RESTART} onClick={onRestart}>
+            <Button size="lg" className={REPLAY_BTN} onClick={onRestart}>
               再來一局
             </Button>
           </div>
