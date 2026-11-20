@@ -187,3 +187,28 @@ test("打開別人的領地戰分享連結，不改動自己的朗讀偏好", as
   const prefs = await page.evaluate(() => JSON.parse(localStorage.getItem("question-speech")!).state);
   expect(prefs).toMatchObject({ reading: true, speechRate: 1.2, voiceURI: "mine" });
 });
+
+test("唸完題目出現選項後，按選項右上角的喇叭唸那個選項", async ({ page }) => {
+  await begin(page);
+  const board = page.locator("[data-territory-board]");
+  await expect.poll(() => page.evaluate(() => (window as SpeechWindow).testUtterance?.text)).toBeTruthy();
+  await page.evaluate(() => (window as SpeechWindow).testUtterance!.onend?.({} as SpeechSynthesisEvent));
+  for (const n of ["3", "2", "1"]) {
+    await expect(board.getByText(n, { exact: true })).toBeVisible();
+    await page.clock.runFor(1000);
+  }
+  await expect(board.getByRole("button", { name: /隊選/ })).toHaveCount(4);
+  await board.getByRole("button", { name: "唸選項「否」", exact: true }).first().click();
+  await expect.poll(() => page.evaluate(() => (window as SpeechWindow).testUtterance?.text)).toBe("否");
+});
+
+test("關閉朗讀時選項旁沒有喇叭", async ({ page }) => {
+  await begin(page, "reading-off");
+  const board = page.locator("[data-territory-board]");
+  for (const n of ["3", "2", "1"]) {
+    await expect(board.getByText(n, { exact: true })).toBeVisible();
+    await page.clock.runFor(1000);
+  }
+  await expect(board.getByRole("button", { name: /隊選/ })).toHaveCount(4);
+  await expect(board.getByRole("button", { name: /唸選項/ })).toHaveCount(0);
+});

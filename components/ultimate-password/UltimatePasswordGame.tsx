@@ -39,7 +39,8 @@ import { ULTIMATE_PASSWORD_QUESTIONS } from "@/lib/ultimate-password/questions";
 import { useUltimatePasswordProgress, useUltimatePasswordStore } from "@/lib/ultimate-password/store";
 import { useSharedSetup } from "@/lib/share/useSharedSetup";
 import { activeQuestions, receiveSharedBank, useSelectedBank } from "@/lib/questions/library";
-import { useQuestionReading } from "@/lib/questions/speech";
+import { useOptionReading, useQuestionReading } from "@/lib/questions/speech";
+import { SpokenOption } from "@/components/organisms/SpokenOption";
 import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass, REPLAY_BTN } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
 import { playableOf } from "@/lib/territory/rules";
@@ -96,6 +97,11 @@ export function UltimatePasswordGame() {
   );
   const [message, setMessage] = useState("");
   const [feedback, setFeedback] = useState<AnswerFeedback | null>(null);
+  // 回饋特效出現就收掉喇叭：凸出鈕角的部分在特效範圍外，會露出來
+  const speakOption = useOptionReading(
+    answerAccepted || feedback ? null : question,
+    sound && !setupOpen && !confirmLeave,
+  );
   const answerTransitionTimer = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -356,8 +362,8 @@ export function UltimatePasswordGame() {
                         : ["是", "否"]
                       ).map((option) => (
                         // 按下後不改色不改字：結果交給中央的回饋卡講，按鈕只擋住重按
+                        <SpokenOption key={option} option={option} speak={speakOption} disabled={reading} className="-top-3 -right-3 size-14">
                         <Button
-                          key={option}
                           type="button"
                           variant="outline"
                           disabled={!!selectedAnswer || reading}
@@ -373,6 +379,7 @@ export function UltimatePasswordGame() {
                         >
                           {option}
                         </Button>
+                        </SpokenOption>
                       ))}
                     </div>
                   )}

@@ -6,6 +6,8 @@ import {
   confirmPurchase,
   drawAndApplyCard,
   ranking,
+  settle,
+  endGame,
   resolveCardDice,
   resolveLanding,
   rollCardDice,
@@ -602,4 +604,104 @@ it("差異化難度題庫各自依序出完，換學生不重置", () => {
   }
   for (let i = 0; i < 6; i += 2) expect(seen[0].slice(i, i + 2).sort()).toEqual(["e1", "e2"]);
   for (let i = 0; i < 6; i += 3) expect(seen[1].slice(i, i + 3).sort()).toEqual(["e1", "e2", "n1"]);
+});
+
+describe("結算加分", () => {
+  const SETTINGS = {
+    ...DEFAULT_SETTINGS,
+    bonuses: {
+      land: 500,
+      house: 300,
+      mostCorrect: 2000,
+      mostJail: 1000,
+      mostChance: 800,
+      mostFate: 700,
+    },
+  };
+  const base = () => startGame(SETTINGS, Q, PLAYERS, 0);
+
+  it("答對、進監獄、踩機會命運都記在當下那位玩家", () => {
+    let s = base();
+    // 小明踩無主地答對
+    s = { ...s, players: replaceForTest(s.players, 0, { position: 1 }) };
+    s = resolveLanding(s, seqRng([0]), 0);
+    s = answerQuestion(s, true, 0);
+    s = confirmPurchase(s, false, 0); // 換小華
+    // 小華踩監獄
+    s = { ...s, players: replaceForTest(s.players, 1, { position: 11 }) };
+    s = resolveLanding(s, seqRng([0]), 0); // 換小明
+    // 小明踩機會
+    s = { ...s, players: replaceForTest(s.players, 0, { position: 3 }) };
+    s = resolveLanding(s, seqRng([0]), 0);
+    expect(s.stats?.p0).toMatchObject({ correct: 1, chance: 1, fate: 0 });
+    expect(s.stats?.p1).toMatchObject({ jail: 1 });
+  });
+
+  it("服刑跳過那回合不再算一次進監獄", () => {
+    let s = base();
+    s = { ...s, players: replaceForTest(s.players, 0, { position: 11 }) };
+    s = resolveLanding(s, seqRng([0]), 0); // 小明進監獄、換小華
+    s = { ...s, currentPlayerIndex: 0 };
+    s = takeTurn(s, seqRng([0]), 0); // 小明服刑跳過
+    expect(s.stats?.p0?.jail).toBe(1);
+  });
+
+  it("每塊地、每棟房各加；最多的人加分，同分都拿、0 次沒人拿", () => {
+    let s = base();
+    s = {
+      ...s,
+      players: replaceForTest(
+        replaceForTest(s.players, 0, {
+          money: 5000,
+          ownedTiles: [1, 2],
+          houses: { 1: 2 },
+        }),
+        1,
+        { money: 6000 },
+      ),
+      stats: {
+        p0: { correct: 3, jail: 1, chance: 0, fate: 2 },
+        p1: { correct: 3, jail: 0, chance: 0, fate: 1 },
+      },
+    };
+    const r = settle(s);
+    const award = (k: string) => r.awards.find((a) => a.key === k);
+    expect(award("land")?.winners).toEqual([
+      { playerId: "p0", count: 2, amount: 1000 },
+    ]);
+    expect(award("house")?.winners).toEqual([
+      { playerId: "p0", count: 2, amount: 600 },
+    ]);
+    expect(award("mostCorrect")?.winners.map((w) => w.playerId)).toEqual([
+      "p0",
+      "p1",
+    ]);
+    expect(award("mostChance")?.winners).toEqual([]);
+    // 小明 5000 + 1000 + 600 + 2000 + 1000 + 700 = 10300；小華 6000 + 2000 = 8000
+    expect(r.rows.map((row) => [row.player.id, row.total])).toEqual([
+      ["p0", 10300],
+      ["p1", 8000],
+    ]);
+  });
+
+  it("沒設加分（舊設定、舊局）→ 沒有加分項目，名次照現金", () => {
+    let s = startGame(DEFAULT_SETTINGS, Q, PLAYERS, 0);
+    s = { ...s, players: replaceForTest(s.players, 1, { money: 9000 }) };
+    const r = settle(s);
+    expect(r.awards).toEqual([]);
+    expect(r.rows.map((row) => row.player.id)).toEqual(["p1", "p0"]);
+  });
+});
+
+describe("老師手動結束", () => {
+  it("進行中直接進結算，清掉待處理的題目；已結束的局不變", () => {
+    let s = startGame(DEFAULT_SETTINGS, Q, PLAYERS, 0);
+    s = { ...s, players: replaceForTest(s.players, 0, { position: 1 }) };
+    s = resolveLanding(s, seqRng([0]), 0);
+    expect(s.pendingAction?.kind).toBe("buyQuestion");
+    const ended = endGame(s);
+    expect(ended.phase).toBe("gameover");
+    expect(ended.pendingAction).toBeNull();
+    expect(endGame(ended)).toBe(ended);
+  });
 });

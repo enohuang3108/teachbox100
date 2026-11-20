@@ -8,6 +8,7 @@ import {
   answerQuestion,
   checkEnd,
   confirmPurchase,
+  endGame,
   drawAndApplyCard,
   resolveCardDice,
   rollCardDice,
@@ -42,6 +43,8 @@ interface MonopolyStore {
   resolveCardDice: () => void;
   answerCardQuiz: (correct: boolean) => void;
   endIfTimeUp: () => void;
+  /** 老師從頂列直接結束、進結算 */
+  endNow: () => void;
   reset: () => void;
 }
 
@@ -134,6 +137,10 @@ export const useMonopolyStore = create<MonopolyStore>()(
         if (g.settings.endCondition.type !== "time") return;
         const next = checkEnd(g, now());
         if (next.phase === "gameover") set({ game: next });
+      },
+      endNow: () => {
+        const g = get().game;
+        if (g) set({ game: endGame(g) });
       },
       reset: () => set({ game: null }),
     }),

@@ -3,16 +3,24 @@ import { BOARD, BOARD_SIZE } from "./board";
 import { deckOf } from "./cards";
 import { pickIndex, rollOne, type Rng } from "./rng";
 import type {
+  BonusKey,
   Card,
   CutsceneEvent,
   GameSettings,
   GameState,
   Player,
   PlayerInput,
+  PlayerStats,
   PropertyTile,
   Question,
 } from "./types";
-import { buildCostFor, withinCap, isProperty, maxBuildLevel } from "./types";
+import {
+  BONUS_KEYS,
+  buildCostFor,
+  withinCap,
+  isProperty,
+  maxBuildLevel,
+} from "./types";
 
 const MAX_CHAIN = 10;
 
@@ -47,6 +55,23 @@ function withCutsceneEvent(
   return {
     ...state,
     cutsceneEvents: [...prev, { ...ev, seq } as CutsceneEvent].slice(-12),
+  };
+}
+
+// === 結算加分用的次數 ===
+const NO_STATS: PlayerStats = { correct: 0, jail: 0, chance: 0, fate: 0 };
+
+function statsOf(state: GameState, id: string): PlayerStats {
+  return state.stats?.[id] ?? NO_STATS;
+}
+
+// 目前玩家某項次數 +1；在改狀態的那一刻記，不從過場佇列推（佇列只留 12 筆）
+function bumpStat(state: GameState, key: keyof PlayerStats): GameState {
+  const id = state.players[state.currentPlayerIndex].id;
+  const prev = statsOf(state, id);
+  return {
+    ...state,
+    stats: { ...state.stats, [id]: { ...prev, [key]: prev[key] + 1 } },
   };
 }
 
@@ -115,6 +140,70 @@ export function ranking(state: GameState): Player[] {
   });
 }
 
+export interface BonusAward {
+  key: BonusKey;
+  amount: number; // 設定的單價（每塊／每棟／最多的人）
+  winners: { playerId: string; count: number; amount: number }[];
+}
+
+export interface SettlementRow {
+  player: Player;
+  money: number;
+  bonus: number;
+  total: number;
+}
+
+// 結算：只算不寫回 money —— gameover 的局會被 persist，寫回去重整會再加一次。
+// rows 依總分排，同分比資產。破產者地與房已被清空，自然拿 0。
+export function settle(state: GameState): {
+  awards: BonusAward[];
+  rows: SettlementRow[];
+} {
+  const bonuses = state.settings.bonuses ?? {};
+  const countOf = (key: BonusKey, p: Player): number => {
+    if (key === "land") return p.ownedTiles.length;
+    // 旅館是蓋滿房子後再升一級，算多一棟
+    if (key === "house")
+      return Object.values(p.houses).reduce((a, b) => a + b, 0);
+    const stats = statsOf(state, p.id);
+    if (key === "mostCorrect") return stats.correct;
+    if (key === "mostJail") return stats.jail;
+    if (key === "mostChance") return stats.chance;
+    return stats.fate;
+  };
+
+  const awards = BONUS_KEYS.filter((k) => (bonuses[k] ?? 0) > 0).map(
+    (key): BonusAward => {
+      const amount = bonuses[key]!;
+      const counts = state.players.map((p) => ({
+        playerId: p.id,
+        count: countOf(key, p),
+      }));
+      const perUnit = key === "land" || key === "house";
+      const top = Math.max(...counts.map((c) => c.count));
+      const winners = counts
+        .filter((c) => c.count > 0 && (perUnit || c.count === top))
+        .map((c) => ({ ...c, amount: perUnit ? c.count * amount : amount }));
+      return { key, amount, winners };
+    },
+  );
+
+  const rows = state.players
+    .map((player) => {
+      const bonus = awards
+        .flatMap((a) => a.winners)
+        .filter((w) => w.playerId === player.id)
+        .reduce((sum, w) => sum + w.amount, 0);
+      return { player, money: player.money, bonus, total: player.money + bonus };
+    })
+    .sort(
+      (a, b) =>
+        b.total - a.total ||
+        assetValue(state, b.player) - assetValue(state, a.player),
+    );
+  return { awards, rows };
+}
+
 function activePlayers(state: GameState): Player[] {
   return state.players.filter((p) => !p.bankrupt);
 }
@@ -147,6 +236,12 @@ export function checkEnd(state: GameState, now: number): GameState {
     };
   }
   return state;
+}
+
+// 老師按「結束遊戲」：不看結束條件直接進結算，手上沒答完的題目作廢
+export function endGame(state: GameState): GameState {
+  if (state.phase !== "playing") return state;
+  return { ...state, phase: "gameover", pendingAction: null };
 }
 
 // 結束目前回合：先檢查結束條件，否則清 pendingAction、輪到下一位非破產玩家
@@ -289,7 +384,8 @@ export function answerPassStart(
   });
   // 🏁 加錢過場改由 UI 在答題當下立即播（棋子還停在起點），演完才續走，
   // 故這裡不推 cutsceneEvent，只結算金額後續結算落點。
-  const next = { ...state, players, pendingAction: null };
+  const paid = { ...state, players, pendingAction: null };
+  const next = correct ? bumpStat(paid, "correct") : paid;
   return resolveLanding(next, rng, now);
 }
 
@@ -314,7 +410,7 @@ export function resolveLanding(
       });
       return endTurn(
         withCutsceneEvent(
-          { ...state, players },
+          bumpStat({ ...state, players }, "jail"),
           { kind: "skip", playerId: player.id, reason: "jail" },
         ),
         now,
@@ -325,7 +421,7 @@ export function resolveLanding(
       const deck = deckOf(tile.type);
       const card = deck[pickIndex(deck.length, rng)];
       return {
-        ...state,
+        ...bumpStat(state, tile.type),
         pendingAction: { kind: "drawCard", deck: tile.type, card },
       };
     }
@@ -383,7 +479,7 @@ export function answerQuestion(
   }
   const nextKind = pa.kind === "buyQuestion" ? "confirmBuy" : "confirmBuild";
   return {
-    ...state,
+    ...bumpStat(state, "correct"),
     pendingAction: { kind: nextKind, tileIndex: pa.tileIndex },
   };
 }
@@ -555,10 +651,7 @@ function applyCardEffect(
       });
       return endTurn(
         withCutsceneEvent(
-          {
-            ...state,
-            players,
-          },
+          bumpStat({ ...state, players }, "jail"),
           { kind: "skip", playerId: player.id, reason: "jail" },
         ),
         now,
@@ -737,13 +830,14 @@ export function answerCardQuiz(
 
   if (correct) {
     const reward = card.effect.reward;
-    if (reward <= 0) return endTurn(base, now);
-    const players = replacePlayer(base.players, idx, {
+    const right = bumpStat(base, "correct");
+    if (reward <= 0) return endTurn(right, now);
+    const players = replacePlayer(right.players, idx, {
       money: player.money + reward,
     });
     return endTurn(
       withCutsceneEvent(
-        { ...base, players },
+        { ...right, players },
         cardEvent(reward, `答對了！獲得 $${reward}`),
       ),
       now,
@@ -760,10 +854,7 @@ export function answerCardQuiz(
     });
     return endTurn(
       withCutsceneEvent(
-        {
-          ...base,
-          players,
-        },
+        bumpStat({ ...base, players }, "jail"),
         { kind: "skip", playerId: player.id, reason: "jail" },
       ),
       now,

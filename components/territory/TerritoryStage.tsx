@@ -12,6 +12,8 @@ import {
 } from "@/lib/territory/rules";
 import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
+import { useOptionReading } from "@/lib/questions/speech";
+import { SpokenOption } from "@/components/organisms/SpokenOption";
 import type { TerritoryGame } from "./useTerritoryGame";
 import { VictoryOverlay } from "./VictoryOverlay";
 
@@ -53,6 +55,8 @@ export function TerritoryStage({
   // 直立螢幕的左右太窄，兩隊的鈕改成並排放在題目下方
   const portrait = aspect < 1;
   const flags = flagsOf(board.cols, board.rows);
+  // 兩隊共用一個喇叭狀態：按另一隊的喇叭也會先停掉正在唸的
+  const speak = useOptionReading(game.canAnswer && !over ? question : null, sound);
 
   return (
     <div
@@ -120,6 +124,7 @@ export function TerritoryStage({
               game={game}
               question={question}
               name={nameOf("left")}
+              speak={speak}
               className={portrait ? "col-start-1 row-start-2" : "self-end"}
             />}
             <QuestionText
@@ -133,6 +138,7 @@ export function TerritoryStage({
               game={game}
               question={question}
               name={nameOf("right")}
+              speak={speak}
               className={portrait ? "col-start-2 row-start-2" : "col-start-3 row-start-1 self-end"}
             />}
           </>
@@ -387,12 +393,14 @@ function AnswerPad({
   game,
   question,
   name,
+  speak,
   className,
 }: {
   side: Side;
   game: TerritoryGame;
   question: Question;
   name: string;
+  speak: ((text: string) => void) | null;
   className: string;
 }) {
   const { flash } = game;
@@ -423,8 +431,8 @@ function AnswerPad({
       </p>
       <div className={cn(ANSWER_GRID, "gap-[0.8cqw]")}>
         {optionsOf(question).map((option, i) => (
+          <SpokenOption key={option + i} option={option} speak={speak}>
           <button
-            key={option + i}
             type="button"
             disabled={disabled}
             aria-label={`${name}選 ${option}`}
@@ -458,6 +466,7 @@ function AnswerPad({
               {option}
             </span>
           </button>
+          </SpokenOption>
         ))}
       </div>
     </section>

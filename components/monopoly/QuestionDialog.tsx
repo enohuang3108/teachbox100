@@ -12,7 +12,8 @@ import { useAudioStore } from "@/lib/monopoly/audio";
 import type { PendingAction, Player, Question } from "@/lib/monopoly/types";
 import { ANSWER_CONTENT, ANSWER_GRID, answerTextClass } from "@/lib/ui-classes";
 import { cn } from "@/lib/utils";
-import { useQuestionReading } from "@/lib/questions/speech";
+import { useOptionReading, useQuestionReading } from "@/lib/questions/speech";
+import { SpokenOption } from "@/components/organisms/SpokenOption";
 import { useState } from "react";
 import { SpotlightAvatar } from "./SpotlightAvatar";
 
@@ -39,6 +40,7 @@ export function QuestionDialog({
   // 大富翁沒有頂列靜音，音效拉到 0 就當靜音
   const muted = useAudioStore((s) => s.sfxVolume === 0);
   const reading = useQuestionReading(open ? question : null, question.text, !muted);
+  const speak = useOptionReading(open && revealed === null ? question : null, !muted);
   if (!open) return null;
 
   // 標題：買地／蓋房用固定字樣；過起點加碼題標出答對／答錯獎金；互動答題卡顯示卡片描述
@@ -63,12 +65,16 @@ export function QuestionDialog({
 
   return (
     <Dialog open={open}>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto" hideClose>
-        {/* 和題目一起捲動，長答案也不會把玩家頭像推到畫面外。 */}
-        <div className="mx-auto">
-          <SpotlightAvatar player={player} name nameClassName="max-w-[16rem] text-h3 text-ink ![text-shadow:none]" />
-        </div>
+      {/* 外層透明、鋪滿整個畫面只負責捲動：頭像浮在暗場上（跟購買確認、抽卡同一套聚光燈），
+          卡片只裝標題、題目與按鈕；兩者一起捲，長答案也不會把頭像推到畫面外。
+          容器跟畫面一樣大，光暈才不會被捲動邊界裁掉；焦點在容器上，不畫外框 */}
+      <DialogContent
+        className="inset-0 flex h-dvh max-w-none translate-x-0 translate-y-0 flex-col items-center justify-center-safe gap-5 overflow-y-auto border-0 bg-transparent px-4 py-10 shadow-none outline-none"
+        hideClose
+      >
+        <SpotlightAvatar player={player} name />
 
+        <div className="grid w-full max-w-lg gap-4 rounded-2xl bg-background p-6 shadow-lg">
         <DialogHeader>
           <DialogTitle className="text-center text-base font-bold text-ink-soft">
             {title}
@@ -79,36 +85,41 @@ export function QuestionDialog({
 
         <fieldset disabled={reading} className={cn("m-0 min-w-0 border-0 p-0 transition-opacity duration-hover", reading && "opacity-50")}>
         {revealed === null && question.type === "choice" && (
-          <div className={cn(ANSWER_GRID, "grid-cols-2 gap-2 max-sm:grid-cols-1")}>
+          <div className={cn(ANSWER_GRID, "grid-cols-2 gap-3 max-sm:grid-cols-1")}>
             {question.options?.map((opt) => (
-              <Button
-                key={opt}
-                variant="outline"
-                className={cn(ANSWER_CONTENT, answerTextClass(opt), "min-h-14 rounded-2xl px-4 py-3 transition-transform duration-press ease-out active:scale-[0.97]")}
-                onClick={() => pickChoice(opt)}
-              >
-                {opt}
-              </Button>
+              <SpokenOption key={opt} option={opt} speak={speak}>
+                <Button
+                  variant="outline"
+                  className={cn(ANSWER_CONTENT, answerTextClass(opt), "min-h-14 rounded-2xl px-4 py-3 transition-transform duration-press ease-out active:scale-[0.97]")}
+                  onClick={() => pickChoice(opt)}
+                >
+                  {opt}
+                </Button>
+              </SpokenOption>
             ))}
           </div>
         )}
 
         {revealed === null && question.type === "boolean" && (
-          <div className={cn(ANSWER_GRID, "grid-cols-2 gap-2")}>
-            <Button
-              className={cn(ANSWER_CONTENT, answerTextClass("是"), "min-h-14 rounded-2xl px-4 py-3 transition-transform duration-press ease-out active:scale-[0.97]")}
-              variant="outline"
-              onClick={() => pickChoice("是")}
-            >
-              是
-            </Button>
-            <Button
-              className={cn(ANSWER_CONTENT, answerTextClass("否"), "min-h-14 rounded-2xl px-4 py-3 transition-transform duration-press ease-out active:scale-[0.97]")}
-              variant="outline"
-              onClick={() => pickChoice("否")}
-            >
-              否
-            </Button>
+          <div className={cn(ANSWER_GRID, "grid-cols-2 gap-3")}>
+            <SpokenOption option="是" speak={speak}>
+              <Button
+                className={cn(ANSWER_CONTENT, answerTextClass("是"), "min-h-14 rounded-2xl px-4 py-3 transition-transform duration-press ease-out active:scale-[0.97]")}
+                variant="outline"
+                onClick={() => pickChoice("是")}
+              >
+                是
+              </Button>
+            </SpokenOption>
+            <SpokenOption option="否" speak={speak}>
+              <Button
+                className={cn(ANSWER_CONTENT, answerTextClass("否"), "min-h-14 rounded-2xl px-4 py-3 transition-transform duration-press ease-out active:scale-[0.97]")}
+                variant="outline"
+                onClick={() => pickChoice("否")}
+              >
+                否
+              </Button>
+            </SpokenOption>
           </div>
         )}
 
@@ -155,6 +166,7 @@ export function QuestionDialog({
             </Button>
           </div>
         )}
+        </div>
       </DialogContent>
     </Dialog>
   );

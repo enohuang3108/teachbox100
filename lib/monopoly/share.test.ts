@@ -64,3 +64,32 @@ describe("分享連結", () => {
     expect(await decodeSetup("#other")).toBeNull();
   });
 });
+
+describe("分享連結的加分設定", () => {
+  it("加分項目跟著連結走，沒開的項目維持沒開", async () => {
+    const setup: SharedSetup = {
+      settings: {
+        ...DEFAULT_SETTINGS,
+        bonuses: { land: 500, mostCorrect: 2000, mostFate: 300 },
+      },
+      players,
+      questions: null,
+    };
+    expect(await decodeSetup("#" + (await encodeSetup(setup)))).toEqual(setup);
+  });
+
+  it("沒設加分時編碼跟舊版一樣，舊連結解出來沒有加分", async () => {
+    const setup: SharedSetup = {
+      settings: DEFAULT_SETTINGS,
+      players,
+      questions: null,
+    };
+    const withEmpty = await encodeSetup({
+      ...setup,
+      settings: { ...DEFAULT_SETTINGS, bonuses: {} },
+    });
+    expect(withEmpty).toBe(await encodeSetup(setup));
+    const decoded = await decodeSetup("#" + withEmpty);
+    expect(decoded?.settings.bonuses).toBeUndefined();
+  });
+});
