@@ -30,7 +30,7 @@ M 系列 Mac 的耗時。
 | Storybook | `pnpm test:stories` | 未量 |
 | commit 閘門 | `.githooks/pre-commit`：動到 `app/ lib/ components/ hooks/` 就要 `.agents/verification/<HEAD>.json` 的 proof，且 diff hash 對得上。先 `git add` 再 `pnpm verify:change -- --matrix "<列>" --behavior "<行為>" --seam unit -- pnpm test <檔>` | — |
 | CI | **沒有**（repo 沒有 `.github/`）。Vercel 只做 build | — |
-| 編輯後快速檢查 | `.agent/check <檔>`：`.ts/.tsx/.js/.mjs` 跑 `oxlint --type-aware`＋`tsc`（只報這個檔的錯）＋`lint:tokens`（`app/ components/ lib/`）＋同名 `.test.ts(x)`；`*.test.ts(x)` 跑 vitest；`e2e/` 不跑 Playwright；JSON 用 `JSON.parse`（`tsconfig*` 是 JSONC，跳過）；Python 用 `ast.parse`；shell（`.agent/verify`、`.githooks/*`、`*.sh`）用 `brigade-shell-lint`。不帶參數＝`pnpm lint`＋`lint:tokens`＋`test` | TS 4–7 秒（tsc 佔大半），其他 1 秒內。PostToolUse hook 只在 `brigade-trust` 過的 clone 自動跑；`~/agent-kit/brigade/bin/brigade-trust --check .` exit 1 時要手動跑 |
+| 停下前快速檢查 | `.agent/test stop <檔>`（Stop hook 自動跑）：`.ts/.tsx/.js/.mjs` 跑 `oxlint --type-aware`＋`tsc`（只報這個檔的錯）＋`lint:tokens`（`app/ components/ lib/`）＋同名 `.test.ts(x)`；`*.test.ts(x)` 跑 vitest；`e2e/` 不跑 Playwright；JSON 用 `JSON.parse`（`tsconfig*` 是 JSONC，跳過）；Python 用 `ast.parse`；shell（`.agent/verify`、`.githooks/*`、`*.sh`）用 `brigade-shell-lint`。不帶參數＝`pnpm lint`＋`lint:tokens`＋`test` | TS 4–7 秒（tsc 佔大半），其他 1 秒內。PostToolUse hook 只在 `brigade-trust` 過的 clone 自動跑；`~/agent-kit/brigade/bin/brigade-trust --check .` exit 1 時要手動跑 |
 
 ## Doors
 
@@ -68,8 +68,8 @@ agent 推分支一律寫出分支名：`git push -u origin <branch>`。
 | 不發佈到 claude.ai artifact | 專案 hook `.claude/settings.json` PreToolUse `Artifact`（只擋 publish） |
 | 說「修好了」之前要有這次改動之後的證據 | hook `require-evidence.sh`（Stop，**目前只警告**；跑滿一週沒有誤報、使用者同意後 `touch .agent/enforce-evidence` 改成擋下）＋ `.agent/verify` |
 | 動到產品程式碼要有 proof 才能 commit | git hook `.githooks/pre-commit`（verify:change receipt＋diff hash） |
-| 顏色、z-index、transition 走 design token | `pnpm lint:tokens`；`.agent/check` 編輯當下報 |
-| shell 變數後面不直接接全形字元 | `brigade-shell-lint`（`.agent/check` 改到 shell 時） |
+| 顏色、z-index、transition 走 design token | `pnpm lint:tokens`；`.agent/test stop` 停下前報 |
+| shell 變數後面不直接接全形字元 | `brigade-shell-lint`（`.agent/test` 改到 shell 時） |
 | 部署（push main）、改寫遠端歷史、丟棄未提交改動、Vercel CLI、刪 Redis 由使用者執行 | hook `guard-doors.sh`，door 1–5 |
 | 回覆一律用繁體中文（臺灣） | 全域 hook `reply-language.sh` |
 

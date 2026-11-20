@@ -1,9 +1,16 @@
 #!/bin/sh
-# brigade fast check: the PostToolUse hook runs it with the file just edited. Read-only, under 30 s per file.
-#   .agent/check <file>...   check those files (paths relative to the repo root or absolute)
-#   .agent/check             everything fast: pnpm lint, lint:tokens, test
-# Slow gates (Playwright, next build) stay in .agent/verify.
+# brigade checkpoints (~/agent-kit/brigade/testing.md). Read-only, under 30 s per file for stop and commit.
+#   .agent/test <stop|commit> <file>...   check those files (paths relative to the repo root or absolute)
+#   .agent/test <stop|commit|push>        everything fast: pnpm lint, lint:tokens, test
+#   .agent/test <release|weekly>          not built yet: exit 2
+# commit = stop until the random-input tests exist. Slow gates (Playwright, next build) stay in .agent/verify.
 set -u
+cp=${1:-}
+case $cp in
+  stop|commit|push) shift ;;
+  release|weekly) echo ".agent/test $cp: 還沒實作（testing.md 的斷點）" >&2; exit 2 ;;
+  *) echo "usage: .agent/test <stop|commit|push|release|weekly> [file...]" >&2; exit 2 ;;
+esac
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cd "$ROOT" || exit 1
 fail=0
@@ -40,7 +47,7 @@ check_one() {
       case $f in tsconfig*.json|.vscode/*) ;; *) run node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"))' "$f" ;; esac ;;
     *.py)
       run python3 -c 'import ast,sys; ast.parse(open(sys.argv[1]).read(), sys.argv[1])' "$f" ;;
-    .agent/verify|.agent/check|.agent/bin/*|.githooks/*|*.sh)
+    .agent/verify|.agent/test|.agent/bin/*|.githooks/*|*.sh)
       run ~/agent-kit/brigade/bin/brigade-shell-lint "$f" ;;
   esac
 }
