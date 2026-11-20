@@ -137,7 +137,8 @@
       "source-map-js": "^1.2.2",
       "fast-uri": "^3.1.9",
       "zod": "^4.6.6",
-      "@vitest/mocker": "^4.1.12"
+      "@vitest/mocker": "^4.1.12",
+      "glob@>=9 <14.0.2": "^14.0.2"
     }
   }
 }
