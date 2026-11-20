@@ -122,6 +122,57 @@ export interface GameSettings {
   passStartQuizBonus?: number; // 加碼題答對拿的錢；舊 persist 沒有 = PASS_START_QUIZ_BONUS
   differentiated?: boolean; // 差異化教學：開啟才依玩家難度出題；舊 persist 沒有 = 關閉
   endCondition: EndCondition;
+  bonuses?: BonusSettings; // 結算加分；有列出的項目才算，舊 persist 沒有 = 不加分
+}
+
+// === 結算加分 ===
+// land／house 是每塊地、每棟房各加；most* 是該項次數最多的人加（同分都拿，0 次沒人拿）
+export type BonusKey =
+  | "land"
+  | "house"
+  | "mostCorrect"
+  | "mostJail"
+  | "mostChance"
+  | "mostFate";
+
+export type BonusSettings = Partial<Record<BonusKey, number>>;
+
+// 順序 = 設定頁與結算畫面的揭曉順序，也是分享連結的欄位順序（只能往後加）
+export const BONUS_KEYS: BonusKey[] = [
+  "land",
+  "house",
+  "mostCorrect",
+  "mostJail",
+  "mostChance",
+  "mostFate",
+];
+
+// 設定頁與結算畫面共用的文案；unit 是 NumberField 後面的單位說明
+export const BONUS_LABEL: Record<BonusKey, { title: string; unit: string }> = {
+  land: { title: "買到的土地", unit: "每塊" },
+  house: { title: "蓋的房子", unit: "每棟" },
+  mostCorrect: { title: "答對最多題", unit: "最多的人" },
+  mostJail: { title: "進最多次監獄", unit: "最多的人" },
+  mostChance: { title: "遇到最多次機會", unit: "最多的人" },
+  mostFate: { title: "遇到最多次命運", unit: "最多的人" },
+};
+
+// 打勾時帶入的金額
+export const BONUS_DEFAULT: Record<BonusKey, number> = {
+  land: 500,
+  house: 300,
+  mostCorrect: 2000,
+  mostJail: 1000,
+  mostChance: 1000,
+  mostFate: 1000,
+};
+
+// 遊戲中累計、供「最多」類加分用的次數
+export interface PlayerStats {
+  correct: number;
+  jail: number;
+  chance: number;
+  fate: number;
 }
 
 export const DEFAULT_SETTINGS: GameSettings = {
@@ -230,4 +281,5 @@ export interface GameState {
   startedAt: number | null;
   lapsByPlayer: Record<string, number>;
   cutsceneEvents?: CutsceneEvent[]; // 近期過場事件佇列（依序播放；seq 遞增供 UI 去重）
+  stats?: Record<string, PlayerStats>; // 依玩家 id；舊 persist 的局沒有 = 全部 0
 }

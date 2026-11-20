@@ -8,6 +8,9 @@ import { defaultCharacterId } from "@/lib/monopoly/characters";
 import { DEFAULT_QUESTIONS } from "@/lib/monopoly/default-questions";
 import { useMonopolyStore } from "@/lib/monopoly/store";
 import {
+  BONUS_DEFAULT,
+  BONUS_KEYS,
+  BONUS_LABEL,
   DIFFICULTIES,
   DIFFICULTY_CAP_LABEL,
   DIFFICULTY_LABEL,
@@ -222,6 +225,8 @@ export function SetupPanel() {
   const ec = draftSettings.endCondition;
   const differentiated = draftSettings.differentiated ?? false;
   const passStartQuiz = draftSettings.passStartQuiz ?? true;
+  const bonuses = draftSettings.bonuses ?? {};
+  const hasBonus = BONUS_KEYS.some((k) => bonuses[k] !== undefined);
   const quizBonus = draftSettings.passStartQuizBonus ?? PASS_START_QUIZ_BONUS;
   const bankLevels = DIFFICULTIES.filter((d) =>
     questions.some((q) => difficultyOf(q) === d),
@@ -441,7 +446,7 @@ export function SetupPanel() {
           <header>
             <h3 className="text-h3 text-ink">怎麼玩、玩多久？</h3>
             <DialogDescription className="mt-1">
-              骰子、起始金額、經過起點與結束條件。
+              骰子、起始金額、經過起點、結束條件與結算加分。
             </DialogDescription>
           </header>
 
@@ -584,7 +589,7 @@ export function SetupPanel() {
                       })
                     }
                   />
-                  結束，錢最多的人獲勝
+                  結束，{hasBonus ? "錢加上加分" : "錢"}最多的人獲勝
                 </>
               )}
               {ec.type === "moneyGoal" && (
@@ -628,6 +633,59 @@ export function SetupPanel() {
                 </>
               )}
             </div>
+          </div>
+
+          {/* 結算加分：打勾才算，金額在結束畫面逐項加進每個人的錢 */}
+          <div>
+            <FieldLabel hint="遊戲結束時加進錢裡再排名">加分條件</FieldLabel>
+            <div className="divide-y divide-dashed divide-border rounded-2xl border border-border bg-background">
+              {BONUS_KEYS.map((k) => {
+                const on = bonuses[k] !== undefined;
+                return (
+                  <div
+                    key={k}
+                    className="flex min-h-14 flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5"
+                  >
+                    <label className="flex cursor-pointer items-center gap-3">
+                      <Checkbox
+                        checked={on}
+                        onCheckedChange={(v) => {
+                          const next = { ...bonuses };
+                          if (v === true) next[k] = BONUS_DEFAULT[k];
+                          else delete next[k];
+                          updateSettings({ bonuses: next });
+                        }}
+                      />
+                      <span className="text-sm font-semibold text-ink">
+                        {BONUS_LABEL[k].title}
+                      </span>
+                    </label>
+                    {on && (
+                      <span className="flex items-center gap-2 text-caption text-muted-foreground animate-in fade-in-0 duration-200">
+                        {BONUS_LABEL[k].unit}
+                        <NumberField
+                          label="元"
+                          prefix="+$"
+                          value={bonuses[k]!}
+                          min={0}
+                          step={100}
+                          onChange={(amount) =>
+                            updateSettings({
+                              bonuses: { ...bonuses, [k]: amount },
+                            })
+                          }
+                        />
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {hasBonus && (
+              <p className="mt-2 text-caption text-muted-foreground">
+                旅館算一棟房子；「最多」同分的人都拿，一次都沒有就沒人拿。
+              </p>
+            )}
           </div>
         </section>
       ),

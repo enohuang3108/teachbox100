@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "motion/react";
-import { RotateCcw, Target } from "lucide-react";
+import { Flag, RotateCcw, Target } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { FullscreenButton } from "@/components/atoms/FullscreenButton";
 import { Button } from "@/components/atoms/shadcn/button";
@@ -13,7 +14,7 @@ import { CardDialog } from "@/components/monopoly/CardDialog";
 import { CardDiceDialog } from "@/components/monopoly/CardDiceDialog";
 import { Countdown } from "@/components/monopoly/Countdown";
 import { Dice } from "@/components/monopoly/Dice";
-import { GameOverDialog } from "@/components/monopoly/GameOverDialog";
+import { Settlement } from "@/components/monopoly/Settlement";
 import { MoneyCutscene } from "@/components/monopoly/MoneyCutscene";
 import { MoneyDisplay } from "@/components/monopoly/MoneyDisplay";
 import { QuestionDialog } from "@/components/monopoly/QuestionDialog";
@@ -22,7 +23,6 @@ import { TurnBanner } from "@/components/monopoly/TurnBanner";
 import { BOARD, BOARD_SIZE } from "@/lib/monopoly/board";
 import type { CutsceneEvent, Player, PropertyTile } from "@/lib/monopoly/types";
 import { buildCostFor, isProperty } from "@/lib/monopoly/types";
-import { realisticEffect } from "@/lib/helpers/confetti-effects";
 import { useSound } from "@/lib/hooks/useSound";
 import { useMonopolyStore } from "@/lib/monopoly/store";
 import { ACTION_BTN, Tip } from "@/components/templates/GamePageTemplate";
@@ -38,7 +38,7 @@ const BANNER_MS = 2000; // 「換你了」橫幅顯示時間
 
 export default function MonopolyGame() {
   const [hydrated, setHydrated] = useState(false);
-  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState<"reset" | "end" | null>(null);
   const [rolling, setRolling] = useState(false);
   const rollComplete = useRef<(() => void) | null>(null);
   const [rollSeq, setRollSeq] = useState(0);
@@ -79,6 +79,7 @@ export default function MonopolyGame() {
     answerCardQuiz,
     endIfTimeUp,
     reset,
+    endNow,
   } = useMonopolyStore();
   const { playDiceSound } = useSound();
 
@@ -126,10 +127,6 @@ export default function MonopolyGame() {
     resumePendingRef.current = false;
     resumeWalk();
   }, [cutscene]);
-
-  useEffect(() => {
-    if (game?.phase === "gameover") realisticEffect();
-  }, [game?.phase]);
 
   // HUD 顯示用金額：只在「走棋＋過場都結束」的閒置時刻才同步到真實金額，
   // 走棋／支付過場期間維持舊值，讓金額在支付過場演完後才滾動到新值
@@ -384,11 +381,26 @@ export default function MonopolyGame() {
                 <Target className="h-4 w-4" />${ec.amount.toLocaleString()}
               </div>
             )}
+            {game.phase === "playing" && (
+              <button
+                type="button"
+                data-fs-hide
+                onClick={() => setConfirmOpen("end")}
+                className={cn(
+                  ACTION_BTN,
+                  "flex w-auto items-center justify-center gap-1.5 text-sm font-bold text-ink sm:px-3",
+                )}
+              >
+                <Flag className="h-4 w-4" />
+                {/* 手機頂列放不下，只留旗子 */}
+                <span className="max-sm:sr-only">結束遊戲</span>
+              </button>
+            )}
             <Tip label="重新開始">
               <button
                 type="button"
                 data-fs-hide
-                onClick={() => setResetConfirmOpen(true)}
+                onClick={() => setConfirmOpen("reset")}
                 aria-label="重新開始"
                 className={`${ACTION_BTN} flex items-center justify-center`}
               >
@@ -416,25 +428,45 @@ export default function MonopolyGame() {
         data-stage-inner
         className="flex min-h-[calc(100svh-4rem)] items-center justify-center p-2"
       >
-        <Board
-          players={game.players}
-          currentIndex={game.currentPlayerIndex}
-          walking={walk}
-          landing={landing}
-          center={center}
-        />
+        {/* gameover 可能在擲骰當下就成立，等棋子走完、過場播完才換成結算頁 */}
+        {game.phase === "gameover" && !busy ? (
+          <Settlement game={game} onRestart={reset} />
+        ) : (
+          <Board
+            players={game.players}
+            currentIndex={game.currentPlayerIndex}
+            walking={walk}
+            landing={landing}
+            center={center}
+          />
+        )}
       </div>
 
       <MoneyCutscene event={cutscene} players={game.players} />
       <TurnBanner player={turnPlayer} />
 
-      {resetConfirmOpen && (
-        <ResetConfirm
+      {confirmOpen === "reset" && (
+        <ActionConfirm
+          title="重新開始遊戲？"
+          body="目前的進度會清掉，回到設定畫面。"
+          confirmLabel="重新開始"
           onConfirm={() => {
-            setResetConfirmOpen(false);
+            setConfirmOpen(null);
             reset();
           }}
-          onCancel={() => setResetConfirmOpen(false)}
+          onCancel={() => setConfirmOpen(null)}
+        />
+      )}
+      {confirmOpen === "end" && (
+        <ActionConfirm
+          title="結束遊戲、進入結算？"
+          body="不等結束條件，現在就加上加分條件排名次。還沒答完的題目不算。"
+          confirmLabel="結束並結算"
+          onConfirm={() => {
+            setConfirmOpen(null);
+            endNow();
+          }}
+          onCancel={() => setConfirmOpen(null)}
         />
       )}
 
@@ -507,7 +539,6 @@ export default function MonopolyGame() {
         />
       )}
 
-      <GameOverDialog game={game} onRestart={reset} />
     </main>
   );
 }
@@ -693,10 +724,16 @@ function TollSchedule({
   );
 }
 
-function ResetConfirm({
+function ActionConfirm({
+  title,
+  body,
+  confirmLabel,
   onConfirm,
   onCancel,
 }: {
+  title: string;
+  body: string;
+  confirmLabel: string;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -710,11 +747,9 @@ function ResetConfirm({
       >
         <div className="space-y-1.5 text-center">
           <p className="font-display text-lg font-extrabold text-ink">
-            重新開始遊戲？
+            {title}
           </p>
-          <p className="text-sm leading-[1.75] text-ink-soft">
-            目前的進度會清掉，回到設定畫面。
-          </p>
+          <p className="text-sm leading-[1.75] text-ink-soft">{body}</p>
         </div>
         <div className="flex gap-3">
           <Button
@@ -722,7 +757,7 @@ function ResetConfirm({
             className="h-auto flex-1 rounded-full py-2.5 text-base font-bold transition-transform duration-150 ease-out active:scale-[0.97]"
             onClick={onConfirm}
           >
-            重新開始
+            {confirmLabel}
           </Button>
           <Button
             variant="outline"

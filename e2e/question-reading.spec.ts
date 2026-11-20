@@ -69,6 +69,10 @@ test("大富翁跳出題目先唸，唸完才開放作答", async ({ page }) => 
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByText("答對才能購買")).toBeVisible({ timeout: 15_000 });
   await expect.poll(() => lastSpoken(page)).toBeTruthy();
+  // 題目視窗一掛上就唸：dev 的 StrictMode 重掛也只能唸一次、不取消
+  await page.waitForTimeout(300);
+  expect(await page.evaluate(() => (window as SpeechWindow).spoken!.length)).toBe(1);
+  expect(await cancelled(page)).toBe(0);
   const answers = dialog.locator("fieldset button");
   await expect(answers.first()).toBeDisabled();
   await finishSpeaking(page);
@@ -123,4 +127,59 @@ test("領地戰匯入的題庫，圈叉搶答也選得到", async ({ page }) => 
   const shared = page.getByRole("radio", { name: /共用自然/ });
   await expect(shared).toBeVisible();
   await expect(page.getByRole("radio", { name: /內建題庫/ })).toBeChecked(); // 各遊戲自己記得選哪份
+});
+
+test("終極密碼唸完題目後，按選項右上角的喇叭唸那個選項", async ({ page }) => {
+  await fakeSpeech(page);
+  await page.addInitScript(() => { Math.random = () => 0.11; });
+  await page.goto("/ultimate-password", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "開始使用" }).click();
+  await page.getByRole("button", { name: "下一步" }).click();
+  await page.getByRole("button", { name: "下一步" }).click();
+  await page.getByRole("button", { name: "開始遊戲" }).click();
+  await expect.poll(() => lastSpoken(page)).toBeTruthy();
+  const speaker = page.getByRole("button", { name: /^唸選項「/ }).first();
+  await expect(speaker).toBeDisabled();
+  await finishSpeaking(page);
+  const label = await speaker.getAttribute("aria-label");
+  await speaker.click();
+  await expect.poll(() => lastSpoken(page)).toBe(label!.slice(4, -1));
+  // 答題後回饋特效蓋上來，喇叭跟著收掉，不會露在特效外
+  await page.getByRole("button", { name: label!.slice(4, -1), exact: true }).click();
+  await expect(page.getByRole("button", { name: /^唸選項「/ })).toHaveCount(0);
+});
+
+test("大富翁唸完題目後，按選項右上角的喇叭唸那個選項", async ({ page }) => {
+  await fakeSpeech(page);
+  await page.goto("/monopoly", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "開始遊戲", exact: true }).click();
+  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: "下一步" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "開始遊戲", exact: true }).click();
+  await page.evaluate(() => { Math.random = () => 0.1; });
+  await page.getByRole("button", { name: "擲骰子", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByText("答對才能購買")).toBeVisible({ timeout: 15_000 });
+  await expect.poll(() => lastSpoken(page)).toBeTruthy();
+  const speaker = dialog.getByRole("button", { name: /^唸選項「/ }).first();
+  await expect(speaker).toBeDisabled();
+  await finishSpeaking(page);
+  const label = await speaker.getAttribute("aria-label");
+  await speaker.click();
+  await expect.poll(() => lastSpoken(page)).toBe(label!.slice(4, -1));
+});
+
+test("大富翁音效調到 0 時選項旁沒有喇叭", async ({ page }) => {
+  await fakeSpeech(page);
+  await page.addInitScript(() => {
+    localStorage.setItem("monopoly-audio", JSON.stringify({ state: { bgmVolume: 0.3, sfxVolume: 0 }, version: 0 }));
+  });
+  await page.goto("/monopoly", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "開始遊戲", exact: true }).click();
+  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: "下一步" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "開始遊戲", exact: true }).click();
+  await page.evaluate(() => { Math.random = () => 0.1; });
+  await page.getByRole("button", { name: "擲骰子", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByText("答對才能購買")).toBeVisible({ timeout: 15_000 });
+  await expect(dialog.getByRole("button", { name: /唸選項/ })).toHaveCount(0);
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -88,18 +88,25 @@ export function speakQuestion(
     window.clearTimeout(watchdog);
     watchdog = window.setTimeout(finish, Math.max(60_000, text.length * 1000 / speechRate));
   };
-  try {
-    synth.speak(utterance);
-  } catch {
-    finish();
-  }
+  // 等這輪同步程式跑完才開口：元件一掛上就唸時，dev 的 StrictMode 會同步地掛上→卸下→再掛上，
+  // speak→cancel→speak 在 Chrome 會唸兩次；卸下的那一次到這裡已經不 active，就不唸
+  let spoken = false;
+  queueMicrotask(() => {
+    if (!active) return;
+    spoken = true;
+    try {
+      synth.speak(utterance);
+    } catch {
+      finish();
+    }
+  });
   return () => {
     active = false;
     window.clearTimeout(watchdog);
     utterance.onstart = null;
     utterance.onend = null;
     utterance.onerror = null;
-    if (!endedNaturally) synth.cancel();
+    if (spoken && !endedNaturally) synth.cancel();
   };
 }
 
@@ -118,4 +125,20 @@ export function useQuestionReading(current: object | null, text: string, sound: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [on, current]);
   return on && doneFor !== current;
+}
+
+/**
+ * 選項右上角的喇叭：按了唸那個選項，按下一個先停掉上一個；換題、靜音或離開畫面就停。
+ * 關閉朗讀或靜音時回 null，畫面上就不放喇叭。
+ */
+export function useOptionReading(current: object | null, sound: boolean) {
+  const { reading, speechRate, voiceURI } = useSpeechStore();
+  const stop = useRef(() => {});
+  const on = current !== null && reading && sound;
+  useEffect(() => () => stop.current(), [on, current]);
+  const speak = useCallback((text: string) => {
+    stop.current();
+    stop.current = speakQuestion(text, { speechRate, voiceURI }, () => {});
+  }, [speechRate, voiceURI]);
+  return on ? speak : null;
 }
